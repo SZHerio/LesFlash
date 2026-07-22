@@ -10,12 +10,19 @@ config_version=5
 
 [application]
 
-config/name="Homeless"
+config/name="Бомжара"
+config/quit_on_go_back=false
+run/main_scene="res://ui/main.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
 [display]
 
+window/size/viewport_width=540
+window/size/viewport_height=960
+window/size/window_width_override=540
+window/size/window_height_override=960
+window/handheld/orientation=1
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 

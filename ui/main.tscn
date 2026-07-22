@@ -1,0 +1,93 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://ui/main.gd" id="1_main"]
+[ext_resource type="Shader" path="res://ui/shaders/psyche_background.gdshader" id="2_psyche"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_psyche"]
+shader = ExtResource("2_psyche")
+shader_parameter/psyche_intensity = 0.0
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="BackgroundLayer" type="CanvasLayer" parent="."]
+layer = -10
+
+[node name="BackdropRoot" type="Control" parent="BackgroundLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Backdrop" type="TextureRect" parent="BackgroundLayer/BackdropRoot"]
+material = SubResource("ShaderMaterial_psyche")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Shade" type="ColorRect" parent="BackgroundLayer/BackdropRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.035, 0.055, 0.052, 0.18)
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="SafeArea" type="MarginContainer" parent="UILayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="Center" type="CenterContainer" parent="UILayer/SafeArea"]
+layout_mode = 2
+
+[node name="ContentRoot" type="VBoxContainer" parent="UILayer/SafeArea/Center"]
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScreenHost" type="VBoxContainer" parent="UILayer/SafeArea/Center/ContentRoot"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OverlayLayer" type="Control" parent="UILayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="AutosaveTimer" type="Timer" parent="."]
+wait_time = 300.0
+autostart = true
+
+[connection signal="timeout" from="AutosaveTimer" to="." method="_on_autosave_timeout"]
