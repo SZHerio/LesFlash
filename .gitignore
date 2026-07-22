@@ -1,0 +1,18 @@
+# Godot generated files
+.godot/
+.import/
+
+# Local export output and credentials
+build/
+export/
+*.apk
+*.aab
+*.pck
+export_credentials.cfg
+
+# Editor and operating-system noise
+.vscode/
+.idea/
+*.log
+Thumbs.db
+.DS_Store
