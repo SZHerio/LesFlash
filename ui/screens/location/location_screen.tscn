@@ -1,0 +1,244 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://ui/screens/location/location_screen.gd" id="1_screen"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/riverside_station_square_day.png" id="3_background"]
+[ext_resource type="Shader" path="res://ui/shaders/psyche_background.gdshader" id="4_psyche"]
+[ext_resource type="PackedScene" path="res://ui/components/game_header.tscn" id="5_header"]
+[ext_resource type="PackedScene" path="res://ui/components/status_glyph.tscn" id="6_status"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_psyche"]
+resource_local_to_scene = true
+shader = ExtResource("4_psyche")
+shader_parameter/psyche_intensity = 0.0
+
+[sub_resource type="Gradient" id="Gradient_shade"]
+offsets = PackedFloat32Array(0, 0.42, 1)
+colors = PackedColorArray(0.02, 0.045, 0.039, 0.08, 0.02, 0.045, 0.039, 0.25, 0.02, 0.045, 0.039, 0.72)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture_shade"]
+gradient = SubResource("Gradient_shade")
+width = 8
+height = 512
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[node name="LocationScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_screen")
+
+[node name="Background" type="TextureRect" parent="."]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_psyche")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="AmbientShade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.016, 0.035, 0.031, 0.08)
+
+[node name="ReadabilityShade" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture_shade")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="ContentMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="ContentFrame" type="VBoxContainer" parent="ContentMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GameHeader" parent="ContentMargin/ContentFrame" instance=ExtResource("5_header")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="StatusRail" type="PanelContainer" parent="ContentMargin/ContentFrame"]
+layout_mode = 2
+theme_type_variation = &"StatusRailPanel"
+
+[node name="StatusRow" type="HBoxContainer" parent="ContentMargin/ContentFrame/StatusRail"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="HealthGlyph" parent="ContentMargin/ContentFrame/StatusRail/StatusRow" instance=ExtResource("6_status")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HungerGlyph" parent="ContentMargin/ContentFrame/StatusRail/StatusRow" instance=ExtResource("6_status")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="EnergyGlyph" parent="ContentMargin/ContentFrame/StatusRail/StatusRow" instance=ExtResource("6_status")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TensionGlyph" parent="ContentMargin/ContentFrame/StatusRail/StatusRow" instance=ExtResource("6_status")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="MoraleGlyph" parent="ContentMargin/ContentFrame/StatusRail/StatusRow" instance=ExtResource("6_status")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="LocationScroll" type="ScrollContainer" parent="ContentMargin/ContentFrame"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 2
+scroll_deadzone = 12
+
+[node name="ScrollContent" type="VBoxContainer" parent="ContentMargin/ContentFrame/LocationScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 9
+
+[node name="EnvironmentPanel" type="PanelContainer" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent"]
+custom_minimum_size = Vector2(0, 122)
+layout_mode = 2
+theme_type_variation = &"EnvironmentPanel"
+
+[node name="EnvironmentCopy" type="VBoxContainer" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent/EnvironmentPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PlaceEyebrow" type="Label" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent/EnvironmentPanel/EnvironmentCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "СЕЙЧАС ВЫ ЗДЕСЬ"
+
+[node name="DescriptionLabel" type="Label" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent/EnvironmentPanel/EnvironmentCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyLabel"
+text = "Утренний поток людей растекается от вокзала к остановкам. Здесь легко затеряться — и так же легко заметить возможность."
+autowrap_mode = 2
+
+[node name="ContextLabel" type="Label" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent/EnvironmentPanel/EnvironmentCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+text = "Утро  ·  Людно  ·  Сухо"
+autowrap_mode = 2
+
+[node name="StatusDetail" type="PanelContainer" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"StatusDetailPanel"
+
+[node name="DetailContent" type="VBoxContainer" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent/StatusDetail"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="DetailHeader" type="HBoxContainer" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent/StatusDetail/DetailContent"]
+layout_mode = 2
+
+[node name="StatusDetailTitle" type="Label" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent/StatusDetail/DetailContent/DetailHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"ActionTitleLabel"
+text = "Здоровье"
+
+[node name="StatusDetailValue" type="Label" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent/StatusDetail/DetailContent/DetailHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+text = "72 из 100"
+
+[node name="StatusDetailClose" type="Button" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent/StatusDetail/DetailContent/DetailHeader"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+theme_type_variation = &"IconButton"
+tooltip_text = "Закрыть"
+text = "×"
+
+[node name="StatusDetailCopy" type="Label" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent/StatusDetail/DetailContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Ссадины обработаны, но плечо всё ещё ноет после ночи."
+autowrap_mode = 2
+
+[node name="StatusDetailForecast" type="Label" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent/StatusDetail/DetailContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+text = "При дальнейшем ухудшении тяжёлая работа станет недоступна."
+autowrap_mode = 2
+
+[node name="ActionsHeader" type="HBoxContainer" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ActionsHeading" type="Label" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent/ActionsHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SectionTitle"
+text = "ЧТО СДЕЛАТЬ ЗДЕСЬ"
+
+[node name="ActionsCount" type="Label" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent/ActionsHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+text = "4 доступно"
+
+[node name="ActionsList" type="VBoxContainer" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="EmptyActions" type="Label" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"BodyMuted"
+text = "Сейчас здесь нечего делать. Попробуйте открыть карту или вернуться позже."
+autowrap_mode = 2
+horizontal_alignment = 1
+
+[node name="BottomSpacer" type="Control" parent="ContentMargin/ContentFrame/LocationScroll/ScrollContent"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2

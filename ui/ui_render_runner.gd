@@ -1,50 +1,39 @@
 extends SceneTree
 
-const MainScene = preload("res://ui/main.tscn")
-const PREVIEW_PATH := "res://ui_preview.png"
-const PREVIEW_SIZE := Vector2i(432, 768)
+const MainScene := preload("res://ui/main.tscn")
 
 
 func _init() -> void:
-	call_deferred("_capture")
+	call_deferred("_run")
 
 
-func _capture() -> void:
-	var main = MainScene.instantiate()
-	if main == null:
-		push_error("UI SMOKE FAILED: main scene could not be instantiated")
+func _run() -> void:
+	var viewport := SubViewport.new()
+	viewport.size = Vector2i(432, 768)
+	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	root.add_child(viewport)
+	var shell := MainScene.instantiate() as AppShell
+	if shell == null:
+		push_error("UI SMOKE FAILED: AppShell could not be instantiated")
 		quit(1)
 		return
-	if not main.has_method("_show_main_menu"):
-		push_error("UI SMOKE FAILED: main scene script did not compile")
-		quit(1)
-		return
-	root.size = PREVIEW_SIZE
-	root.add_child(main)
-	for index in range(8):
+	shell.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	viewport.add_child(shell)
+	for _frame in range(10):
 		await process_frame
-	var screen_host := main.get_node_or_null("UILayer/SafeArea/Center/ContentRoot/ScreenHost")
-	if screen_host == null or screen_host.get_child_count() == 0:
-		push_error("UI SMOKE FAILED: main menu was not built")
+	if not shell.current_screen() is MainMenuScreen:
+		push_error("UI SMOKE FAILED: main menu was not presented")
 		quit(1)
 		return
-	if DisplayServer.get_name().to_lower() == "headless":
-		print("UI SMOKE PASSED (SAFE MODE): headless dummy renderer has no reliable viewport pixels; screenshot skipped")
+	if DisplayServer.get_name() == "headless":
+		print("UI SMOKE PASSED: modular AppShell and main menu instantiated")
 		quit(0)
 		return
-	var viewport_texture := root.get_texture()
-	if viewport_texture == null:
-		push_error("UI RENDER FAILED: window viewport texture is unavailable")
-		quit(1)
-		return
-	var image := viewport_texture.get_image()
+	var image := viewport.get_texture().get_image()
 	if image == null or image.is_empty():
-		push_error("UI RENDER FAILED: windowed renderer returned an empty image")
+		push_error("UI RENDER FAILED: viewport returned no pixels")
 		quit(1)
 		return
-	var error := image.save_png(PREVIEW_PATH)
-	if error == OK:
-		print("UI RENDER PASSED: %s (%dx%d)" % [PREVIEW_PATH, image.get_width(), image.get_height()])
-	else:
-		push_error("UI RENDER FAILED: preview could not be saved (error %d)" % error)
+	var error := image.save_png("res://.godot/m3_ui_previews/main_menu_432x768.png")
+	print("UI RENDER PASSED" if error == OK else "UI RENDER FAILED")
 	quit(0 if error == OK else 1)

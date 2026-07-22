@@ -1,0 +1,57 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/components/toast_overlay.gd" id="1_script"]
+
+[node name="ToastOverlay" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="Position" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -142.0
+offset_right = -16.0
+offset_bottom = -86.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="ToastPanel" type="PanelContainer" parent="Position"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"ToastPanel"
+
+[node name="Margin" type="MarginContainer" parent="Position/ToastPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 11
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 11
+
+[node name="ToastLabel" type="Label" parent="Position/ToastPanel/Margin"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"BodyLabel"
+text = "Сохранено"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="HideTimer" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 3.2
+one_shot = true

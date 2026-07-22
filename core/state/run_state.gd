@@ -381,31 +381,59 @@ func to_dict() -> Dictionary:
 	}
 
 
+static func migrate_serialized(data: Dictionary) -> Dictionary:
+	var source_version: Variant = _parse_integral(data.get("save_version", null))
+	if source_version == null:
+		return {
+			"ok": false,
+			"code": "invalid_run_state_version",
+			"error": "RunState save_version must be an integer.",
+		}
+	if int(source_version) not in [GameRules.LEGACY_SAVE_VERSION, GameRules.SAVE_VERSION]:
+		return {
+			"ok": false,
+			"code": "unsupported_run_state_version",
+			"error": "RunState save version is unsupported.",
+			"actual": int(source_version),
+		}
+	var migrated := data.duplicate(true)
+	migrated["save_version"] = GameRules.SAVE_VERSION
+	return {
+		"ok": true,
+		"code": "ok",
+		"error": "",
+		"data": migrated,
+		"migrated": int(source_version) != GameRules.SAVE_VERSION,
+		"source_version": int(source_version),
+	}
+
+
 static func from_dict(data: Dictionary) -> RunState:
-	var version: Variant = _parse_integral(data.get("save_version", null))
-	if version == null or int(version) != GameRules.SAVE_VERSION:
+	var migration := migrate_serialized(data)
+	if not bool(migration.get("ok", false)):
 		return null
+	var source: Dictionary = migration["data"]
 
 	var parsed_characteristics: Variant = _parse_int_map(
-		data.get("characteristics", null),
+		source.get("characteristics", null),
 		GameRules.CHARACTERISTIC_KEYS,
 		GameRules.CHARACTERISTIC_MIN,
 		GameRules.CHARACTERISTIC_MAX
 	)
 	var parsed_meters: Variant = _parse_int_map(
-		data.get("meters", null),
+		source.get("meters", null),
 		GameRules.METER_KEYS,
 		GameRules.METER_MIN,
 		GameRules.METER_MAX
 	)
 	var parsed_polarities: Variant = _parse_int_map(
-		data.get("stored_polarities", null),
+		source.get("stored_polarities", null),
 		GameRules.STORED_POLARITY_KEYS,
 		GameRules.POLARITY_MIN,
 		GameRules.POLARITY_MAX
 	)
 	var parsed_skills: Variant = _parse_int_map(
-		data.get("skills", null),
+		source.get("skills", null),
 		GameRules.SKILL_KEYS,
 		GameRules.SKILL_MIN_RANK,
 		GameRules.SKILL_MAX_RANK
@@ -415,9 +443,9 @@ static func from_dict(data: Dictionary) -> RunState:
 	if not GameRules.characteristics_use_budget(parsed_characteristics):
 		return null
 
-	var parsed_money: Variant = _parse_integral(data.get("money", null))
-	var parsed_mastery: Variant = _parse_integral(data.get("mastery_points", null))
-	var parsed_sequence: Variant = _parse_integral(data.get("next_journal_sequence", null))
+	var parsed_money: Variant = _parse_integral(source.get("money", null))
+	var parsed_mastery: Variant = _parse_integral(source.get("mastery_points", null))
+	var parsed_sequence: Variant = _parse_integral(source.get("next_journal_sequence", null))
 	if parsed_money == null or int(parsed_money) < GameRules.MONEY_MIN or int(parsed_money) > GameRules.MONEY_MAX:
 		return null
 	if parsed_mastery == null or int(parsed_mastery) < GameRules.MASTERY_POINTS_MIN or int(parsed_mastery) > GameRules.MASTERY_POINTS_MAX:
@@ -426,31 +454,31 @@ static func from_dict(data: Dictionary) -> RunState:
 		return null
 
 	var parsed_inventory: Variant = _parse_string_int_map(
-		data.get("inventory", null),
+		source.get("inventory", null),
 		GameRules.INVENTORY_QUANTITY_MIN,
 		GameRules.INVENTORY_QUANTITY_MAX
 	)
 	var parsed_knowledge: Variant = _parse_string_int_map(
-		data.get("knowledge", null),
+		source.get("knowledge", null),
 		GameRules.KNOWLEDGE_LEVEL_MIN,
 		GameRules.KNOWLEDGE_LEVEL_MAX
 	)
-	var parsed_profiles: Variant = _parse_computed_profiles(data.get("computed_profiles", null))
+	var parsed_profiles: Variant = _parse_computed_profiles(source.get("computed_profiles", null))
 	if parsed_inventory == null or parsed_knowledge == null or parsed_profiles == null:
 		return null
 
-	if typeof(data.get("calendar", null)) != TYPE_DICTIONARY or typeof(data.get("rng", null)) != TYPE_DICTIONARY:
+	if typeof(source.get("calendar", null)) != TYPE_DICTIONARY or typeof(source.get("rng", null)) != TYPE_DICTIONARY:
 		return null
-	var parsed_calendar := GameCalendar.from_dict(data["calendar"])
-	var parsed_rng := DeterministicRng.from_dict(data["rng"])
+	var parsed_calendar := GameCalendar.from_dict(source["calendar"])
+	var parsed_rng := DeterministicRng.from_dict(source["rng"])
 	if parsed_calendar == null or parsed_rng == null:
 		return null
 
-	var parsed_birth_date: Variant = _parse_birth_date(data.get("birth_date", null), parsed_calendar)
+	var parsed_birth_date: Variant = _parse_birth_date(source.get("birth_date", null), parsed_calendar)
 	if parsed_birth_date == null:
 		return null
 
-	if typeof(data.get("journal", null)) != TYPE_ARRAY or typeof(data.get("deferred_consequences", null)) != TYPE_ARRAY:
+	if typeof(source.get("journal", null)) != TYPE_ARRAY or typeof(source.get("deferred_consequences", null)) != TYPE_ARRAY:
 		return null
 	var result := RunState.new()
 	result.characteristics = parsed_characteristics
@@ -466,9 +494,9 @@ static func from_dict(data: Dictionary) -> RunState:
 	result.birth_date = parsed_birth_date
 	result.rng = parsed_rng
 	result._next_journal_sequence = int(parsed_sequence)
-	if not result._load_journal(data["journal"]):
+	if not result._load_journal(source["journal"]):
 		return null
-	if not result._load_deferred(data["deferred_consequences"]):
+	if not result._load_deferred(source["deferred_consequences"]):
 		return null
 	var validation := result.validate()
 	return result if validation["ok"] else null

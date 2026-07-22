@@ -1,0 +1,88 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/screens/result/result_screen.gd" id="1_script"]
+
+[node name="ResultScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="Body" type="VBoxContainer" parent="Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="TopSpace" type="Control" parent="Scroll/Body"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+
+[node name="ResultCard" type="PanelContainer" parent="Scroll/Body"]
+layout_mode = 2
+theme_type_variation = &"HeroCard"
+
+[node name="Margin" type="MarginContainer" parent="Scroll/Body/ResultCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="Copy" type="VBoxContainer" parent="Scroll/Body/ResultCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="EyebrowLabel" type="Label" parent="Scroll/Body/ResultCard/Margin/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Eyebrow"
+text = "ИТОГ"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Scroll/Body/ResultCard/Margin/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ScreenTitle"
+text = "Готово"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="BodyLabel" type="Label" parent="Scroll/Body/ResultCard/Margin/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyLabel"
+text = "Описание результата"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="FactsLabel" type="Label" parent="Scroll/Body/ResultCard/Margin/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyMuted"
+text = "Факт"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ConfirmButton" type="Button" parent="Scroll/Body"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "Продолжить"
+
+[node name="BottomSpace" type="Control" parent="Scroll/Body"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2

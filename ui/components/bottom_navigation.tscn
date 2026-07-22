@@ -1,0 +1,58 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/components/bottom_navigation.gd" id="1_nav"]
+
+[node name="BottomNavigation" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 68)
+theme_type_variation = &"BottomNavPanel"
+script = ExtResource("1_nav")
+
+[node name="Tabs" type="GridContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 2
+columns = 5
+
+[node name="PlaceButton" type="Button" parent="Tabs"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 58)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"BottomNavButtonActive"
+text = "Место"
+focus_mode = 2
+[node name="MapButton" type="Button" parent="Tabs"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 58)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"BottomNavButton"
+text = "Карта"
+focus_mode = 2
+
+[node name="HeroButton" type="Button" parent="Tabs"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 58)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"BottomNavButton"
+text = "Герой"
+focus_mode = 2
+
+[node name="ItemsButton" type="Button" parent="Tabs"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 58)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"BottomNavButton"
+text = "Вещи"
+focus_mode = 2
+
+[node name="TasksButton" type="Button" parent="Tabs"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 58)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"BottomNavButton"
+text = "Дела"
+focus_mode = 2

@@ -1,0 +1,121 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/screens/main_menu/main_menu.gd" id="1_script"]
+
+[node name="MainMenuScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="TopSpace" type="Control" parent="Scroll/Content"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Brand" type="VBoxContainer" parent="Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Eyebrow" type="Label" parent="Scroll/Content/Brand"]
+layout_mode = 2
+theme_type_variation = &"Eyebrow"
+text = "ГОРОДСКОЙ SURVIVAL · ANDROID"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Title" type="Label" parent="Scroll/Content/Brand"]
+layout_mode = 2
+theme_type_variation = &"DisplayTitle"
+text = "БОМЖАРА"
+horizontal_alignment = 1
+
+[node name="Rule" type="HSeparator" parent="Scroll/Content/Brand"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+
+[node name="Subtitle" type="Label" parent="Scroll/Content/Brand"]
+layout_mode = 2
+theme_type_variation = &"BodyMuted"
+text = "Один человек. Один город.\nИстория, которую выбираете вы."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="MiddleSpace" type="Control" parent="Scroll/Content"]
+custom_minimum_size = Vector2(0, 18)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MenuPanel" type="PanelContainer" parent="Scroll/Content"]
+layout_mode = 2
+theme_type_variation = &"HeroCard"
+
+[node name="Margin" type="MarginContainer" parent="Scroll/Content/MenuPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Buttons" type="VBoxContainer" parent="Scroll/Content/MenuPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 9
+
+[node name="NewGameButton" type="Button" parent="Scroll/Content/MenuPanel/Margin/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "Новая жизнь"
+
+[node name="ContinueButton" type="Button" parent="Scroll/Content/MenuPanel/Margin/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 58)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+text = "Продолжить"
+
+[node name="SettingsButton" type="Button" parent="Scroll/Content/MenuPanel/Margin/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+theme_type_variation = &"QuietButton"
+text = "Настройки"
+
+[node name="QuitButton" type="Button" parent="Scroll/Content/MenuPanel/Margin/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+theme_type_variation = &"QuietButton"
+text = "Выйти"
+
+[node name="AutosaveLabel" type="Label" parent="Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Eyebrow"
+text = "Автосохранение включено"
+horizontal_alignment = 1
+
+[node name="BottomSpace" type="Control" parent="Scroll/Content"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+size_flags_vertical = 3

@@ -1,0 +1,337 @@
+{
+	"flow_revision": 6,
+	"saved_at_unix": 1784755436,
+	"schema_version": 1,
+	"session": {
+		"biography": [],
+		"completed": [
+			"clinic_notice_board"
+		],
+		"current_event": "clinic_blister",
+		"day_completed": false,
+		"flow_revision": 6,
+		"job_state": {
+			"active": false,
+			"answers": [],
+			"approach": "",
+			"job_id": "",
+			"prompt_ids": [],
+			"result": {},
+			"round_index": 0,
+			"rounds_total": 6,
+			"score": 0
+		},
+		"location": "clinic_yard",
+		"phase": "event",
+		"run_state": {
+			"birth_date": {
+				"day": 1,
+				"month": 9,
+				"year": 1952
+			},
+			"calendar": {
+				"config": {
+					"leap_every": 4,
+					"leap_except_every": 100,
+					"leap_include_every": 400,
+					"leap_month": 2,
+					"leap_years_enabled": true,
+					"minutes_per_day": 1440,
+					"month_lengths": [
+						31,
+						28,
+						31,
+						30,
+						31,
+						30,
+						31,
+						31,
+						30,
+						31,
+						30,
+						31
+					]
+				},
+				"stamp": {
+					"day": 1,
+					"elapsed_minutes": 12,
+					"minute_of_day": 492,
+					"month": 9,
+					"year": 1970
+				}
+			},
+			"characteristics": {
+				"charisma": 7,
+				"intelligence": 6,
+				"luck": 2,
+				"strength": 3
+			},
+			"computed_profiles": {
+				"knowledge_profile": {
+					"evidence": 0,
+					"formed": false,
+					"value": 0
+				},
+				"relationship_investment": {
+					"evidence": 0,
+					"formed": false,
+					"value": 0
+				}
+			},
+			"deferred_consequences": [],
+			"inventory": {},
+			"journal": [
+				{
+					"at": {
+						"day": 1,
+						"elapsed_minutes": 0,
+						"minute_of_day": 480,
+						"month": 9,
+						"year": 1970
+					},
+					"id": "action:first_day_start:start_clinic_quiet::0:0",
+					"message": "Первое утро началось в тихом дворе поликлиники.",
+					"payload": {
+						"action_id": "first_day_start:start_clinic_quiet",
+						"changes": [
+							{
+								"after": 97,
+								"before": 100,
+								"delta": -3,
+								"description": "energy: 100 → 97",
+								"effect": {
+									"delta": -3,
+									"id": "energy",
+									"type": "change_state"
+								},
+								"effect_type": "change_state",
+								"target_id": "energy",
+								"target_kind": "state"
+							},
+							{
+								"after": 54,
+								"before": 50,
+								"delta": 4,
+								"description": "morale: 50 → 54",
+								"effect": {
+									"delta": 4,
+									"id": "morale",
+									"type": "change_state"
+								},
+								"effect_type": "change_state",
+								"target_id": "morale",
+								"target_kind": "state"
+							}
+						],
+						"option_id": "",
+						"start_id": "start_clinic_quiet",
+						"time": {
+							"advanced_minutes": 0,
+							"after": {
+								"day": 1,
+								"elapsed_minutes": 0,
+								"minute_of_day": 480,
+								"month": 9,
+								"year": 1970
+							},
+							"before": {
+								"day": 1,
+								"elapsed_minutes": 0,
+								"minute_of_day": 480,
+								"month": 9,
+								"year": 1970
+							}
+						}
+					},
+					"sequence": 0,
+					"type": "action"
+				},
+				{
+					"at": {
+						"day": 1,
+						"elapsed_minutes": 12,
+						"minute_of_day": 492,
+						"month": 9,
+						"year": 1970
+					},
+					"id": "time:1",
+					"message": "Чтение объявлений",
+					"payload": {
+						"minutes": 12
+					},
+					"sequence": 1,
+					"type": "time"
+				},
+				{
+					"at": {
+						"day": 1,
+						"elapsed_minutes": 12,
+						"minute_of_day": 492,
+						"month": 9,
+						"year": 1970
+					},
+					"id": "action:event:clinic_notice_board:clinic_notice_board.read:12:2",
+					"message": "Объявления во дворе — Разобраться в объявлениях",
+					"payload": {
+						"action_id": "event:clinic_notice_board",
+						"changes": [
+							{
+								"after": {
+									"day": 1,
+									"elapsed_minutes": 12,
+									"minute_of_day": 492,
+									"month": 9,
+									"year": 1970
+								},
+								"before": {
+									"day": 1,
+									"elapsed_minutes": 0,
+									"minute_of_day": 480,
+									"month": 9,
+									"year": 1970
+								},
+								"delta": 12,
+								"description": "Прошло 12 мин.",
+								"effect": {
+									"minutes": 12,
+									"payload": {},
+									"reason": "Чтение объявлений",
+									"type": "advance_time"
+								},
+								"effect_type": "advance_time",
+								"target_id": "calendar",
+								"target_kind": "time"
+							},
+							{
+								"after": 1,
+								"before": 0,
+								"delta": 1,
+								"description": "Знание clinic_back_gate: уровень 0 → 1",
+								"effect": {
+									"amount": 1,
+									"id": "clinic_back_gate",
+									"mode": "unlock",
+									"type": "knowledge"
+								},
+								"effect_type": "knowledge",
+								"target_id": "clinic_back_gate",
+								"target_kind": "knowledge"
+							},
+							{
+								"after": 1,
+								"before": 0,
+								"delta": 1,
+								"description": "Знание cheap_canteen: уровень 0 → 1",
+								"effect": {
+									"amount": 1,
+									"id": "cheap_canteen",
+									"mode": "unlock",
+									"type": "knowledge"
+								},
+								"effect_type": "knowledge",
+								"target_id": "cheap_canteen",
+								"target_kind": "knowledge"
+							},
+							{
+								"after": 1,
+								"before": 0,
+								"delta": 1,
+								"description": "Навык first_aid: ранг 0 → 1",
+								"effect": {
+									"id": "first_aid",
+									"rank": 1,
+									"type": "unlock_skill"
+								},
+								"effect_type": "unlock_skill",
+								"target_id": "first_aid",
+								"target_kind": "skill"
+							},
+							{
+								"after": -3,
+								"before": 0,
+								"delta": -3,
+								"description": "attention_distribution: 0 → -3",
+								"effect": {
+									"delta": -3,
+									"id": "attention_distribution",
+									"type": "shift_polarity"
+								},
+								"effect_type": "shift_polarity",
+								"target_id": "attention_distribution",
+								"target_kind": "polarity"
+							}
+						],
+						"choice_id": "clinic_notice_board.read",
+						"event_id": "clinic_notice_board",
+						"option_id": "clinic_notice_board.read",
+						"time": {
+							"advanced_minutes": 12,
+							"after": {
+								"day": 1,
+								"elapsed_minutes": 12,
+								"minute_of_day": 492,
+								"month": 9,
+								"year": 1970
+							},
+							"before": {
+								"day": 1,
+								"elapsed_minutes": 0,
+								"minute_of_day": 480,
+								"month": 9,
+								"year": 1970
+							}
+						}
+					},
+					"sequence": 2,
+					"type": "action"
+				}
+			],
+			"knowledge": {
+				"cheap_canteen": 1,
+				"clinic_back_gate": 1
+			},
+			"mastery_points": 0,
+			"meters": {
+				"energy": 97,
+				"health": 100,
+				"hunger": 0,
+				"morale": 54,
+				"tension": 0
+			},
+			"money": 0,
+			"next_journal_sequence": 3,
+			"rng": {
+				"seed": "1784780032",
+				"state": "-8763414225942181230"
+			},
+			"save_version": 1,
+			"skills": {
+				"cargo_handling": 0,
+				"city_navigation": 0,
+				"cooking": 0,
+				"first_aid": 1,
+				"repair": 0,
+				"trade": 0
+			},
+			"stored_polarities": {
+				"attention_distribution": -3,
+				"decision_priority": 0,
+				"execution_style": 0,
+				"influence_style": 0,
+				"physical_specialization": 0,
+				"uncertainty_behavior": 0
+			}
+		},
+		"seen": [
+			"clinic_notice_board",
+			"clinic_blister"
+		],
+		"session_version": 1,
+		"settings": {
+			"font_scale": 1.0,
+			"psyche_effect_mode": "full",
+			"show_locked_options": false
+		},
+		"start": "start_clinic_quiet"
+	}
+}

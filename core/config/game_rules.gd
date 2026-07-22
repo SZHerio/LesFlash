@@ -6,7 +6,8 @@ extends RefCounted
 ## Values that are likely to change during balancing live here so the state model
 ## and content resolvers do not have to duplicate magic numbers.
 
-const SAVE_VERSION := 1
+const LEGACY_SAVE_VERSION := 1
+const SAVE_VERSION := 2
 
 const CHARACTERISTIC_MIN := 1
 const CHARACTERISTIC_MAX := 10

@@ -1,0 +1,75 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/components/action_row.gd" id="1_action"]
+
+[node name="ActionRow" type="Button"]
+custom_minimum_size = Vector2(0, 92)
+size_flags_horizontal = 3
+theme_type_variation = &"ActionButton"
+focus_mode = 2
+script = ExtResource("1_action")
+
+[node name="Content" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 9.0
+offset_right = -12.0
+offset_bottom = -9.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 11
+
+[node name="AccentRail" type="ColorRect" parent="Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(4, 0)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.87, 0.72, 0.42, 1)
+
+[node name="Copy" type="VBoxContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 3
+
+[node name="TitleLabel" type="Label" parent="Content/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "Осмотреться"
+autowrap_mode = 2
+
+[node name="DescriptionLabel" type="Label" parent="Content/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionDescriptionLabel"
+text = "Понять, что происходит вокруг."
+autowrap_mode = 2
+
+[node name="MetaLabel" type="Label" parent="Content/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionMetaLabel"
+text = "5 мин  ·  Без риска"
+autowrap_mode = 2
+
+[node name="ReasonLabel" type="Label" parent="Content/Copy"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"ActionReasonLabel"
+text = "Недоступно"
+autowrap_mode = 2
+
+[node name="TrailingLabel" type="Label" parent="Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+theme_type_variation = &"LocationTitleLabel"
+text = "›"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -1,0 +1,91 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://app/app_shell.gd" id="1_shell"]
+[ext_resource type="Theme" path="res://ui/theme/m3_ui_theme.tres" id="2_theme"]
+[ext_resource type="Shader" path="res://ui/shaders/psyche_background.gdshader" id="3_psyche"]
+[ext_resource type="PackedScene" path="res://ui/components/bottom_navigation.tscn" id="4_nav"]
+[ext_resource type="PackedScene" path="res://ui/components/toast_overlay.tscn" id="5_toast"]
+[ext_resource type="Script" path="res://app/ui_coordinator.gd" id="6_coordinator"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_psyche"]
+shader = ExtResource("3_psyche")
+shader_parameter/psyche_intensity = 0.0
+
+[node name="AppShell" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_shell")
+
+[node name="Backdrop" type="TextureRect" parent="."]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_psyche")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="BackdropShade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.018, 0.033, 0.029, 0.12)
+
+[node name="SafeArea" type="MarginContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Center" type="CenterContainer" parent="SafeArea"]
+layout_mode = 2
+
+[node name="ContentFrame" type="VBoxContainer" parent="SafeArea/Center"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(508, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="ScreenHost" type="Control" parent="SafeArea/Center/ContentFrame"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BottomNavigation" parent="SafeArea/Center/ContentFrame" instance=ExtResource("4_nav")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="ToastOverlay" parent="SafeArea" instance=ExtResource("5_toast")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="AutosaveTimer" type="Timer" parent="."]
+wait_time = 300.0
+autostart = true
+
+[node name="UiCoordinator" type="Node" parent="."]
+script = ExtResource("6_coordinator")
+
+[connection signal="timeout" from="AutosaveTimer" to="." method="_on_autosave_timer_timeout"]

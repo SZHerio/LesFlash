@@ -1,0 +1,177 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/screens/settings/settings_screen.gd" id="1_script"]
+
+[node name="SettingsScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Layout" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Layout"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BackButton" type="Button" parent="Layout/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 54)
+layout_mode = 2
+theme_type_variation = &"IconButton"
+text = "←"
+
+[node name="Title" type="Label" parent="Layout/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"ScreenTitle"
+text = "Настройки"
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Body" type="VBoxContainer" parent="Layout/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="ChoicesCard" type="PanelContainer" parent="Layout/Scroll/Body"]
+layout_mode = 2
+theme_type_variation = &"SurfaceCard"
+
+[node name="Margin" type="MarginContainer" parent="Layout/Scroll/Body/ChoicesCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="Content" type="VBoxContainer" parent="Layout/Scroll/Body/ChoicesCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Layout/Scroll/Body/ChoicesCard/Margin/Content"]
+layout_mode = 2
+theme_type_variation = &"SectionTitle"
+text = "Скрытые возможности"
+autowrap_mode = 2
+
+[node name="Description" type="Label" parent="Layout/Scroll/Body/ChoicesCard/Margin/Content"]
+layout_mode = 2
+theme_type_variation = &"BodyMuted"
+text = "По умолчанию недоступные ответы скрыты — так интереснее открывать игру самостоятельно."
+autowrap_mode = 2
+
+[node name="LockedToggle" type="CheckButton" parent="Layout/Scroll/Body/ChoicesCard/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+text = "Показывать"
+
+[node name="VisualCard" type="PanelContainer" parent="Layout/Scroll/Body"]
+layout_mode = 2
+theme_type_variation = &"SurfaceCard"
+
+[node name="Margin" type="MarginContainer" parent="Layout/Scroll/Body/VisualCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="Content" type="VBoxContainer" parent="Layout/Scroll/Body/VisualCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Layout/Scroll/Body/VisualCard/Margin/Content"]
+layout_mode = 2
+theme_type_variation = &"SectionTitle"
+text = "Влияние психики на окружение"
+autowrap_mode = 2
+
+[node name="Description" type="Label" parent="Layout/Scroll/Body/VisualCard/Margin/Content"]
+layout_mode = 2
+theme_type_variation = &"BodyMuted"
+text = "Меняются только цвет, свет и виньетка изображения места. Контраст интерфейса остаётся постоянным."
+autowrap_mode = 2
+
+[node name="PsycheOption" type="OptionButton" parent="Layout/Scroll/Body/VisualCard/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+item_count = 3
+selected = 2
+popup/item_0/text = "Выключено"
+popup/item_0/id = 0
+popup/item_0/metadata = "off"
+popup/item_1/text = "Слабо"
+popup/item_1/id = 1
+popup/item_1/metadata = "reduced"
+popup/item_2/text = "Полностью"
+popup/item_2/id = 2
+popup/item_2/metadata = "full"
+
+[node name="AccessibilityCard" type="PanelContainer" parent="Layout/Scroll/Body"]
+layout_mode = 2
+theme_type_variation = &"SurfaceCard"
+
+[node name="Margin" type="MarginContainer" parent="Layout/Scroll/Body/AccessibilityCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="Content" type="VBoxContainer" parent="Layout/Scroll/Body/AccessibilityCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Layout/Scroll/Body/AccessibilityCard/Margin/Content"]
+layout_mode = 2
+theme_type_variation = &"SectionTitle"
+text = "Доступность"
+autowrap_mode = 2
+
+[node name="FontLabel" type="Label" parent="Layout/Scroll/Body/AccessibilityCard/Margin/Content"]
+layout_mode = 2
+theme_type_variation = &"BodyMuted"
+text = "Размер текста"
+
+[node name="FontOption" type="OptionButton" parent="Layout/Scroll/Body/AccessibilityCard/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+item_count = 4
+selected = 0
+popup/item_0/text = "100%"
+popup/item_0/id = 0
+popup/item_0/metadata = 1.0
+popup/item_1/text = "125%"
+popup/item_1/id = 1
+popup/item_1/metadata = 1.25
+popup/item_2/text = "150%"
+popup/item_2/id = 2
+popup/item_2/metadata = 1.5
+popup/item_3/text = "200%"
+popup/item_3/id = 3
+popup/item_3/metadata = 2.0
+
+[node name="MotionToggle" type="CheckButton" parent="Layout/Scroll/Body/AccessibilityCard/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+text = "Уменьшить"

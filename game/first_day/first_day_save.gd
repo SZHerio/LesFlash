@@ -5,8 +5,10 @@ extends RefCounted
 ## A valid .tmp file is treated as an interrupted newer save and is promoted on
 ## load before the primary or .bak candidates are considered.
 
-const SCHEMA_VERSION := 1
+const SCHEMA_VERSION := 2
 const DEFAULT_SAVE_PATH := "user://first_day_session.json"
+
+const M2SessionMigrationScript := preload("res://game/first_day/first_day_session_migration.gd")
 
 
 static func save_session(session: FirstDaySession, path: String = DEFAULT_SAVE_PATH) -> Dictionary:
@@ -212,11 +214,16 @@ static func _parse_and_validate(payload: String, source_path: String) -> Diction
 	var schema: Variant = envelope.get("schema_version", null)
 	if (typeof(schema) != TYPE_INT and typeof(schema) != TYPE_FLOAT) or float(schema) != floor(float(schema)):
 		return _failure("invalid_schema_version", "The session schema version must be an integer.", source_path)
-	if int(schema) != SCHEMA_VERSION:
-		return _failure("unsupported_schema_version", "The session schema version is unsupported.", source_path, {"actual": int(schema)})
-	if typeof(envelope.get("session", null)) != TYPE_DICTIONARY:
-		return _failure("invalid_session_payload", "The save envelope does not contain a session object.", source_path)
-	var session := FirstDaySession.from_dict(envelope["session"])
+	var migration := M2SessionMigrationScript.migrate_envelope(envelope)
+	if not bool(migration.get("ok", false)):
+		return _failure(
+			String(migration.get("code", "save_migration_failed")),
+			String(migration.get("error", "The session save could not be migrated.")),
+			source_path,
+			{"migration": migration, "actual": int(schema)}
+		)
+	var current_envelope: Dictionary = migration["data"]
+	var session := FirstDaySession.from_dict(current_envelope["session"])
 	if session == null:
 		return _failure("session_deserialization_failed", "FirstDaySession could not be reconstructed.", source_path)
 	var validation := session.validate()
@@ -224,8 +231,12 @@ static func _parse_and_validate(payload: String, source_path: String) -> Diction
 		return _failure("loaded_session_validation_failed", "The reconstructed session is invalid.", source_path, {"validation": validation})
 	return _success({
 		"path": source_path,
-		"schema_version": int(schema),
-		"saved_at_unix": envelope.get("saved_at_unix", null),
+		"schema_version": SCHEMA_VERSION,
+		"source_schema_version": int(migration.get("source_schema_version", schema)),
+		"source_session_version": int(migration.get("source_session_version", FirstDaySession.SESSION_VERSION)),
+		"source_run_state_version": int(migration.get("source_run_state_version", GameRules.SAVE_VERSION)),
+		"migrated": bool(migration.get("migrated", false)),
+		"saved_at_unix": current_envelope.get("saved_at_unix", null),
 		"flow_revision": session.flow_revision,
 		"session": session,
 	})

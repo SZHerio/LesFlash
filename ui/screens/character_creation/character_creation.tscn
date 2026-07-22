@@ -1,0 +1,124 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://ui/screens/character_creation/character_creation.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://ui/components/characteristic_stepper.tscn" id="2_stepper"]
+
+[node name="CharacterCreationScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Layout" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Layout"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BackButton" type="Button" parent="Layout/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 54)
+layout_mode = 2
+theme_type_variation = &"IconButton"
+text = "←"
+
+[node name="Title" type="Label" parent="Layout/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"ScreenTitle"
+text = "Кем вы станете?"
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Body" type="VBoxContainer" parent="Layout/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="IntroCard" type="PanelContainer" parent="Layout/Scroll/Body"]
+layout_mode = 2
+theme_type_variation = &"SurfaceCard"
+
+[node name="Margin" type="MarginContainer" parent="Layout/Scroll/Body/IntroCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="Text" type="Label" parent="Layout/Scroll/Body/IntroCard/Margin"]
+layout_mode = 2
+theme_type_variation = &"BodyMuted"
+text = "Все характеристики начинаются с 1. Вложите оставшиеся очки: сильным во всём быть невозможно, и выбранные пределы откроют разные пути."
+autowrap_mode = 2
+
+[node name="PointsCard" type="PanelContainer" parent="Layout/Scroll/Body"]
+layout_mode = 2
+theme_type_variation = &"HeroCard"
+
+[node name="Margin" type="MarginContainer" parent="Layout/Scroll/Body/PointsCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="Row" type="HBoxContainer" parent="Layout/Scroll/Body/PointsCard/Margin"]
+layout_mode = 2
+
+[node name="Caption" type="Label" parent="Layout/Scroll/Body/PointsCard/Margin/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SectionTitle"
+text = "Свободные очки"
+
+[node name="PointsLabel" type="Label" parent="Layout/Scroll/Body/PointsCard/Margin/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ScreenTitle"
+text = "14"
+
+[node name="StrengthStepper" parent="Layout/Scroll/Body" instance=ExtResource("2_stepper")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="CharismaStepper" parent="Layout/Scroll/Body" instance=ExtResource("2_stepper")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="IntelligenceStepper" parent="Layout/Scroll/Body" instance=ExtResource("2_stepper")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="LuckStepper" parent="Layout/Scroll/Body" instance=ExtResource("2_stepper")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ConfirmButton" type="Button" parent="Layout/Scroll/Body"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "Распределите ещё 14"
+
+[node name="Hint" type="Label" parent="Layout/Scroll/Body"]
+layout_mode = 2
+theme_type_variation = &"BodyMuted"
+text = "Сумма четырёх характеристик должна быть ровно 18."
+horizontal_alignment = 1
+autowrap_mode = 2

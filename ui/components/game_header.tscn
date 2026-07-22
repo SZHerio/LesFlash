@@ -1,0 +1,68 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/components/game_header.gd" id="1_header"]
+
+[node name="GameHeader" type="PanelContainer"]
+theme_type_variation = &"ScreenHeaderPanel"
+script = ExtResource("1_header")
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="TopRow" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Titles" type="VBoxContainer" parent="Content/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 1
+
+[node name="DistrictLabel" type="Label" parent="Content/TopRow/Titles"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "ПРИРЕЧНЫЙ РАЙОН"
+autowrap_mode = 2
+
+[node name="LocationLabel" type="Label" parent="Content/TopRow/Titles"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"LocationTitleLabel"
+text = "Вокзальная площадь"
+autowrap_mode = 2
+
+[node name="SettingsButton" type="Button" parent="Content/TopRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+tooltip_text = "Настройки"
+text = "⋮"
+focus_mode = 2
+
+[node name="MetaRow" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="DatePill" type="PanelContainer" parent="Content/MetaRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"PillPanel"
+
+[node name="DateLabel" type="Label" parent="Content/MetaRow/DatePill"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "12 сентября 1974 · 08:20"
+autowrap_mode = 2
+
+[node name="MoneyPill" type="PanelContainer" parent="Content/MetaRow"]
+layout_mode = 2
+theme_type_variation = &"PillPanel"
+
+[node name="MoneyLabel" type="Label" parent="Content/MetaRow/MoneyPill"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+text = "0 ₽"

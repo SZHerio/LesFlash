@@ -5,13 +5,15 @@ extends RefCounted
 ## RunState changes are committed only through ActionTransaction. Flow changes
 ## are applied after a successful transaction and carry their own revision.
 
-const SESSION_VERSION := 1
+const SESSION_VERSION := 2
 const JOB_ROUNDS := 6
 const VALID_PHASES := ["uninitialized", "start", "map", "event", "job", "shelter", "completed"]
 const VALID_PSYCHE_MODES := ["off", "reduced", "full"]
 const FIRST_DAY_DURATION_MINUTES := 24 * 60
 const SHELTER_EVENING_MINUTE := 18 * 60
 const SHELTER_WAKE_MINUTE := 8 * 60
+
+const M2SessionMigrationScript := preload("res://game/first_day/first_day_session_migration.gd")
 
 const DEFERRED_PAYLOADS := {
 	"cold_symptoms": {"health": -5},
@@ -106,6 +108,26 @@ func start_new_run(
 	})
 
 
+func get_active_activity() -> Dictionary:
+	return M2SessionMigrationScript.legacy_activity({
+		"phase": phase,
+		"location": location,
+		"current_event": current_event,
+		"start": start,
+		"job_state": job_state,
+	})
+
+
+func get_flow_model() -> Dictionary:
+	return {
+		"phase": phase,
+		"base_location_id": location,
+		"flow_revision": flow_revision,
+		"day_completed": day_completed,
+		"active_activity": get_active_activity(),
+	}
+
+
 func get_map_model() -> Dictionary:
 	var location_models: Array = []
 	for raw_location in _locations():
@@ -115,6 +137,7 @@ func get_map_model() -> Dictionary:
 		location_models.append({
 			"id": location_id,
 			"title": String(raw_location.get("title", location_id)),
+			"description": String(raw_location.get("description", "")),
 			"background_key": String(raw_location.get("background_key", raw_location.get("background_id", ""))),
 			"tags": _array_copy(raw_location.get("tags", [])),
 			"current": location_id == location,
@@ -152,6 +175,7 @@ func get_map_model() -> Dictionary:
 			"id": event_id,
 			"title": String(card.get("title", event_id)),
 			"available": bool(check["allowed"]),
+			"reasons": _array_copy(check["reasons"]),
 			"seen": event_id in seen,
 			"completed": event_id in completed,
 		})
@@ -660,6 +684,8 @@ func to_dict() -> Dictionary:
 	return {
 		"session_version": SESSION_VERSION,
 		"run_state": run_state.to_dict(),
+		"base_location": location,
+		"active_activity": get_active_activity(),
 		"phase": phase,
 		"location": location,
 		"current_event": current_event,
@@ -675,42 +701,46 @@ func to_dict() -> Dictionary:
 
 
 static func from_dict(data: Dictionary) -> FirstDaySession:
-	var version: Variant = _integral(data.get("session_version", null))
-	var revision: Variant = _integral(data.get("flow_revision", null))
+	var migration := M2SessionMigrationScript.migrate_session(data)
+	if not bool(migration.get("ok", false)):
+		return null
+	var source: Dictionary = migration["data"]
+	var version: Variant = _integral(source.get("session_version", null))
+	var revision: Variant = _integral(source.get("flow_revision", null))
 	if version == null or int(version) != SESSION_VERSION or revision == null or int(revision) < 0:
 		return null
-	if typeof(data.get("run_state", null)) != TYPE_DICTIONARY:
+	if typeof(source.get("run_state", null)) != TYPE_DICTIONARY:
 		return null
-	var parsed_state := RunState.from_dict(data["run_state"])
+	var parsed_state := RunState.from_dict(source["run_state"])
 	if parsed_state == null:
 		return null
 	for key in ["phase", "location", "current_event", "start"]:
-		if typeof(data.get(key, null)) != TYPE_STRING:
+		if typeof(source.get(key, null)) != TYPE_STRING:
 			return null
-	if typeof(data.get("day_completed", null)) != TYPE_BOOL:
+	if typeof(source.get("day_completed", null)) != TYPE_BOOL:
 		return null
-	if typeof(data.get("seen", null)) != TYPE_ARRAY or typeof(data.get("completed", null)) != TYPE_ARRAY:
+	if typeof(source.get("seen", null)) != TYPE_ARRAY or typeof(source.get("completed", null)) != TYPE_ARRAY:
 		return null
-	if typeof(data.get("settings", null)) != TYPE_DICTIONARY or typeof(data.get("job_state", null)) != TYPE_DICTIONARY:
+	if typeof(source.get("settings", null)) != TYPE_DICTIONARY or typeof(source.get("job_state", null)) != TYPE_DICTIONARY:
 		return null
-	if typeof(data.get("biography", null)) != TYPE_ARRAY:
+	if typeof(source.get("biography", null)) != TYPE_ARRAY:
 		return null
-	var parsed_seen: Variant = _string_array(data["seen"])
-	var parsed_completed: Variant = _string_array(data["completed"])
+	var parsed_seen: Variant = _string_array(source["seen"])
+	var parsed_completed: Variant = _string_array(source["completed"])
 	if parsed_seen == null or parsed_completed == null:
 		return null
 	var result := FirstDaySession.new()
 	result.run_state = parsed_state
-	result.phase = String(data["phase"])
-	result.location = String(data["location"])
-	result.current_event = String(data["current_event"])
-	result.start = String(data["start"])
+	result.phase = String(source["phase"])
+	result.location = String(source["location"])
+	result.current_event = String(source["current_event"])
+	result.start = String(source["start"])
 	result.seen = parsed_seen
 	result.completed = parsed_completed
-	result.settings = _normalize_json_numbers(Dictionary(data["settings"]).duplicate(true))
-	result.job_state = _normalize_json_numbers(Dictionary(data["job_state"]).duplicate(true))
-	result.day_completed = bool(data["day_completed"])
-	result.biography = _normalize_json_numbers(Array(data["biography"]).duplicate(true))
+	result.settings = _normalize_json_numbers(Dictionary(source["settings"]).duplicate(true))
+	result.job_state = _normalize_json_numbers(Dictionary(source["job_state"]).duplicate(true))
+	result.day_completed = bool(source["day_completed"])
+	result.biography = _normalize_json_numbers(Array(source["biography"]).duplicate(true))
 	result.flow_revision = int(revision)
 	var validation := result.validate()
 	return result if bool(validation["ok"]) else null
@@ -776,6 +806,17 @@ func validate() -> Dictionary:
 			errors.append("active first day cannot cross the next 08:00")
 	if flow_revision < 0:
 		errors.append("flow_revision cannot be negative")
+	var contract_validation := M2SessionMigrationScript.validate_contract_fields({
+		"phase": phase,
+		"location": location,
+		"base_location": location,
+		"current_event": current_event,
+		"start": start,
+		"job_state": job_state,
+		"active_activity": get_active_activity(),
+	})
+	if not bool(contract_validation.get("ok", false)):
+		errors.append("M3A session contract: %s" % String(contract_validation.get("error", "invalid")))
 	_validate_json_value(biography, "biography", errors)
 	var content_validation := _content_validation()
 	if not bool(content_validation.get("ok", false)):
@@ -1563,7 +1604,7 @@ static func _settings_valid(value: Dictionary) -> bool:
 	var scale: Variant = value.get("font_scale", null)
 	if typeof(scale) != TYPE_INT and typeof(scale) != TYPE_FLOAT:
 		return false
-	return is_finite(float(scale)) and float(scale) >= 0.8 and float(scale) <= 1.6
+	return is_finite(float(scale)) and float(scale) >= 0.8 and float(scale) <= 2.0
 
 
 static func _string_array(raw: Variant) -> Variant:
