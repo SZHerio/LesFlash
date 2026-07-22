@@ -180,10 +180,6 @@ func _show_main_menu() -> void:
 	var bottom_space := Control.new()
 	bottom_space.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	screen.add_child(bottom_space)
-	var hint := _make_label("Время движется только после решений", 13, COLOUR_MUTED, false)
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_add_menu_text_outline(hint, 4)
-	screen.add_child(hint)
 	_animate_screen(screen)
 
 
