@@ -1,7 +1,7 @@
 class_name SessionPersistence
 extends RefCounted
 
-const DefaultAdapter := preload("res://app/session/first_day_session_adapter.gd")
+const DefaultAdapter := preload("res://app/session/sandbox_session_adapter.gd")
 const DefaultSaveSlot := preload("res://app/session/save_slot.gd")
 
 var _create_session: Callable

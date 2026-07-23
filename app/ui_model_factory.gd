@@ -310,19 +310,26 @@ static func _location_action(raw: Dictionary) -> Dictionary:
 	var title := String(raw.get("title", "Действие"))
 	if completed:
 		title += " · завершено"
-	var description := ""
-	match kind:
-		"event":
-			description = "Осмотреть место и разобраться в ситуации."
-		"job":
-			description = "Короткая рабочая смена с отдельной мини-игрой."
-		"wait":
-			description = "Осознанно пропустить часть дня."
-		"shelter":
-			description = "Сравнить доступные варианты ночлега."
-	var meta: Array = []
+	var description := String(raw.get("description", ""))
+	if description.is_empty():
+		match kind:
+			"event":
+				description = "Осмотреть место и разобраться в ситуации."
+			"local":
+				description = "Заняться делом в текущем месте."
+			"job":
+				description = "Короткая рабочая смена с отдельной мини-игрой."
+			"wait":
+				description = "Осознанно пропустить часть дня."
+			"shelter":
+				description = "Сравнить доступные варианты ночлега."
+	var meta: Array = Array(raw.get("meta", [])).duplicate(true)
 	if int(raw.get("minutes", 0)) > 0:
 		meta.append("%d мин" % int(raw.get("minutes", 0)))
+	if int(raw.get("price", 0)) > 0:
+		meta.append("%d ₽" % int(raw.get("price", 0)))
+	if int(raw.get("risk", 0)) > 0:
+		meta.append("Риск %d/5" % clampi(int(raw.get("risk", 0)), 1, 5))
 	return {
 		"id": String(raw.get("id", "")),
 		"kind": kind,
@@ -331,5 +338,5 @@ static func _location_action(raw: Dictionary) -> Dictionary:
 		"meta": meta,
 		"enabled": enabled,
 		"locked_reason": "Уже завершено" if completed else reason_text(raw.get("reasons", [])),
-		"variant": "accent" if kind in ["job", "shelter"] and enabled else "normal",
+		"variant": "accent" if kind in ["local", "job", "shelter"] and enabled else "normal",
 	}

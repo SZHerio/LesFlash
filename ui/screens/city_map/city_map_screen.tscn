@@ -1,0 +1,182 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://ui/screens/city_map/city_map_screen.gd" id="1_screen"]
+[ext_resource type="PackedScene" path="res://ui/components/city_map_canvas.tscn" id="2_canvas"]
+
+[node name="CityMapScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_screen")
+
+[node name="ScreenMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="Layout" type="VBoxContainer" parent="ScreenMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="PanelContainer" parent="ScreenMargin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ScreenHeaderPanel"
+
+[node name="HeaderRow" type="HBoxContainer" parent="ScreenMargin/Layout/Header"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BackButton" type="Button" parent="ScreenMargin/Layout/Header/HeaderRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+theme_type_variation = &"IconButton"
+tooltip_text = "Вернуться к месту"
+text = "‹"
+focus_mode = 2
+
+[node name="HeaderCopy" type="VBoxContainer" parent="ScreenMargin/Layout/Header/HeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 1
+
+[node name="DistrictLabel" type="Label" parent="ScreenMargin/Layout/Header/HeaderRow/HeaderCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "ПРИРЕЧНЫЙ РАЙОН"
+autowrap_mode = 2
+
+[node name="TitleLabel" type="Label" parent="ScreenMargin/Layout/Header/HeaderRow/HeaderCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"LocationTitleLabel"
+text = "Карта района"
+autowrap_mode = 2
+
+[node name="CurrentLabel" type="Label" parent="ScreenMargin/Layout/Header/HeaderRow/HeaderCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Сейчас: Вокзальная площадь"
+autowrap_mode = 2
+
+[node name="BodyScroll" type="ScrollContainer" parent="ScreenMargin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Body" type="VBoxContainer" parent="ScreenMargin/Layout/BodyScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="MapPanel" type="PanelContainer" parent="ScreenMargin/Layout/BodyScroll/Body"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"EnvironmentPanel"
+
+[node name="MapMargin" type="MarginContainer" parent="ScreenMargin/Layout/BodyScroll/Body/MapPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="MapCanvas" parent="ScreenMargin/Layout/BodyScroll/Body/MapPanel/MapMargin" instance=ExtResource("2_canvas")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TripPanel" type="PanelContainer" parent="ScreenMargin/Layout/BodyScroll/Body"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 154)
+layout_mode = 2
+theme_type_variation = &"ScreenHeaderPanel"
+
+[node name="TripContent" type="VBoxContainer" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="DestinationRow" type="HBoxContainer" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel/TripContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DestinationCopy" type="VBoxContainer" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel/TripContent/DestinationRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 1
+
+[node name="TripEyebrow" type="Label" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel/TripContent/DestinationRow/DestinationCopy"]
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "МАРШРУТ"
+
+[node name="DestinationLabel" type="Label" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel/TripContent/DestinationRow/DestinationCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "Выберите место на карте"
+autowrap_mode = 2
+
+[node name="RouteState" type="Label" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel/TripContent/DestinationRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+text = "○"
+vertical_alignment = 1
+
+[node name="ModeRow" type="HBoxContainer" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel/TripContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ModePicker" type="OptionButton" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel/TripContent/ModeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(136, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SecondaryButton"
+disabled = true
+focus_mode = 2
+
+[node name="ModeMetaLabel" type="Label" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel/TripContent/ModeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(112, 50)
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+text = "Время и цена"
+horizontal_alignment = 2
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ReasonLabel" type="Label" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel/TripContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionReasonLabel"
+text = "Сначала выберите точку назначения."
+autowrap_mode = 2
+
+[node name="ConfirmButton" type="Button" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel/TripContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+disabled = true
+text = "Отправиться"
+focus_mode = 2

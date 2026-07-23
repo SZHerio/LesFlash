@@ -945,6 +945,30 @@ static func _sort_by_id(left: Dictionary, right: Dictionary) -> bool:
 	return String(left.get("id", "")) < String(right.get("id", ""))
 
 
+static func validate_condition_packet(
+	raw_conditions: Variant,
+	context: String = "content"
+) -> Dictionary:
+	var errors: Array = []
+	if not raw_conditions is Array:
+		errors.append("Условия в %s должны быть массивом" % context)
+	else:
+		_validate_conditions(raw_conditions, context, errors)
+	return {"ok": errors.is_empty(), "errors": errors}
+
+
+static func validate_effect_packet(
+	raw_effects: Variant,
+	context: String = "content"
+) -> Dictionary:
+	var errors: Array = []
+	if not raw_effects is Array:
+		errors.append("Эффекты в %s должны быть массивом" % context)
+	else:
+		_validate_effects(raw_effects, context, errors)
+	return {"ok": errors.is_empty(), "errors": errors}
+
+
 static func validate_content() -> Dictionary:
 	var errors: Array = []
 	var place_map := locations()
@@ -1229,7 +1253,9 @@ static func _validate_conditions(conditions: Array, context: String, errors: Arr
 				if typeof(raw_value) != TYPE_INT or int(raw_value) < 1 or int(raw_value) > GameRules.SKILL_MAX_RANK:
 					errors.append("В %s указан неверный ранг навыка" % context)
 			"knowledge":
-				if not _valid_identifier(identifier) or typeof(raw_value) != TYPE_INT or int(raw_value) < GameRules.KNOWLEDGE_LEVEL_MIN or int(raw_value) > GameRules.KNOWLEDGE_LEVEL_MAX:
+				# Zero is not a stored knowledge level, but it is a valid
+				# requirement for data that must run only before discovery.
+				if not _valid_identifier(identifier) or typeof(raw_value) != TYPE_INT or int(raw_value) < 0 or int(raw_value) > GameRules.KNOWLEDGE_LEVEL_MAX:
 					errors.append("В %s указано неверное условие знания" % context)
 
 

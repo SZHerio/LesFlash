@@ -48,6 +48,28 @@ static func create(characteristics: Dictionary, seed: int) -> FirstDaySession:
 	return session if bool(result.get("ok", false)) else null
 
 
+static func create_location_first(characteristics: Dictionary, seed: int) -> FirstDaySession:
+	var session := FirstDaySession.new()
+	var result := session.start_new_location_first(characteristics, seed)
+	return session if bool(result.get("ok", false)) else null
+
+
+func start_new_location_first(
+	characteristics: Dictionary = GameRules.DEFAULT_CHARACTERISTICS,
+	seed: int = GameRules.DEFAULT_RNG_SEED
+) -> Dictionary:
+	var result := start_new_run(characteristics, seed)
+	if not bool(result.get("ok", false)):
+		return result
+	if not current_event.is_empty():
+		seen.erase(current_event)
+	current_event = ""
+	phase = "map"
+	result["phase"] = phase
+	result["event_id"] = ""
+	return result
+
+
 func start_new_run(
 	characteristics: Dictionary = GameRules.DEFAULT_CHARACTERISTICS,
 	seed: int = GameRules.DEFAULT_RNG_SEED
@@ -557,7 +579,7 @@ func get_wait_until_evening_model() -> Dictionary:
 	var available := visible and (job_finished or enough_lived_events)
 	var reason := ""
 	if visible and not available:
-		reason = "Сначала завершите работу или проживите ещё несколько событий"
+		reason = "Сначала завершите дело или проведите время за другими занятиями"
 	return {
 		"visible": visible,
 		"available": available,
@@ -675,6 +697,8 @@ func set_setting(key: String, value: Variant) -> bool:
 	candidate[key] = value
 	if not _settings_valid(candidate):
 		return false
+	if candidate == settings:
+		return true
 	settings = candidate
 	_touch()
 	return true

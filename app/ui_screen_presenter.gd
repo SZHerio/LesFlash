@@ -2,10 +2,12 @@ class_name UiScreenPresenter
 extends RefCounted
 
 const UiModels := preload("res://app/ui_model_factory.gd")
+const CityMapModels := preload("res://app/map/city_map_view_model.gd")
 const MainMenuScene := preload("res://ui/screens/main_menu/main_menu.tscn")
 const CharacterCreationScene := preload("res://ui/screens/character_creation/character_creation.tscn")
 const SettingsScene := preload("res://ui/screens/settings/settings_screen.tscn")
 const LocationScene := preload("res://ui/screens/location/location_screen.tscn")
+const CityMapScene := preload("res://ui/screens/city_map/city_map_screen.tscn")
 const ChoiceScene := preload("res://ui/screens/choice/choice_screen.tscn")
 const ResultScene := preload("res://ui/screens/result/result_screen.tscn")
 const DEFAULT_BACKGROUND := "riverside_station_square_day"
@@ -58,7 +60,7 @@ func show_location(
 	_shell.set_navigation_visible(true)
 	_shell.present_navigation({
 		"active_tab": "place",
-		"enabled_tabs": {"place": true, "map": false, "hero": false, "items": false, "tasks": false},
+		"enabled_tabs": {"place": true, "map": true, "hero": false, "items": false, "tasks": false},
 	})
 	var screen := _shell.show_screen(LocationScene) as LocationScreen
 	screen.action_requested.connect(_handler(handlers, "action"))
@@ -71,6 +73,30 @@ func show_location(
 		last_transaction,
 		animate_status_delta
 	))
+
+
+func show_city_map(
+	raw_model: Dictionary,
+	shell_model: Dictionary,
+	preferences: Dictionary,
+	handlers: Dictionary
+) -> CityMapScreen:
+	var location_model: Dictionary = Dictionary(shell_model.get("location", {}))
+	_shell.set_background(String(location_model.get("background_key", DEFAULT_BACKGROUND)))
+	apply_session_ambience(shell_model, preferences)
+	_shell.set_navigation_visible(true)
+	_shell.present_navigation({
+		"active_tab": "map",
+		"enabled_tabs": {"place": true, "map": true, "hero": false, "items": false, "tasks": false},
+	})
+	var screen := _shell.show_screen(CityMapScene) as CityMapScreen
+	screen.travel_requested.connect(_handler(handlers, "travel"))
+	screen.back_requested.connect(_handler(handlers, "back"))
+	screen.present(CityMapModels.build(
+		raw_model,
+		bool(preferences.get("reduced_motion", false))
+	))
+	return screen
 
 
 func show_event(raw_model: Dictionary, shell_model: Dictionary, preferences: Dictionary, handlers: Dictionary) -> void:

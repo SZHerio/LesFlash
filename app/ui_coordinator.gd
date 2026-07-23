@@ -3,14 +3,21 @@ extends Node
 
 const PreferencesScript := preload("res://app/ui_preferences.gd")
 const PersistenceScript := preload("res://app/session/session_persistence.gd")
+const LifecycleScript := preload("res://app/session/session_lifecycle_coordinator.gd")
 const ScreenPresenterScript := preload("res://app/ui_screen_presenter.gd")
-const ErrorLocalizerScript := preload("res://app/ui_error_localizer.gd")
+const MapFlowScript := preload("res://app/flows/map_flow_coordinator.gd")
+const LocationFlowScript := preload("res://app/flows/location_flow_coordinator.gd")
+const PreferenceFlowScript := preload("res://app/flows/preference_flow_coordinator.gd")
 
 var _shell: AppShell
-var _session: FirstDaySessionAdapter
+var _session: SandboxSessionAdapter
 var _preferences: UiPreferences
 var _persistence: SessionPersistence
+var _lifecycle: SessionLifecycleCoordinator
 var _screens: UiScreenPresenter
+var _map_flow: MapFlowCoordinator
+var _location_flow: LocationFlowCoordinator
+var _preference_flow: RefCounted
 var _route := "boot"
 var _settings_return_route := "menu"
 var _command_in_flight := false
@@ -37,16 +44,20 @@ func _boot() -> void:
 		_persistence = PersistenceScript.new()
 	if _preferences == null:
 		_preferences = PreferencesScript.new()
+	_lifecycle = LifecycleScript.new(_shell, _persistence)
 	_screens = ScreenPresenterScript.new(_shell)
+	_map_flow = MapFlowScript.new()
+	_location_flow = LocationFlowScript.new()
+	_preference_flow = PreferenceFlowScript.new(_shell, _preferences, _lifecycle, _screens)
 	_shell.back_requested.connect(_on_back_requested)
 	_shell.close_requested.connect(_on_close_requested)
-	_shell.pause_requested.connect(_on_pause_requested)
-	_shell.autosave_requested.connect(_on_autosave_requested)
+	_shell.pause_requested.connect(_save_session.bind(false))
+	_shell.autosave_requested.connect(_save_session.bind(false))
 	_shell.navigation_requested.connect(_on_navigation_requested)
 	var preference_result := _preferences.load_from_disk()
 	if not bool(preference_result.get("ok", false)):
 		_shell.show_toast("Настройки не удалось прочитать. Использованы безопасные значения.", true)
-	_apply_visual_preferences()
+	_preference_flow.apply_visual(_session)
 	_show_main_menu()
 
 
@@ -77,7 +88,7 @@ func _create_new_session(characteristics: Dictionary) -> void:
 	if not _try_begin_command():
 		return
 	var seed := int(Time.get_unix_time_from_system()) ^ int(Time.get_ticks_msec())
-	var candidate := _persistence.create_session(characteristics, seed)
+	var candidate := _persistence.create_session(characteristics, seed) as SandboxSessionAdapter
 	if candidate == null or not candidate.is_valid():
 		_shell.show_toast("Не удалось начать новую жизнь.", true)
 		_release_command_after_transition()
@@ -85,7 +96,7 @@ func _create_new_session(characteristics: Dictionary) -> void:
 	_session = candidate
 	_last_transaction.clear()
 	_status_delta_pending = false
-	_apply_preferences_to_session()
+	_preference_flow.apply_to_session(_session)
 	var save_result := _save_session(false)
 	if not bool(save_result.get("ok", false)):
 		_session = null
@@ -100,10 +111,10 @@ func _continue_game() -> void:
 		return
 	var result: Dictionary = _persistence.load_session()
 	if not bool(result.get("ok", false)):
-		_shell.show_toast("Сохранение не загружено: %s" % _error_message(result), true)
+		_shell.show_toast("Сохранение не загружено: %s" % _lifecycle.error_message(result), true)
 		_release_command_after_transition()
 		return
-	_session = result.get("adapter") as FirstDaySessionAdapter
+	_session = result.get("adapter") as SandboxSessionAdapter
 	if _session == null or not _session.is_valid():
 		_shell.show_toast("Сохранение не содержит рабочую игровую сессию.", true)
 		_session = null
@@ -111,7 +122,7 @@ func _continue_game() -> void:
 		return
 	_last_transaction.clear()
 	_status_delta_pending = false
-	_apply_preferences_to_session()
+	_preference_flow.apply_to_session(_session)
 	_route_session()
 	if bool(result.get("migrated", false)):
 		var migration_save := _save_session(false)
@@ -142,16 +153,45 @@ func _route_session() -> void:
 
 func _show_location() -> void:
 	_route = "location"
-	var shell_model := _session.get_shell_model()
-	var animate_status_delta := _status_delta_pending
-	_screens.show_location(
-		shell_model,
+	_location_flow.show(
+		_session,
+		_screens,
 		_preferences.to_model(),
-		{"action": _on_location_action, "settings": _open_settings},
 		_last_transaction,
-		animate_status_delta
+		_status_delta_pending,
+		{
+			"settings": _open_settings,
+			"run_command": _run_command,
+			"begin_command": _try_begin_command,
+			"shelters": _show_shelters,
+			"release_command": _release_command_after_transition,
+		}
 	)
 	_status_delta_pending = false
+
+
+func _show_map() -> void:
+	_route = "map"
+	_map_flow.show(
+		_session,
+		_screens,
+		_preferences.to_model(),
+		{
+			"back": _show_location,
+			"begin_command": _try_begin_command,
+			"accept_result": _accept_result,
+			"capture_transaction": _capture_transaction,
+			"save": _save_session.bind(false),
+			"arrived": _on_map_arrived,
+			"release_command": _release_command_after_transition,
+		}
+	)
+
+
+func _on_map_arrived(result: Dictionary) -> void:
+	_show_location()
+	if bool(result.get("show_travel_toast", true)):
+		_shell.show_toast("Дорога заняла %d мин." % int(result.get("minutes", 0)))
 
 
 func _show_event() -> void:
@@ -210,7 +250,7 @@ func _open_settings() -> void:
 	_route = "settings"
 	_screens.show_settings(
 		_preferences.to_model(),
-		{"back": _return_from_settings, "change": _on_preference_changed}
+		{"back": _return_from_settings, "change": _preference_flow.change.bind(_session)}
 	)
 
 
@@ -218,24 +258,10 @@ func _return_from_settings() -> void:
 	match _settings_return_route:
 		"menu": _show_main_menu()
 		"creation": _show_character_creation()
+		"map": _show_map()
 		"shelter": _show_shelters()
 		"job_result": _show_job_result()
 		_: _route_session()
-
-
-func _on_location_action(_action_id: String, action_model: Dictionary) -> void:
-	var kind := String(action_model.get("kind", "event"))
-	match kind:
-		"event":
-			_run_command(_session.enter_event.bind(String(action_model.get("id", ""))))
-		"job":
-			_run_command(_session.begin_job.bind("standard"))
-		"wait":
-			_run_command(_session.wait_until_evening, true)
-		"shelter":
-			if _try_begin_command():
-				_show_shelters()
-				_release_command_after_transition()
 
 
 func _on_event_choice(choice_id: String) -> void:
@@ -250,12 +276,13 @@ func _on_job_answer(choice_id: String) -> void:
 		_release_command_after_transition()
 		return
 	_capture_transaction(result)
-	_save_session(false)
+	var save_result := _save_session(false)
 	if bool(result.get("completed", false)):
 		_show_job_result()
 	else:
 		_show_job()
-		_shell.show_toast("Результат раунда: +%d" % int(result.get("round_score", 0)))
+		if bool(save_result.get("ok", false)):
+			_shell.show_toast("Результат раунда: +%d" % int(result.get("round_score", 0)))
 	_release_command_after_transition()
 
 
@@ -271,57 +298,26 @@ func _run_command(command: Callable, show_outcome: bool = false) -> void:
 		_release_command_after_transition()
 		return
 	_capture_transaction(result)
-	_save_session(false)
+	var save_result := _save_session(false)
 	_route_session()
-	if show_outcome and not String(result.get("outcome", "")).is_empty():
+	if (
+		bool(save_result.get("ok", false))
+		and show_outcome
+		and not String(result.get("outcome", "")).is_empty()
+	):
 		_shell.show_toast(String(result.get("outcome", "")))
 	_release_command_after_transition()
 
 
-func _on_preference_changed(key: String, value: Variant) -> void:
-	if not _preferences.apply(key, value):
-		return
-	var result := _preferences.save_to_disk()
-	if not bool(result.get("ok", false)):
-		_shell.show_toast("Настройка применена, но не сохранена.", true)
-	_apply_visual_preferences()
-	_apply_preferences_to_session()
-	_save_session(false)
-
-
-func _apply_visual_preferences() -> void:
-	_shell.set_font_scale(_preferences.font_scale)
-	_shell.set_reduced_motion(_preferences.reduced_motion)
-	if _session != null:
-		_screens.apply_session_ambience(_session.get_shell_model(), _preferences.to_model())
-
-
-func _apply_preferences_to_session() -> void:
-	if _session == null:
-		return
-	_session.set_setting("show_locked_options", _preferences.show_locked_options)
-	_session.set_setting("psyche_effect_mode", _preferences.psyche_effect_mode)
-	_session.set_setting("font_scale", _preferences.font_scale)
-
-
 func _save_session(show_success: bool) -> Dictionary:
-	var result: Dictionary = _persistence.save_session(_session)
-	if not bool(result.get("ok", false)):
-		_shell.show_toast("Не удалось сохранить попытку: %s" % _error_message(result), true)
-	elif show_success:
-		_shell.show_toast("Сохранено")
-	return result
+	return _lifecycle.save(_session, show_success)
 
 
 func _accept_result(result: Dictionary) -> bool:
 	if bool(result.get("ok", false)):
 		return true
-	_shell.show_toast(_error_message(result), true)
+	_shell.show_toast(_lifecycle.error_message(result), true)
 	return false
-
-
-func _error_message(result: Dictionary) -> String:
-	return ErrorLocalizerScript.message(result)
 
 
 func _capture_transaction(result: Dictionary) -> void:
@@ -343,22 +339,33 @@ func _release_command_after_transition() -> void:
 func _try_begin_command() -> bool:
 	if _command_in_flight or Time.get_ticks_msec() < _command_unlock_at_msec:
 		return false
+	if not _lifecycle.ensure_durable(_session):
+		return false
 	_command_in_flight = true
 	return true
 
 
 func _on_navigation_requested(tab_id: String) -> void:
-	if tab_id == "place":
-		_show_location()
+	if _command_in_flight:
+		return
+	match tab_id:
+		"place":
+			_show_location()
+		"map":
+			_show_map()
 
 
 func _on_back_requested() -> void:
+	if _command_in_flight:
+		return
 	match _route:
 		"menu": _on_close_requested()
 		"creation": _show_main_menu()
 		"settings": _return_from_settings()
 		"location":
 			_leave_session_to_menu()
+		"map":
+			_show_location()
 		"shelter": _show_location()
 		"job_result": _show_location()
 		"summary": _leave_session_to_menu()
@@ -366,21 +373,9 @@ func _on_back_requested() -> void:
 			_shell.show_toast("Сначала завершите текущее решение.")
 
 
-func _on_pause_requested() -> void:
-	_save_session(false)
-
-
-func _on_autosave_requested() -> void:
-	_save_session(false)
-
-
 func _leave_session_to_menu() -> void:
-	var result := _save_session(false)
-	if bool(result.get("ok", false)):
-		_show_main_menu()
+	_lifecycle.leave_to_menu(_session, _show_main_menu)
 
 
 func _on_close_requested() -> void:
-	var result := _save_session(false)
-	if bool(result.get("ok", false)):
-		get_tree().quit()
+	_lifecycle.close_application(_session, get_tree())

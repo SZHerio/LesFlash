@@ -9,6 +9,7 @@ const SCHEMA_VERSION := 2
 const DEFAULT_SAVE_PATH := "user://first_day_session.json"
 
 const M2SessionMigrationScript := preload("res://game/first_day/first_day_session_migration.gd")
+const JsonValueEquivalence := preload("res://core/save/json_value_equivalence.gd")
 
 
 static func save_session(session: FirstDaySession, path: String = DEFAULT_SAVE_PATH) -> Dictionary:
@@ -41,6 +42,55 @@ static func save_session(session: FirstDaySession, path: String = DEFAULT_SAVE_P
 	if FileAccess.file_exists(temporary_path):
 		var pending := _read_and_validate(temporary_path)
 		if bool(pending.get("ok", false)):
+			var pending_session := pending.get("session") as FirstDaySession
+			if (
+				pending_session != null
+				and JsonValueEquivalence.are_equivalent(
+					pending_session.to_dict(),
+					session.to_dict()
+				)
+			):
+				var primary_valid := (
+					FileAccess.file_exists(absolute_path)
+					and bool(_read_and_validate(absolute_path).get("ok", false))
+				)
+				var promotion := _promote_temporary(
+					temporary_path,
+					absolute_path,
+					primary_valid
+				)
+				if not bool(promotion.get("ok", false)):
+					return _failure(
+						"pending_temporary_promotion_failed",
+						"A matching interrupted save could not be promoted.",
+						absolute_path,
+						{"cause": promotion}
+					)
+				var promoted := _read_and_validate(absolute_path)
+				var promoted_session := promoted.get("session") as FirstDaySession
+				if (
+					not bool(promoted.get("ok", false))
+					or promoted_session == null
+					or not JsonValueEquivalence.are_equivalent(
+						promoted_session.to_dict(),
+						session.to_dict()
+					)
+				):
+					return _failure(
+						"pending_temporary_promotion_mismatch",
+						"The promoted interrupted save does not match the active session.",
+						absolute_path,
+						{"cause": promoted}
+					)
+				return _success({
+					"path": absolute_path,
+					"requested_path": path,
+					"schema_version": SCHEMA_VERSION,
+					"flow_revision": session.flow_revision,
+					"bytes_written": 0,
+					"backup_created": bool(promotion.get("backup_created", primary_valid)),
+					"recovered_pending_temporary": true,
+				})
 			return _failure(
 				"pending_temporary_recovery",
 				"A valid interrupted session save is waiting for recovery. Load before saving again.",
