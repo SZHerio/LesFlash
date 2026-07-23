@@ -52,8 +52,6 @@ func set_reduced_motion(enabled: bool) -> void:
 
 
 func _on_tab_pressed(tab_id: StringName) -> void:
-	_active_tab = tab_id
-	_apply_active_style()
 	tab_requested.emit(String(tab_id))
 
 

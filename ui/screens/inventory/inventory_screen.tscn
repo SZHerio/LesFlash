@@ -1,0 +1,176 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://ui/screens/inventory/inventory_screen.gd" id="1_screen"]
+[ext_resource type="PackedScene" path="res://ui/components/game_header.tscn" id="2_header"]
+[ext_resource type="PackedScene" path="res://ui/components/inventory_capacity_card.tscn" id="3_capacity"]
+[ext_resource type="PackedScene" path="res://ui/components/inventory_action_sheet.tscn" id="4_sheet"]
+
+[node name="InventoryScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_screen")
+
+[node name="ScreenMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="Layout" type="VBoxContainer" parent="ScreenMargin"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="GameHeader" parent="ScreenMargin/Layout" instance=ExtResource("2_header")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="InventoryScroll" type="ScrollContainer" parent="ScreenMargin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Body" type="VBoxContainer" parent="ScreenMargin/Layout/InventoryScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Context" type="VBoxContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Eyebrow" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/Context"]
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "ВСЁ, ЧТО ПРИ ВАС И РЯДОМ"
+
+[node name="LocationLabel" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/Context"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Сейчас: Подземный переход"
+autowrap_mode = 2
+
+[node name="CapacityFlow" type="HFlowContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+layout_mode = 2
+theme_override_constants/h_separation = 7
+theme_override_constants/v_separation = 7
+
+[node name="MassCard" parent="ScreenMargin/Layout/InventoryScroll/Body/CapacityFlow" instance=ExtResource("3_capacity")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="VolumeCard" parent="ScreenMargin/Layout/InventoryScroll/Body/CapacityFlow" instance=ExtResource("3_capacity")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="OverloadPanel" type="PanelContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"ToastErrorPanel"
+
+[node name="Copy" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/OverloadPanel"]
+layout_mode = 2
+theme_type_variation = &"BodyLabel"
+text = "⚠ Перегруз: освободите место, чтобы снова действовать свободно."
+autowrap_mode = 2
+
+[node name="CapacityMessage" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Сила увеличивает массу, но не объём."
+autowrap_mode = 2
+
+[node name="FilterFlow" type="HFlowContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+
+[node name="ContainerFilter" type="OptionButton" parent="ScreenMargin/Layout/InventoryScroll/Body/FilterFlow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 48)
+layout_mode = 2
+size_flags_horizontal = 1
+theme_type_variation = &"SecondaryButton"
+
+[node name="KindFilter" type="OptionButton" parent="ScreenMargin/Layout/InventoryScroll/Body/FilterFlow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 48)
+layout_mode = 2
+size_flags_horizontal = 1
+theme_type_variation = &"SecondaryButton"
+
+[node name="SortPicker" type="OptionButton" parent="ScreenMargin/Layout/InventoryScroll/Body/FilterFlow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 48)
+layout_mode = 2
+size_flags_horizontal = 1
+theme_type_variation = &"SecondaryButton"
+
+[node name="ListHeader" type="HBoxContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+layout_mode = 2
+
+[node name="ListTitle" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/ListHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SectionTitle"
+text = "ПРЕДМЕТЫ"
+
+[node name="ItemCount" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/ListHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+text = "0 позиций"
+
+[node name="ItemsList" type="VBoxContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="EmptyState" type="MarginContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="EmptyCopy" type="VBoxContainer" parent="ScreenMargin/Layout/InventoryScroll/Body/EmptyState"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="EmptyMark" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/EmptyState/EmptyCopy"]
+layout_mode = 2
+theme_type_variation = &"ScreenTitle"
+text = "∅"
+horizontal_alignment = 1
+
+[node name="EmptyTitle" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/EmptyState/EmptyCopy"]
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "Пока ничего нет"
+horizontal_alignment = 1
+
+[node name="EmptyBody" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/EmptyState/EmptyCopy"]
+layout_mode = 2
+theme_type_variation = &"BodyMuted"
+text = "Находки появятся после ваших действий. Стартовых ресурсов у героя нет."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ActionSheet" parent="." instance=ExtResource("4_sheet")]
+unique_name_in_owner = true
+layout_mode = 1

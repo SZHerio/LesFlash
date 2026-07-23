@@ -5,7 +5,7 @@ extends RefCounted
 ## RunState changes are committed only through ActionTransaction. Flow changes
 ## are applied after a successful transaction and carry their own revision.
 
-const SESSION_VERSION := 2
+const SESSION_VERSION := 3
 const JOB_ROUNDS := 6
 const VALID_PHASES := ["uninitialized", "start", "map", "event", "job", "shelter", "completed"]
 const VALID_PSYCHE_MODES := ["off", "reduced", "full"]

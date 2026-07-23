@@ -1,0 +1,70 @@
+{
+	"schema_version": 1,
+	"saved_at_unix": 1784780000,
+	"run_state": {
+		"save_version": 2,
+		"characteristics": {
+			"strength": 5,
+			"charisma": 5,
+			"intelligence": 4,
+			"luck": 4
+		},
+		"meters": {
+			"health": 100,
+			"hunger": 0,
+			"energy": 100,
+			"tension": 0,
+			"morale": 50
+		},
+		"money": 0,
+		"inventory": {
+			"cardboard_sheet": 1,
+			"legacy_mystery": 2
+		},
+		"stored_polarities": {
+			"physical_specialization": 0,
+			"execution_style": 0,
+			"influence_style": 0,
+			"attention_distribution": 0,
+			"uncertainty_behavior": 0,
+			"decision_priority": 0
+		},
+		"computed_profiles": {
+			"relationship_investment": {"value": 0, "formed": false, "evidence": 0},
+			"knowledge_profile": {"value": 0, "formed": false, "evidence": 0}
+		},
+		"skills": {
+			"city_navigation": 0,
+			"cargo_handling": 0,
+			"cooking": 0,
+			"repair": 0,
+			"first_aid": 0,
+			"trade": 0
+		},
+		"mastery_points": 0,
+		"knowledge": {},
+		"calendar": {
+			"config": {
+				"month_lengths": [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
+				"minutes_per_day": 1440,
+				"leap_years_enabled": true,
+				"leap_month": 2,
+				"leap_every": 4,
+				"leap_except_every": 100,
+				"leap_include_every": 400
+			},
+			"stamp": {
+				"year": 1970,
+				"month": 9,
+				"day": 1,
+				"minute_of_day": 480,
+				"elapsed_minutes": 0
+			}
+		},
+		"birth_date": {"year": 1952, "month": 9, "day": 1},
+		"journal": [],
+		"deferred_consequences": [],
+		"next_journal_sequence": 0,
+		"rng": {"seed": "1970180001", "state": "1970180001"}
+	}
+}

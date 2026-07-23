@@ -1,0 +1,116 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/components/inventory_item_card.gd" id="1_script"]
+
+[node name="InventoryItemCard" type="PanelContainer"]
+size_flags_horizontal = 3
+theme_type_variation = &"SurfaceCard"
+script = ExtResource("1_script")
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="HeaderButton" type="Button" parent="Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 66)
+layout_mode = 2
+theme_type_variation = &"QuietButton"
+focus_mode = 2
+
+[node name="HeaderRow" type="HBoxContainer" parent="Content/HeaderButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 4.0
+offset_right = -6.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="Copy" type="VBoxContainer" parent="Content/HeaderButton/HeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 1
+
+[node name="TitleRow" type="HBoxContainer" parent="Content/HeaderButton/HeaderRow/Copy"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TitleLabel" type="Label" parent="Content/HeaderButton/HeaderRow/Copy/TitleRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"ActionTitleLabel"
+text = "Лист сухого картона"
+autowrap_mode = 2
+
+[node name="QuantityLabel" type="Label" parent="Content/HeaderButton/HeaderRow/Copy/TitleRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+text = "×2"
+
+[node name="LocationLabel" type="Label" parent="Content/HeaderButton/HeaderRow/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Карманы"
+autowrap_mode = 2
+
+[node name="SummaryLabel" type="Label" parent="Content/HeaderButton/HeaderRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+text = "340 г"
+horizontal_alignment = 2
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ChevronLabel" type="Label" parent="Content/HeaderButton/HeaderRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "⌄"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Details" type="VBoxContainer" parent="Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="DescriptionLabel" type="Label" parent="Content/Details"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyLabel"
+text = "Описание предмета."
+autowrap_mode = 2
+
+[node name="TagsLabel" type="Label" parent="Content/Details"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+text = "Материал  ·  Ночлег"
+autowrap_mode = 2
+
+[node name="ConditionLabel" type="Label" parent="Content/Details"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Хорошее состояние"
+autowrap_mode = 2
+
+[node name="Actions" type="HFlowContainer" parent="Content/Details"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 7
+theme_override_constants/v_separation = 7

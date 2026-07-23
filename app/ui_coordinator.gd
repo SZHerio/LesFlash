@@ -8,6 +8,8 @@ const ScreenPresenterScript := preload("res://app/ui_screen_presenter.gd")
 const MapFlowScript := preload("res://app/flows/map_flow_coordinator.gd")
 const LocationFlowScript := preload("res://app/flows/location_flow_coordinator.gd")
 const PreferenceFlowScript := preload("res://app/flows/preference_flow_coordinator.gd")
+const InventoryFlowScript := preload("res://app/flows/inventory_flow_coordinator.gd")
+const LegacyActivityFlowScript := preload("res://app/flows/legacy_activity_flow_coordinator.gd")
 
 var _shell: AppShell
 var _session: SandboxSessionAdapter
@@ -18,6 +20,8 @@ var _screens: UiScreenPresenter
 var _map_flow: MapFlowCoordinator
 var _location_flow: LocationFlowCoordinator
 var _preference_flow: RefCounted
+var _inventory_flow: InventoryFlowCoordinator
+var _legacy_activity_flow: LegacyActivityFlowCoordinator
 var _route := "boot"
 var _settings_return_route := "menu"
 var _command_in_flight := false
@@ -49,6 +53,8 @@ func _boot() -> void:
 	_map_flow = MapFlowScript.new()
 	_location_flow = LocationFlowScript.new()
 	_preference_flow = PreferenceFlowScript.new(_shell, _preferences, _lifecycle, _screens)
+	_inventory_flow = InventoryFlowScript.new()
+	_legacy_activity_flow = LegacyActivityFlowScript.new()
 	_shell.back_requested.connect(_on_back_requested)
 	_shell.close_requested.connect(_on_close_requested)
 	_shell.pause_requested.connect(_save_session.bind(false))
@@ -188,6 +194,24 @@ func _show_map() -> void:
 	)
 
 
+func _show_inventory() -> void:
+	_route = "inventory"
+	_inventory_flow.show(
+		_session,
+		_screens,
+		_preferences.to_model(),
+		{
+			"settings": _open_settings,
+			"begin_command": _try_begin_command,
+			"accept_result": _accept_result,
+			"capture_transaction": _capture_transaction,
+			"save": _save_session.bind(false),
+			"toast": _shell.show_toast,
+			"release_command": _release_command_after_transition,
+		}
+	)
+
+
 func _on_map_arrived(result: Dictionary) -> void:
 	_show_location()
 	if bool(result.get("show_travel_toast", true)):
@@ -196,53 +220,32 @@ func _on_map_arrived(result: Dictionary) -> void:
 
 func _show_event() -> void:
 	_route = "event"
-	var raw_model := _session.get_current_event_model()
-	_screens.show_event(
-		raw_model,
-		_session.get_shell_model(),
-		_preferences.to_model(),
-		{"action": _on_event_choice, "settings": _open_settings}
-	)
+	_prepare_legacy_flow()
+	_legacy_activity_flow.show_event()
 
 
 func _show_job() -> void:
 	_route = "job"
-	_screens.show_job(
-		_session.current_job_prompt(),
-		_session.get_shell_model(),
-		_preferences.to_model(),
-		{"action": _on_job_answer, "settings": _open_settings}
-	)
+	_prepare_legacy_flow()
+	_legacy_activity_flow.show_job()
 
 
 func _show_shelters() -> void:
 	_route = "shelter"
-	_screens.show_shelters(
-		_session.available_shelters(),
-		_session.get_shell_model(),
-		_preferences.to_model(),
-		{"action": _on_shelter_selected, "settings": _open_settings}
-	)
+	_prepare_legacy_flow()
+	_legacy_activity_flow.show_shelters()
 
 
 func _show_job_result() -> void:
 	_route = "job_result"
-	_screens.show_job_result(
-		_session.get_job_result_model(),
-		_session.get_shell_model(),
-		_preferences.to_model(),
-		_show_location
-	)
+	_prepare_legacy_flow()
+	_legacy_activity_flow.show_job_result()
 
 
 func _show_summary() -> void:
 	_route = "summary"
-	_screens.show_summary(
-		_session.get_summary_model(),
-		_session.get_shell_model(),
-		_preferences.to_model(),
-		_leave_session_to_menu
-	)
+	_prepare_legacy_flow()
+	_legacy_activity_flow.show_summary()
 
 
 func _open_settings() -> void:
@@ -259,35 +262,31 @@ func _return_from_settings() -> void:
 		"menu": _show_main_menu()
 		"creation": _show_character_creation()
 		"map": _show_map()
+		"inventory": _show_inventory()
 		"shelter": _show_shelters()
 		"job_result": _show_job_result()
 		_: _route_session()
 
 
-func _on_event_choice(choice_id: String) -> void:
-	_run_command(_session.resolve_choice.bind(choice_id), true)
-
-
-func _on_job_answer(choice_id: String) -> void:
-	if not _try_begin_command():
-		return
-	var result: Dictionary = _session.answer_job(choice_id)
-	if not _accept_result(result):
-		_release_command_after_transition()
-		return
-	_capture_transaction(result)
-	var save_result := _save_session(false)
-	if bool(result.get("completed", false)):
-		_show_job_result()
-	else:
-		_show_job()
-		if bool(save_result.get("ok", false)):
-			_shell.show_toast("Результат раунда: +%d" % int(result.get("round_score", 0)))
-	_release_command_after_transition()
-
-
-func _on_shelter_selected(shelter_id: String) -> void:
-	_run_command(_session.choose_shelter.bind(shelter_id))
+func _prepare_legacy_flow() -> void:
+	_legacy_activity_flow.configure(
+		_session,
+		_screens,
+		_preferences.to_model(),
+		{
+			"settings": _open_settings,
+			"run_command": _run_command,
+			"begin_command": _try_begin_command,
+			"accept_result": _accept_result,
+			"capture_transaction": _capture_transaction,
+			"save": _save_session.bind(false),
+			"job_result": _show_job_result,
+			"location": _show_location,
+			"leave": _leave_session_to_menu,
+			"toast": _shell.show_toast,
+			"release_command": _release_command_after_transition,
+		}
+	)
 
 
 func _run_command(command: Callable, show_outcome: bool = false) -> void:
@@ -348,11 +347,15 @@ func _try_begin_command() -> bool:
 func _on_navigation_requested(tab_id: String) -> void:
 	if _command_in_flight:
 		return
+	if _route == "inventory" and _inventory_flow.has_modal():
+		return
 	match tab_id:
 		"place":
 			_show_location()
 		"map":
 			_show_map()
+		"items":
+			_show_inventory()
 
 
 func _on_back_requested() -> void:
@@ -366,6 +369,9 @@ func _on_back_requested() -> void:
 			_leave_session_to_menu()
 		"map":
 			_show_location()
+		"inventory":
+			if not _inventory_flow.handle_back():
+				_show_location()
 		"shelter": _show_location()
 		"job_result": _show_location()
 		"summary": _leave_session_to_menu()

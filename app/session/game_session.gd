@@ -7,7 +7,8 @@ extends RefCounted
 ## mini-game is an interruptible activity layered on top of that location; UI
 ## routes are deliberately not represented here.
 
-const CONTRACT_VERSION := 2
+const PREVIOUS_CONTRACT_VERSION := 2
+const CONTRACT_VERSION := 3
 const NO_ACTIVITY_KIND := "none"
 
 var run_state: RunState = RunState.new()
@@ -161,7 +162,7 @@ func to_dict() -> Dictionary:
 
 static func from_dict(data: Dictionary) -> GameSession:
 	var version: Variant = _parse_integral(data.get("session_version", null))
-	if version == null or int(version) != CONTRACT_VERSION:
+	if version == null or int(version) not in [PREVIOUS_CONTRACT_VERSION, CONTRACT_VERSION]:
 		return null
 	if typeof(data.get("run_state", null)) != TYPE_DICTIONARY:
 		return null

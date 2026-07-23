@@ -6,7 +6,8 @@ extends RefCounted
 ## The service deliberately returns data-rich result dictionaries instead of
 ## logging errors. This keeps it deterministic and convenient for headless tests.
 
-const SCHEMA_VERSION: int = 1
+const PREVIOUS_SCHEMA_VERSION: int = 1
+const SCHEMA_VERSION: int = 2
 const DEFAULT_SAVE_PATH: String = "user://run_state.json"
 
 
@@ -481,7 +482,7 @@ static func _parse_and_validate(payload: String, source_path: String) -> Diction
 			source_path,
 			{"actual_value": schema_value}
 		)
-	if schema_version != SCHEMA_VERSION:
+	if schema_version not in [PREVIOUS_SCHEMA_VERSION, SCHEMA_VERSION]:
 		return _failure(
 			"unsupported_schema_version",
 			"This save schema version is not supported.",
@@ -496,7 +497,15 @@ static func _parse_and_validate(payload: String, source_path: String) -> Diction
 			source_path
 		)
 
-	var run_state := RunState.from_dict(envelope.run_state)
+	var state_migration := RunState.migrate_serialized(envelope.run_state)
+	if not bool(state_migration.get("ok", false)):
+		return _failure(
+			"run_state_migration_failed",
+			"RunState migration failed.",
+			source_path,
+			{"migration": state_migration}
+		)
+	var run_state := RunState.from_dict(state_migration["data"])
 	if run_state == null:
 		return _failure(
 			"run_state_deserialization_failed",
@@ -515,7 +524,10 @@ static func _parse_and_validate(payload: String, source_path: String) -> Diction
 
 	return _success({
 		"path": source_path,
-		"schema_version": schema_version,
+		"schema_version": SCHEMA_VERSION,
+		"source_schema_version": schema_version,
+		"source_run_state_version": int(state_migration.get("source_version", GameRules.SAVE_VERSION)),
+		"migrated": schema_version != SCHEMA_VERSION or bool(state_migration.get("migrated", false)),
 		"saved_at_unix": envelope.get("saved_at_unix", null),
 		"state": run_state,
 	})

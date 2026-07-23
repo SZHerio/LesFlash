@@ -1,0 +1,220 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/components/inventory_action_sheet.gd" id="1_script"]
+
+[node name="InventoryActionSheet" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("1_script")
+
+[node name="BackdropButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+modulate = Color(0.03, 0.045, 0.04, 0.82)
+theme_type_variation = &"QuietButton"
+focus_mode = 0
+
+[node name="SheetMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_top = 0.14
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 0.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="SheetPanel" type="PanelContainer" parent="SheetMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"StatusDetailPanel"
+mouse_filter = 0
+
+[node name="SheetLayout" type="VBoxContainer" parent="SheetMargin/SheetPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Handle" type="ColorRect" parent="SheetMargin/SheetPanel/SheetLayout"]
+custom_minimum_size = Vector2(42, 4)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+color = Color(0.55, 0.62, 0.59, 0.62)
+
+[node name="SheetScroll" type="ScrollContainer" parent="SheetMargin/SheetPanel/SheetLayout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 9
+
+[node name="Eyebrow" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content"]
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "ДЕЙСТВИЕ С ПРЕДМЕТОМ"
+
+[node name="TitleLabel" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "Подтвердить действие"
+autowrap_mode = 2
+
+[node name="BodyLabel" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyMuted"
+text = "Описание последствия."
+autowrap_mode = 2
+
+[node name="DurationLabel" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionMetaLabel"
+text = "Время не изменится"
+autowrap_mode = 2
+
+[node name="EffectsLabel" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyLabel"
+text = "Последствия"
+autowrap_mode = 2
+
+[node name="OutputsLabel" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyLabel"
+text = "Результат"
+autowrap_mode = 2
+
+[node name="ConditionsLabel" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyLabel"
+text = "Условия"
+autowrap_mode = 2
+
+[node name="QuantityRow" type="HBoxContainer" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="QuantityLabel" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content/QuantityRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"MutedLabel"
+text = "Количество"
+
+[node name="DecreaseQuantityButton" type="Button" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content/QuantityRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+text = "−"
+
+[node name="QuantityValue" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content/QuantityRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 48)
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "1 из 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="IncreaseQuantityButton" type="Button" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content/QuantityRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+text = "+"
+
+[node name="TargetRow" type="VBoxContainer" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TargetLabel" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content/TargetRow"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Куда положить"
+
+[node name="TargetPicker" type="OptionButton" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content/TargetRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SecondaryButton"
+
+[node name="ConflictSection" type="VBoxContainer" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ConflictCapacityLabel" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content/ConflictSection"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionReasonLabel"
+text = "Находка не помещается."
+autowrap_mode = 2
+
+[node name="ReplacementLabel" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content/ConflictSection"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Что оставить здесь взамен"
+
+[node name="ReplacementPicker" type="OptionButton" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content/ConflictSection"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+
+[node name="RecoveriesLabel" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content/ConflictSection"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyMuted"
+text = "Доступно: выбрать другое место, заменить или оставить находку."
+autowrap_mode = 2
+
+[node name="AlternateButton" type="Button" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content/ConflictSection"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+text = "Выбрать другое место"
+
+[node name="Buttons" type="HBoxContainer" parent="SheetMargin/SheetPanel/SheetLayout"]
+layout_mode = 2
+
+[node name="CancelButton" type="Button" parent="SheetMargin/SheetPanel/SheetLayout/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SecondaryButton"
+text = "Отмена"
+
+[node name="ConfirmButton" type="Button" parent="SheetMargin/SheetPanel/SheetLayout/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"PrimaryButton"
+text = "Подтвердить"

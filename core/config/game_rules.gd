@@ -7,7 +7,8 @@ extends RefCounted
 ## and content resolvers do not have to duplicate magic numbers.
 
 const LEGACY_SAVE_VERSION := 1
-const SAVE_VERSION := 2
+const PREVIOUS_SAVE_VERSION := 2
+const SAVE_VERSION := 3
 
 const CHARACTERISTIC_MIN := 1
 const CHARACTERISTIC_MAX := 10
@@ -61,6 +62,15 @@ const PROFILE_FORMATION_EVIDENCE := 5
 const SKILL_MIN_RANK := 0
 const SKILL_MAX_RANK := 3
 const SKILL_KEYS := [
+	"city_navigation",
+	"cargo_handling",
+	"cooking",
+	"repair",
+	"first_aid",
+	"trade",
+	"search",
+]
+const LEGACY_SKILL_KEYS := [
 	"city_navigation",
 	"cargo_handling",
 	"cooking",

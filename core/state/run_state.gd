@@ -7,10 +7,12 @@ extends RefCounted
 ## expected to work on a clone and commit through replace_from(), which keeps the
 ## original RunState object identity while making a decision atomic.
 
+const InventoryStateScript := preload("res://core/inventory/inventory_state.gd")
+
 var characteristics: Dictionary = GameRules.default_characteristics()
 var meters: Dictionary = GameRules.default_meters()
 var money: int = 0
-var inventory: Dictionary = {}
+var inventory: Dictionary = InventoryStateScript.fresh()
 
 var stored_polarities: Dictionary = GameRules.default_stored_polarities()
 var computed_profiles: Dictionary = GameRules.default_computed_profiles()
@@ -116,30 +118,33 @@ func change_money(delta: int) -> bool:
 
 
 func get_item_count(item_id: String) -> int:
-	return int(inventory.get(item_id, 0))
+	return InventoryStateScript.item_count(inventory, item_id)
 
 
-func add_item(item_id: String, quantity: int = 1) -> bool:
-	if item_id.is_empty() or quantity <= 0:
+func add_item(
+	item_id: String,
+	quantity: int = 1,
+	preferred_container: String = ""
+) -> bool:
+	var result := InventoryStateScript.add_item(
+		inventory,
+		item_id,
+		quantity,
+		100,
+		preferred_container,
+		get_characteristic("strength")
+	)
+	if not bool(result.get("ok", false)):
 		return false
-	var current := get_item_count(item_id)
-	if current > GameRules.INVENTORY_QUANTITY_MAX - quantity:
-		return false
-	inventory[item_id] = current + quantity
+	inventory = result["inventory"]
 	return true
 
 
 func remove_item(item_id: String, quantity: int = 1) -> bool:
-	if item_id.is_empty() or quantity <= 0:
+	var result := InventoryStateScript.remove_item(inventory, item_id, quantity)
+	if not bool(result.get("ok", false)):
 		return false
-	var current := get_item_count(item_id)
-	if current < quantity:
-		return false
-	var remaining := current - quantity
-	if remaining == 0:
-		inventory.erase(item_id)
-	else:
-		inventory[item_id] = remaining
+	inventory = result["inventory"]
 	return true
 
 
@@ -389,7 +394,11 @@ static func migrate_serialized(data: Dictionary) -> Dictionary:
 			"code": "invalid_run_state_version",
 			"error": "RunState save_version must be an integer.",
 		}
-	if int(source_version) not in [GameRules.LEGACY_SAVE_VERSION, GameRules.SAVE_VERSION]:
+	if int(source_version) not in [
+		GameRules.LEGACY_SAVE_VERSION,
+		GameRules.PREVIOUS_SAVE_VERSION,
+		GameRules.SAVE_VERSION,
+	]:
 		return {
 			"ok": false,
 			"code": "unsupported_run_state_version",
@@ -397,6 +406,53 @@ static func migrate_serialized(data: Dictionary) -> Dictionary:
 			"actual": int(source_version),
 		}
 	var migrated := data.duplicate(true)
+	var current_version := int(source_version)
+	if current_version == GameRules.LEGACY_SAVE_VERSION:
+		migrated["save_version"] = GameRules.PREVIOUS_SAVE_VERSION
+		current_version = GameRules.PREVIOUS_SAVE_VERSION
+	if current_version == GameRules.PREVIOUS_SAVE_VERSION:
+		var legacy_inventory: Variant = migrated.get("inventory", null)
+		if not legacy_inventory is Dictionary:
+			return {
+				"ok": false,
+				"code": "invalid_legacy_inventory",
+				"error": "Legacy inventory must be a dictionary.",
+			}
+		var parsed_legacy_inventory: Variant = _parse_string_int_map(
+			legacy_inventory,
+			GameRules.INVENTORY_QUANTITY_MIN,
+			GameRules.INVENTORY_QUANTITY_MAX
+		)
+		if parsed_legacy_inventory == null:
+			return {
+				"ok": false,
+				"code": "invalid_legacy_inventory",
+				"error": "Legacy inventory contains invalid quantities.",
+			}
+		var legacy_skills: Variant = migrated.get("skills", null)
+		var parsed_legacy_skills: Variant = _parse_int_map(
+			legacy_skills,
+			GameRules.LEGACY_SKILL_KEYS,
+			GameRules.SKILL_MIN_RANK,
+			GameRules.SKILL_MAX_RANK
+		)
+		if parsed_legacy_skills == null:
+			return {
+				"ok": false,
+				"code": "invalid_legacy_skills",
+				"error": "Legacy skills must contain exactly the six M1 skills.",
+			}
+		parsed_legacy_skills["search"] = 0
+		migrated["skills"] = parsed_legacy_skills
+		migrated["inventory"] = InventoryStateScript.migrate_legacy(parsed_legacy_inventory)
+		migrated["save_version"] = GameRules.SAVE_VERSION
+		current_version = GameRules.SAVE_VERSION
+	if current_version != GameRules.SAVE_VERSION:
+		return {
+			"ok": false,
+			"code": "run_state_migration_incomplete",
+			"error": "RunState migration did not reach the current version.",
+		}
 	migrated["save_version"] = GameRules.SAVE_VERSION
 	return {
 		"ok": true,
@@ -453,10 +509,10 @@ static func from_dict(data: Dictionary) -> RunState:
 	if parsed_sequence == null or int(parsed_sequence) < 0:
 		return null
 
-	var parsed_inventory: Variant = _parse_string_int_map(
-		source.get("inventory", null),
-		GameRules.INVENTORY_QUANTITY_MIN,
-		GameRules.INVENTORY_QUANTITY_MAX
+	var parsed_inventory: Variant = (
+		InventoryStateScript.normalize_serialized(Dictionary(source["inventory"]))
+		if source.get("inventory", null) is Dictionary
+		else null
 	)
 	var parsed_knowledge: Variant = _parse_string_int_map(
 		source.get("knowledge", null),
@@ -464,7 +520,12 @@ static func from_dict(data: Dictionary) -> RunState:
 		GameRules.KNOWLEDGE_LEVEL_MAX
 	)
 	var parsed_profiles: Variant = _parse_computed_profiles(source.get("computed_profiles", null))
-	if parsed_inventory == null or parsed_knowledge == null or parsed_profiles == null:
+	if (
+		parsed_inventory == null
+		or not bool(InventoryStateScript.validate(parsed_inventory).get("ok", false))
+		or parsed_knowledge == null
+		or parsed_profiles == null
+	):
 		return null
 
 	if typeof(source.get("calendar", null)) != TYPE_DICTIONARY or typeof(source.get("rng", null)) != TYPE_DICTIONARY:
@@ -565,13 +626,7 @@ func validate() -> Dictionary:
 		errors.append("money is outside allowed range")
 	if mastery_points < GameRules.MASTERY_POINTS_MIN or mastery_points > GameRules.MASTERY_POINTS_MAX:
 		errors.append("mastery_points is outside allowed range")
-	_validate_string_int_map(
-		inventory,
-		GameRules.INVENTORY_QUANTITY_MIN,
-		GameRules.INVENTORY_QUANTITY_MAX,
-		"inventory",
-		errors
-	)
+	_append_nested_errors("inventory", InventoryStateScript.validate(inventory), errors)
 	_validate_string_int_map(
 		knowledge,
 		GameRules.KNOWLEDGE_LEVEL_MIN,

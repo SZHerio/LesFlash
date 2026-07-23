@@ -235,10 +235,9 @@ static func _change_item(run_state: Object, effect: Dictionary, adding: bool) ->
 	var quantity := int(quantity_result["value"])
 	if quantity <= 0:
 		return _failure("invalid_quantity", "Количество предметов должно быть больше нуля")
-	var container := RuleStateAccess.find_dictionary(run_state, RuleStateAccess.INVENTORY_CONTAINERS)
-	if not bool(container["found"]):
-		return _failure("inventory_not_supported", "RunState не содержит инвентарь")
 	var current := RuleStateAccess.item_value(run_state, identifier)
+	if not bool(current.get("found", false)):
+		return _failure("inventory_not_supported", "RunState не содержит инвентарь")
 	var before := int(roundf(float(current["value"])))
 	if not adding and before < quantity:
 		return _failure(
@@ -246,14 +245,30 @@ static func _change_item(run_state: Object, effect: Dictionary, adding: bool) ->
 			"Недостаточно предмета «%s»: нужно %d, доступно %d" % [identifier, quantity, before]
 		)
 	var after := before + quantity if adding else before - quantity
-	var dictionary: Dictionary = container["value"]
-	var item_key: Variant = current.get("key", identifier)
-	if after == 0:
-		dictionary.erase(item_key)
+	if run_state.has_method("add_item") and run_state.has_method("remove_item"):
+		var changed := (
+			bool(run_state.call("add_item", identifier, quantity))
+			if adding
+			else bool(run_state.call("remove_item", identifier, quantity))
+		)
+		if not changed:
+			return _failure(
+				"inventory_capacity" if adding else "insufficient_item",
+				"Для предмета «%s» не хватает места." % identifier
+				if adding
+				else "Недостаточно предмета «%s»." % identifier
+			)
 	else:
-		dictionary[item_key] = after
-	# Keep mutation explicit even though Dictionary is reference-counted.
-	run_state.set(StringName(container["name"]), dictionary)
+		var container := RuleStateAccess.find_dictionary(run_state, RuleStateAccess.INVENTORY_CONTAINERS)
+		if not bool(container["found"]):
+			return _failure("inventory_not_supported", "RunState не содержит инвентарь")
+		var dictionary: Dictionary = container["value"]
+		var item_key: Variant = current.get("key", identifier)
+		if after == 0:
+			dictionary.erase(item_key)
+		else:
+			dictionary[item_key] = after
+		run_state.set(StringName(container["name"]), dictionary)
 	var effect_type := "add_item" if adding else "remove_item"
 	return _success(_record(
 		effect_type,

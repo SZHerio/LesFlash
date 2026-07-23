@@ -8,14 +8,15 @@ extends RefCounted
 const GameSessionScript := preload("res://app/session/game_session.gd")
 
 const LEGACY_VERSION := 1
-const CURRENT_VERSION := 2
+const PREVIOUS_VERSION := 2
+const CURRENT_VERSION := 3
 
 
 static func migrate_envelope(raw: Dictionary) -> Dictionary:
 	var source_version: Variant = _integral(raw.get("schema_version", null))
 	if source_version == null:
 		return _failure("invalid_schema_version", "Envelope schema_version must be an integer.")
-	if int(source_version) not in [LEGACY_VERSION, CURRENT_VERSION]:
+	if int(source_version) not in [LEGACY_VERSION, PREVIOUS_VERSION, CURRENT_VERSION]:
 		return _failure(
 			"unsupported_schema_version",
 			"Envelope schema version is unsupported.",
@@ -46,7 +47,7 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 	var source_version: Variant = _integral(raw.get("session_version", null))
 	if source_version == null:
 		return _failure("invalid_session_version", "session_version must be an integer.")
-	if int(source_version) not in [LEGACY_VERSION, CURRENT_VERSION]:
+	if int(source_version) not in [LEGACY_VERSION, PREVIOUS_VERSION, CURRENT_VERSION]:
 		return _failure(
 			"unsupported_session_version",
 			"FirstDaySession version is unsupported.",
@@ -62,13 +63,24 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 			{"cause": state_result}
 		)
 	var migrated := raw.duplicate(true)
-	migrated["session_version"] = CURRENT_VERSION
-	migrated["run_state"] = state_result["data"]
-	if int(source_version) == LEGACY_VERSION:
+	var current_version := int(source_version)
+	if current_version == LEGACY_VERSION:
 		if typeof(raw.get("location", null)) != TYPE_STRING:
 			return _failure("invalid_legacy_location", "Legacy session location must be a string.")
 		migrated["base_location"] = String(raw["location"])
 		migrated["active_activity"] = legacy_activity(raw)
+		migrated["session_version"] = PREVIOUS_VERSION
+		current_version = PREVIOUS_VERSION
+	if current_version == PREVIOUS_VERSION:
+		migrated["session_version"] = CURRENT_VERSION
+		current_version = CURRENT_VERSION
+	if current_version != CURRENT_VERSION:
+		return _failure(
+			"session_migration_incomplete",
+			"FirstDaySession migration did not reach the current version."
+		)
+	migrated["session_version"] = CURRENT_VERSION
+	migrated["run_state"] = state_result["data"]
 	var contract_validation := validate_contract_fields(migrated)
 	if not bool(contract_validation.get("ok", false)):
 		return contract_validation

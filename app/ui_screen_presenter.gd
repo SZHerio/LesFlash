@@ -8,6 +8,8 @@ const CharacterCreationScene := preload("res://ui/screens/character_creation/cha
 const SettingsScene := preload("res://ui/screens/settings/settings_screen.tscn")
 const LocationScene := preload("res://ui/screens/location/location_screen.tscn")
 const CityMapScene := preload("res://ui/screens/city_map/city_map_screen.tscn")
+const InventoryScene := preload("res://ui/screens/inventory/inventory_screen.tscn")
+const InventoryModels := preload("res://app/inventory/inventory_view_model.gd")
 const ChoiceScene := preload("res://ui/screens/choice/choice_screen.tscn")
 const ResultScene := preload("res://ui/screens/result/result_screen.tscn")
 const DEFAULT_BACKGROUND := "riverside_station_square_day"
@@ -57,11 +59,7 @@ func show_location(
 	var location_model: Dictionary = Dictionary(shell_model.get("location", {}))
 	_shell.set_background(String(location_model.get("background_key", DEFAULT_BACKGROUND)))
 	apply_session_ambience(shell_model, preferences)
-	_shell.set_navigation_visible(true)
-	_shell.present_navigation({
-		"active_tab": "place",
-		"enabled_tabs": {"place": true, "map": true, "hero": false, "items": false, "tasks": false},
-	})
+	_show_session_navigation("place")
 	var screen := _shell.show_screen(LocationScene) as LocationScreen
 	screen.action_requested.connect(_handler(handlers, "action"))
 	screen.settings_requested.connect(_handler(handlers, "settings"))
@@ -84,17 +82,35 @@ func show_city_map(
 	var location_model: Dictionary = Dictionary(shell_model.get("location", {}))
 	_shell.set_background(String(location_model.get("background_key", DEFAULT_BACKGROUND)))
 	apply_session_ambience(shell_model, preferences)
-	_shell.set_navigation_visible(true)
-	_shell.present_navigation({
-		"active_tab": "map",
-		"enabled_tabs": {"place": true, "map": true, "hero": false, "items": false, "tasks": false},
-	})
+	_show_session_navigation("map")
 	var screen := _shell.show_screen(CityMapScene) as CityMapScreen
 	screen.travel_requested.connect(_handler(handlers, "travel"))
 	screen.back_requested.connect(_handler(handlers, "back"))
 	screen.present(CityMapModels.build(
 		raw_model,
 		bool(preferences.get("reduced_motion", false))
+	))
+	return screen
+
+
+func show_inventory(
+	raw_model: Dictionary,
+	shell_model: Dictionary,
+	preferences: Dictionary,
+	handlers: Dictionary
+) -> InventoryScreen:
+	var location_model: Dictionary = Dictionary(shell_model.get("location", {}))
+	_shell.set_background(String(location_model.get("background_key", DEFAULT_BACKGROUND)))
+	apply_session_ambience(shell_model, preferences)
+	_show_session_navigation("items")
+	var screen := _shell.show_screen(InventoryScene) as InventoryScreen
+	screen.action_requested.connect(_handler(handlers, "action"))
+	screen.settings_requested.connect(_handler(handlers, "settings"))
+	screen.present(InventoryModels.build(
+		raw_model,
+		shell_model,
+		bool(preferences.get("reduced_motion", false)),
+		float(preferences.get("font_scale", 1.0))
 	))
 	return screen
 
@@ -165,3 +181,17 @@ func _handler(handlers: Dictionary, key: String) -> Callable:
 	var value: Variant = handlers.get(key, Callable())
 	assert(value is Callable and value.is_valid(), "Missing UI handler: %s" % key)
 	return value
+
+
+func _show_session_navigation(active_tab: String) -> void:
+	_shell.set_navigation_visible(true)
+	_shell.present_navigation({
+		"active_tab": active_tab,
+		"enabled_tabs": {
+			"place": true,
+			"map": true,
+			"hero": false,
+			"items": true,
+			"tasks": false,
+		},
+	})

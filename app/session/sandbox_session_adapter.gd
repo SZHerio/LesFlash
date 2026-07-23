@@ -13,6 +13,7 @@ const LegacySaveScript := preload("res://game/first_day/first_day_save.gd")
 const FirstDayContentScript := preload("res://game/first_day/first_day_content.gd")
 const LocationActions := preload("res://game/location/location_action_service.gd")
 const LocationActionCommand := preload("res://game/location/first_day_location_action_command.gd")
+const InventoryTransaction := preload("res://core/inventory/inventory_transaction.gd")
 
 
 static func create(characteristics: Dictionary, seed: int) -> RefCounted:
@@ -68,6 +69,86 @@ func perform_location_action(action_id: String) -> Dictionary:
 	if _session == null:
 		return _missing_sandbox_session()
 	return LocationActionCommand.execute(_session, action_id)
+
+
+func get_inventory_model() -> Dictionary:
+	if _session == null or _session.run_state == null:
+		return {}
+	var location_model := get_location_model()
+	return {
+		"inventory": _session.run_state.inventory.duplicate(true),
+		"strength": _session.run_state.get_characteristic("strength"),
+		"location_id": _session.location,
+		"location_title": String(location_model.get("title", _session.location)),
+	}
+
+
+func perform_inventory_action(
+	stack_id: String,
+	action_id: String,
+	quantity: int = 0,
+	target_container_id: String = ""
+) -> Dictionary:
+	if _session == null or _session.run_state == null:
+		return _missing_sandbox_session()
+	var result: Dictionary
+	match action_id:
+		"select":
+			result = InventoryTransaction.select(_session.run_state, stack_id)
+		"move":
+			result = InventoryTransaction.move(
+				_session.run_state,
+				stack_id,
+				target_container_id,
+				quantity
+			)
+		"pick_up":
+			result = InventoryTransaction.pick_up(
+				_session.run_state,
+				stack_id,
+				target_container_id,
+				quantity
+			)
+		"use":
+			result = InventoryTransaction.use(_session.run_state, stack_id)
+		"disassemble":
+			result = InventoryTransaction.disassemble(_session.run_state, stack_id)
+		"drop":
+			result = InventoryTransaction.drop(
+				_session.run_state,
+				stack_id,
+				_session.location,
+				quantity
+			)
+		_:
+			return {
+				"ok": false,
+				"code": "unknown_inventory_action",
+				"error": "Неизвестное действие с предметом.",
+			}
+	if bool(result.get("ok", false)):
+		_session.flow_revision += 1
+		result["flow_revision"] = _session.flow_revision
+	return result
+
+
+func perform_inventory_replacement(
+	incoming_stack_id: String,
+	displaced_stack_id: String,
+	target_container_id: String
+) -> Dictionary:
+	if _session == null or _session.run_state == null:
+		return _missing_sandbox_session()
+	var result := InventoryTransaction.replace(
+		_session.run_state,
+		incoming_stack_id,
+		displaced_stack_id,
+		target_container_id
+	)
+	if bool(result.get("ok", false)):
+		_session.flow_revision += 1
+		result["flow_revision"] = _session.flow_revision
+	return result
 
 
 func get_city_map_model() -> Dictionary:

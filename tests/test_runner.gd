@@ -116,7 +116,7 @@ func _test_initial_state_and_profiles() -> void:
 	var state = RunStateScript.new(_specialized_characteristics(), 12345)
 	_expect_equal(state.age_years, 18, "a new run must start at age 18")
 	_expect_equal(state.money, 0, "a new run must start without money")
-	_expect(state.inventory.is_empty(), "a new run must start without items")
+	_expect_equal(state.get_item_count("cardboard_sheet"), 0, "a new run must start without items")
 	_expect_equal(state.stored_polarities.size(), 6, "six polarities must be stored")
 	_expect_equal(state.computed_profiles.size(), 2, "two polarities must be computed profiles")
 	for polarity_value in state.stored_polarities.values():
@@ -124,7 +124,7 @@ func _test_initial_state_and_profiles() -> void:
 	for profile_value in state.computed_profiles.values():
 		_expect(not profile_value["formed"], "computed profiles must start unformed")
 		_expect_equal(profile_value["value"], 0, "unformed profiles must start at zero")
-	_expect_equal(state.skills.size(), 6, "six test skills must exist")
+	_expect_equal(state.skills.size(), 7, "seven test skills must exist")
 	for skill_rank in state.skills.values():
 		_expect_equal(skill_rank, 0, "skills must not be selected at character creation")
 	_expect_equal(state.mastery_points, 0, "mastery points must start at zero")

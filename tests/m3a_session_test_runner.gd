@@ -157,8 +157,7 @@ func _test_run_state_v1_migration() -> void:
 	var state := RunState.new(_build(), 7_004)
 	state.add_item("legacy_item", 2)
 	state.set_knowledge_level("known_place", 3)
-	var legacy: Dictionary = state.to_dict()
-	legacy["save_version"] = 1
+	var legacy: Dictionary = _downgrade_run_state(state.to_dict(), 1)
 	var source_copy: Dictionary = legacy.duplicate(true)
 	var migration := RunState.migrate_serialized(legacy)
 	_expect(bool(migration.get("ok", false)), "RunState v1 migration must succeed")
@@ -168,9 +167,11 @@ func _test_run_state_v1_migration() -> void:
 	var restored := RunState.from_dict(legacy)
 	_expect(restored != null, "RunState.from_dict must accept v1 through migration")
 	if restored != null:
-		var expected := source_copy.duplicate(true)
-		expected["save_version"] = GameRules.SAVE_VERSION
-		_expect_equal(restored.to_dict(), expected, "RunState fields must survive v1 migration")
+		_expect_equal(
+			_downgrade_run_state(restored.to_dict(), 1),
+			source_copy,
+			"RunState fields must survive v1 migration"
+		)
 
 
 func _test_session_v1_migration() -> void:
@@ -256,17 +257,17 @@ func _test_v2_save_round_trip() -> void:
 		return
 	var expected: Dictionary = session.to_dict()
 	var saved: Dictionary = FirstDaySaveScript.save_session(session, _save_path)
-	_expect(bool(saved.get("ok", false)), "v2 session must save")
+	_expect(bool(saved.get("ok", false)), "current session must save")
 	var loaded: Dictionary = FirstDaySaveScript.load_session(_save_path)
-	_expect(bool(loaded.get("ok", false)), "v2 session must load")
+	_expect(bool(loaded.get("ok", false)), "current session must load")
 	_expect(not bool(loaded.get("migrated", true)), "current save must not report migration")
-	_expect_equal(loaded.get("schema_version"), 2, "current envelope version must be 2")
-	_expect_equal(loaded.get("source_session_version"), 2, "current session version must be 2")
-	_expect_equal(loaded.get("source_run_state_version"), 2, "current state version must be 2")
+	_expect_equal(loaded.get("schema_version"), 3, "current envelope version must be 3")
+	_expect_equal(loaded.get("source_session_version"), 3, "current session version must be 3")
+	_expect_equal(loaded.get("source_run_state_version"), 3, "current state version must be 3")
 	var restored = loaded.get("session")
-	_expect(restored != null, "loaded v2 session must exist")
+	_expect(restored != null, "loaded current session must exist")
 	if restored != null:
-		_expect_equal(restored.to_dict(), expected, "v2 session must round-trip exactly")
+		_expect_equal(restored.to_dict(), expected, "current session must round-trip exactly")
 
 
 func _downgrade_session(current: Dictionary) -> Dictionary:
@@ -275,7 +276,32 @@ func _downgrade_session(current: Dictionary) -> Dictionary:
 	result.erase("base_location")
 	result.erase("active_activity")
 	if result.get("run_state") is Dictionary:
-		result["run_state"]["save_version"] = 1
+		result["run_state"] = _downgrade_run_state(result["run_state"], 1)
+	return result
+
+
+func _downgrade_run_state(current: Dictionary, version: int) -> Dictionary:
+	var result := current.duplicate(true)
+	result["save_version"] = version
+	var legacy_inventory: Dictionary = {}
+	if result.get("inventory", {}) is Dictionary:
+		var inventory: Dictionary = result["inventory"]
+		for group_name in ["containers", "external_containers"]:
+			var group: Dictionary = inventory.get(group_name, {})
+			for container_value in group.values():
+				if not container_value is Dictionary:
+					continue
+				for stack_value in Array(container_value.get("stacks", [])):
+					if not stack_value is Dictionary:
+						continue
+					var item_id := String(stack_value.get("item_id", ""))
+					legacy_inventory[item_id] = (
+						int(legacy_inventory.get(item_id, 0))
+						+ int(stack_value.get("quantity", 0))
+					)
+	result["inventory"] = legacy_inventory
+	if result.get("skills", {}) is Dictionary:
+		result["skills"].erase("search")
 	return result
 
 

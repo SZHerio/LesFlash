@@ -84,6 +84,14 @@ static func money_value(run_state: Object) -> Dictionary:
 
 
 static func item_value(run_state: Object, identifier: String) -> Dictionary:
+	if run_state != null and run_state.has_method("get_item_count"):
+		return {
+			"found": true,
+			"value": float(run_state.call("get_item_count", identifier)),
+			"container": "inventory",
+			"key": identifier,
+			"structured": true,
+		}
 	return _dictionary_number(run_state, INVENTORY_CONTAINERS, identifier, true)
 
 
