@@ -10,6 +10,9 @@ const LocationScene := preload("res://ui/screens/location/location_screen.tscn")
 const CityMapScene := preload("res://ui/screens/city_map/city_map_screen.tscn")
 const InventoryScene := preload("res://ui/screens/inventory/inventory_screen.tscn")
 const InventoryModels := preload("res://app/inventory/inventory_view_model.gd")
+const SearchScene := preload("res://ui/screens/search/search_screen.tscn")
+const SearchModels := preload("res://app/search/search_view_model.gd")
+const EncounterModels := preload("res://app/events/encounter_view_model.gd")
 const ChoiceScene := preload("res://ui/screens/choice/choice_screen.tscn")
 const ResultScene := preload("res://ui/screens/result/result_screen.tscn")
 const DEFAULT_BACKGROUND := "riverside_station_square_day"
@@ -113,6 +116,60 @@ func show_inventory(
 		float(preferences.get("font_scale", 1.0))
 	))
 	return screen
+
+
+## The search is an interruptible activity, not a navigation tab, so the bottom
+## navigation steps aside until the player leaves the zone.
+func show_search(
+	raw_model: Dictionary,
+	shell_model: Dictionary,
+	preferences: Dictionary,
+	handlers: Dictionary
+) -> SearchScreen:
+	_prepare_location_activity(shell_model, preferences)
+	var screen := _shell.show_screen(SearchScene) as SearchScreen
+	screen.move_requested.connect(_handler(handlers, "move"))
+	screen.movement_checkpoint.connect(_handler(handlers, "checkpoint"))
+	screen.interaction_requested.connect(_handler(handlers, "interact"))
+	screen.pickup_requested.connect(_handler(handlers, "pick_up"))
+	screen.replacement_requested.connect(_handler(handlers, "replace"))
+	screen.capacity_recovery_requested.connect(_handler(handlers, "recover"))
+	screen.quick_search_requested.connect(_handler(handlers, "quick_search"))
+	screen.finish_requested.connect(_handler(handlers, "finish"))
+	screen.present(build_search_model(raw_model, shell_model, preferences))
+	return screen
+
+
+func build_search_model(
+	raw_model: Dictionary,
+	shell_model: Dictionary,
+	preferences: Dictionary
+) -> Dictionary:
+	return SearchModels.build(
+		raw_model,
+		shell_model,
+		bool(preferences.get("reduced_motion", false)),
+		float(preferences.get("font_scale", 1.0)),
+		String(preferences.get("psyche_effect_mode", "full"))
+	)
+
+
+func show_encounter(
+	preview: Dictionary,
+	shell_model: Dictionary,
+	preferences: Dictionary,
+	handlers: Dictionary
+) -> void:
+	_prepare_location_activity(shell_model, preferences)
+	var location_model: Dictionary = Dictionary(shell_model.get("location", {}))
+	_show_choice(
+		EncounterModels.build(
+			preview,
+			String(location_model.get("title", "Город")),
+			bool(preferences.get("show_locked_options", false))
+		),
+		handlers
+	)
 
 
 func show_event(raw_model: Dictionary, shell_model: Dictionary, preferences: Dictionary, handlers: Dictionary) -> void:

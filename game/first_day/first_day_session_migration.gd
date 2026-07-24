@@ -6,17 +6,19 @@ extends RefCounted
 ## JSON dictionary that may still be needed for recovery or diagnostics.
 
 const GameSessionScript := preload("res://app/session/game_session.gd")
+const SearchSessionStateScript := preload("res://game/search/search_session_state.gd")
 
 const LEGACY_VERSION := 1
-const PREVIOUS_VERSION := 2
-const CURRENT_VERSION := 3
+const INVENTORY_VERSION := 3
+const PREVIOUS_VERSION := INVENTORY_VERSION
+const CURRENT_VERSION := 4
 
 
 static func migrate_envelope(raw: Dictionary) -> Dictionary:
 	var source_version: Variant = _integral(raw.get("schema_version", null))
 	if source_version == null:
 		return _failure("invalid_schema_version", "Envelope schema_version must be an integer.")
-	if int(source_version) not in [LEGACY_VERSION, PREVIOUS_VERSION, CURRENT_VERSION]:
+	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, CURRENT_VERSION]:
 		return _failure(
 			"unsupported_schema_version",
 			"Envelope schema version is unsupported.",
@@ -39,7 +41,9 @@ static func migrate_envelope(raw: Dictionary) -> Dictionary:
 		"migrated": int(source_version) != CURRENT_VERSION or bool(session_result.get("migrated", false)),
 		"source_schema_version": int(source_version),
 		"source_session_version": int(session_result.get("source_session_version", CURRENT_VERSION)),
-		"source_run_state_version": int(session_result.get("source_run_state_version", CURRENT_VERSION)),
+		"source_run_state_version": int(
+			session_result.get("source_run_state_version", GameRules.SAVE_VERSION)
+		),
 	})
 
 
@@ -47,7 +51,7 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 	var source_version: Variant = _integral(raw.get("session_version", null))
 	if source_version == null:
 		return _failure("invalid_session_version", "session_version must be an integer.")
-	if int(source_version) not in [LEGACY_VERSION, PREVIOUS_VERSION, CURRENT_VERSION]:
+	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, CURRENT_VERSION]:
 		return _failure(
 			"unsupported_session_version",
 			"FirstDaySession version is unsupported.",
@@ -69,9 +73,17 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 			return _failure("invalid_legacy_location", "Legacy session location must be a string.")
 		migrated["base_location"] = String(raw["location"])
 		migrated["active_activity"] = legacy_activity(raw)
-		migrated["session_version"] = PREVIOUS_VERSION
-		current_version = PREVIOUS_VERSION
-	if current_version == PREVIOUS_VERSION:
+		migrated["session_version"] = 2
+		current_version = 2
+	if current_version == 2:
+		migrated["session_version"] = INVENTORY_VERSION
+		current_version = INVENTORY_VERSION
+	if current_version == INVENTORY_VERSION:
+		var legacy_validation := _validate_v3_contract_fields(migrated)
+		if not bool(legacy_validation.get("ok", false)):
+			return legacy_validation
+		migrated["active_activity"] = GameSessionScript.empty_activity()
+		migrated["search_zone_states"] = {}
 		migrated["session_version"] = CURRENT_VERSION
 		current_version = CURRENT_VERSION
 	if current_version != CURRENT_VERSION:
@@ -88,11 +100,54 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 		"data": migrated,
 		"migrated": int(source_version) != CURRENT_VERSION or bool(state_result.get("migrated", false)),
 		"source_session_version": int(source_version),
-		"source_run_state_version": int(state_result.get("source_version", CURRENT_VERSION)),
+		"source_run_state_version": int(
+			state_result.get("source_version", GameRules.SAVE_VERSION)
+		),
 	})
 
 
 static func validate_contract_fields(data: Dictionary) -> Dictionary:
+	if typeof(data.get("location", null)) != TYPE_STRING:
+		return _failure("invalid_location", "Legacy compatibility location must be a string.")
+	if typeof(data.get("base_location", null)) != TYPE_STRING:
+		return _failure("invalid_base_location", "base_location must be a string.")
+	if String(data["base_location"]) != String(data["location"]):
+		return _failure(
+			"location_contract_mismatch",
+			"base_location and legacy location disagree."
+		)
+	var normalized := SearchSessionStateScript.normalize_activity(
+		data.get("active_activity", null)
+	)
+	if normalized.is_empty():
+		return _failure("invalid_active_activity", "active_activity has an invalid shape.")
+	if typeof(data.get("search_zone_states", null)) != TYPE_DICTIONARY:
+		return _failure(
+			"invalid_search_zone_states",
+			"search_zone_states must be a dictionary."
+		)
+	var search_validation := SearchSessionStateScript.validate(
+		normalized,
+		data["search_zone_states"]
+	)
+	if not bool(search_validation.get("ok", false)):
+		return _failure(
+			"invalid_search_session_state",
+			"Search session state is invalid.",
+			{"validation": search_validation}
+		)
+	if (
+		String(normalized.get("kind", "")) == SearchSessionStateScript.SEARCH_KIND
+		and String(data.get("phase", "")) != "map"
+	):
+		return _failure(
+			"search_phase_mismatch",
+			"An active search requires the legacy phase to remain map."
+		)
+	return _success()
+
+
+static func _validate_v3_contract_fields(data: Dictionary) -> Dictionary:
 	if typeof(data.get("location", null)) != TYPE_STRING:
 		return _failure("invalid_location", "Legacy compatibility location must be a string.")
 	if typeof(data.get("base_location", null)) != TYPE_STRING:

@@ -261,8 +261,8 @@ func _test_v2_save_round_trip() -> void:
 	var loaded: Dictionary = FirstDaySaveScript.load_session(_save_path)
 	_expect(bool(loaded.get("ok", false)), "current session must load")
 	_expect(not bool(loaded.get("migrated", true)), "current save must not report migration")
-	_expect_equal(loaded.get("schema_version"), 3, "current envelope version must be 3")
-	_expect_equal(loaded.get("source_session_version"), 3, "current session version must be 3")
+	_expect_equal(loaded.get("schema_version"), 4, "current envelope version must be 4")
+	_expect_equal(loaded.get("source_session_version"), 4, "current session version must be 4")
 	_expect_equal(loaded.get("source_run_state_version"), 3, "current state version must be 3")
 	var restored = loaded.get("session")
 	_expect(restored != null, "loaded current session must exist")
@@ -275,6 +275,7 @@ func _downgrade_session(current: Dictionary) -> Dictionary:
 	result["session_version"] = 1
 	result.erase("base_location")
 	result.erase("active_activity")
+	result.erase("search_zone_states")
 	if result.get("run_state") is Dictionary:
 		result["run_state"] = _downgrade_run_state(result["run_state"], 1)
 	return result

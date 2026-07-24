@@ -1,0 +1,350 @@
+{
+	"schema_version": 1,
+	"id": "underpass_service_yard",
+	"template_version": 1,
+	"location_id": "underpass",
+	"title": "Служебный двор под путепроводом",
+	"description": "Проходной двор между тоннелем, старой служебной будкой и закрытой частью овощного рынка.",
+	"map": {
+		"asset": "res://assets/search/underpass_service_yard_v1.png",
+		"size": [1648, 960],
+		"spawn_node": "entry_south"
+	},
+	"walk_graph": {
+		"nodes": [
+			{"id": "entry_south", "position": [823, 912]},
+			{"id": "lower_center", "position": [823, 742]},
+			{"id": "bench_lane", "position": [555, 718]},
+			{"id": "newspapers_lane", "position": [340, 789]},
+			{"id": "yard_center", "position": [909, 596]},
+			{"id": "dumpster_lane", "position": [735, 552]},
+			{"id": "tunnel_lane", "position": [486, 438]},
+			{"id": "tunnel_mouth", "position": [352, 352]},
+			{"id": "shed_lane", "position": [773, 365]},
+			{"id": "gate_lane", "position": [1058, 357]},
+			{"id": "pallet_lane", "position": [1118, 544]},
+			{"id": "booth_lane", "position": [1310, 636]},
+			{"id": "drain_lane", "position": [1162, 760]},
+			{"id": "market_lane", "position": [1328, 334]}
+		],
+		"edges": [
+			{"from": "entry_south", "to": "lower_center", "bidirectional": true},
+			{"from": "lower_center", "to": "bench_lane", "bidirectional": true},
+			{"from": "bench_lane", "to": "newspapers_lane", "bidirectional": true},
+			{"from": "lower_center", "to": "yard_center", "bidirectional": true},
+			{"from": "lower_center", "to": "drain_lane", "bidirectional": true},
+			{"from": "drain_lane", "to": "booth_lane", "bidirectional": true},
+			{"from": "yard_center", "to": "dumpster_lane", "bidirectional": true},
+			{"from": "dumpster_lane", "to": "tunnel_lane", "bidirectional": true},
+			{"from": "tunnel_lane", "to": "tunnel_mouth", "bidirectional": true},
+			{"from": "dumpster_lane", "to": "shed_lane", "bidirectional": true},
+			{"from": "yard_center", "to": "pallet_lane", "bidirectional": true},
+			{"from": "pallet_lane", "to": "booth_lane", "bidirectional": true},
+			{"from": "pallet_lane", "to": "gate_lane", "bidirectional": true},
+			{"from": "gate_lane", "to": "shed_lane", "bidirectional": true},
+			{"from": "gate_lane", "to": "market_lane", "bidirectional": true}
+		],
+		"obstacles": [
+			{
+				"id": "west_retaining_wall",
+				"polygon": [[0, 466], [222, 374], [467, 572], [467, 648], [0, 843]]
+			},
+			{
+				"id": "utility_shed",
+				"polygon": [[560, 84], [898, 23], [905, 307], [584, 323]]
+			},
+			{
+				"id": "market_fence",
+				"polygon": [[900, 112], [1648, 116], [1648, 331], [1031, 301]]
+			},
+			{
+				"id": "dumpster_body",
+				"polygon": [[661, 419], [802, 382], [906, 500], [753, 573]]
+			},
+			{
+				"id": "guard_booth",
+				"polygon": [[1267, 458], [1466, 427], [1516, 679], [1284, 735]]
+			},
+			{
+				"id": "bench_shelter",
+				"polygon": [[374, 591], [638, 568], [665, 727], [412, 771]]
+			}
+		]
+	},
+	"loot_tables": {
+		"dumpster_mixed": {
+			"rolls": [2, 3],
+			"entries": [
+				{"item_id": "recyclables", "weight": 30, "quantity": [1, 2], "condition": [35, 70], "luck_bias": -1},
+				{"item_id": "scrap_wire", "weight": 22, "quantity": [1, 2], "condition": [45, 82], "luck_bias": 0},
+				{"item_id": "cloth_rag", "weight": 18, "quantity": [1, 1], "condition": [42, 76], "luck_bias": 0},
+				{"item_id": "plastic_bottle", "weight": 20, "quantity": [1, 2], "condition": [55, 92], "luck_bias": 0},
+				{"item_id": "sealed_food_can", "weight": 6, "quantity": [1, 1], "condition": [68, 95], "luck_bias": 1}
+			]
+		},
+		"paper_cache": {
+			"rolls": [1, 2],
+			"entries": [
+				{"item_id": "newspaper_bundle", "weight": 42, "quantity": [1, 1], "condition": [52, 84], "luck_bias": 0},
+				{"item_id": "cardboard_sheet", "weight": 36, "quantity": [1, 2], "condition": [48, 88], "luck_bias": 0},
+				{"item_id": "medicine_blister", "weight": 4, "quantity": [1, 1], "condition": [70, 96], "luck_bias": 2}
+			]
+		},
+		"shed_tools": {
+			"rolls": [1, 2],
+			"entries": [
+				{"item_id": "rusty_tool", "weight": 24, "quantity": [1, 1], "condition": [46, 76], "luck_bias": 0},
+				{"item_id": "work_gloves", "weight": 27, "quantity": [1, 1], "condition": [50, 86], "luck_bias": 0},
+				{"item_id": "small_parts", "weight": 25, "quantity": [1, 2], "condition": [45, 82], "luck_bias": 0},
+				{"item_id": "copper_scrap", "weight": 8, "quantity": [1, 1], "condition": [65, 94], "luck_bias": 1}
+			]
+		},
+		"pallet_crate": {
+			"rolls": [1, 2],
+			"entries": [
+				{"item_id": "blanket_roll", "weight": 12, "quantity": [1, 1], "condition": [45, 72], "luck_bias": 1},
+				{"item_id": "sealed_food_can", "weight": 24, "quantity": [1, 2], "condition": [72, 96], "luck_bias": 1},
+				{"item_id": "cardboard_sheet", "weight": 32, "quantity": [1, 2], "condition": [58, 88], "luck_bias": 0},
+				{"item_id": "recyclables", "weight": 28, "quantity": [1, 2], "condition": [50, 80], "luck_bias": -1}
+			]
+		},
+		"guard_exchange": {
+			"rolls": [1, 1],
+			"entries": [
+				{"item_id": "simple_meal", "weight": 36, "quantity": [1, 1], "condition": [82, 100], "luck_bias": 0},
+				{"item_id": "work_gloves", "weight": 18, "quantity": [1, 1], "condition": [60, 88], "luck_bias": 0},
+				{"item_id": "medicine_blister", "weight": 8, "quantity": [1, 1], "condition": [78, 100], "luck_bias": 1}
+			]
+		},
+		"market_rejects": {
+			"rolls": [1, 2],
+			"entries": [
+				{"item_id": "simple_meal", "weight": 26, "quantity": [1, 1], "condition": [62, 86], "luck_bias": 0},
+				{"item_id": "plastic_bottle", "weight": 30, "quantity": [1, 2], "condition": [65, 96], "luck_bias": -1},
+				{"item_id": "cloth_rag", "weight": 24, "quantity": [1, 1], "condition": [48, 78], "luck_bias": 0},
+				{"item_id": "sealed_food_can", "weight": 9, "quantity": [1, 1], "condition": [70, 95], "luck_bias": 1}
+			]
+		},
+		"drain_salvage": {
+			"rolls": [1, 2],
+			"entries": [
+				{"item_id": "aluminum_can", "weight": 34, "quantity": [1, 3], "condition": [38, 74], "luck_bias": -1},
+				{"item_id": "copper_scrap", "weight": 18, "quantity": [1, 2], "condition": [48, 82], "luck_bias": 1},
+				{"item_id": "small_parts", "weight": 22, "quantity": [1, 2], "condition": [35, 72], "luck_bias": 0},
+				{"item_id": "scrap_wire", "weight": 27, "quantity": [1, 2], "condition": [38, 76], "luck_bias": 0}
+			]
+		},
+		"tunnel_debris": {
+			"rolls": [1, 2],
+			"entries": [
+				{"item_id": "broken_radio", "weight": 8, "quantity": [1, 1], "condition": [34, 64], "luck_bias": 1},
+				{"item_id": "cloth_rag", "weight": 30, "quantity": [1, 2], "condition": [30, 68], "luck_bias": 0},
+				{"item_id": "recyclables", "weight": 34, "quantity": [1, 2], "condition": [25, 62], "luck_bias": -1},
+				{"item_id": "scrap_wire", "weight": 22, "quantity": [1, 2], "condition": [32, 70], "luck_bias": 0}
+			]
+		}
+	},
+	"objects": [
+		{
+			"id": "open_dumpster",
+			"title": "Открытый контейнер",
+			"type": "open",
+			"position": [785, 474],
+			"approach_node": "dumpster_lane",
+			"loot_table_id": "dumpster_mixed",
+			"approaches": [
+				{
+					"id": "sort_by_hand",
+					"title": "Перебрать содержимое",
+					"duration_minutes": 12,
+					"energy_cost": 2,
+					"conditions": [],
+					"risk": {"noise": 1, "trespass": 0}
+				}
+			]
+		},
+		{
+			"id": "hidden_newspapers",
+			"title": "Сухая ниша у стены",
+			"type": "hidden",
+			"position": [302, 810],
+			"approach_node": "newspapers_lane",
+			"loot_table_id": "paper_cache",
+			"approaches": [
+				{
+					"id": "inspect_marks",
+					"title": "Проверить следы под бумагой",
+					"duration_minutes": 9,
+					"energy_cost": 1,
+					"conditions": [{"type": "characteristic", "id": "intelligence", "minimum": 4}],
+					"risk": {"noise": 0, "trespass": 0}
+				},
+				{
+					"id": "search_methodically",
+					"title": "Осмотреть нишу по порядку",
+					"duration_minutes": 14,
+					"energy_cost": 2,
+					"conditions": [{"type": "skill", "id": "search", "minimum": 1}],
+					"risk": {"noise": 0, "trespass": 0}
+				}
+			]
+		},
+		{
+			"id": "locked_shed",
+			"title": "Запертая служебная дверь",
+			"type": "locked",
+			"position": [756, 214],
+			"approach_node": "shed_lane",
+			"loot_table_id": "shed_tools",
+			"approaches": [
+				{
+					"id": "study_lock",
+					"title": "Разобраться с простым замком",
+					"duration_minutes": 18,
+					"energy_cost": 2,
+					"conditions": [
+						{"type": "characteristic", "id": "intelligence", "minimum": 7},
+						{"type": "skill", "id": "search", "minimum": 1}
+					],
+					"risk": {"noise": 2, "trespass": 2}
+				},
+				{
+					"id": "force_hinge",
+					"title": "Отжать старую петлю",
+					"duration_minutes": 11,
+					"energy_cost": 5,
+					"conditions": [
+						{"type": "characteristic", "id": "strength", "minimum": 7},
+						{"type": "item", "id": "rusty_tool", "minimum": 1}
+					],
+					"risk": {"noise": 7, "trespass": 3}
+				}
+			]
+		},
+		{
+			"id": "heavy_pallet",
+			"title": "Ящик на поддоне",
+			"type": "heavy",
+			"position": [1128, 467],
+			"approach_node": "pallet_lane",
+			"loot_table_id": "pallet_crate",
+			"approaches": [
+				{
+					"id": "shift_crate",
+					"title": "Сдвинуть ящик",
+					"duration_minutes": 16,
+					"energy_cost": 6,
+					"conditions": [{"type": "characteristic", "id": "strength", "minimum": 7}],
+					"risk": {"noise": 5, "trespass": 1}
+				}
+			]
+		},
+		{
+			"id": "guard_booth",
+			"title": "Сторож в будке",
+			"type": "social",
+			"position": [1390, 574],
+			"approach_node": "booth_lane",
+			"loot_table_id": "guard_exchange",
+			"approaches": [
+				{
+					"id": "ask_permission",
+					"title": "Попросить разрешения осмотреть двор",
+					"duration_minutes": 8,
+					"energy_cost": 1,
+					"conditions": [{"type": "characteristic", "id": "charisma", "minimum": 5}],
+					"risk": {"noise": 0, "trespass": -2}
+				},
+				{
+					"id": "offer_help",
+					"title": "Предложить помощь с разгрузкой",
+					"duration_minutes": 22,
+					"energy_cost": 4,
+					"conditions": [{"type": "characteristic", "id": "strength", "minimum": 5}],
+					"risk": {"noise": 1, "trespass": -1}
+				}
+			]
+		},
+		{
+			"id": "market_fence",
+			"title": "Закрытая часть рынка",
+			"type": "trespass",
+			"position": [1378, 214],
+			"approach_node": "market_lane",
+			"loot_table_id": "market_rejects",
+			"approaches": [
+				{
+					"id": "slip_through",
+					"title": "Протиснуться через зазор",
+					"duration_minutes": 7,
+					"energy_cost": 2,
+					"conditions": [],
+					"risk": {"noise": 2, "trespass": 8}
+				},
+				{
+					"id": "find_blind_spot",
+					"title": "Выбрать непросматриваемый проход",
+					"duration_minutes": 13,
+					"energy_cost": 2,
+					"conditions": [{"type": "characteristic", "id": "intelligence", "minimum": 6}],
+					"risk": {"noise": 0, "trespass": 5}
+				}
+			]
+		},
+		{
+			"id": "storm_drain",
+			"title": "Ливневая решётка",
+			"type": "technical",
+			"position": [1200, 795],
+			"approach_node": "drain_lane",
+			"loot_table_id": "drain_salvage",
+			"approaches": [
+				{
+					"id": "open_safely",
+					"title": "Освободить крепление по очереди",
+					"duration_minutes": 17,
+					"energy_cost": 3,
+					"conditions": [
+						{"type": "characteristic", "id": "intelligence", "minimum": 6},
+						{"type": "item", "id": "rusty_tool", "minimum": 1}
+					],
+					"risk": {"noise": 2, "trespass": 0}
+				},
+				{
+					"id": "lift_grate",
+					"title": "Приподнять решётку руками",
+					"duration_minutes": 10,
+					"energy_cost": 6,
+					"conditions": [{"type": "characteristic", "id": "strength", "minimum": 8}],
+					"risk": {"noise": 6, "trespass": 0}
+				}
+			]
+		},
+		{
+			"id": "dark_tunnel",
+			"title": "Тёмный тоннель",
+			"type": "hazardous",
+			"position": [327, 317],
+			"approach_node": "tunnel_mouth",
+			"loot_table_id": "tunnel_debris",
+			"approaches": [
+				{
+					"id": "feel_along_wall",
+					"title": "Осмотреть край тоннеля",
+					"duration_minutes": 14,
+					"energy_cost": 3,
+					"conditions": [{"type": "characteristic", "id": "luck", "minimum": 5}],
+					"risk": {"noise": 1, "trespass": 0}
+				},
+				{
+					"id": "protected_search",
+					"title": "Разобрать мусор в перчатках",
+					"duration_minutes": 18,
+					"energy_cost": 3,
+					"conditions": [{"type": "item", "id": "work_gloves", "minimum": 1}],
+					"risk": {"noise": 2, "trespass": 0}
+				}
+			]
+		}
+	]
+}

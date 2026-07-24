@@ -14,6 +14,9 @@ const FirstDayContentScript := preload("res://game/first_day/first_day_content.g
 const LocationActions := preload("res://game/location/location_action_service.gd")
 const LocationActionCommand := preload("res://game/location/first_day_location_action_command.gd")
 const InventoryTransaction := preload("res://core/inventory/inventory_transaction.gd")
+const SearchCommands := preload("res://app/session/search_session_commands.gd")
+const SearchModels := preload("res://app/search/search_read_model.gd")
+const EncounterCommand := preload("res://game/events/search_encounter_command.gd")
 
 
 static func create(characteristics: Dictionary, seed: int) -> RefCounted:
@@ -61,8 +64,35 @@ func get_location_model() -> Dictionary:
 			if String(inherited_action.get("kind", "")) == "wait":
 				inherited_action["description"] = "Перейти к вечерним делам и подготовке ночлега."
 			sandbox_actions.append(inherited_action)
+	var search_action := _search_action()
+	if not search_action.is_empty():
+		sandbox_actions.push_front(search_action)
 	model["actions"] = sandbox_actions
 	return model
+
+
+## The searchable yard is the headline activity of the place that owns it, so it
+## leads the list instead of sitting below the ordinary actions.
+func _search_action() -> Dictionary:
+	if _session == null:
+		return {}
+	var template := SearchModels.zone_for_location(_session.location)
+	if template.is_empty():
+		return {}
+	return {
+		"id": "search_zone:%s" % String(template.get("id", "")),
+		"kind": "search",
+		"location_id": _session.location,
+		"title": "Продолжить поиск" if _session.is_search_active() else "Искать полезное",
+		"description": "%s Ходьба по зоне не тратит время — его тратят только подтверждённые решения." % String(
+			template.get("description", "")
+		),
+		"minutes": 0,
+		"risk": 0,
+		"available": true,
+		"reasons": [],
+		"meta": ["Мини-игра"],
+	}
 
 
 func perform_location_action(action_id: String) -> Dictionary:
@@ -149,6 +179,85 @@ func perform_inventory_replacement(
 		_session.flow_revision += 1
 		result["flow_revision"] = _session.flow_revision
 	return result
+
+
+func is_search_active() -> bool:
+	return _session != null and _session.is_search_active()
+
+
+func get_search_zone_id() -> String:
+	return SearchCommands.zone_id(_session)
+
+
+func get_search_model() -> Dictionary:
+	return SearchModels.build(_session) if _session != null else {}
+
+
+func get_encounter_model() -> Dictionary:
+	return EncounterCommand.pending(_session) if _session != null else {}
+
+
+func suggest_loot_container(stack_id: String, exclude_container_id: String) -> String:
+	if _session == null:
+		return ""
+	return SearchModels.alternative_container(_session, stack_id, exclude_container_id)
+
+
+func begin_search() -> Dictionary:
+	return SearchCommands.begin(_session) if _session != null else _missing_sandbox_session()
+
+
+func finish_search() -> Dictionary:
+	return SearchCommands.finish(_session) if _session != null else _missing_sandbox_session()
+
+
+func plan_search_move(target: Variant) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return SearchCommands.plan_move(_session, target)
+
+
+func checkpoint_search_move(position: Variant, path_index: int) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return SearchCommands.arrive(_session, position, path_index)
+
+
+func confirm_search_interaction(object_id: String, approach_id: String) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return SearchCommands.interact(_session, object_id, approach_id)
+
+
+func pick_up_search_loot(stack_id: String, target_container_id: String) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return SearchCommands.pick_up(_session, stack_id, target_container_id)
+
+
+func replace_search_loot(
+	incoming_stack_id: String,
+	displaced_stack_id: String,
+	target_container_id: String
+) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return SearchCommands.replace(
+		_session,
+		incoming_stack_id,
+		displaced_stack_id,
+		target_container_id
+	)
+
+
+func run_quick_search() -> Dictionary:
+	return SearchCommands.quick(_session) if _session != null else _missing_sandbox_session()
+
+
+func resolve_encounter(option_id: String) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return SearchCommands.resolve_encounter(_session, option_id)
 
 
 func get_city_map_model() -> Dictionary:

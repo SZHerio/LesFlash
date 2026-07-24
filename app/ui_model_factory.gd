@@ -323,6 +323,8 @@ static func _location_action(raw: Dictionary) -> Dictionary:
 				description = "Осознанно пропустить часть дня."
 			"shelter":
 				description = "Сравнить доступные варианты ночлега."
+			"search":
+				description = "Обойти зону и решить, что здесь стоит забрать."
 	var meta: Array = Array(raw.get("meta", [])).duplicate(true)
 	if int(raw.get("minutes", 0)) > 0:
 		meta.append("%d мин" % int(raw.get("minutes", 0)))
@@ -338,5 +340,5 @@ static func _location_action(raw: Dictionary) -> Dictionary:
 		"meta": meta,
 		"enabled": enabled,
 		"locked_reason": "Уже завершено" if completed else reason_text(raw.get("reasons", [])),
-		"variant": "accent" if kind in ["local", "job", "shelter"] and enabled else "normal",
+		"variant": "accent" if kind in ["local", "job", "shelter", "search"] and enabled else "normal",
 	}

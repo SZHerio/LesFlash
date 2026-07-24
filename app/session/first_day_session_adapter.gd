@@ -49,6 +49,8 @@ func get_flow_revision() -> int:
 
 
 func get_active_activity() -> Dictionary:
+	if _session != null and _session.has_method("get_active_activity"):
+		return _session.get_active_activity()
 	return activity_from_legacy(_session)
 
 

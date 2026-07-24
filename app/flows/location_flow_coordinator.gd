@@ -36,6 +36,8 @@ func _on_action_requested(_action_id: String, action_model: Dictionary) -> void:
 			_hook("run_command").call(_session.enter_event.bind(action_id), false)
 		"job":
 			_hook("run_command").call(_session.begin_job.bind("standard"), false)
+		"search":
+			_hook("run_command").call(_session.begin_search, false)
 		"wait":
 			_hook("run_command").call(_session.wait_until_evening, true)
 		"shelter":

@@ -1,0 +1,169 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://ui/components/search_capacity_conflict_sheet.gd" id="1_sheet"]
+
+[sub_resource type="StyleBoxFlat" id="StyleSheet"]
+bg_color = Color(0.062, 0.076, 0.082, 0.99)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.58, 0.4, 0.32, 0.9)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="SearchCapacityConflictSheet" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("1_sheet")
+
+[node name="BackdropButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+modulate = Color(0.01, 0.015, 0.02, 0.8)
+theme_type_variation = &"QuietButton"
+focus_mode = 0
+
+[node name="SheetMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_top = 0.2
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="SheetPanel" type="PanelContainer" parent="SheetMargin"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 330)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleSheet")
+mouse_filter = 0
+
+[node name="Layout" type="VBoxContainer" parent="SheetMargin/SheetPanel"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="Handle" type="ColorRect" parent="SheetMargin/SheetPanel/Layout"]
+custom_minimum_size = Vector2(42, 4)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+color = Color(0.66, 0.51, 0.43, 0.72)
+
+[node name="Scroll" type="ScrollContainer" parent="SheetMargin/SheetPanel/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Margin" type="MarginContainer" parent="SheetMargin/SheetPanel/Layout/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 7
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 12
+
+[node name="Content" type="VBoxContainer" parent="SheetMargin/SheetPanel/Layout/Scroll/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 9
+
+[node name="Top" type="HBoxContainer" parent="SheetMargin/SheetPanel/Layout/Scroll/Margin/Content"]
+layout_mode = 2
+
+[node name="Eyebrow" type="Label" parent="SheetMargin/SheetPanel/Layout/Scroll/Margin/Content/Top"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"EyebrowLabel"
+text = "ВМЕСТИМОСТЬ"
+
+[node name="Close" type="Button" parent="SheetMargin/SheetPanel/Layout/Scroll/Margin/Content/Top"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+theme_type_variation = &"QuietButton"
+text = "×"
+
+[node name="Title" type="Label" parent="SheetMargin/SheetPanel/Layout/Scroll/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ScreenTitle"
+text = "Не хватает места"
+autowrap_mode = 2
+
+[node name="Incoming" type="Label" parent="SheetMargin/SheetPanel/Layout/Scroll/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "Находка"
+autowrap_mode = 2
+
+[node name="Capacity" type="Label" parent="SheetMargin/SheetPanel/Layout/Scroll/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionReasonLabel"
+text = "После подбора ёмкость будет превышена."
+autowrap_mode = 2
+
+[node name="ReplacementLabel" type="Label" parent="SheetMargin/SheetPanel/Layout/Scroll/Margin/Content"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Что оставить здесь взамен"
+
+[node name="ReplacementPicker" type="OptionButton" parent="SheetMargin/SheetPanel/Layout/Scroll/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+
+[node name="RecoveryNote" type="Label" parent="SheetMargin/SheetPanel/Layout/Scroll/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyMuted"
+text = "Ничего не потеряно."
+autowrap_mode = 2
+
+[node name="OtherContainer" type="Button" parent="SheetMargin/SheetPanel/Layout/Scroll/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+text = "Другое место"
+
+[node name="Buttons" type="HBoxContainer" parent="SheetMargin/SheetPanel/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Leave" type="Button" parent="SheetMargin/SheetPanel/Layout/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SecondaryButton"
+text = "Оставить"
+
+[node name="Replace" type="Button" parent="SheetMargin/SheetPanel/Layout/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"PrimaryButton"
+text = "Заменить"

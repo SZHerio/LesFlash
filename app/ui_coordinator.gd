@@ -9,6 +9,7 @@ const MapFlowScript := preload("res://app/flows/map_flow_coordinator.gd")
 const LocationFlowScript := preload("res://app/flows/location_flow_coordinator.gd")
 const PreferenceFlowScript := preload("res://app/flows/preference_flow_coordinator.gd")
 const InventoryFlowScript := preload("res://app/flows/inventory_flow_coordinator.gd")
+const SearchFlowScript := preload("res://app/flows/search_flow_coordinator.gd")
 const LegacyActivityFlowScript := preload("res://app/flows/legacy_activity_flow_coordinator.gd")
 
 var _shell: AppShell
@@ -21,6 +22,7 @@ var _map_flow: MapFlowCoordinator
 var _location_flow: LocationFlowCoordinator
 var _preference_flow: RefCounted
 var _inventory_flow: InventoryFlowCoordinator
+var _search_flow: SearchFlowCoordinator
 var _legacy_activity_flow: LegacyActivityFlowCoordinator
 var _route := "boot"
 var _settings_return_route := "menu"
@@ -54,6 +56,7 @@ func _boot() -> void:
 	_location_flow = LocationFlowScript.new()
 	_preference_flow = PreferenceFlowScript.new(_shell, _preferences, _lifecycle, _screens)
 	_inventory_flow = InventoryFlowScript.new()
+	_search_flow = SearchFlowScript.new()
 	_legacy_activity_flow = LegacyActivityFlowScript.new()
 	_shell.back_requested.connect(_on_back_requested)
 	_shell.close_requested.connect(_on_close_requested)
@@ -143,18 +146,40 @@ func _route_session() -> void:
 	if _session == null:
 		_show_main_menu()
 		return
+	# The search is an activity layered on the location, so it wins over the
+	# underlying phase and is restored first after a reload or a kill.
+	if _session.is_search_active():
+		_show_search()
+		return
 	match _session.get_phase():
 		"start", "event":
-			_show_event()
+			_show_legacy("event")
 		"map":
 			_show_location()
 		"job":
-			_show_job()
+			_show_legacy("job")
 		"completed":
-			_show_summary()
+			_show_legacy("summary")
 		_:
 			_shell.show_toast("Неизвестное состояние попытки.", true)
 			_show_main_menu()
+
+
+## Every flow needs the same command gating, result handling, saving and toasts.
+## Only the routes a flow can reach differ.
+func _flow_hooks(routes: Dictionary = {}) -> Dictionary:
+	var hooks := {
+		"settings": _open_settings,
+		"run_command": _run_command,
+		"begin_command": _try_begin_command,
+		"accept_result": _accept_result,
+		"capture_transaction": _capture_transaction,
+		"save": _save_session.bind(false),
+		"toast": _shell.show_toast,
+		"release_command": _release_command_after_transition,
+	}
+	hooks.merge(routes, true)
+	return hooks
 
 
 func _show_location() -> void:
@@ -165,13 +190,18 @@ func _show_location() -> void:
 		_preferences.to_model(),
 		_last_transaction,
 		_status_delta_pending,
-		{
-			"settings": _open_settings,
-			"run_command": _run_command,
-			"begin_command": _try_begin_command,
-			"shelters": _show_shelters,
-			"release_command": _release_command_after_transition,
-		}
+		_flow_hooks({"shelters": _show_shelters})
+	)
+	_status_delta_pending = false
+
+
+func _show_search() -> void:
+	_route = "search"
+	_search_flow.show(
+		_session,
+		_screens,
+		_preferences.to_model(),
+		_flow_hooks({"location": _show_location})
 	)
 	_status_delta_pending = false
 
@@ -182,15 +212,7 @@ func _show_map() -> void:
 		_session,
 		_screens,
 		_preferences.to_model(),
-		{
-			"back": _show_location,
-			"begin_command": _try_begin_command,
-			"accept_result": _accept_result,
-			"capture_transaction": _capture_transaction,
-			"save": _save_session.bind(false),
-			"arrived": _on_map_arrived,
-			"release_command": _release_command_after_transition,
-		}
+		_flow_hooks({"back": _show_location, "arrived": _on_map_arrived})
 	)
 
 
@@ -200,15 +222,7 @@ func _show_inventory() -> void:
 		_session,
 		_screens,
 		_preferences.to_model(),
-		{
-			"settings": _open_settings,
-			"begin_command": _try_begin_command,
-			"accept_result": _accept_result,
-			"capture_transaction": _capture_transaction,
-			"save": _save_session.bind(false),
-			"toast": _shell.show_toast,
-			"release_command": _release_command_after_transition,
-		}
+		_flow_hooks()
 	)
 
 
@@ -218,34 +232,29 @@ func _on_map_arrived(result: Dictionary) -> void:
 		_shell.show_toast("Дорога заняла %d мин." % int(result.get("minutes", 0)))
 
 
-func _show_event() -> void:
-	_route = "event"
-	_prepare_legacy_flow()
-	_legacy_activity_flow.show_event()
+## Routes still served by the legacy M2 activity screens. They share one entry
+## point so the route name and the presented screen can never drift apart.
+const LEGACY_ROUTES := {
+	"event": "show_event",
+	"job": "show_job",
+	"shelter": "show_shelters",
+	"job_result": "show_job_result",
+	"summary": "show_summary",
+}
 
 
-func _show_job() -> void:
-	_route = "job"
+func _show_legacy(route: String) -> void:
+	_route = route
 	_prepare_legacy_flow()
-	_legacy_activity_flow.show_job()
+	_legacy_activity_flow.call(StringName(LEGACY_ROUTES[route]))
 
 
 func _show_shelters() -> void:
-	_route = "shelter"
-	_prepare_legacy_flow()
-	_legacy_activity_flow.show_shelters()
+	_show_legacy("shelter")
 
 
 func _show_job_result() -> void:
-	_route = "job_result"
-	_prepare_legacy_flow()
-	_legacy_activity_flow.show_job_result()
-
-
-func _show_summary() -> void:
-	_route = "summary"
-	_prepare_legacy_flow()
-	_legacy_activity_flow.show_summary()
+	_show_legacy("job_result")
 
 
 func _open_settings() -> void:
@@ -273,19 +282,11 @@ func _prepare_legacy_flow() -> void:
 		_session,
 		_screens,
 		_preferences.to_model(),
-		{
-			"settings": _open_settings,
-			"run_command": _run_command,
-			"begin_command": _try_begin_command,
-			"accept_result": _accept_result,
-			"capture_transaction": _capture_transaction,
-			"save": _save_session.bind(false),
+		_flow_hooks({
 			"job_result": _show_job_result,
 			"location": _show_location,
 			"leave": _leave_session_to_menu,
-			"toast": _shell.show_toast,
-			"release_command": _release_command_after_transition,
-		}
+		})
 	)
 
 
@@ -349,6 +350,10 @@ func _on_navigation_requested(tab_id: String) -> void:
 		return
 	if _route == "inventory" and _inventory_flow.has_modal():
 		return
+	# The search owns the screen until the player leaves the zone, so a stray
+	# tab request must not drop them out of an unfinished activity.
+	if _route == "search":
+		return
 	match tab_id:
 		"place":
 			_show_location()
@@ -371,6 +376,9 @@ func _on_back_requested() -> void:
 			_show_location()
 		"inventory":
 			if not _inventory_flow.handle_back():
+				_show_location()
+		"search":
+			if not _search_flow.handle_back():
 				_show_location()
 		"shelter": _show_location()
 		"job_result": _show_location()

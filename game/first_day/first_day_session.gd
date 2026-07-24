@@ -5,7 +5,7 @@ extends RefCounted
 ## RunState changes are committed only through ActionTransaction. Flow changes
 ## are applied after a successful transaction and carry their own revision.
 
-const SESSION_VERSION := 3
+const SESSION_VERSION := 4
 const JOB_ROUNDS := 6
 const VALID_PHASES := ["uninitialized", "start", "map", "event", "job", "shelter", "completed"]
 const VALID_PSYCHE_MODES := ["off", "reduced", "full"]
@@ -14,6 +14,7 @@ const SHELTER_EVENING_MINUTE := 18 * 60
 const SHELTER_WAKE_MINUTE := 8 * 60
 
 const M2SessionMigrationScript := preload("res://game/first_day/first_day_session_migration.gd")
+const SearchSessionStateScript := preload("res://game/search/search_session_state.gd")
 
 const DEFERRED_PAYLOADS := {
 	"cold_symptoms": {"health": -5},
@@ -40,6 +41,8 @@ var job_state: Dictionary = _default_job_state()
 var day_completed: bool = false
 var biography: Array = []
 var flow_revision: int = 0
+var active_activity: Dictionary = SearchSessionStateScript.empty_activity()
+var search_zone_states: Dictionary = {}
 
 
 static func create(characteristics: Dictionary, seed: int) -> FirstDaySession:
@@ -121,6 +124,8 @@ func start_new_run(
 	day_completed = false
 	biography = []
 	flow_revision = 1
+	active_activity = SearchSessionStateScript.empty_activity()
+	search_zone_states = {}
 	return _success({
 		"start_id": start,
 		"location_id": location,
@@ -131,6 +136,8 @@ func start_new_run(
 
 
 func get_active_activity() -> Dictionary:
+	if is_search_active():
+		return active_activity.duplicate(true)
 	return M2SessionMigrationScript.legacy_activity({
 		"phase": phase,
 		"location": location,
@@ -138,6 +145,49 @@ func get_active_activity() -> Dictionary:
 		"start": start,
 		"job_state": job_state,
 	})
+
+
+func is_search_active() -> bool:
+	return String(active_activity.get("kind", "")) == SearchSessionStateScript.SEARCH_KIND
+
+
+func standard_action_guard() -> Dictionary:
+	if not is_search_active():
+		return _success()
+	return _failure(
+		"search_active",
+		"Сначала завершите или покиньте текущий поиск",
+		{"active_activity": active_activity.duplicate(true)}
+	)
+
+
+func replace_search_state(
+	next_activity: Dictionary,
+	next_zone_states: Dictionary
+) -> Dictionary:
+	var normalized := SearchSessionStateScript.normalize_activity(next_activity)
+	if normalized.is_empty():
+		return _failure("invalid_active_activity", "Состояние текущего поиска повреждено")
+	var validation := SearchSessionStateScript.validate(normalized, next_zone_states)
+	if not bool(validation.get("ok", false)):
+		return _failure(
+			"invalid_search_session_state",
+			"Состояние поисковой зоны не прошло проверку",
+			{"validation": validation}
+		)
+	var normalized_zones := SearchSessionStateScript.normalized_zone_states(next_zone_states)
+	if String(normalized.get("kind", "")) == SearchSessionStateScript.SEARCH_KIND:
+		if day_completed or phase != "map":
+			return _failure(
+				"invalid_search_phase",
+				"Поиск можно продолжать только поверх карты активной попытки"
+			)
+	if active_activity == normalized and search_zone_states == normalized_zones:
+		return _success({"changed": false})
+	active_activity = normalized
+	search_zone_states = normalized_zones
+	_touch()
+	return _success({"changed": true, "flow_revision": flow_revision})
 
 
 func get_flow_model() -> Dictionary:
@@ -215,6 +265,9 @@ func get_map_model() -> Dictionary:
 
 
 func enter_event(event_id: String) -> Dictionary:
+	var activity_guard := standard_action_guard()
+	if not bool(activity_guard.get("ok", false)):
+		return activity_guard
 	if day_completed or phase not in ["map", "event"]:
 		return _failure("invalid_phase", "Сейчас нельзя открыть событие")
 	var card := _event_card(event_id)
@@ -236,6 +289,9 @@ func enter_event(event_id: String) -> Dictionary:
 
 
 func select_event(event_id: String = "") -> Dictionary:
+	var activity_guard := standard_action_guard()
+	if not bool(activity_guard.get("ok", false)):
+		return activity_guard
 	if not event_id.is_empty():
 		return enter_event(event_id)
 	var candidates: Array = []
@@ -291,6 +347,9 @@ func get_current_event_model() -> Dictionary:
 
 
 func travel(destination: String, mode: String = "walk") -> Dictionary:
+	var activity_guard := standard_action_guard()
+	if not bool(activity_guard.get("ok", false)):
+		return activity_guard
 	if day_completed or phase != "map":
 		return _failure("invalid_phase", "Перемещение доступно только с карты")
 	var route_match := _find_route(destination, mode)
@@ -330,6 +389,9 @@ func travel(destination: String, mode: String = "walk") -> Dictionary:
 
 
 func resolve_choice(choice_id: String) -> Dictionary:
+	var activity_guard := standard_action_guard()
+	if not bool(activity_guard.get("ok", false)):
+		return activity_guard
 	if phase not in ["start", "event"]:
 		return _failure("invalid_phase", "Сейчас нет события, ожидающего решения")
 	var card := _active_card()
@@ -393,6 +455,9 @@ func resolve_choice(choice_id: String) -> Dictionary:
 
 
 func begin_job(approach: String = "standard") -> Dictionary:
+	var activity_guard := standard_action_guard()
+	if not bool(activity_guard.get("ok", false)):
+		return activity_guard
 	if day_completed or phase != "map":
 		return _failure("invalid_phase", "Работу можно начать только с карты")
 	var prepared := _prepare_job_state(approach)
@@ -446,6 +511,9 @@ func current_job_prompt() -> Dictionary:
 
 
 func answer_job(category: String) -> Dictionary:
+	var activity_guard := standard_action_guard()
+	if not bool(activity_guard.get("ok", false)):
+		return activity_guard
 	if phase != "job" or not bool(job_state.get("active", false)):
 		return _failure("job_not_active", "Сейчас нет активной рабочей смены")
 	var prompt_model := current_job_prompt()
@@ -589,6 +657,9 @@ func get_wait_until_evening_model() -> Dictionary:
 
 
 func wait_until_evening() -> Dictionary:
+	var activity_guard := standard_action_guard()
+	if not bool(activity_guard.get("ok", false)):
+		return activity_guard
 	var model := get_wait_until_evening_model()
 	if not bool(model.get("visible", false)):
 		return _failure("evening_wait_unavailable", "Сейчас ждать вечера уже не нужно")
@@ -623,6 +694,9 @@ func wait_until_evening() -> Dictionary:
 
 
 func choose_shelter(shelter_id: String) -> Dictionary:
+	var activity_guard := standard_action_guard()
+	if not bool(activity_guard.get("ok", false)):
+		return activity_guard
 	if day_completed or phase not in ["map", "shelter"]:
 		return _failure("invalid_phase", "Сейчас нельзя выбрать ночлег")
 	if not _shelter_window_open():
@@ -709,7 +783,8 @@ func to_dict() -> Dictionary:
 		"session_version": SESSION_VERSION,
 		"run_state": run_state.to_dict(),
 		"base_location": location,
-		"active_activity": get_active_activity(),
+		"active_activity": active_activity.duplicate(true),
+		"search_zone_states": search_zone_states.duplicate(true),
 		"phase": phase,
 		"location": location,
 		"current_event": current_event,
@@ -749,6 +824,14 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 		return null
 	if typeof(source.get("biography", null)) != TYPE_ARRAY:
 		return null
+	var parsed_activity := SearchSessionStateScript.normalize_activity(
+		source.get("active_activity", null)
+	)
+	if parsed_activity.is_empty() or typeof(source.get("search_zone_states", null)) != TYPE_DICTIONARY:
+		return null
+	var parsed_zone_states := SearchSessionStateScript.normalized_zone_states(
+		Dictionary(source["search_zone_states"])
+	)
 	var parsed_seen: Variant = _string_array(source["seen"])
 	var parsed_completed: Variant = _string_array(source["completed"])
 	if parsed_seen == null or parsed_completed == null:
@@ -761,17 +844,42 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 	result.start = String(source["start"])
 	result.seen = parsed_seen
 	result.completed = parsed_completed
-	result.settings = _normalize_json_numbers(Dictionary(source["settings"]).duplicate(true))
+	result.settings = Dictionary(source["settings"]).duplicate(true)
 	result.job_state = _normalize_json_numbers(Dictionary(source["job_state"]).duplicate(true))
 	result.day_completed = bool(source["day_completed"])
 	result.biography = _normalize_json_numbers(Array(source["biography"]).duplicate(true))
 	result.flow_revision = int(revision)
+	result.active_activity = parsed_activity
+	result.search_zone_states = parsed_zone_states
 	var validation := result.validate()
 	return result if bool(validation["ok"]) else null
 
 
 func clone() -> FirstDaySession:
 	return FirstDaySession.from_dict(to_dict())
+
+
+func replace_from(other: FirstDaySession) -> bool:
+	if other == null:
+		return false
+	var candidate := FirstDaySession.from_dict(other.to_dict())
+	if candidate == null:
+		return false
+	run_state = candidate.run_state
+	phase = candidate.phase
+	location = candidate.location
+	current_event = candidate.current_event
+	start = candidate.start
+	seen = candidate.seen
+	completed = candidate.completed
+	settings = candidate.settings
+	job_state = candidate.job_state
+	day_completed = candidate.day_completed
+	biography = candidate.biography
+	flow_revision = candidate.flow_revision
+	active_activity = candidate.active_activity
+	search_zone_states = candidate.search_zone_states
+	return true
 
 
 func validate() -> Dictionary:
@@ -830,6 +938,13 @@ func validate() -> Dictionary:
 			errors.append("active first day cannot cross the next 08:00")
 	if flow_revision < 0:
 		errors.append("flow_revision cannot be negative")
+	var search_validation := SearchSessionStateScript.validate(
+		active_activity,
+		search_zone_states
+	)
+	_append_validation("search_session", search_validation, errors)
+	if is_search_active() and phase != "map":
+		errors.append("active search requires map phase")
 	var contract_validation := M2SessionMigrationScript.validate_contract_fields({
 		"phase": phase,
 		"location": location,
@@ -837,7 +952,8 @@ func validate() -> Dictionary:
 		"current_event": current_event,
 		"start": start,
 		"job_state": job_state,
-		"active_activity": get_active_activity(),
+		"active_activity": active_activity,
+		"search_zone_states": search_zone_states,
 	})
 	if not bool(contract_validation.get("ok", false)):
 		errors.append("M3A session contract: %s" % String(contract_validation.get("error", "invalid")))
@@ -985,6 +1101,11 @@ func _execute_action_with_due(
 	context: Dictionary,
 	completes_day: bool = false
 ) -> ActionResult:
+	if is_search_active():
+		return ActionResult.failed(
+			&"search_active",
+			"Сначала завершите или покиньте текущий поиск"
+		)
 	var candidate := run_state.clone()
 	if candidate == null:
 		return ActionResult.failed(&"clone_failed", "Не удалось подготовить безопасную копию состояния")
@@ -1064,17 +1185,23 @@ func _resolve_due_consequences(candidate: RunState, context: Dictionary) -> Dict
 	return {"ok": true, "changes": all_changes, "journal_entries": journal_entries}
 
 
+## M2 consequences keep their fixed payload contract. Consequences queued by
+## versioned content are accepted on shape alone, so a new event card does not
+## require a code change to schedule its own follow-up.
 func _deferred_effects(consequence: Dictionary) -> Dictionary:
 	var effect_id := String(consequence.get("effect_id", ""))
-	if not DEFERRED_PAYLOADS.has(effect_id):
-		return _failure("unknown_deferred_effect", "Неизвестный effect_id %s" % effect_id)
+	if effect_id.is_empty():
+		return _failure("unknown_deferred_effect", "Отложенное последствие без effect_id")
 	var payload_value: Variant = consequence.get("payload", null)
 	if not payload_value is Dictionary:
 		return _failure("invalid_deferred_payload", "payload должен быть словарём")
 	var payload: Dictionary = _normalize_json_numbers(payload_value)
-	var expected: Dictionary = Dictionary(DEFERRED_PAYLOADS[effect_id]).duplicate(true)
-	if payload != expected:
-		return _failure("invalid_deferred_payload", "payload не соответствует контракту %s" % effect_id)
+	if DEFERRED_PAYLOADS.has(effect_id):
+		var expected: Dictionary = Dictionary(DEFERRED_PAYLOADS[effect_id]).duplicate(true)
+		if payload != expected:
+			return _failure("invalid_deferred_payload", "payload не соответствует контракту %s" % effect_id)
+	elif payload.is_empty():
+		return _failure("invalid_deferred_payload", "payload последствия %s пуст" % effect_id)
 	var effects: Array = []
 	for key_value in payload:
 		var key := String(key_value)
