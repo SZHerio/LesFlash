@@ -1,0 +1,331 @@
+{
+  "schema_version": 1,
+  "catalog_id": "riverside_contextual_events",
+  "cards": [
+    {
+      "id": "underpass_yard_watchman", "title": "Сторож заметил движение", "body": "Из будки выходит сторож и внимательно смотрит в сторону открытого двора.", "tone": "adverse",
+      "base_weight": 10, "luck_bias": -2, "cooldown_minutes": 360, "locations": ["underpass"], "source_kinds": ["search"], "tags": ["social", "trespass"], "conditions": [],
+      "options": [
+        {"id": "explain", "label": "Спокойно объяснить, что вы ищете выход", "conditions": [{"kind": "stat", "id": "charisma", "operator": ">=", "value": 6, "blocked_reason": "Нужно говорить увереннее и спокойнее"}], "effects": [{"type": "advance_time", "minutes": 4, "reason": "Разговор со сторожем"}, {"type": "change_state", "id": "tension", "delta": -2}], "outcome": "Сторож указывает на калитку и теряет к вам интерес."},
+        {"id": "leave", "label": "Молча вернуться к проходу", "conditions": [], "effects": [{"type": "advance_time", "minutes": 2, "reason": "Отход от служебного двора"}, {"type": "change_state", "id": "tension", "delta": 2}], "outcome": "Вы уходите до того, как разговор становится неприятным."}
+      ]
+    },
+    {
+      "id": "underpass_loose_manhole", "title": "Расшатанная крышка", "body": "На пути качается тяжёлая крышка люка; неверный шаг может закончиться ушибом.", "tone": "adverse",
+      "base_weight": 9, "luck_bias": -2, "cooldown_minutes": 720, "locations": ["underpass"], "source_kinds": ["search"], "tags": ["hazard", "technical"], "conditions": [],
+      "options": [
+        {"id": "brace", "label": "Закрепить крышку найденным обломком", "conditions": [{"kind": "stat", "id": "intelligence", "operator": ">=", "value": 6, "blocked_reason": "Не удаётся понять, куда безопасно поставить упор"}], "effects": [{"type": "advance_time", "minutes": 6, "reason": "Закрепление крышки"}, {"type": "change_state", "id": "energy", "delta": -2}], "outcome": "Крышка больше не качается, и проход становится безопаснее."},
+        {"id": "detour", "label": "Осторожно обойти по краю", "conditions": [], "effects": [{"type": "advance_time", "minutes": 4, "reason": "Обход опасного места"}], "outcome": "Вы обходите люк, не проверяя, насколько он глубок."}
+      ]
+    },
+    {
+      "id": "underpass_pipe_warmth", "title": "Тёплая труба", "body": "За ограждением проходит тёплая труба, рядом сухо и почти не тянет ветром.", "tone": "positive",
+      "base_weight": 10, "luck_bias": 2, "cooldown_minutes": 240, "locations": ["underpass"], "source_kinds": ["search"], "tags": ["rest", "shelter"], "conditions": [],
+      "options": [
+        {"id": "warm_up", "label": "Ненадолго присесть рядом", "conditions": [{"kind": "state", "id": "energy", "operator": "<=", "value": 85, "blocked_reason": "Сейчас короткий отдых почти ничего не даст"}], "effects": [{"type": "advance_time", "minutes": 8, "reason": "Отдых у тёплой трубы"}, {"type": "change_state", "id": "energy", "delta": 4}, {"type": "change_state", "id": "tension", "delta": -3}], "outcome": "Несколько тёплых минут возвращают чувствительность пальцам."},
+        {"id": "move_on", "label": "Запомнить место и идти дальше", "conditions": [], "effects": [], "outcome": "Вы отмечаете сухой угол и продолжаете поиск."}
+      ]
+    },
+    {
+      "id": "underpass_shared_tea", "title": "Кружка горячего чая", "body": "Рабочий у распахнутой двери термосной замечает вас и предлагает немного чая.", "tone": "positive",
+      "base_weight": 8, "luck_bias": 2, "cooldown_minutes": 600, "locations": ["underpass"], "source_kinds": ["search"], "tags": ["social", "food"], "conditions": [],
+      "options": [
+        {"id": "talk", "label": "Принять чай и поддержать разговор", "conditions": [{"kind": "stat", "id": "charisma", "operator": ">=", "value": 4, "blocked_reason": "Сейчас трудно поддерживать спокойную беседу"}], "effects": [{"type": "advance_time", "minutes": 10, "reason": "Разговор за чаем"}, {"type": "change_state", "id": "hunger", "delta": -4}, {"type": "change_state", "id": "morale", "delta": 4}], "outcome": "Чай согревает, а обычный разговор немного поднимает настроение."},
+        {"id": "decline", "label": "Поблагодарить и не задерживаться", "conditions": [], "effects": [{"type": "change_state", "id": "morale", "delta": 1}], "outcome": "Рабочий кивает, и вы спокойно расходитесь."}
+      ]
+    },
+    {
+      "id": "underpass_echoing_steps", "title": "Шаги за стеной", "body": "За бетонной стеной слышны размеренные шаги, хотя проход туда не виден.", "tone": "neutral",
+      "base_weight": 10, "luck_bias": 0, "cooldown_minutes": 180, "locations": ["underpass"], "source_kinds": ["search"], "tags": ["noise", "uncertainty"], "conditions": [],
+      "options": [
+        {"id": "listen", "label": "Остановиться и определить направление", "conditions": [{"kind": "stat", "id": "intelligence", "operator": ">=", "value": 5, "blocked_reason": "Эхо слишком сильно смешивает звуки"}], "effects": [{"type": "advance_time", "minutes": 3, "reason": "Наблюдение за звуками"}, {"type": "shift_polarity", "id": "attention_distribution", "delta": -1}], "outcome": "Вы понимаете, что шаги идут по параллельному коридору."},
+        {"id": "continue", "label": "Не останавливаться", "conditions": [], "effects": [{"type": "change_state", "id": "tension", "delta": 1}], "outcome": "Шаги вскоре растворяются в городском шуме."}
+      ]
+    },
+    {
+      "id": "underpass_paper_map", "title": "Старая схема коммуникаций", "body": "Под доской застрял промокший лист со схемой труб и служебных проходов.", "tone": "positive",
+      "base_weight": 8, "luck_bias": 2, "cooldown_minutes": 1440, "locations": ["underpass"], "source_kinds": ["search"], "tags": ["knowledge", "technical"], "conditions": [],
+      "options": [
+        {"id": "study", "label": "Сопоставить схему с местностью", "conditions": [{"kind": "stat", "id": "intelligence", "operator": ">=", "value": 4, "blocked_reason": "Условные обозначения пока ничего не говорят"}], "effects": [{"type": "advance_time", "minutes": 7, "reason": "Изучение старой схемы"}, {"type": "knowledge", "id": "underpass_services", "amount": 1, "mode": "unlock"}], "outcome": "Несколько отметок помогают понять устройство служебного двора."},
+        {"id": "leave", "label": "Оставить размокший лист на месте", "conditions": [], "effects": [], "outcome": "Вы не тратите время на почти стёртые линии."}
+      ]
+    },
+    {
+      "id": "underpass_guard_round", "title": "Обход приближается", "body": "Луч фонаря скользит по воротам: кто-то начинает плановый обход двора.", "tone": "adverse",
+      "base_weight": 10, "luck_bias": -2, "cooldown_minutes": 480, "locations": ["underpass"], "source_kinds": ["search"], "tags": ["risk", "trespass"], "conditions": [],
+      "options": [
+        {"id": "blend_in", "label": "Выйти навстречу уверенным шагом", "conditions": [{"kind": "stat", "id": "charisma", "operator": ">=", "value": 7, "blocked_reason": "Не хватает уверенности выдать себя за человека по делу"}], "effects": [{"type": "advance_time", "minutes": 3, "reason": "Короткая встреча с обходчиком"}], "outcome": "Обходчик машинально здоровается и проходит мимо."},
+        {"id": "hide", "label": "Переждать за штабелем ящиков", "conditions": [], "effects": [{"type": "advance_time", "minutes": 6, "reason": "Ожидание конца обхода"}, {"type": "change_state", "id": "tension", "delta": 4}, {"type": "deferred", "effect_id": "guard_remembers_noise", "delay_minutes": 240, "payload": {"location_id": "underpass", "tension": 2}, "deferred_id": "underpass_guard_memory", "source_id": "underpass_guard_round"}], "outcome": "Фонарь проходит мимо, но сторож задерживается возле свежих следов."}
+      ]
+    },
+    {
+      "id": "underpass_dry_corner", "title": "Сухой угол за щитом", "body": "За рекламным щитом находится сухая площадка, скрытая от основного потока людей.", "tone": "neutral",
+      "base_weight": 9, "luck_bias": 0, "cooldown_minutes": 720, "locations": ["underpass"], "source_kinds": ["search"], "tags": ["shelter", "knowledge"], "conditions": [],
+      "options": [
+        {"id": "inspect", "label": "Проверить место внимательнее", "conditions": [{"kind": "skill", "id": "search", "operator": ">=", "value": 1, "blocked_reason": "Пока трудно быстро оценить следы и безопасность места"}], "effects": [{"type": "advance_time", "minutes": 5, "reason": "Осмотр сухого угла"}, {"type": "knowledge", "id": "underpass_dry_corner", "amount": 1, "mode": "unlock"}], "outcome": "Следы показывают, когда угол пустует и откуда его видно."},
+        {"id": "remember", "label": "Просто запомнить ориентир", "conditions": [], "effects": [], "outcome": "Вы запоминаете щит, не задерживаясь рядом."}
+      ]
+    },
+
+    {
+      "id": "market_broken_crate", "title": "Рассыпавшийся ящик", "body": "У служебных ворот ломается ящик, и мелкие овощи раскатываются под ноги.", "tone": "neutral",
+      "base_weight": 10, "luck_bias": 0, "cooldown_minutes": 240, "locations": ["market"], "source_kinds": ["location_action", "travel"], "tags": ["work", "social"], "conditions": [],
+      "options": [
+        {"id": "help", "label": "Быстро собрать рассыпавшееся", "conditions": [{"kind": "state", "id": "energy", "operator": ">=", "value": 20, "blocked_reason": "Сейчас трудно быстро наклоняться и двигаться"}], "effects": [{"type": "advance_time", "minutes": 6, "reason": "Помощь у ворот"}, {"type": "change_state", "id": "energy", "delta": -2}, {"type": "change_state", "id": "morale", "delta": 2}], "outcome": "Продавец благодарит вас и успевает убрать тележку с проезда."},
+        {"id": "step_away", "label": "Освободить место рабочим", "conditions": [], "effects": [{"type": "advance_time", "minutes": 2, "reason": "Обход суеты у ворот"}], "outcome": "Вы отходите в сторону и не мешаете собирать товар."}
+      ]
+    },
+    {
+      "id": "market_vendor_sample", "title": "Проба горячей каши", "body": "Продавщица закрывает котёл и предлагает последнюю небольшую порцию на пробу.", "tone": "positive",
+      "base_weight": 8, "luck_bias": 2, "cooldown_minutes": 720, "locations": ["market"], "source_kinds": ["location_action"], "tags": ["food", "social"], "conditions": [],
+      "options": [
+        {"id": "accept", "label": "Принять порцию и поблагодарить", "conditions": [{"kind": "state", "id": "hunger", "operator": ">=", "value": 10, "blocked_reason": "Вы не голодны настолько, чтобы брать чужую еду"}], "effects": [{"type": "advance_time", "minutes": 5, "reason": "Небольшой перекус"}, {"type": "change_state", "id": "hunger", "delta": -10}, {"type": "change_state", "id": "morale", "delta": 2}], "outcome": "Тёплая еда заметно облегчает голод."},
+        {"id": "decline", "label": "Оставить порцию тому, кому нужнее", "conditions": [], "effects": [{"type": "change_state", "id": "morale", "delta": 1}], "outcome": "Продавщица принимает ответ без лишних вопросов."}
+      ]
+    },
+    {
+      "id": "market_purse_glimpse", "title": "Кошелёк под прилавком", "body": "Под краем прилавка виден чужой кошелёк, а владелец уже уходит к выходу.", "tone": "neutral",
+      "base_weight": 7, "luck_bias": 0, "cooldown_minutes": 1440, "locations": ["market"], "source_kinds": ["location_action", "travel"], "tags": ["choice", "social"], "conditions": [],
+      "options": [
+        {"id": "return", "label": "Догнать владельца", "conditions": [{"kind": "state", "id": "energy", "operator": ">=", "value": 15, "blocked_reason": "Сейчас вы не успеете догнать уходящего человека"}], "effects": [{"type": "advance_time", "minutes": 7, "reason": "Возврат кошелька"}, {"type": "change_state", "id": "morale", "delta": 5}], "outcome": "Владелец облегчённо забирает кошелёк и благодарит вас."},
+        {"id": "call_vendor", "label": "Позвать продавца и указать на находку", "conditions": [], "effects": [{"type": "advance_time", "minutes": 3, "reason": "Передача найденного кошелька"}], "outcome": "Продавец убирает кошелёк и обещает дождаться владельца."}
+      ]
+    },
+    {
+      "id": "market_unloading_call", "title": "Нужны руки на разгрузке", "body": "Водитель оглядывает тяжёлые ящики и спрашивает, кто поможет перенести их под навес.", "tone": "positive",
+      "base_weight": 9, "luck_bias": 1, "cooldown_minutes": 360, "locations": ["market"], "source_kinds": ["location_action"], "tags": ["work", "strength"], "conditions": [],
+      "options": [
+        {"id": "work", "label": "Взяться за несколько ящиков", "conditions": [{"kind": "stat", "id": "strength", "operator": ">=", "value": 6, "blocked_reason": "Ящики слишком тяжёлые для безопасного переноса"}], "effects": [{"type": "advance_time", "minutes": 20, "reason": "Разгрузка машины"}, {"type": "change_state", "id": "energy", "delta": -8}, {"type": "change_money", "delta": 35}], "outcome": "Водитель честно платит за перенесённые ящики."},
+        {"id": "pass", "label": "Не брать работу без уверенности", "conditions": [], "effects": [], "outcome": "Через минуту водитель находит другого помощника."}
+      ]
+    },
+    {
+      "id": "market_closing_sweep", "title": "Рынок начинает закрываться", "body": "Ряды пустеют, дворник выметает упаковку к служебным воротам.", "tone": "neutral",
+      "base_weight": 9, "luck_bias": 0, "cooldown_minutes": 480, "locations": ["market"], "source_kinds": ["location_action", "travel"], "tags": ["time", "search"], "conditions": [{"kind": "calendar", "id": "minute_of_day", "operator": ">=", "value": 960}],
+      "options": [
+        {"id": "ask", "label": "Спросить, что можно забрать", "conditions": [{"kind": "stat", "id": "charisma", "operator": ">=", "value": 5, "blocked_reason": "Нужно обратиться яснее и без давления"}], "effects": [{"type": "advance_time", "minutes": 5, "reason": "Разговор с дворником"}, {"type": "add_item", "id": "cardboard_sheet", "quantity": 1}], "outcome": "Дворник разрешает забрать чистый лист картона."},
+        {"id": "leave", "label": "Не мешать закрытию", "conditions": [], "effects": [], "outcome": "Вы уходите, пока служебные ворота ещё открыты."}
+      ]
+    },
+    {
+      "id": "market_price_argument", "title": "Спор у весов", "body": "Покупатель и продавец всё громче спорят о весе пакета, задерживая очередь.", "tone": "adverse",
+      "base_weight": 8, "luck_bias": -1, "cooldown_minutes": 300, "locations": ["market"], "source_kinds": ["location_action"], "tags": ["social", "tension"], "conditions": [],
+      "options": [
+        {"id": "mediate", "label": "Предложить проверить вес ещё раз", "conditions": [{"kind": "stat", "id": "charisma", "operator": ">=", "value": 6, "blocked_reason": "Вас вряд ли услышат в разгорячённом споре"}], "effects": [{"type": "advance_time", "minutes": 5, "reason": "Попытка уладить спор"}, {"type": "change_state", "id": "morale", "delta": 2}], "outcome": "Повторное взвешивание быстро снимает главный вопрос."},
+        {"id": "avoid", "label": "Обойти спорящую толпу", "conditions": [], "effects": [{"type": "advance_time", "minutes": 3, "reason": "Обход очереди"}], "outcome": "Вы выбираете соседний проход и не втягиваетесь в конфликт."}
+      ]
+    },
+    {
+      "id": "market_spoiled_box", "title": "Ящик с резким запахом", "body": "У контейнера стоит закрытый ящик, из щели идёт неприятный сладковатый запах.", "tone": "adverse",
+      "base_weight": 9, "luck_bias": -2, "cooldown_minutes": 600, "locations": ["market"], "source_kinds": ["location_action"], "tags": ["food", "hazard"], "conditions": [],
+      "options": [
+        {"id": "inspect", "label": "Проверить только неповреждённые банки", "conditions": [{"kind": "stat", "id": "intelligence", "operator": ">=", "value": 6, "blocked_reason": "Нельзя уверенно отличить безопасное содержимое"}], "effects": [{"type": "advance_time", "minutes": 6, "reason": "Осторожный осмотр ящика"}, {"type": "add_item", "id": "sealed_food_can", "quantity": 1}], "outcome": "Среди испорченного находится одна целая заводская банка."},
+        {"id": "leave", "label": "Не рисковать здоровьем", "conditions": [], "effects": [], "outcome": "Вы оставляете сомнительный ящик закрытым."}
+      ]
+    },
+
+    {
+      "id": "station_porter_request", "title": "Просьба поднести чемодан", "body": "Пожилая пассажирка не может поднять чемодан на высокий бордюр.", "tone": "positive",
+      "base_weight": 9, "luck_bias": 1, "cooldown_minutes": 360, "locations": ["station_square"], "source_kinds": ["location_action", "travel"], "tags": ["help", "strength"], "conditions": [],
+      "options": [
+        {"id": "carry", "label": "Поднять чемодан до входа", "conditions": [{"kind": "stat", "id": "strength", "operator": ">=", "value": 5, "blocked_reason": "Чемодан слишком тяжёлый для безопасного подъёма"}], "effects": [{"type": "advance_time", "minutes": 7, "reason": "Помощь с чемоданом"}, {"type": "change_state", "id": "energy", "delta": -3}, {"type": "change_state", "id": "morale", "delta": 3}], "outcome": "Пассажирка искренне благодарит вас у дверей вокзала."},
+        {"id": "find_help", "label": "Позвать свободного носильщика", "conditions": [], "effects": [{"type": "advance_time", "minutes": 3, "reason": "Поиск носильщика"}], "outcome": "Носильщик принимает чемодан, и пассажирка успевает к входу."}
+      ]
+    },
+    {
+      "id": "station_missed_passenger", "title": "Человек потерялся в расписании", "body": "Растерянный пассажир держит старый билет и не понимает, к какой платформе идти.", "tone": "neutral",
+      "base_weight": 10, "luck_bias": 0, "cooldown_minutes": 300, "locations": ["station_square"], "source_kinds": ["location_action"], "tags": ["knowledge", "social"], "conditions": [],
+      "options": [
+        {"id": "guide", "label": "Сопоставить билет со схемой", "conditions": [{"kind": "knowledge", "id": "station_layout", "operator": ">=", "value": 1, "blocked_reason": "Вы сами ещё плохо знаете устройство вокзала"}], "effects": [{"type": "advance_time", "minutes": 6, "reason": "Помощь пассажиру"}, {"type": "change_state", "id": "morale", "delta": 2}], "outcome": "Номер пути находится, и пассажир спешит в нужный переход."},
+        {"id": "point_desk", "label": "Показать справочное окно", "conditions": [], "effects": [{"type": "advance_time", "minutes": 2, "reason": "Короткая подсказка"}], "outcome": "Пассажир благодарит и направляется к справочному окну."}
+      ]
+    },
+    {
+      "id": "station_inspector_glance", "title": "Внимание патруля", "body": "Сотрудник вокзала задерживает взгляд и начинает идти через площадь в вашу сторону.", "tone": "adverse",
+      "base_weight": 10, "luck_bias": -2, "cooldown_minutes": 480, "locations": ["station_square"], "source_kinds": ["location_action", "travel"], "tags": ["authority", "risk"], "conditions": [],
+      "options": [
+        {"id": "ask_time", "label": "Первым спросить время отправления", "conditions": [{"kind": "stat", "id": "charisma", "operator": ">=", "value": 6, "blocked_reason": "Сейчас голос выдаст напряжение"}], "effects": [{"type": "advance_time", "minutes": 3, "reason": "Разговор с сотрудником"}], "outcome": "Вопрос переводит встречу в обычный короткий разговор."},
+        {"id": "leave", "label": "Перейти на оживлённую сторону площади", "conditions": [], "effects": [{"type": "advance_time", "minutes": 4, "reason": "Смена пути"}, {"type": "change_state", "id": "tension", "delta": 2}], "outcome": "Сотрудник не следует за вами в плотный поток людей."}
+      ]
+    },
+    {
+      "id": "station_waiting_room", "title": "Открылась боковая дверь", "body": "Боковую дверь зала ожидания оставили открытой, внутри тепло и спокойно.", "tone": "positive",
+      "base_weight": 8, "luck_bias": 2, "cooldown_minutes": 600, "locations": ["station_square"], "source_kinds": ["location_action"], "tags": ["rest", "shelter"], "conditions": [],
+      "options": [
+        {"id": "rest", "label": "Посидеть несколько минут", "conditions": [{"kind": "state", "id": "energy", "operator": "<=", "value": 80, "blocked_reason": "Сейчас отдых не даст заметного восстановления"}], "effects": [{"type": "advance_time", "minutes": 10, "reason": "Отдых в зале ожидания"}, {"type": "change_state", "id": "energy", "delta": 5}, {"type": "change_state", "id": "tension", "delta": -3}], "outcome": "Тепло и неподвижность ненадолго возвращают силы."},
+        {"id": "pass", "label": "Не задерживаться у входа", "conditions": [], "effects": [], "outcome": "Вы проходите мимо, оставляя свободные места пассажирам."}
+      ]
+    },
+    {
+      "id": "station_luggage_cart", "title": "Тележка перекрыла спуск", "body": "Нагруженная багажная тележка съехала к бордюру и перекрыла узкий спуск.", "tone": "neutral",
+      "base_weight": 9, "luck_bias": 0, "cooldown_minutes": 300, "locations": ["station_square"], "source_kinds": ["location_action"], "tags": ["strength", "work"], "conditions": [],
+      "options": [
+        {"id": "push", "label": "Вернуть тележку к стене", "conditions": [{"kind": "stat", "id": "strength", "operator": ">=", "value": 6, "blocked_reason": "Нагруженная тележка слишком тяжела"}], "effects": [{"type": "advance_time", "minutes": 5, "reason": "Перемещение тележки"}, {"type": "change_state", "id": "energy", "delta": -3}], "outcome": "Спуск снова свободен, тележка упирается колёсами в бордюр."},
+        {"id": "warn", "label": "Предупредить работников вокзала", "conditions": [], "effects": [{"type": "advance_time", "minutes": 3, "reason": "Поиск работника"}], "outcome": "Работник закрепляет тележку прежде, чем она катится дальше."}
+      ]
+    },
+    {
+      "id": "station_timetable_change", "title": "Заменили лист расписания", "body": "Работник прикрепляет новый лист, пока старый ещё лежит на подоконнике.", "tone": "positive",
+      "base_weight": 7, "luck_bias": 1, "cooldown_minutes": 1440, "locations": ["station_square"], "source_kinds": ["location_action"], "tags": ["knowledge", "time"], "conditions": [],
+      "options": [
+        {"id": "compare", "label": "Сравнить изменения в расписании", "conditions": [{"kind": "stat", "id": "intelligence", "operator": ">=", "value": 5, "blocked_reason": "Слишком много мелких строк и сокращений"}], "effects": [{"type": "advance_time", "minutes": 6, "reason": "Сравнение расписаний"}, {"type": "knowledge", "id": "station_schedule", "amount": 1, "mode": "unlock"}], "outcome": "Вы отмечаете часы, когда площадь становится заметно спокойнее."},
+        {"id": "ignore", "label": "Не тратить время на поезда", "conditions": [], "effects": [], "outcome": "Новый лист остаётся частью вокзальной суеты."}
+      ]
+    },
+    {
+      "id": "station_platform_coin", "title": "Монета у водостока", "body": "У края водостока поблёскивает монета, которую непросто достать пальцами.", "tone": "positive",
+      "base_weight": 6, "luck_bias": 2, "cooldown_minutes": 1440, "locations": ["station_square"], "source_kinds": ["location_action", "travel"], "tags": ["luck", "resource"], "conditions": [],
+      "options": [
+        {"id": "retrieve", "label": "Поддеть монету тонким предметом", "conditions": [{"kind": "stat", "id": "intelligence", "operator": ">=", "value": 4, "blocked_reason": "Под рукой нет безопасного способа достать монету"}], "effects": [{"type": "advance_time", "minutes": 3, "reason": "Извлечение монеты"}, {"type": "change_money", "delta": 3}], "outcome": "Монета выскальзывает на сухой край водостока."},
+        {"id": "leave", "label": "Не возиться у прохода", "conditions": [], "effects": [], "outcome": "Вы оставляете монету там, где она лежала."}
+      ]
+    },
+
+    {
+      "id": "recycling_scale_dispute", "title": "Весы показывают разное", "body": "Приёмщик дважды взвешивает мешок и получает заметно разные значения.", "tone": "neutral",
+      "base_weight": 9, "luck_bias": 0, "cooldown_minutes": 420, "locations": ["recycling_point"], "source_kinds": ["location_action", "job"], "tags": ["trade", "technical"], "conditions": [],
+      "options": [
+        {"id": "check", "label": "Осмотреть опоры платформы", "conditions": [{"kind": "stat", "id": "intelligence", "operator": ">=", "value": 6, "blocked_reason": "Не удаётся понять причину разницы"}], "effects": [{"type": "advance_time", "minutes": 5, "reason": "Проверка весов"}, {"type": "knowledge", "id": "recycling_scale", "amount": 1, "mode": "unlock"}], "outcome": "Под одной опорой находится застрявшая металлическая пластина."},
+        {"id": "wait", "label": "Дождаться повторной настройки", "conditions": [], "effects": [{"type": "advance_time", "minutes": 6, "reason": "Ожидание у весов"}], "outcome": "Приёмщик очищает платформу и начинает взвешивание заново."}
+      ]
+    },
+    {
+      "id": "recycling_sharp_metal", "title": "Острый край в куче", "body": "Из смешанной кучи торчит рваный металлический лист с почти незаметным краем.", "tone": "adverse",
+      "base_weight": 10, "luck_bias": -2, "cooldown_minutes": 480, "locations": ["recycling_point"], "source_kinds": ["location_action", "job"], "tags": ["hazard", "work"], "conditions": [],
+      "options": [
+        {"id": "secure", "label": "Загнуть край инструментом", "conditions": [{"kind": "item", "id": "rusty_tool", "operator": ">=", "value": 1, "blocked_reason": "Нужен тяжёлый инструмент, чтобы не касаться края руками"}], "effects": [{"type": "advance_time", "minutes": 4, "reason": "Обезвреживание острого края"}], "outcome": "Лист больше не цепляет одежду и руки работников."},
+        {"id": "mark", "label": "Отметить место и предупредить приёмщика", "conditions": [], "effects": [{"type": "advance_time", "minutes": 2, "reason": "Предупреждение об опасности"}], "outcome": "Приёмщик ставит рядом ящик и обещает убрать лист щипцами."}
+      ]
+    },
+    {
+      "id": "recycling_foreman_notice", "title": "Мастер ищет помощника", "body": "Мастер спрашивает, кто умеет отличать цветной металл от похожих сплавов.", "tone": "positive",
+      "base_weight": 8, "luck_bias": 1, "cooldown_minutes": 720, "locations": ["recycling_point"], "source_kinds": ["location_action", "job"], "tags": ["work", "knowledge"], "conditions": [],
+      "options": [
+        {"id": "volunteer", "label": "Предложить помощь в сортировке", "conditions": [{"kind": "skill", "id": "trade", "operator": ">=", "value": 1, "blocked_reason": "Пока не хватает практики оценки материалов"}], "effects": [{"type": "advance_time", "minutes": 18, "reason": "Сортировка цветного металла"}, {"type": "change_state", "id": "energy", "delta": -5}, {"type": "change_money", "delta": 30}], "outcome": "Мастер принимает работу и рассчитывается после проверки кучки."},
+        {"id": "listen", "label": "Послушать объяснение мастера", "conditions": [], "effects": [{"type": "advance_time", "minutes": 5, "reason": "Наблюдение за сортировкой"}, {"type": "knowledge", "id": "metal_grades", "amount": 1, "mode": "unlock"}], "outcome": "Вы запоминаете два простых признака разных металлов."}
+      ]
+    },
+    {
+      "id": "recycling_sorted_bonus", "title": "Чистая партия банок", "body": "В стороне лежит небольшая партия уже промытых и сплющенных алюминиевых банок.", "tone": "positive",
+      "base_weight": 7, "luck_bias": 2, "cooldown_minutes": 1440, "locations": ["recycling_point"], "source_kinds": ["location_action"], "tags": ["resource", "trade"], "conditions": [],
+      "options": [
+        {"id": "ask", "label": "Уточнить, можно ли забрать остаток", "conditions": [{"kind": "stat", "id": "charisma", "operator": ">=", "value": 4, "blocked_reason": "Нужно обратиться к приёмщику прямо и спокойно"}], "effects": [{"type": "advance_time", "minutes": 3, "reason": "Разговор с приёмщиком"}, {"type": "add_item", "id": "aluminum_can", "quantity": 2}], "outcome": "Приёмщик разрешает забрать две банки из забракованной партии."},
+        {"id": "leave", "label": "Не трогать чужой материал", "conditions": [], "effects": [], "outcome": "Вы оставляете аккуратную кучку на её месте."}
+      ]
+    },
+    {
+      "id": "recycling_rain_tarp", "title": "Ветер срывает брезент", "body": "Порыв ветра поднимает край брезента над сухим картоном, начинается дождь.", "tone": "adverse",
+      "base_weight": 9, "luck_bias": -1, "cooldown_minutes": 600, "locations": ["recycling_point"], "source_kinds": ["location_action", "job"], "tags": ["weather", "work"], "conditions": [],
+      "options": [
+        {"id": "hold", "label": "Натянуть брезент обратно", "conditions": [{"kind": "stat", "id": "strength", "operator": ">=", "value": 5, "blocked_reason": "Порывы слишком сильны, чтобы удержать край одному"}], "effects": [{"type": "advance_time", "minutes": 6, "reason": "Закрепление брезента"}, {"type": "change_state", "id": "energy", "delta": -3}, {"type": "change_state", "id": "morale", "delta": 2}], "outcome": "Картон остаётся сухим, а край брезента удаётся прижать."},
+        {"id": "warn", "label": "Позвать рабочих из ангара", "conditions": [], "effects": [{"type": "advance_time", "minutes": 4, "reason": "Предупреждение рабочих"}], "outcome": "Рабочие успевают закрепить брезент до сильного дождя."}
+      ]
+    },
+    {
+      "id": "recycling_machine_jam", "title": "Пресс внезапно остановился", "body": "Старый пресс гудит, но плита не двигается; оператор сердито выключает питание.", "tone": "adverse",
+      "base_weight": 8, "luck_bias": -1, "cooldown_minutes": 720, "locations": ["recycling_point"], "source_kinds": ["job"], "tags": ["technical", "work"], "conditions": [],
+      "options": [
+        {"id": "diagnose", "label": "Осмотреть видимую тягу без запуска", "conditions": [{"kind": "skill", "id": "repair", "operator": ">=", "value": 1, "blocked_reason": "Без основ ремонта легко сделать механизм опаснее"}], "effects": [{"type": "advance_time", "minutes": 8, "reason": "Осмотр остановленного пресса"}, {"type": "change_state", "id": "energy", "delta": -2}], "outcome": "Под тягой обнаруживается кусок проволоки, мешающий движению."},
+        {"id": "stand_clear", "label": "Отойти и не мешать оператору", "conditions": [], "effects": [{"type": "advance_time", "minutes": 4, "reason": "Ожидание ремонта"}], "outcome": "Оператор вызывает механика и ограждает место."}
+      ]
+    },
+
+    {
+      "id": "clinic_queue_question", "title": "Очередь не понимает порядок", "body": "У служебного окна люди спорят, кто пришёл раньше и кого должны принять первым.", "tone": "neutral",
+      "base_weight": 9, "luck_bias": 0, "cooldown_minutes": 360, "locations": ["clinic_yard"], "source_kinds": ["location_action", "travel"], "tags": ["social", "health"], "conditions": [],
+      "options": [
+        {"id": "organize", "label": "Предложить восстановить очередь по талонам", "conditions": [{"kind": "stat", "id": "charisma", "operator": ">=", "value": 6, "blocked_reason": "Люди слишком раздражены, чтобы сразу вас услышать"}], "effects": [{"type": "advance_time", "minutes": 6, "reason": "Помощь очереди"}, {"type": "change_state", "id": "morale", "delta": 2}], "outcome": "Номера талонов быстро возвращают очереди понятный порядок."},
+        {"id": "wait", "label": "Остаться в стороне", "conditions": [], "effects": [{"type": "advance_time", "minutes": 4, "reason": "Ожидание у окна"}], "outcome": "Через несколько минут сотрудница сама успокаивает спор."}
+      ]
+    },
+    {
+      "id": "clinic_dropped_note", "title": "Записка у скамейки", "body": "У ножки скамейки лежит сложенная записка с фамилией врача и временем приёма.", "tone": "neutral",
+      "base_weight": 8, "luck_bias": 0, "cooldown_minutes": 720, "locations": ["clinic_yard"], "source_kinds": ["location_action"], "tags": ["social", "knowledge"], "conditions": [],
+      "options": [
+        {"id": "find_owner", "label": "Спросить людей возле окна", "conditions": [{"kind": "stat", "id": "charisma", "operator": ">=", "value": 4, "blocked_reason": "Сейчас трудно обратиться сразу к нескольким незнакомым людям"}], "effects": [{"type": "advance_time", "minutes": 5, "reason": "Поиск владельца записки"}, {"type": "change_state", "id": "morale", "delta": 2}], "outcome": "Записка возвращается женщине, которая уже собиралась уходить."},
+        {"id": "desk", "label": "Передать записку сотруднице окна", "conditions": [], "effects": [{"type": "advance_time", "minutes": 2, "reason": "Передача найденной записки"}], "outcome": "Сотрудница кладёт записку на видное место."}
+      ]
+    },
+    {
+      "id": "clinic_orderly_question", "title": "Санитар задаёт вопрос", "body": "Санитар выносит коробки и спрашивает, не видели ли вы оставленную тележку.", "tone": "neutral",
+      "base_weight": 8, "luck_bias": 0, "cooldown_minutes": 300, "locations": ["clinic_yard"], "source_kinds": ["location_action"], "tags": ["social", "work"], "conditions": [],
+      "options": [
+        {"id": "point", "label": "Вспомнить, где стояла тележка", "conditions": [{"kind": "stat", "id": "intelligence", "operator": ">=", "value": 4, "blocked_reason": "Вы не успели запомнить детали двора"}], "effects": [{"type": "advance_time", "minutes": 3, "reason": "Короткий разговор"}, {"type": "change_state", "id": "morale", "delta": 1}], "outcome": "Санитар находит тележку за углом и благодарит за подсказку."},
+        {"id": "unknown", "label": "Честно сказать, что не заметили", "conditions": [], "effects": [], "outcome": "Санитар кивает и продолжает искать во дворе."}
+      ]
+    },
+    {
+      "id": "clinic_bandage_offer", "title": "Осталась чистая повязка", "body": "Медсестра выбрасывает неповреждённый внешний свёрток и замечает ваш взгляд.", "tone": "positive",
+      "base_weight": 7, "luck_bias": 2, "cooldown_minutes": 1440, "locations": ["clinic_yard"], "source_kinds": ["location_action"], "tags": ["health", "item"], "conditions": [],
+      "options": [
+        {"id": "ask", "label": "Спросить, можно ли забрать ткань", "conditions": [{"kind": "stat", "id": "charisma", "operator": ">=", "value": 4, "blocked_reason": "Нужно ясно объяснить, для чего нужна повязка"}], "effects": [{"type": "advance_time", "minutes": 3, "reason": "Разговор с медсестрой"}, {"type": "add_item", "id": "cloth_rag", "quantity": 1}], "outcome": "Медсестра отдаёт чистую ткань и напоминает держать её сухой."},
+        {"id": "leave", "label": "Не задерживать сотрудницу", "conditions": [], "effects": [], "outcome": "Медсестра уносит свёрток вместе с остальными отходами."}
+      ]
+    },
+    {
+      "id": "clinic_locked_gate", "title": "Калитка закрылась раньше", "body": "Служебная калитка неожиданно закрыта, хотя по расписанию двор ещё должен быть открыт.", "tone": "adverse",
+      "base_weight": 9, "luck_bias": -2, "cooldown_minutes": 720, "locations": ["clinic_yard"], "source_kinds": ["travel", "location_action"], "tags": ["access", "time"], "conditions": [],
+      "options": [
+        {"id": "find_bell", "label": "Найти служебный звонок", "conditions": [{"kind": "knowledge", "id": "clinic_hours", "operator": ">=", "value": 1, "blocked_reason": "Вы не уверены, что окно сейчас вообще работает"}], "effects": [{"type": "advance_time", "minutes": 5, "reason": "Поиск служебного входа"}], "outcome": "Сотрудница открывает боковую дверь и объясняет причину закрытия."},
+        {"id": "return", "label": "Вернуться к главному входу", "conditions": [], "effects": [{"type": "advance_time", "minutes": 6, "reason": "Обход здания"}], "outcome": "Обход занимает время, но главный вход остаётся открыт."}
+      ]
+    },
+    {
+      "id": "clinic_ambulance_arrival", "title": "Во двор въезжает машина", "body": "Медицинская машина резко сворачивает во двор, и проход нужно освободить немедленно.", "tone": "adverse",
+      "base_weight": 8, "luck_bias": -1, "cooldown_minutes": 480, "locations": ["clinic_yard"], "source_kinds": ["location_action", "travel"], "tags": ["hazard", "health"], "conditions": [],
+      "options": [
+        {"id": "move_bench", "label": "Помочь отодвинуть лёгкую скамью", "conditions": [{"kind": "stat", "id": "strength", "operator": ">=", "value": 5, "blocked_reason": "Скамья слишком тяжела для быстрого движения"}], "effects": [{"type": "advance_time", "minutes": 3, "reason": "Освобождение проезда"}, {"type": "change_state", "id": "energy", "delta": -2}], "outcome": "Машина проходит, не цепляя край скамьи."},
+        {"id": "step_back", "label": "Быстро отойти за ограждение", "conditions": [], "effects": [{"type": "change_state", "id": "tension", "delta": 2}], "outcome": "Вы освобождаете проезд и ждёте, пока машина остановится."}
+      ]
+    },
+
+    {
+      "id": "embankment_fisher_line", "title": "Запуталась рыболовная леска", "body": "У парапета рыбак пытается распутать леску, затянутую вокруг ржавого кольца.", "tone": "neutral",
+      "base_weight": 9, "luck_bias": 0, "cooldown_minutes": 480, "locations": ["embankment"], "source_kinds": ["location_action", "travel"], "tags": ["social", "technical"], "conditions": [],
+      "options": [
+        {"id": "untangle", "label": "Предложить аккуратно распутать узел", "conditions": [{"kind": "stat", "id": "intelligence", "operator": ">=", "value": 5, "blocked_reason": "Узел слишком сложен, леску легко порвать"}], "effects": [{"type": "advance_time", "minutes": 7, "reason": "Распутывание лески"}, {"type": "change_state", "id": "morale", "delta": 2}], "outcome": "Леска остаётся целой, и рыбак благодарит за терпение."},
+        {"id": "leave", "label": "Не отвлекать рыбака", "conditions": [], "effects": [], "outcome": "Рыбак продолжает разбирать узел самостоятельно."}
+      ]
+    },
+    {
+      "id": "embankment_patrol_light", "title": "Свет патрульной машины", "body": "На дальнем въезде появляется медленный свет патрульной машины.", "tone": "adverse",
+      "base_weight": 10, "luck_bias": -2, "cooldown_minutes": 600, "locations": ["embankment"], "source_kinds": ["location_action", "travel"], "tags": ["authority", "risk"], "conditions": [],
+      "options": [
+        {"id": "stay_calm", "label": "Остаться у парапета и не суетиться", "conditions": [{"kind": "stat", "id": "charisma", "operator": ">=", "value": 5, "blocked_reason": "Напряжение слишком заметно в движениях"}], "effects": [{"type": "advance_time", "minutes": 3, "reason": "Ожидание у парапета"}], "outcome": "Машина проезжает по дороге, не сворачивая к воде."},
+        {"id": "walk", "label": "Спокойно уйти к освещённой лестнице", "conditions": [], "effects": [{"type": "advance_time", "minutes": 5, "reason": "Переход к лестнице"}, {"type": "change_state", "id": "tension", "delta": 2}], "outcome": "Вы поднимаетесь к обычному пешеходному маршруту."}
+      ]
+    },
+    {
+      "id": "embankment_cold_wind", "title": "Ветер усиливается", "body": "С воды приходит резкий холодный ветер, открытая часть набережной быстро пустеет.", "tone": "adverse",
+      "base_weight": 9, "luck_bias": -1, "cooldown_minutes": 360, "locations": ["embankment"], "source_kinds": ["location_action"], "tags": ["weather", "health"], "conditions": [],
+      "options": [
+        {"id": "shelter", "label": "Найти нишу за лестницей", "conditions": [{"kind": "knowledge", "id": "embankment_shelter", "operator": ">=", "value": 1, "blocked_reason": "Вы ещё не знаете защищённых от ветра мест"}], "effects": [{"type": "advance_time", "minutes": 5, "reason": "Переход в укрытие"}, {"type": "change_state", "id": "tension", "delta": -1}], "outcome": "Бетонная ниша почти полностью закрывает ветер."},
+        {"id": "leave", "label": "Подняться с открытой набережной", "conditions": [], "effects": [{"type": "advance_time", "minutes": 8, "reason": "Уход с набережной"}, {"type": "change_state", "id": "energy", "delta": -2}], "outcome": "На верхней улице ветер ощущается заметно слабее."}
+      ]
+    },
+    {
+      "id": "embankment_lost_glove", "title": "Перчатка на парапете", "body": "На парапете лежит одинокая рабочая перчатка, сухая и почти целая.", "tone": "positive",
+      "base_weight": 7, "luck_bias": 2, "cooldown_minutes": 1440, "locations": ["embankment"], "source_kinds": ["location_action", "travel"], "tags": ["item", "luck"], "conditions": [],
+      "options": [
+        {"id": "look_pair", "label": "Осмотреть дорожку в поисках пары", "conditions": [{"kind": "skill", "id": "search", "operator": ">=", "value": 1, "blocked_reason": "Без привычки легко пропустить перчатку среди мусора"}], "effects": [{"type": "advance_time", "minutes": 6, "reason": "Поиск второй перчатки"}, {"type": "add_item", "id": "work_gloves", "quantity": 1}], "outcome": "Вторая перчатка находится под ближайшей скамьёй."},
+        {"id": "leave", "label": "Оставить перчатку владельцу", "conditions": [], "effects": [], "outcome": "Перчатка остаётся на заметном месте у дорожки."}
+      ]
+    },
+    {
+      "id": "embankment_gulls_food", "title": "Чайки кружат над пакетом", "body": "У урны чайки разрывают бумажный пакет, внутри видна закрытая банка.", "tone": "positive",
+      "base_weight": 7, "luck_bias": 2, "cooldown_minutes": 720, "locations": ["embankment"], "source_kinds": ["location_action"], "tags": ["food", "search"], "conditions": [],
+      "options": [
+        {"id": "check", "label": "Отогнать чаек и проверить банку", "conditions": [{"kind": "state", "id": "energy", "operator": ">=", "value": 10, "blocked_reason": "Сейчас трудно быстро подойти к шумной стае"}], "effects": [{"type": "advance_time", "minutes": 4, "reason": "Осмотр пакета"}, {"type": "add_item", "id": "sealed_food_can", "quantity": 1}], "outcome": "Банка не повреждена и остаётся плотно закрытой."},
+        {"id": "ignore", "label": "Не подходить к стае", "conditions": [], "effects": [], "outcome": "Вы обходите шумную урну по дальней стороне дорожки."}
+      ]
+    },
+    {
+      "id": "embankment_bench_story", "title": "Сосед по скамейке", "body": "Мужчина с газетой освобождает край скамейки и начинает разговор о районе.", "tone": "positive",
+      "base_weight": 8, "luck_bias": 1, "cooldown_minutes": 960, "locations": ["embankment"], "source_kinds": ["location_action"], "tags": ["social", "knowledge"], "conditions": [],
+      "options": [
+        {"id": "listen", "label": "Выслушать рассказ до конца", "conditions": [{"kind": "stat", "id": "charisma", "operator": ">=", "value": 4, "blocked_reason": "Сейчас трудно поддерживать доверительный разговор"}], "effects": [{"type": "advance_time", "minutes": 12, "reason": "Разговор на скамейке"}, {"type": "knowledge", "id": "embankment_routines", "amount": 1, "mode": "unlock"}, {"type": "change_state", "id": "morale", "delta": 3}], "outcome": "Рассказ помогает понять привычный ритм набережной."},
+        {"id": "short", "label": "Вежливо закончить разговор", "conditions": [], "effects": [{"type": "advance_time", "minutes": 2, "reason": "Короткий разговор"}], "outcome": "Мужчина возвращается к газете без обиды."}
+      ]
+    }
+  ]
+}
