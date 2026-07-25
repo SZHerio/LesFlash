@@ -19,6 +19,7 @@
 - [Живой продуктовый roadmap](docs/ROADMAP.md)
 - [Исполнимый план разработки](docs/DEVELOPMENT_PLAN.md)
 - [Обязательный UI/UX-стандарт](docs/UI_UX_STANDARD.md)
+- [UI-бэклог: что известно и что предстоит](docs/UI_BACKLOG.md)
 - [Поисковая мини-игра и инвентарь](docs/SEARCH_AND_INVENTORY.md)
 - [Инструкции для ИИ-агентов](AGENTS.md)
 - [Реализация системного ядра M1](docs/M1_CORE.md)
