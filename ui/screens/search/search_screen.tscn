@@ -13,10 +13,10 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.28, 0.34, 0.34, 0.78)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleWorld"]
 bg_color = Color(0.04, 0.05, 0.055, 1)
@@ -25,10 +25,22 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.24, 0.29, 0.29, 0.8)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleWorldFrame"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.498, 0.553, 0.529, 0.65)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleMapHint"]
 bg_color = Color(0.035, 0.048, 0.052, 0.86)
@@ -37,10 +49,10 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.43, 0.53, 0.5, 0.62)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="SearchScreen" type="Control"]
 layout_mode = 3
@@ -65,7 +77,7 @@ grow_vertical = 2
 
 [node name="Root" type="VBoxContainer" parent="ScreenMargin"]
 layout_mode = 2
-theme_override_constants/separation = 7
+theme_override_constants/separation = 8
 
 [node name="TopPanel" type="PanelContainer" parent="ScreenMargin/Root"]
 layout_mode = 2
@@ -73,14 +85,14 @@ theme_override_styles/panel = SubResource("StyleTop")
 
 [node name="TopMargin" type="MarginContainer" parent="ScreenMargin/Root/TopPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 13
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 13
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
 
 [node name="TopContent" type="VBoxContainer" parent="ScreenMargin/Root/TopPanel/TopMargin"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 8
 
 [node name="TitleRow" type="HBoxContainer" parent="ScreenMargin/Root/TopPanel/TopMargin/TopContent"]
 layout_mode = 2
@@ -201,6 +213,16 @@ theme_override_constants/margin_bottom = 8
 unique_name_in_owner = true
 layout_mode = 2
 
+[node name="WorldFrame" type="Panel" parent="ScreenMargin/Root/WorldPanel/WorldStack"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleWorldFrame")
+
 [node name="Hint" type="Label" parent="ScreenMargin/Root"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -209,6 +231,7 @@ text = "Ходьба не тратит игровое время. Время м�
 autowrap_mode = 2
 
 [node name="Actions" type="HBoxContainer" parent="ScreenMargin/Root"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 8
 
@@ -225,7 +248,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_type_variation = &"PrimaryButton"
+theme_type_variation = &"SecondaryButton"
 text = "Быстрый поиск"
 
 [node name="InteractionSheet" parent="." instance=ExtResource("4_sheet")]

@@ -23,72 +23,77 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 10
+theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 10
+theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
 [node name="Layout" type="VBoxContainer" parent="ScreenMargin"]
 layout_mode = 2
-theme_override_constants/separation = 7
+theme_override_constants/separation = 8
 
 [node name="GameHeader" parent="ScreenMargin/Layout" instance=ExtResource("2_header")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="InventoryScroll" type="ScrollContainer" parent="ScreenMargin/Layout"]
+[node name="ContentPanel" type="PanelContainer" parent="ScreenMargin/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"SurfaceCard"
+
+[node name="InventoryScroll" type="ScrollContainer" parent="ScreenMargin/Layout/ContentPanel"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="Body" type="VBoxContainer" parent="ScreenMargin/Layout/InventoryScroll"]
+[node name="Body" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="Context" type="VBoxContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+[node name="Context" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body"]
 layout_mode = 2
-theme_override_constants/separation = 2
+theme_override_constants/separation = 4
 
-[node name="Eyebrow" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/Context"]
+[node name="Eyebrow" type="Label" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/Context"]
 layout_mode = 2
 theme_type_variation = &"EyebrowLabel"
 text = "ВСЁ, ЧТО ПРИ ВАС И РЯДОМ"
 
-[node name="LocationLabel" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/Context"]
+[node name="LocationLabel" type="Label" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/Context"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"MutedLabel"
 text = "Сейчас: Подземный переход"
 autowrap_mode = 2
 
-[node name="CapacityFlow" type="HFlowContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+[node name="CapacityFlow" type="HFlowContainer" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body"]
 layout_mode = 2
-theme_override_constants/h_separation = 7
-theme_override_constants/v_separation = 7
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
 
-[node name="MassCard" parent="ScreenMargin/Layout/InventoryScroll/Body/CapacityFlow" instance=ExtResource("3_capacity")]
+[node name="MassCard" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/CapacityFlow" instance=ExtResource("3_capacity")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="VolumeCard" parent="ScreenMargin/Layout/InventoryScroll/Body/CapacityFlow" instance=ExtResource("3_capacity")]
+[node name="VolumeCard" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/CapacityFlow" instance=ExtResource("3_capacity")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="OverloadPanel" type="PanelContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+[node name="OverloadPanel" type="PanelContainer" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_type_variation = &"ToastErrorPanel"
 
-[node name="Copy" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/OverloadPanel"]
+[node name="Copy" type="Label" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/OverloadPanel"]
 layout_mode = 2
 theme_type_variation = &"BodyLabel"
 text = "⚠ Перегруз: освободите место, чтобы снова действовать свободно."
 autowrap_mode = 2
 
-[node name="CapacityMessage" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+[node name="CapacityMessage" type="Label" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -96,75 +101,75 @@ theme_type_variation = &"MutedLabel"
 text = "Сила увеличивает массу, но не объём."
 autowrap_mode = 2
 
-[node name="FilterFlow" type="HFlowContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+[node name="FilterFlow" type="HFlowContainer" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body"]
 layout_mode = 2
-theme_override_constants/h_separation = 6
-theme_override_constants/v_separation = 6
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
 
-[node name="ContainerFilter" type="OptionButton" parent="ScreenMargin/Layout/InventoryScroll/Body/FilterFlow"]
+[node name="ContainerFilter" type="OptionButton" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/FilterFlow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(88, 48)
 layout_mode = 2
 size_flags_horizontal = 1
 theme_type_variation = &"SecondaryButton"
 
-[node name="KindFilter" type="OptionButton" parent="ScreenMargin/Layout/InventoryScroll/Body/FilterFlow"]
+[node name="KindFilter" type="OptionButton" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/FilterFlow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(88, 48)
 layout_mode = 2
 size_flags_horizontal = 1
 theme_type_variation = &"SecondaryButton"
 
-[node name="SortPicker" type="OptionButton" parent="ScreenMargin/Layout/InventoryScroll/Body/FilterFlow"]
+[node name="SortPicker" type="OptionButton" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/FilterFlow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(88, 48)
 layout_mode = 2
 size_flags_horizontal = 1
 theme_type_variation = &"SecondaryButton"
 
-[node name="ListHeader" type="HBoxContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+[node name="ListHeader" type="HBoxContainer" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body"]
 layout_mode = 2
 
-[node name="ListTitle" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/ListHeader"]
+[node name="ListTitle" type="Label" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/ListHeader"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"SectionTitle"
 text = "ПРЕДМЕТЫ"
 
-[node name="ItemCount" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/ListHeader"]
+[node name="ItemCount" type="Label" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/ListHeader"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"MetaLabel"
 text = "0 позиций"
 
-[node name="ItemsList" type="VBoxContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+[node name="ItemsList" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 7
+theme_override_constants/separation = 8
 
-[node name="EmptyState" type="MarginContainer" parent="ScreenMargin/Layout/InventoryScroll/Body"]
+[node name="EmptyState" type="MarginContainer" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="EmptyCopy" type="VBoxContainer" parent="ScreenMargin/Layout/InventoryScroll/Body/EmptyState"]
+[node name="EmptyCopy" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/EmptyState"]
 layout_mode = 2
-theme_override_constants/separation = 3
+theme_override_constants/separation = 4
 
-[node name="EmptyMark" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/EmptyState/EmptyCopy"]
+[node name="EmptyMark" type="Label" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/EmptyState/EmptyCopy"]
 layout_mode = 2
 theme_type_variation = &"ScreenTitle"
 text = "∅"
 horizontal_alignment = 1
 
-[node name="EmptyTitle" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/EmptyState/EmptyCopy"]
+[node name="EmptyTitle" type="Label" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/EmptyState/EmptyCopy"]
 layout_mode = 2
 theme_type_variation = &"ActionTitleLabel"
 text = "Пока ничего нет"
 horizontal_alignment = 1
 
-[node name="EmptyBody" type="Label" parent="ScreenMargin/Layout/InventoryScroll/Body/EmptyState/EmptyCopy"]
+[node name="EmptyBody" type="Label" parent="ScreenMargin/Layout/ContentPanel/InventoryScroll/Body/EmptyState/EmptyCopy"]
 layout_mode = 2
 theme_type_variation = &"BodyMuted"
 text = "Находки появятся после ваших действий. Стартовых ресурсов у героя нет."

@@ -75,11 +75,10 @@ static func _quick_search_model(raw_value: Variant) -> Dictionary:
 	if not raw_value is Dictionary:
 		return {"visible": false, "enabled": false, "blocked_reason": ""}
 	var model: Dictionary = Dictionary(raw_value).duplicate(true)
-	model["visible"] = bool(model.get("visible", not model.is_empty()))
-	model["enabled"] = bool(model.get("enabled", false))
-	model["blocked_reason"] = String(model.get("blocked_reason", ""))
-	model["progress_text"] = String(model.get("progress_text", ""))
-	return model
+	return {
+		"visible": bool(model.get("visible", not model.is_empty())),
+		"enabled": bool(model.get("enabled", false)),
+	}
 
 
 static func _effective_psyche_intensity(

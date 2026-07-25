@@ -62,14 +62,17 @@ static func _draw_object(
 		if near and not bool(model["reduced_motion"])
 		else 1.0
 	)
-	canvas.draw_circle(position, 21.0 * pulse, Color(0.03, 0.05, 0.055, 0.68))
-	canvas.draw_circle(position, 17.0 * pulse, Color(color, 0.16 if not near else 0.3))
+	# The disc stays dark so the glyph on top of it keeps its contrast. Drawing
+	# halo, fill, ring and glyph in one colour made every object read as the
+	# same featureless pale circle from more than a step away.
+	canvas.draw_circle(position, 21.0 * pulse, Color(0.03, 0.05, 0.055, 0.82))
+	canvas.draw_circle(position, 17.0 * pulse, Color(0.04, 0.06, 0.065, 0.9))
 	canvas.draw_arc(position, 19.0 * pulse, 0.0, TAU, 30, Color(color, 0.95), 2.5)
 	_draw_object_mark(
 		canvas,
 		position,
 		String(object.get("type", "open")),
-		color,
+		Color("#f1ece0") if not interacted else Color("#8d97a0"),
 		interacted
 	)
 	if near or focused:
@@ -89,17 +92,27 @@ static func _draw_object_mark(
 	interacted: bool
 ) -> void:
 	if interacted:
-		canvas.draw_line(position + Vector2(-5, 0), position + Vector2(-1, 5), color, 2.5)
-		canvas.draw_line(position + Vector2(-1, 5), position + Vector2(7, -6), color, 2.5)
+		canvas.draw_line(position + Vector2(-6, 0), position + Vector2(-1, 6), color, 3.0)
+		canvas.draw_line(position + Vector2(-1, 6), position + Vector2(8, -7), color, 3.0)
 	elif type_id in ["locked", "trespass"]:
-		canvas.draw_rect(Rect2(position + Vector2(-6, -1), Vector2(12, 10)), color, false, 2.0)
-		canvas.draw_arc(position + Vector2(0, -2), 6.0, PI, TAU, 14, color, 2.0)
+		canvas.draw_rect(Rect2(position + Vector2(-7, -1), Vector2(14, 11)), color, false, 2.5)
+		canvas.draw_arc(position + Vector2(0, -2), 6.5, PI, TAU, 16, color, 2.5)
 	elif type_id == "social":
-		canvas.draw_circle(position + Vector2(0, -5), 4.0, color)
-		canvas.draw_arc(position + Vector2(0, 8), 8.0, PI, TAU, 14, color, 2.0)
+		canvas.draw_circle(position + Vector2(0, -6), 4.5, color)
+		canvas.draw_arc(position + Vector2(0, 8), 8.5, PI, TAU, 16, color, 2.5)
+	elif type_id == "heavy":
+		canvas.draw_rect(Rect2(position + Vector2(-8, -6), Vector2(16, 12)), color, false, 2.5)
+		canvas.draw_line(position + Vector2(-8, 0), position + Vector2(8, 0), color, 2.5)
+	elif type_id == "hazardous":
+		canvas.draw_line(position + Vector2(0, -8), position + Vector2(-8, 7), color, 2.5)
+		canvas.draw_line(position + Vector2(-8, 7), position + Vector2(8, 7), color, 2.5)
+		canvas.draw_line(position + Vector2(8, 7), position + Vector2(0, -8), color, 2.5)
+	elif type_id == "hidden":
+		canvas.draw_arc(position, 7.5, 0.4, 2.7, 14, color, 2.5)
+		canvas.draw_circle(position + Vector2(0, 7), 2.0, color)
 	else:
-		canvas.draw_line(position + Vector2(-7, 0), position + Vector2(7, 0), color, 2.0)
-		canvas.draw_line(position + Vector2(0, -7), position + Vector2(0, 7), color, 2.0)
+		canvas.draw_line(position + Vector2(-8, 0), position + Vector2(8, 0), color, 2.5)
+		canvas.draw_line(position + Vector2(0, -8), position + Vector2(0, 8), color, 2.5)
 
 
 static func _draw_object_label(

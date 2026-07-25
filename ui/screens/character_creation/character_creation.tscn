@@ -1,7 +1,12 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://ui/screens/character_creation/character_creation.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://ui/components/characteristic_stepper.tscn" id="2_stepper"]
+[ext_resource type="PackedScene" path="res://ui/components/info_sheet.tscn" id="3_info"]
+
+[sub_resource type="StyleBoxLine" id="StyleRule"]
+color = Color(0.353, 0.408, 0.384, 0.4)
+thickness = 1
 
 [node name="CharacterCreationScreen" type="Control"]
 layout_mode = 3
@@ -23,11 +28,11 @@ theme_override_constants/separation = 12
 
 [node name="Header" type="HBoxContainer" parent="Layout"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
 [node name="BackButton" type="Button" parent="Layout/Header"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(54, 54)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 theme_type_variation = &"IconButton"
 text = "←"
@@ -40,85 +45,77 @@ text = "Кем вы станете?"
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="Scroll" type="ScrollContainer" parent="Layout"]
+[node name="ContentPanel" type="PanelContainer" parent="Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"SurfaceCard"
+
+[node name="Scroll" type="ScrollContainer" parent="Layout/ContentPanel"]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="Body" type="VBoxContainer" parent="Layout/Scroll"]
+[node name="Body" type="VBoxContainer" parent="Layout/ContentPanel/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
-[node name="IntroCard" type="PanelContainer" parent="Layout/Scroll/Body"]
-layout_mode = 2
-theme_type_variation = &"SurfaceCard"
-
-[node name="Margin" type="MarginContainer" parent="Layout/Scroll/Body/IntroCard"]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 14
-
-[node name="Text" type="Label" parent="Layout/Scroll/Body/IntroCard/Margin"]
+[node name="Subtitle" type="Label" parent="Layout/ContentPanel/Scroll/Body"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"BodyMuted"
-text = "Все характеристики начинаются с 1. Вложите оставшиеся очки: сильным во всём быть невозможно, и выбранные пределы откроют разные пути."
+text = "Коснитесь названия, чтобы узнать, на что оно влияет."
 autowrap_mode = 2
 
-[node name="PointsCard" type="PanelContainer" parent="Layout/Scroll/Body"]
+[node name="PointsRow" type="HBoxContainer" parent="Layout/ContentPanel/Scroll/Body"]
 layout_mode = 2
-theme_type_variation = &"HeroCard"
+theme_override_constants/separation = 12
 
-[node name="Margin" type="MarginContainer" parent="Layout/Scroll/Body/PointsCard"]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 12
-
-[node name="Row" type="HBoxContainer" parent="Layout/Scroll/Body/PointsCard/Margin"]
-layout_mode = 2
-
-[node name="Caption" type="Label" parent="Layout/Scroll/Body/PointsCard/Margin/Row"]
+[node name="Caption" type="Label" parent="Layout/ContentPanel/Scroll/Body/PointsRow"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
 theme_type_variation = &"SectionTitle"
 text = "Свободные очки"
 
-[node name="PointsLabel" type="Label" parent="Layout/Scroll/Body/PointsCard/Margin/Row"]
+[node name="PointsLabel" type="Label" parent="Layout/ContentPanel/Scroll/Body/PointsRow"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 4
 theme_type_variation = &"ScreenTitle"
 text = "14"
 
-[node name="StrengthStepper" parent="Layout/Scroll/Body" instance=ExtResource("2_stepper")]
+[node name="Rule" type="HSeparator" parent="Layout/ContentPanel/Scroll/Body"]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleRule")
+
+[node name="Steppers" type="VBoxContainer" parent="Layout/ContentPanel/Scroll/Body"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="StrengthStepper" parent="Layout/ContentPanel/Scroll/Body/Steppers" instance=ExtResource("2_stepper")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="CharismaStepper" parent="Layout/Scroll/Body" instance=ExtResource("2_stepper")]
+[node name="CharismaStepper" parent="Layout/ContentPanel/Scroll/Body/Steppers" instance=ExtResource("2_stepper")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="IntelligenceStepper" parent="Layout/Scroll/Body" instance=ExtResource("2_stepper")]
+[node name="IntelligenceStepper" parent="Layout/ContentPanel/Scroll/Body/Steppers" instance=ExtResource("2_stepper")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="LuckStepper" parent="Layout/Scroll/Body" instance=ExtResource("2_stepper")]
+[node name="LuckStepper" parent="Layout/ContentPanel/Scroll/Body/Steppers" instance=ExtResource("2_stepper")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ConfirmButton" type="Button" parent="Layout/Scroll/Body"]
+[node name="ConfirmButton" type="Button" parent="Layout"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 62)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_type_variation = &"PrimaryButton"
 text = "Распределите ещё 14"
 
-[node name="Hint" type="Label" parent="Layout/Scroll/Body"]
-layout_mode = 2
-theme_type_variation = &"BodyMuted"
-text = "Сумма четырёх характеристик должна быть ровно 18."
-horizontal_alignment = 1
-autowrap_mode = 2
+[node name="InfoSheet" parent="." instance=ExtResource("3_info")]
+unique_name_in_owner = true
+layout_mode = 1

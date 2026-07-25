@@ -204,31 +204,17 @@ static func _suggested_container(
 	return fallback
 
 
+## The control does not exist until it is earned: no greyed-out placeholder, no
+## counter, no hint about what would unlock it. The zone is something to work
+## out by playing it. Once earned it stays visible, and only a waiting encounter
+## can switch it off.
 static func _quick_search(run_state: RunState, snapshot: Dictionary) -> Dictionary:
-	var resolved := InteractionResolver.exhausted_count(snapshot)
-	var required := InteractionTransaction.QUICK_SEARCH_RESOLVED_REQUIRED
 	if run_state == null:
-		return {"visible": false, "enabled": false, "blocked_reason": ""}
-	if resolved < required or run_state.get_skill_rank("search") < 1:
-		return {
-			"visible": true,
-			"enabled": false,
-			"progress_text": "%d/%d" % [mini(resolved, required), required],
-			"blocked_reason": "Быстрый поиск откроется, когда вы разберётесь с %d объектами зоны: сейчас %d." % [
-				required,
-				resolved,
-			],
-		}
-	if not SessionTransaction.pending_encounter(snapshot).is_empty():
-		return {
-			"visible": true,
-			"enabled": false,
-			"progress_text": "",
-			"blocked_reason": "Сначала ответьте на то, что происходит рядом.",
-		}
-	return {
-		"visible": true,
-		"enabled": true,
-		"progress_text": "",
-		"blocked_reason": "",
-	}
+		return {"visible": false, "enabled": false}
+	var earned := (
+		InteractionResolver.exhausted_count(snapshot)
+		>= InteractionTransaction.QUICK_SEARCH_RESOLVED_REQUIRED
+		and run_state.get_skill_rank("search") >= 1
+	)
+	var encounter_waiting := not SessionTransaction.pending_encounter(snapshot).is_empty()
+	return {"visible": earned, "enabled": earned and not encounter_waiting}

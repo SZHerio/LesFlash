@@ -31,6 +31,7 @@ const CapacitySheetScript := preload(
 @onready var _loot_tray: SearchLootTray = %LootTray
 @onready var _quick_search: Button = %QuickSearch
 @onready var _finish: Button = %Finish
+@onready var _actions: HBoxContainer = %Actions
 @onready var _sheet: SearchInteractionSheet = %InteractionSheet
 @onready var _capacity_sheet: CapacitySheetScript = %CapacitySheet
 
@@ -38,7 +39,7 @@ var _model: Dictionary = {}
 var _objects: Dictionary = {}
 var _reduced_motion := false
 var _risk: Dictionary = {}
-var _quick_progress := ""
+var _actions_paired := false
 
 
 func _ready() -> void:
@@ -154,13 +155,27 @@ func _open_object(object_id: String) -> void:
 		_sheet.present(Dictionary(_objects[object_id]), _reduced_motion)
 
 
-## The hint line belongs to the instruction that teaches the zone. A locked
-## quick search explains itself on its own button instead of taking it over.
+## A control the player has not earned yet is absent, not greyed out: no
+## placeholder and no explanation of what would bring it in.
 func _present_quick_search(quick: Dictionary) -> void:
-	_quick_search.visible = bool(quick.get("visible", false))
+	var earned := bool(quick.get("visible", false))
+	_quick_search.visible = earned
 	_quick_search.disabled = not bool(quick.get("enabled", false))
-	_quick_search.tooltip_text = String(quick.get("blocked_reason", ""))
-	_quick_progress = String(quick.get("progress_text", ""))
+	_layout_actions(earned)
+
+
+## Alone, the exit sits centred at its own width. Once quick search is earned the
+## pair shares the row evenly.
+func _layout_actions(paired: bool) -> void:
+	_actions_paired = paired
+	_actions.alignment = (
+		BoxContainer.ALIGNMENT_BEGIN if paired else BoxContainer.ALIGNMENT_CENTER
+	)
+	_finish.size_flags_horizontal = (
+		Control.SIZE_EXPAND_FILL if paired else Control.SIZE_SHRINK_CENTER
+	)
+	_finish.custom_minimum_size.x = 0.0 if paired else 200.0
+	_apply_density()
 
 
 func _present_risk(risk: Dictionary) -> void:
@@ -184,13 +199,9 @@ func _apply_density() -> void:
 		return
 	var font_scale := float(_model.get("font_scale", 1.0))
 	var compact := size.x < 410.0 or size.y < 720.0 or font_scale >= 1.5
-	_finish.text = "Закончить" if compact else "Закончить поиск"
-	var quick_label := "Быстро" if compact else "Быстрый поиск"
-	_quick_search.text = (
-		quick_label
-		if _quick_progress.is_empty()
-		else "%s %s" % [quick_label, _quick_progress]
-	)
+	# Alone the exit has the whole row to itself and keeps its full label.
+	_finish.text = "Закончить" if compact and _actions_paired else "Закончить поиск"
+	_quick_search.text = "Быстро" if compact else "Быстрый поиск"
 	_hint.visible = not (font_scale >= 1.75 and size.y < 760.0)
 	_map_hint.visible = font_scale < 1.5
 	if compact:

@@ -368,7 +368,10 @@ func _on_back_requested() -> void:
 		return
 	match _route:
 		"menu": _on_close_requested()
-		"creation": _show_main_menu()
+		"creation":
+			var creation := _shell.current_screen() as CharacterCreationScreen
+			if creation == null or not creation.handle_back():
+				_show_main_menu()
 		"settings": _return_from_settings()
 		"location":
 			_leave_session_to_menu()

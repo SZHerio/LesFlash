@@ -26,6 +26,7 @@ const CHARACTERISTIC_COPY := {
 
 @onready var _points_label: Label = %PointsLabel
 @onready var _confirm_button: Button = %ConfirmButton
+@onready var _info_sheet: InfoSheet = %InfoSheet
 @onready var _steppers := {
 	"strength": %StrengthStepper,
 	"charisma": %CharismaStepper,
@@ -45,7 +46,32 @@ func _ready() -> void:
 	_confirm_button.pressed.connect(_confirm)
 	for stepper in _steppers.values():
 		stepper.delta_requested.connect(_on_delta_requested)
+		stepper.description_requested.connect(_show_description)
 	_refresh()
+
+
+## Back closes the explanation first, so reading about a characteristic can
+## never drop the player out of character creation.
+func handle_back() -> bool:
+	if _info_sheet != null and _info_sheet.is_open():
+		_info_sheet.close()
+		return true
+	return false
+
+
+func has_open_sheet() -> bool:
+	return _info_sheet != null and _info_sheet.is_open()
+
+
+func _show_description(characteristic_id: String) -> void:
+	var copy: Dictionary = CHARACTERISTIC_COPY.get(characteristic_id, {})
+	if copy.is_empty():
+		return
+	_info_sheet.present(
+		String(copy["title"]),
+		String(copy["description"]),
+		_reduced_motion
+	)
 
 
 func present(model: Dictionary) -> void:
@@ -67,6 +93,8 @@ func set_reduced_motion(enabled: bool) -> void:
 	_reduced_motion = enabled
 	for stepper in _steppers.values():
 		stepper.set_reduced_motion(enabled)
+	if _info_sheet != null:
+		_info_sheet.set_reduced_motion(enabled)
 
 
 func _on_delta_requested(characteristic_id: String, delta: int) -> void:
@@ -94,7 +122,6 @@ func _refresh() -> void:
 		_steppers[characteristic_id].present({
 			"id": characteristic_id,
 			"title": copy["title"],
-			"description": copy["description"],
 			"value": int(_values[characteristic_id]),
 			"can_decrease": int(_values[characteristic_id]) > _minimum,
 			"can_increase": int(_values[characteristic_id]) < _maximum and remaining > 0,
