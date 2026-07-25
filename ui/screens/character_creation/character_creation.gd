@@ -116,7 +116,10 @@ func _refresh() -> void:
 	_points_label.text = "%d" % remaining
 	_points_label.modulate = Color("d8b36a") if remaining == 0 else Color.WHITE
 	_confirm_button.disabled = remaining != 0
-	_confirm_button.text = "Начать жизнь" if remaining == 0 else "Распределите ещё %d" % remaining
+	# The count is already on screen above; repeating it here says nothing new.
+	_confirm_button.text = (
+		"Начать жизнь" if remaining == 0 else "Есть свободные очки"
+	)
 	for characteristic_id in CHARACTERISTIC_ORDER:
 		var copy: Dictionary = CHARACTERISTIC_COPY[characteristic_id]
 		_steppers[characteristic_id].present({

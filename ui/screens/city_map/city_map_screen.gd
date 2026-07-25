@@ -17,7 +17,7 @@ const CityMapCanvasScript = preload("res://ui/components/city_map_canvas.gd")
 @onready var _trip_panel: PanelContainer = %TripPanel
 @onready var _destination_label: Label = %DestinationLabel
 @onready var _route_state: Label = %RouteState
-@onready var _mode_picker: OptionButton = %ModePicker
+@onready var _mode_picker: SegmentedRow = %ModePicker
 @onready var _mode_meta_label: Label = %ModeMetaLabel
 @onready var _reason_label: Label = %ReasonLabel
 @onready var _confirm_button: Button = %ConfirmButton
@@ -37,8 +37,7 @@ func _ready() -> void:
 	_back_button.pressed.connect(func() -> void: back_requested.emit())
 	_map_canvas.destination_selected.connect(_on_destination_selected)
 	_map_canvas.travel_animation_finished.connect(_on_travel_animation_finished)
-	_mode_picker.item_selected.connect(_on_mode_selected)
-	_mode_picker.get_popup().add_theme_constant_override("v_separation", 28)
+	_mode_picker.option_selected.connect(_select_mode)
 	_confirm_button.pressed.connect(_on_confirm_pressed)
 	_show_empty_trip()
 
@@ -105,11 +104,10 @@ func _on_destination_selected(destination_id: String) -> void:
 
 
 func _present_route(route: Dictionary) -> void:
-	_mode_picker.clear()
+	_mode_picker.present([], "")
 	_mode_models.clear()
 	_selected_mode_id = ""
 	if route.is_empty():
-		_mode_picker.disabled = true
 		_confirm_button.disabled = true
 		_mode_meta_label.text = "Нет пути"
 		_reason_label.text = "Из текущего места сюда пока нет известного маршрута."
@@ -121,34 +119,47 @@ func _present_route(route: Dictionary) -> void:
 		if not raw_mode is Dictionary:
 			continue
 		var mode := Dictionary(raw_mode).duplicate(true)
-		var mode_id := String(mode.get("id", ""))
-		if mode_id.is_empty():
+		if String(mode.get("id", "")).is_empty():
 			continue
 		_mode_models.append(mode)
-		_mode_picker.add_item(_mode_title(mode))
 	if _mode_models.is_empty():
 		var fallback_mode := route.duplicate(true)
 		fallback_mode["id"] = String(route.get("mode_id", "route"))
 		fallback_mode["transport"] = String(route.get("transport", "Маршрут"))
 		_mode_models.append(fallback_mode)
-		_mode_picker.add_item(_mode_title(fallback_mode))
 
-	_mode_picker.disabled = false
-	var first_available := -1
-	for index in range(_mode_models.size()):
-		if bool(_mode_models[index].get("available", true)):
-			first_available = index
+	var first_available := ""
+	for mode: Dictionary in _mode_models:
+		if bool(mode.get("available", true)):
+			first_available = String(mode["id"])
 			break
-	_mode_picker.select(first_available if first_available >= 0 else 0)
-	_on_mode_selected(_mode_picker.selected)
+	if first_available.is_empty():
+		first_available = String(_mode_models[0]["id"])
+	_mode_picker.present(_mode_options(), first_available)
+	_select_mode(first_available)
 
 
-func _on_mode_selected(index: int) -> void:
-	if index < 0 or index >= _mode_models.size():
+## Icons make the choice readable at a glance; the label stays for anything the
+## glyph cannot say and for a player who does not recognise it.
+func _mode_options() -> Array:
+	var options: Array = []
+	for mode: Dictionary in _mode_models:
+		options.append({
+			"id": String(mode.get("id", "")),
+			"title": _mode_title(mode),
+			"icon": String(mode.get("id", "")),
+			"enabled": bool(mode.get("available", true)),
+		})
+	return options
+
+
+func _select_mode(mode_id: String) -> void:
+	var mode := _find_mode(mode_id)
+	if mode.is_empty():
 		_selected_mode_id = ""
 		_confirm_button.disabled = true
 		return
-	var mode := _mode_models[index]
+	_mode_picker.select(mode_id)
 	_selected_mode_id = String(mode.get("id", ""))
 	var available := bool(mode.get("available", true))
 	_mode_meta_label.text = _mode_meta(mode)
@@ -175,18 +186,17 @@ func _on_travel_animation_finished() -> void:
 
 func _set_controls_locked(locked: bool) -> void:
 	_back_button.disabled = locked
-	_mode_picker.disabled = locked or _mode_models.is_empty()
+	_mode_picker.set_locked(locked or _mode_models.is_empty())
 	if locked:
 		_confirm_button.disabled = true
 	elif not _mode_models.is_empty():
-		_on_mode_selected(_mode_picker.selected)
+		_select_mode(_selected_mode_id)
 
 
 func _show_empty_trip() -> void:
 	_map_canvas.set_selected_destination("")
 	_destination_label.text = "Выберите место на карте"
-	_mode_picker.clear()
-	_mode_picker.disabled = true
+	_mode_picker.present([], "")
 	_mode_models.clear()
 	_mode_meta_label.text = "Время и цена"
 	_reason_label.text = "Сначала выберите точку назначения."
@@ -194,6 +204,13 @@ func _show_empty_trip() -> void:
 	_confirm_button.text = "Отправиться"
 	_confirm_button.disabled = true
 	_route_state.text = "○"
+
+
+func _find_mode(mode_id: String) -> Dictionary:
+	for mode: Dictionary in _mode_models:
+		if String(mode.get("id", "")) == mode_id:
+			return mode
+	return {}
 
 
 func _find_route(from_id: String, to_id: String) -> Dictionary:

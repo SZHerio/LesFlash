@@ -75,9 +75,16 @@ func _check_layout(screen: CityMapScreenScript, test_size: Vector2i) -> void:
 	_require(canvas != null and canvas.size.y >= 200.0, "%s map is too short: %.1f" % [test_size, canvas.size.y])
 	_require(canvas != null and not canvas.is_processing(), "%s idle map redraws every frame" % test_size)
 	_require(trip_panel != null and trip_panel.size.y >= 154.0, "%s trip panel is too short" % test_size)
-	for button_name in ["BackButton", "ModePicker", "ConfirmButton"]:
+	for button_name in ["BackButton", "ConfirmButton"]:
 		var button := screen.get_node("%%%s" % button_name) as BaseButton
 		_require(button != null and button.size.x >= 48.0 and button.size.y >= 48.0, "%s %s touch target is too small" % [test_size, button_name])
+	var modes := screen.get_node("%ModePicker") as SegmentedRow
+	for child in modes.get_children():
+		var segment := child as BaseButton
+		_require(
+			segment != null and segment.size.x >= 48.0 and segment.size.y >= 48.0,
+			"%s transport segment touch target is too small" % test_size
+		)
 	if canvas != null:
 		for node_id in ["market", "embankment", "clinic_yard"]:
 			var touch_rect: Rect2 = canvas.get_node_touch_rect(node_id)
@@ -102,11 +109,15 @@ func _select_destination(screen: CityMapScreenScript, destination_id: String) ->
 
 func _check_available_route(screen: CityMapScreenScript) -> void:
 	var destination_label := screen.get_node("%DestinationLabel") as Label
-	var picker := screen.get_node("%ModePicker") as OptionButton
+	var picker := screen.get_node("%ModePicker") as SegmentedRow
 	var confirm := screen.get_node("%ConfirmButton") as Button
 	_require(destination_label.text == "Центральный рынок", "destination selection did not update the trip panel")
-	_require(picker.item_count == 2, "route should expose two transport modes")
-	_require(picker.selected == 0, "first available transport mode was not selected")
+	_require(picker.get_child_count() == 2, "route should expose two transport modes")
+	_require(picker.selected_id() == "walk", "first available transport mode was not selected")
+	_require(
+		picker.get_child(0).size.y >= 48.0 and picker.get_child(1).size.y >= 48.0,
+		"transport choice must be visible without opening anything"
+	)
 	_require(not confirm.disabled, "available route left confirmation disabled")
 	_require(confirm.text.contains("Пешком"), "confirmation does not name the selected transport")
 	var meta := screen.get_node("%ModeMetaLabel") as Label
@@ -119,16 +130,14 @@ func _check_intents_and_animation(screen: CityMapScreenScript) -> void:
 	_back_requests = 0
 	_animation_finishes = 0
 
-	var picker := screen.get_node("%ModePicker") as OptionButton
+	var picker := screen.get_node("%ModePicker") as SegmentedRow
 	var confirm := screen.get_node("%ConfirmButton") as Button
 	var reason := screen.get_node("%ReasonLabel") as Label
-	picker.select(1)
-	picker.item_selected.emit(1)
+	picker.option_selected.emit("tram")
 	_require(confirm.disabled, "locked transport mode can still be confirmed")
 	_require(reason.visible and reason.text.contains("маршрут"), "locked transport mode does not explain its reason")
 
-	picker.select(0)
-	picker.item_selected.emit(0)
+	picker.option_selected.emit("walk")
 	confirm.pressed.emit()
 	_require(_travel_destination == "market", "travel intent lost the destination id")
 	_require(_travel_mode == "walk", "travel intent lost the mode id")
