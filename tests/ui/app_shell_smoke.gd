@@ -130,7 +130,7 @@ func _check_shell_layout(shell: AppShell, test_size: Vector2i) -> void:
 func _check_touch_targets(node: Node, context: String) -> void:
 	for child in node.find_children("*", "BaseButton", true, false):
 		var button := child as BaseButton
-		if not button.visible:
+		if not button.is_visible_in_tree():
 			continue
 		_require(button.size.y >= 48.0, "%s button '%s' is only %.1f px high" % [context, button.name, button.size.y])
 		_require(button.size.x >= 48.0, "%s button '%s' is only %.1f px wide" % [context, button.name, button.size.x])
@@ -158,7 +158,7 @@ func _check_horizontal_bounds(screen: Control, test_size: Vector2i) -> void:
 func _check_visible_text(screen: Control, context: String) -> void:
 	for child in screen.find_children("*", "Label", true, false):
 		var label := child as Label
-		if not label.visible or label.text.is_empty():
+		if not label.is_visible_in_tree() or label.text.is_empty():
 			continue
 		_require(
 			label.get_visible_line_count() >= label.get_line_count(),

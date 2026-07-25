@@ -3,6 +3,7 @@ extends Control
 
 signal action_requested(action_id: String)
 signal settings_requested
+signal leave_requested
 
 const ActionRowScene := preload("res://ui/components/action_row.tscn")
 
@@ -15,12 +16,15 @@ const ActionRowScene := preload("res://ui/components/action_row.tscn")
 @onready var _progress_card: PanelContainer = %ProgressCard
 @onready var _progress_label: Label = %ProgressLabel
 @onready var _progress_value: ProgressBar = %ProgressValue
+@onready var _bottom_bar: HBoxContainer = %BottomBar
+@onready var _leave_button: Button = %LeaveButton
 
 var _reduced_motion := false
 
 
 func _ready() -> void:
 	%SettingsButton.pressed.connect(func() -> void: settings_requested.emit())
+	_leave_button.pressed.connect(func() -> void: leave_requested.emit())
 
 
 func present(model: Dictionary) -> void:
@@ -31,6 +35,7 @@ func present(model: Dictionary) -> void:
 	_body_label.text = String(model.get("body", ""))
 	_section_label.text = String(model.get("section_title", "Ваше решение"))
 	_present_progress(model.get("progress", {}))
+	_present_exit(String(model.get("leave_text", "")))
 	for child in _options.get_children():
 		child.queue_free()
 	for raw_option in Array(model.get("options", [])):
@@ -43,6 +48,20 @@ func present(model: Dictionary) -> void:
 		row.action_requested.connect(func(action_id: StringName) -> void:
 			action_requested.emit(String(action_id))
 		)
+
+
+## A card whose options can all be closed at once must offer a way out, or the
+## player is stuck looking at a list of things they cannot do. Cards that always
+## keep an available answer — events, encounters, a job round — leave this empty
+## on purpose, because walking out of a decision is not the same as leaving a
+## list of shelters that are all shut until evening.
+func _present_exit(leave_text: String) -> void:
+	_bottom_bar.visible = not leave_text.is_empty()
+	_leave_button.text = leave_text
+
+
+func has_exit() -> bool:
+	return _bottom_bar.visible
 
 
 func set_reduced_motion(enabled: bool) -> void:

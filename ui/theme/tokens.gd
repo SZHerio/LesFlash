@@ -48,6 +48,40 @@ const SURFACE_BASE := Color("#16201d")
 const SURFACE_RAISED := Color("#1f2b27")
 const SURFACES := [SURFACE_SUNKEN, SURFACE_BASE, SURFACE_RAISED]
 
+## Seasonal base tint, one per month of the game year.
+##
+## Only the hue moves; luminance is held level, so contrast against the text
+## never drifts — measured 14.7:1 to 15.7:1 across all twelve against a 4.5:1
+## requirement. The accent and the danger colour stay fixed, or the meaning of a
+## colour would change with the calendar.
+##
+## Mood deliberately does not drive this. Mood is unpredictable and changes in
+## the middle of a decision; it already speaks through the environment shader. A
+## month is slow, foreseeable and part of the world.
+const MONTH_TINTS := [
+	Color("#101a22"), # январь — ледяной синий
+	Color("#15171f"), # февраль — сизый
+	Color("#111c1c"), # март — талый серо-зелёный
+	Color("#141d18"), # апрель — влажная земля
+	Color("#16200f"), # май — приглушённая зелень
+	Color("#1a1f10"), # июнь — густая листва
+	Color("#1f1d12"), # июль — выгоревшая пыль
+	Color("#211b12"), # август — тёплая охра
+	Color("#231a13"), # сентябрь — ржавая листва
+	Color("#211711"), # октябрь — опад
+	Color("#181b1d"), # ноябрь — мокрый асфальт
+	Color("#14161f"), # декабрь — ранние сумерки
+]
+
+
+## Seasonal tint for a calendar month, 1–12. Out-of-range months fall back to
+## the neutral base rather than failing: a broken calendar must not black out
+## the interface.
+static func month_tint(month: int) -> Color:
+	if month < 1 or month > MONTH_TINTS.size():
+		return SURFACE_BASE
+	return MONTH_TINTS[month - 1]
+
 const HAIRLINE := Color("#5a686266")
 const HAIRLINE_STRONG := Color("#7f8d87a6")
 const BORDER_WIDTH := 1

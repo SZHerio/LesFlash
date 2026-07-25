@@ -65,7 +65,8 @@ func present(model: Dictionary) -> void:
 		_:
 			theme_type_variation = &"ActionButton"
 			_accent_rail.color = Palette.GOLD if not disabled else Palette.FAINT
-	tooltip_text = _reason_label.text if disabled else _description_label.text
+	# No tooltip: both texts are already on the card. On a touch device a tooltip
+	# needs a long press and then covers the very thing it was called about.
 	call_deferred("_update_minimum_height")
 
 

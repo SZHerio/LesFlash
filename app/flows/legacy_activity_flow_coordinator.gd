@@ -45,7 +45,11 @@ func show_shelters() -> void:
 		_session.available_shelters(),
 		_session.get_shell_model(),
 		_preferences,
-		{"action": _on_shelter_selected, "settings": _hook("settings")}
+		{
+			"action": _on_shelter_selected,
+			"settings": _hook("settings"),
+			"leave": _hook("location"),
+		}
 	)
 
 

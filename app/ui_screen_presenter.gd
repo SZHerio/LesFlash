@@ -208,6 +208,10 @@ func show_settings(model: Dictionary, handlers: Dictionary) -> void:
 
 
 func apply_session_ambience(shell_model: Dictionary, preferences: Dictionary) -> void:
+	var calendar: Dictionary = Dictionary(
+		Dictionary(shell_model.get("status", {})).get("calendar", {})
+	)
+	_shell.set_month(int(calendar.get("month", 9)))
 	_shell.set_psyche_intensity(
 		UiModels.psyche_intensity(shell_model),
 		String(preferences.get("psyche_effect_mode", "full"))
@@ -218,6 +222,9 @@ func _show_choice(model: Dictionary, handlers: Dictionary) -> void:
 	var screen := _shell.show_screen(ChoiceScene) as ChoiceScreen
 	screen.action_requested.connect(_handler(handlers, "action"))
 	screen.settings_requested.connect(_handler(handlers, "settings"))
+	var leave: Variant = handlers.get("leave", null)
+	if leave is Callable and leave.is_valid():
+		screen.leave_requested.connect(leave)
 	screen.present(model)
 
 

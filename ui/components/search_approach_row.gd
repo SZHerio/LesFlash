@@ -29,7 +29,6 @@ func present(model: Dictionary) -> void:
 	_blocked.visible = not reasons.is_empty()
 	_confirm.disabled = not bool(model.get("enabled", true)) or _approach_id.is_empty()
 	_confirm.text = "Недоступно" if _confirm.disabled else "Выбрать"
-	_confirm.tooltip_text = _blocked.text
 
 
 func action_button() -> Button:

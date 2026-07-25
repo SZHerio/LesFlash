@@ -78,7 +78,7 @@ func present(
 		or _target_container_id.is_empty()
 		or not bool(entry.get("pickup_enabled", true))
 	)
-	_pickup.tooltip_text = blocked_reason if _pickup.disabled else ""
+	# The reason is already printed in the meta line under the title.
 	visible = true
 	_apply_density()
 	if previous_id != _stack_id:

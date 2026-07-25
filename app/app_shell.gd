@@ -9,6 +9,9 @@ signal navigation_requested(tab_id: String)
 
 const BaseTheme: Theme = preload("res://ui/theme/m3_ui_theme.tres")
 const SafeAreaLayoutScript := preload("res://app/android/safe_area_layout.gd")
+const TokensScript := preload("res://ui/theme/tokens.gd")
+## The season is a cast over a neutral surface, not a colour of its own.
+const SEASON_CAST := 0.7
 const BACKGROUNDS := {
 	"riverside_station_square_day": "res://assets/backgrounds/riverside_station_square_day.png",
 	"riverside_underpass_day": "res://assets/backgrounds/riverside_underpass_day.png",
@@ -31,6 +34,7 @@ const MAX_CONTENT_WIDTH := 680.0
 var _current_screen: Control
 var _reduced_motion := false
 var _font_scale := 1.0
+var _month := 9
 var _screen_tween: Tween
 
 
@@ -127,6 +131,21 @@ func set_reduced_motion(enabled: bool) -> void:
 
 func set_font_scale(scale_value: float) -> void:
 	_font_scale = clampf(scale_value, 1.0, 2.0)
+	_rebuild_theme()
+
+
+## The month of the game year tints every neutral surface. Only the hue moves;
+## each surface keeps its own lightness, so the three-step depth hierarchy and
+## the contrast of text survive the calendar.
+func set_month(month: int) -> void:
+	var next := clampi(month, 1, 12)
+	if next == _month:
+		return
+	_month = next
+	_rebuild_theme()
+
+
+func _rebuild_theme() -> void:
 	var scaled_theme := BaseTheme.duplicate(true) as Theme
 	scaled_theme.default_font_size = maxi(12, int(round(float(BaseTheme.default_font_size) * _font_scale)))
 	for type_name in BaseTheme.get_type_list():
@@ -150,7 +169,24 @@ func set_font_scale(scale_value: float) -> void:
 				# body text or the row cannot hold them all.
 				type_scale = minf(type_scale, 1.2)
 			scaled_theme.set_font_size(font_name, type_name, maxi(10, int(round(base_size * type_scale))))
+	_tint_surfaces(scaled_theme)
 	theme = scaled_theme
+
+
+## Repaints the neutral dark surfaces to the season. Saturated colours are left
+## alone: the gold accent and the danger red carry meaning, and meaning must not
+## drift with the calendar.
+func _tint_surfaces(target: Theme) -> void:
+	var tint := TokensScript.month_tint(_month)
+	for type_name in target.get_type_list():
+		for style_name in target.get_stylebox_list(type_name):
+			var box := target.get_stylebox(style_name, type_name) as StyleBoxFlat
+			if box == null or box.bg_color.a <= 0.0:
+				continue
+			var source := box.bg_color
+			if source.v >= 0.35 or source.s >= 0.35:
+				continue
+			box.bg_color = Color.from_hsv(tint.h, tint.s * SEASON_CAST, source.v, source.a)
 
 
 func _on_autosave_timer_timeout() -> void:

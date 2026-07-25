@@ -158,6 +158,7 @@ static func shelters(raw_shelters: Array) -> Dictionary:
 		"title": "Где переночевать",
 		"body": "Сравните безопасность и качество отдыха. Выбор переведёт время к следующему утру.",
 		"section_title": "Доступные места",
+		"leave_text": "Вернуться к месту",
 		"options": options,
 	}
 

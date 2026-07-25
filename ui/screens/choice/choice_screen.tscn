@@ -128,3 +128,18 @@ text = "Ваше решение"
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 8
+
+[node name="BottomBar" type="HBoxContainer" parent="Layout"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LeaveButton" type="Button" parent="Layout/BottomBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SecondaryButton"
+clip_text = true
+text = "Назад"
