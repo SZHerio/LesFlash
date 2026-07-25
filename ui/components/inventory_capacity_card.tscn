@@ -10,11 +10,11 @@ script = ExtResource("1_script")
 
 [node name="Content" type="VBoxContainer" parent="."]
 layout_mode = 2
-theme_override_constants/separation = 3
+theme_override_constants/separation = 4
 
 [node name="Header" type="HBoxContainer" parent="Content"]
 layout_mode = 2
-theme_override_constants/separation = 5
+theme_override_constants/separation = 4
 
 [node name="IconLabel" type="Label" parent="Content/Header"]
 unique_name_in_owner = true

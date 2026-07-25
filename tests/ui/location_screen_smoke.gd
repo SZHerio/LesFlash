@@ -4,7 +4,7 @@ const LocationScreenScene = preload("res://ui/screens/location/location_screen.t
 const BottomNavigationScene = preload("res://ui/components/bottom_navigation.tscn")
 const UiTheme = preload("res://ui/theme/m3_ui_theme.tres")
 const TEST_SIZES: Array[Vector2i] = [Vector2i(360, 640), Vector2i(540, 960)]
-const OUTPUT_DIR := "res://.godot/m3_ui_previews"
+const OUTPUT_DIR := "res://docs/qa/m3a"
 
 var _failures: Array[String] = []
 var _last_action_id := ""

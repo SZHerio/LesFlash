@@ -37,9 +37,9 @@ theme_type_variation = &"ToastPanel"
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 11
+theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 11
+theme_override_constants/margin_bottom = 12
 
 [node name="ToastLabel" type="Label" parent="Position/ToastPanel/Margin"]
 unique_name_in_owner = true

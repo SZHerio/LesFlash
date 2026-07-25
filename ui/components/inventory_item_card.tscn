@@ -9,7 +9,7 @@ script = ExtResource("1_script")
 
 [node name="Content" type="VBoxContainer" parent="."]
 layout_mode = 2
-theme_override_constants/separation = 7
+theme_override_constants/separation = 8
 
 [node name="HeaderButton" type="Button" parent="Content"]
 unique_name_in_owner = true
@@ -36,7 +36,7 @@ theme_override_constants/separation = 8
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
-theme_override_constants/separation = 1
+theme_override_constants/separation = 4
 
 [node name="TitleRow" type="HBoxContainer" parent="Content/HeaderButton/HeaderRow/Copy"]
 layout_mode = 2
@@ -86,7 +86,7 @@ vertical_alignment = 1
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 8
 
 [node name="DescriptionLabel" type="Label" parent="Content/Details"]
 unique_name_in_owner = true
@@ -112,5 +112,5 @@ autowrap_mode = 2
 [node name="Actions" type="HFlowContainer" parent="Content/Details"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/h_separation = 7
-theme_override_constants/v_separation = 7
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8

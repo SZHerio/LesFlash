@@ -64,7 +64,7 @@ horizontal_scroll_mode = 0
 [node name="Content" type="VBoxContainer" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 9
+theme_override_constants/separation = 8
 
 [node name="Eyebrow" type="Label" parent="SheetMargin/SheetPanel/SheetLayout/SheetScroll/Content"]
 layout_mode = 2

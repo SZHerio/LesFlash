@@ -21,9 +21,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 10
+theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 10
+theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
 [node name="Layout" type="VBoxContainer" parent="ScreenMargin"]
@@ -38,7 +38,7 @@ theme_type_variation = &"ScreenHeaderPanel"
 
 [node name="HeaderRow" type="HBoxContainer" parent="ScreenMargin/Layout/Header"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
 [node name="BackButton" type="Button" parent="ScreenMargin/Layout/Header/HeaderRow"]
 unique_name_in_owner = true
@@ -52,7 +52,7 @@ focus_mode = 2
 [node name="HeaderCopy" type="VBoxContainer" parent="ScreenMargin/Layout/Header/HeaderRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 1
+theme_override_constants/separation = 4
 
 [node name="DistrictLabel" type="Label" parent="ScreenMargin/Layout/Header/HeaderRow/HeaderCopy"]
 unique_name_in_owner = true
@@ -94,10 +94,10 @@ theme_type_variation = &"EnvironmentPanel"
 
 [node name="MapMargin" type="MarginContainer" parent="ScreenMargin/Layout/BodyScroll/Body/MapPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 3
-theme_override_constants/margin_top = 3
-theme_override_constants/margin_right = 3
-theme_override_constants/margin_bottom = 3
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
 
 [node name="MapCanvas" parent="ScreenMargin/Layout/BodyScroll/Body/MapPanel/MapMargin" instance=ExtResource("2_canvas")]
 unique_name_in_owner = true
@@ -112,7 +112,7 @@ theme_type_variation = &"ScreenHeaderPanel"
 
 [node name="TripContent" type="VBoxContainer" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 8
 
 [node name="DestinationRow" type="HBoxContainer" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel/TripContent"]
 layout_mode = 2
@@ -121,7 +121,7 @@ theme_override_constants/separation = 8
 [node name="DestinationCopy" type="VBoxContainer" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel/TripContent/DestinationRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 1
+theme_override_constants/separation = 4
 
 [node name="TripEyebrow" type="Label" parent="ScreenMargin/Layout/BodyScroll/Body/TripPanel/TripContent/DestinationRow/DestinationCopy"]
 layout_mode = 2

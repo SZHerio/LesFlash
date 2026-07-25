@@ -12,7 +12,7 @@ const TEST_SIZES: Array[Vector2i] = [
 	Vector2i(540, 960),
 	Vector2i(432, 936),
 ]
-const OUTPUT_DIR := "res://.godot/m3_ui_previews"
+const OUTPUT_DIR := "res://docs/qa/m3a"
 
 var _failures: Array[String] = []
 

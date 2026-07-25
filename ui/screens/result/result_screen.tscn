@@ -35,14 +35,14 @@ theme_type_variation = &"HeroCard"
 
 [node name="Margin" type="MarginContainer" parent="Scroll/Body/ResultCard"]
 layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
 
 [node name="Copy" type="VBoxContainer" parent="Scroll/Body/ResultCard/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
 [node name="EyebrowLabel" type="Label" parent="Scroll/Body/ResultCard/Margin/Copy"]
 unique_name_in_owner = true

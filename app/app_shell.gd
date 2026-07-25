@@ -145,6 +145,10 @@ func set_font_scale(scale_value: float) -> void:
 				type_scale = minf(type_scale, 1.3)
 			elif type_name in [&"BottomNavButton", &"BottomNavButtonActive"]:
 				type_scale = minf(type_scale, 1.25)
+			elif type_name in [&"StepperNameButton", &"StepperValueLabel"]:
+				# They share one row with both controls, so they grow less than
+				# body text or the row cannot hold them all.
+				type_scale = minf(type_scale, 1.2)
 			scaled_theme.set_font_size(font_name, type_name, maxi(10, int(round(base_size * type_scale))))
 	theme = scaled_theme
 

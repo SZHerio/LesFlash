@@ -8,7 +8,7 @@ script = ExtResource("1_header")
 
 [node name="Content" type="VBoxContainer" parent="."]
 layout_mode = 2
-theme_override_constants/separation = 7
+theme_override_constants/separation = 8
 
 [node name="TopRow" type="HBoxContainer" parent="Content"]
 layout_mode = 2
@@ -17,7 +17,7 @@ theme_override_constants/separation = 8
 [node name="Titles" type="VBoxContainer" parent="Content/TopRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 1
+theme_override_constants/separation = 4
 
 [node name="DistrictLabel" type="Label" parent="Content/TopRow/Titles"]
 unique_name_in_owner = true
@@ -43,7 +43,7 @@ focus_mode = 2
 
 [node name="MetaRow" type="HBoxContainer" parent="Content"]
 layout_mode = 2
-theme_override_constants/separation = 7
+theme_override_constants/separation = 8
 
 [node name="DatePill" type="PanelContainer" parent="Content/MetaRow"]
 layout_mode = 2

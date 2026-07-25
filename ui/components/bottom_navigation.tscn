@@ -10,7 +10,7 @@ script = ExtResource("1_nav")
 [node name="Tabs" type="GridContainer" parent="."]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/h_separation = 2
+theme_override_constants/h_separation = 4
 columns = 5
 
 [node name="PlaceButton" type="Button" parent="Tabs"]

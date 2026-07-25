@@ -9,10 +9,10 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.34, 0.4, 0.4, 0.86)
-corner_radius_top_left = 22
-corner_radius_top_right = 22
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="SearchInteractionSheet" type="Control"]
 layout_mode = 3
@@ -58,7 +58,7 @@ mouse_filter = 0
 
 [node name="Layout" type="VBoxContainer" parent="SheetMargin/SheetPanel"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 8
 
 [node name="Handle" type="ColorRect" parent="SheetMargin/SheetPanel/Layout"]
 custom_minimum_size = Vector2(42, 4)
@@ -76,15 +76,15 @@ horizontal_scroll_mode = 0
 [node name="ContentMargin" type="MarginContainer" parent="SheetMargin/SheetPanel/Layout/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/margin_left = 14
+theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
 [node name="Content" type="VBoxContainer" parent="SheetMargin/SheetPanel/Layout/Scroll/ContentMargin"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 9
+theme_override_constants/separation = 8
 
 [node name="Top" type="HBoxContainer" parent="SheetMargin/SheetPanel/Layout/Scroll/ContentMargin/Content"]
 layout_mode = 2

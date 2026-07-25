@@ -22,7 +22,7 @@ theme_override_constants/separation = 12
 
 [node name="Header" type="HBoxContainer" parent="Layout"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
 [node name="BackButton" type="Button" parent="Layout/Header"]
 unique_name_in_owner = true
@@ -47,7 +47,7 @@ horizontal_scroll_mode = 0
 [node name="Body" type="VBoxContainer" parent="Layout/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
 [node name="ChoicesCard" type="PanelContainer" parent="Layout/Scroll/Body"]
 layout_mode = 2
@@ -56,9 +56,9 @@ theme_type_variation = &"SurfaceCard"
 [node name="Margin" type="MarginContainer" parent="Layout/Scroll/Body/ChoicesCard"]
 layout_mode = 2
 theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 14
+theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_bottom = 16
 
 [node name="Content" type="VBoxContainer" parent="Layout/Scroll/Body/ChoicesCard/Margin"]
 layout_mode = 2
@@ -89,9 +89,9 @@ theme_type_variation = &"SurfaceCard"
 [node name="Margin" type="MarginContainer" parent="Layout/Scroll/Body/VisualCard"]
 layout_mode = 2
 theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 14
+theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_bottom = 16
 
 [node name="Content" type="VBoxContainer" parent="Layout/Scroll/Body/VisualCard/Margin"]
 layout_mode = 2
@@ -132,9 +132,9 @@ theme_type_variation = &"SurfaceCard"
 [node name="Margin" type="MarginContainer" parent="Layout/Scroll/Body/AccessibilityCard"]
 layout_mode = 2
 theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 14
+theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_bottom = 16
 
 [node name="Content" type="VBoxContainer" parent="Layout/Scroll/Body/AccessibilityCard/Margin"]
 layout_mode = 2
