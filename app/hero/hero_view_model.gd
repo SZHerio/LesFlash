@@ -22,43 +22,88 @@ const CHARACTERISTICS := {
 	"luck": "Удача",
 }
 
-## Negative values read as the strength of the left pole: −35 on the first axis
-## is shown as «Мощь 35». The centre has its own wording, because standing in
-## the middle is a state, not an absence of one.
+## An axis reads as a phrase, never as a number. «Мощь 35» asks the player a
+## question it does not answer — is 35 a lot? — so each axis carries nine
+## phrases and the value only picks one.
+##
+## Every phrase keeps the root of the pole it belongs to («мощный» for Мощь,
+## «выносливый» for Выносливость). Events name the pole directly, as in
+## `[Мощь ≥ 35] поднять люк одному`, and the player has to be able to connect
+## what an option demands with what the screen says about him. The far ends
+## drop the root for an idiom, because at the edge the lean is the whole
+## description and a plain adjective would understate it.
+##
+## Titles are questions about the person rather than the domain names in
+## ROADMAP §5.2: «Поведение в неизвестности» describes the axis to a designer,
+## «В новом месте» describes it to a player.
+const BAND_MAX := [-76, -51, -26, -6, 5, 25, 50, 75]
+
 const POLARITIES := {
 	"physical_specialization": {
-		"title": "Физическая специализация",
-		"left": "Мощь", "right": "Выносливость", "centre": "Смешанная подготовка",
+		"title": "Что может тело",
+		"bands": [
+			"Небывалая мощь", "Очень мощный", "Мощный", "Чуть мощнее",
+			"Поровну",
+			"Чуть выносливее", "Выносливый", "Очень выносливый", "Двужильный",
+		],
 	},
 	"execution_style": {
-		"title": "Способ выполнения",
-		"left": "Темп", "right": "Контроль", "centre": "Обычный ритм",
+		"title": "Как берётся за дело",
+		"bands": [
+			"Всё бегом", "Очень быстрый темп", "Быстрый темп", "Чуть быстрее",
+			"Как придётся",
+			"Чуть внимательнее", "Держит контроль", "Строгий контроль", "Семь раз отмерит",
+		],
 	},
 	"influence_style": {
-		"title": "Способ влияния",
-		"left": "Давление", "right": "Авторитет", "centre": "Равноправный торг",
+		"title": "Как добивается своего",
+		"bands": [
+			"Берёт горлом", "Сильно давит", "Давит", "Чуть напористее",
+			"По-разному",
+			"Чуть спокойнее", "Есть авторитет", "Крепкий авторитет", "Слово весит",
+		],
 	},
 	"attention_distribution": {
-		"title": "Распределение внимания",
-		"left": "Сосредоточение", "right": "Обзор", "centre": "Смешанный режим",
+		"title": "Куда смотрит",
+		"bands": [
+			"Не видит вокруг", "Уходит с головой", "Сосредоточен", "Чуть собраннее",
+			"Поровну",
+			"Чуть шире обзор", "Широкий обзор", "Замечает всё", "Глаза на затылке",
+		],
 	},
 	"uncertainty_behavior": {
-		"title": "Поведение в неизвестности",
-		"left": "Разведка", "right": "Освоение", "centre": "Чередование подходов",
+		"title": "В новом месте",
+		"bands": [
+			"Вечная разведка", "Тянет в новое", "Ходит в разведку", "Чуть любопытнее",
+			"По настроению",
+			"Чуть оседлее", "Осваивает место", "Обжил район", "Врос в район",
+		],
 	},
 	"decision_priority": {
-		"title": "Приоритет решения",
-		"left": "Возможность", "right": "Безопасность", "centre": "Расчёт",
+		"title": "Когда есть риск",
+		"bands": [
+			"Лезет на рожон", "Хватает любой шанс", "Идёт на риск", "Чуть смелее",
+			"По обстоятельствам",
+			"Чуть осторожнее", "Ищет безопасное", "Не рискует", "Дует на воду",
+		],
 	},
 }
 const PROFILES := {
 	"relationship_investment": {
-		"title": "Вложение в отношения",
-		"left": "Охват", "right": "Глубина", "centre": "Баланс",
+		"title": "Круг общения",
+		"bands": [
+			"Со всеми накоротке", "Широкий охват", "Много знакомых", "Круг чуть шире",
+			"Поровну",
+			"Круг чуть ближе", "Немного, но близко", "Несколько своих", "Держится за своих",
+		],
 	},
 	"knowledge_profile": {
-		"title": "Профиль знаний",
-		"left": "Специализация", "right": "Эрудиция", "centre": "Баланс",
+		"title": "Что знает",
+		"bands": [
+			"Одно дело назубок", "Узкая специализация", "Знает своё дело", "Чуть уже",
+			"Поровну",
+			"Чуть шире", "Знает понемногу", "Широкая эрудиция", "Обо всём слышал",
+		],
 	},
 }
 const SKILLS := {
@@ -192,11 +237,17 @@ static func _profiles(computed: Dictionary) -> Array:
 static func _reading(value: int, copy: Dictionary, formed: bool) -> String:
 	if not formed:
 		return "не сформирован"
-	if value == 0:
-		return String(copy["centre"])
-	if value < 0:
-		return "%s %d" % [String(copy["left"]), absi(value)]
-	return "%s %d" % [String(copy["right"]), value]
+	return String(Array(copy["bands"])[band_index(value)])
+
+
+## The neutral band is deliberately narrow. A run starts with every axis at 0,
+## and a hero who has done nothing yet must not already be described as leaning.
+static func band_index(value: int) -> int:
+	var clamped := clampi(value, GameRules.POLARITY_MIN, GameRules.POLARITY_MAX)
+	for index: int in BAND_MAX.size():
+		if clamped <= int(BAND_MAX[index]):
+			return index
+	return BAND_MAX.size()
 
 
 static func _skills(ranks: Dictionary) -> Array:

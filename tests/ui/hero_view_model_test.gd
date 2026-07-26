@@ -14,12 +14,13 @@ func _init() -> void:
 	_test_raw_reads_only_earned_state()
 	_test_unlearned_skills_are_absent()
 	_test_polarity_readings_name_the_pole()
+	_test_bands_cover_the_whole_range()
 	_test_unformed_profile_says_so()
 	_test_psyche_word_replaces_the_number()
 	_test_age_agrees_with_its_number()
 	_test_header_follows_the_shell()
 	if _failures.is_empty():
-		print("HERO VIEW MODEL TEST PASSED: 7/7")
+		print("HERO VIEW MODEL TEST PASSED: 8/8")
 		quit(0)
 		return
 	for failure in _failures:
@@ -79,29 +80,72 @@ func _test_unlearned_skills_are_absent() -> void:
 	)
 
 
-## −35 has to read as «Мощь 35». A minus sign in front of a Russian noun is not
-## something a player can interpret.
+## An axis reads as a phrase picked by its value, never as a number: «35» does
+## not tell the player whether 35 is a lot.
 func _test_polarity_readings_name_the_pole() -> void:
 	var state := _state()
 	state.set_polarity("physical_specialization", -35)
 	state.set_polarity("execution_style", 40)
-	var axes: Array = _built(state).get("polarities", [])
 	var readings: Dictionary = {}
-	for raw_axis: Variant in axes:
+	for raw_axis: Variant in Array(_built(state).get("polarities", [])):
 		var axis: Dictionary = raw_axis
 		readings[String(axis["id"])] = String(axis["reading"])
 	_require(
-		String(readings.get("physical_specialization", "")) == "Мощь 35",
-		"left pole reads as «%s»" % String(readings.get("physical_specialization", ""))
+		String(readings.get("physical_specialization", "")) == "Мощный",
+		"−35 reads as «%s»" % String(readings.get("physical_specialization", ""))
 	)
 	_require(
-		String(readings.get("execution_style", "")) == "Контроль 40",
-		"right pole reads as «%s»" % String(readings.get("execution_style", ""))
+		String(readings.get("execution_style", "")) == "Держит контроль",
+		"+40 reads as «%s»" % String(readings.get("execution_style", ""))
 	)
 	_require(
-		String(readings.get("influence_style", "")) == "Равноправный торг",
+		String(readings.get("influence_style", "")) == "По-разному",
 		"the centre reads as «%s» instead of a state of its own"
 			% String(readings.get("influence_style", ""))
+	)
+	for key: Variant in readings:
+		var text := String(readings[key])
+		for character: String in text:
+			_require(
+				not character.is_valid_int(),
+				"«%s» still shows the player a raw number" % text
+			)
+
+
+## Every value in the domain range must land on a phrase, and a fresh hero — all
+## axes at 0 — must not already be described as leaning either way.
+func _test_bands_cover_the_whole_range() -> void:
+	var tables := [HeroModels.POLARITIES, HeroModels.PROFILES]
+	var expected: int = HeroModels.BAND_MAX.size() + 1
+	for raw_table: Variant in tables:
+		var table: Dictionary = raw_table
+		for key: String in table:
+			var bands: Array = Dictionary(table[key])["bands"]
+			_require(
+				bands.size() == expected,
+				"%s carries %d phrases, expected %d" % [key, bands.size(), expected]
+			)
+			var seen: Dictionary = {}
+			for phrase: Variant in bands:
+				_require(
+					not String(phrase).strip_edges().is_empty(),
+					"%s has an empty phrase" % key
+				)
+				_require(not seen.has(phrase), "%s repeats «%s»" % [key, String(phrase)])
+				seen[phrase] = true
+	var used: Dictionary = {}
+	for value: int in range(GameRules.POLARITY_MIN, GameRules.POLARITY_MAX + 1):
+		var index := HeroModels.band_index(value)
+		_require(
+			index >= 0 and index < expected,
+			"value %d falls outside every band" % value
+		)
+		used[index] = true
+	_require(used.size() == expected, "%d bands of %d are unreachable" % [expected - used.size(), expected])
+	var neutral := HeroModels.band_index(0)
+	_require(
+		neutral == HeroModels.band_index(-1) and neutral == HeroModels.band_index(1),
+		"zero does not sit inside the neutral band"
 	)
 
 
