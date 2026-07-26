@@ -17,6 +17,7 @@ const InventoryTransaction := preload("res://core/inventory/inventory_transactio
 const SearchCommands := preload("res://app/session/search_session_commands.gd")
 const SearchModels := preload("res://app/search/search_read_model.gd")
 const EncounterCommand := preload("res://game/events/search_encounter_command.gd")
+const HeroModels := preload("res://app/hero/hero_view_model.gd")
 
 
 static func create(characteristics: Dictionary, seed: int) -> RefCounted:
@@ -99,6 +100,12 @@ func perform_location_action(action_id: String) -> Dictionary:
 	if _session == null:
 		return _missing_sandbox_session()
 	return LocationActionCommand.execute(_session, action_id)
+
+
+func get_hero_model() -> Dictionary:
+	if _session == null or _session.run_state == null:
+		return {}
+	return HeroModels.raw(_session.run_state)
 
 
 func get_inventory_model() -> Dictionary:

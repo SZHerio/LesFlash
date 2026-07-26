@@ -9,6 +9,8 @@ const SettingsScene := preload("res://ui/screens/settings/settings_screen.tscn")
 const LocationScene := preload("res://ui/screens/location/location_screen.tscn")
 const CityMapScene := preload("res://ui/screens/city_map/city_map_screen.tscn")
 const InventoryScene := preload("res://ui/screens/inventory/inventory_screen.tscn")
+const HeroScene := preload("res://ui/screens/hero/hero_screen.tscn")
+const HeroModels := preload("res://app/hero/hero_view_model.gd")
 const InventoryModels := preload("res://app/inventory/inventory_view_model.gd")
 const SearchScene := preload("res://ui/screens/search/search_screen.tscn")
 const SearchModels := preload("res://app/search/search_view_model.gd")
@@ -92,6 +94,27 @@ func show_city_map(
 	screen.present(CityMapModels.build(
 		raw_model,
 		bool(preferences.get("reduced_motion", false))
+	))
+	return screen
+
+
+func show_hero(
+	raw_model: Dictionary,
+	shell_model: Dictionary,
+	preferences: Dictionary,
+	handlers: Dictionary
+) -> HeroScreen:
+	var location_model: Dictionary = Dictionary(shell_model.get("location", {}))
+	_shell.set_background(String(location_model.get("background_key", DEFAULT_BACKGROUND)))
+	apply_session_ambience(shell_model, preferences)
+	_show_session_navigation("hero")
+	var screen := _shell.show_screen(HeroScene) as HeroScreen
+	screen.settings_requested.connect(_handler(handlers, "settings"))
+	screen.present(HeroModels.build(
+		raw_model,
+		shell_model,
+		bool(preferences.get("reduced_motion", false)),
+		float(preferences.get("font_scale", 1.0))
 	))
 	return screen
 
@@ -254,7 +277,7 @@ func _show_session_navigation(active_tab: String) -> void:
 		"enabled_tabs": {
 			"place": true,
 			"map": true,
-			"hero": false,
+			"hero": true,
 			"items": true,
 			"tasks": false,
 		},

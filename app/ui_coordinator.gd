@@ -216,6 +216,16 @@ func _show_map() -> void:
 	)
 
 
+func _show_hero() -> void:
+	_route = "hero"
+	_screens.show_hero(
+		_session.get_hero_model(),
+		_session.get_shell_model(),
+		_preferences.to_model(),
+		{"settings": _open_settings}
+	)
+
+
 func _show_inventory() -> void:
 	_route = "inventory"
 	_inventory_flow.show(
@@ -359,6 +369,8 @@ func _on_navigation_requested(tab_id: String) -> void:
 			_show_location()
 		"map":
 			_show_map()
+		"hero":
+			_show_hero()
 		"items":
 			_show_inventory()
 
@@ -377,6 +389,7 @@ func _on_back_requested() -> void:
 			_leave_session_to_menu()
 		"map":
 			_show_location()
+		"hero": _show_location()
 		"inventory":
 			if not _inventory_flow.handle_back():
 				_show_location()

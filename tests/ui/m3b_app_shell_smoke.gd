@@ -95,6 +95,8 @@ func _exercise_size(test_size: Vector2i) -> void:
 	_require(not map_button.disabled and not place_button.disabled, "%s place/map tabs are not enabled" % test_size)
 	_require(map_button.size.y >= 48.0 and place_button.size.y >= 48.0, "%s navigation touch target is too small" % test_size)
 
+	await _exercise_hero_tab(shell, navigation, test_size)
+
 	await create_timer(0.30, true, false, true).timeout
 	shell.navigation_requested.emit("map")
 	for _frame in range(4):
@@ -136,6 +138,58 @@ func _exercise_size(test_size: Vector2i) -> void:
 	root.remove_child(viewport)
 	viewport.queue_free()
 	await process_frame
+
+
+## The hero tab is a read-only view of the run. Opening it must cost nothing —
+## no minute of game time, no save — and it must come back to the place screen.
+func _exercise_hero_tab(
+	shell: AppShell,
+	navigation: BottomNavigation,
+	test_size: Vector2i
+) -> void:
+	var hero_button := navigation.get_node("%HeroButton") as Button
+	_require(not hero_button.disabled, "%s hero tab is disabled" % test_size)
+	# Both screens render the same clock, so an unchanged reading proves the tab
+	# cost no game time and that the hero header follows the shell rather than
+	# inventing its own state.
+	var before_clock := _clock_text(shell.current_screen())
+	await create_timer(0.30, true, false, true).timeout
+	shell.navigation_requested.emit("hero")
+	for _frame in range(4):
+		await process_frame
+	var hero_screen := shell.current_screen() as HeroScreen
+	_require(hero_screen != null, "%s hero tab did not open HeroScreen" % test_size)
+	if hero_screen == null:
+		return
+	_require(
+		not before_clock.is_empty() and _clock_text(hero_screen) == before_clock,
+		"%s hero clock reads «%s», the place screen read «%s»"
+			% [test_size, _clock_text(hero_screen), before_clock]
+	)
+	_require(
+		hero_screen.get_global_rect().end.y <= navigation.get_global_rect().position.y + 1.0,
+		"%s hero screen overlaps bottom navigation" % test_size
+	)
+	var psyche := hero_screen.get_node("%PsycheStep") as Label
+	_require(
+		not psyche.text.is_empty() and not psyche.text.is_valid_int(),
+		"%s hero screen shows the psyche as «%s» instead of a word" % [test_size, psyche.text]
+	)
+	shell.back_requested.emit()
+	for _frame in range(4):
+		await process_frame
+	_require(
+		shell.current_screen() is LocationScreen,
+		"%s back from the hero tab did not return to the place screen" % test_size
+	)
+	await create_timer(0.28, true, false, true).timeout
+
+
+func _clock_text(screen: Control) -> String:
+	if screen == null:
+		return ""
+	var label := screen.find_child("DateLabel", true, false) as Label
+	return label.text if label != null else ""
 
 
 func _capture(

@@ -1,0 +1,36 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://ui/components/polarity_row.gd" id="1_row"]
+[ext_resource type="Script" path="res://ui/components/polarity_track.gd" id="2_track"]
+
+[node name="PolarityRow" type="VBoxContainer"]
+theme_override_constants/separation = 4
+script = ExtResource("1_row")
+
+[node name="Title" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Физическая специализация"
+
+[node name="BottomRow" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Track" type="Control" parent="BottomRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 16)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+script = ExtResource("2_track")
+
+[node name="Reading" type="Label" parent="BottomRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+theme_type_variation = &"ActionMetaLabel"
+text = "Смешанная подготовка"
+horizontal_alignment = 2
