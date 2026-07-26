@@ -42,6 +42,7 @@
 - [Движок контекстных событий M3E](docs/M3E_EVENTS.md)
 - [Android engineering baseline G0](docs/G0_ANDROID_BASELINE.md)
 - [Черновые UI-макеты](docs/mockups/README.md)
+- [Тест мягкого рисованного фона](docs/art_direction/street_style_tests/README.md)
 
 M1 принят как системная основа. M2 завершён как технический эксперимент и покрыт headless-тестами, но его событийный UX и монолитный UI не являются продуктовым образцом. M3A перевёл приложение на модульный `AppShell`, самостоятельные экраны и общий UI-контракт.
 
