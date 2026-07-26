@@ -48,51 +48,43 @@ const SURFACE_BASE := Color("#16201d")
 const SURFACE_RAISED := Color("#1f2b27")
 const SURFACES := [SURFACE_SUNKEN, SURFACE_BASE, SURFACE_RAISED]
 
-## Seasonal base tint, one per month of the game year.
+## Seasonal cast, one hue per month of the game year.
 ##
-## Only the hue moves; luminance is held level, so contrast against the text
-## never drifts — measured 14.7:1 to 15.7:1 across all twelve against a 4.5:1
-## requirement. The accent and the danger colour stay fixed, or the meaning of a
-## colour would change with the calendar.
+## The month contributes a hue and nothing else. Lightness stays whatever the
+## surface already had, and chroma is a fixed whisper, so every month sits at
+## the same depth and carries the same amount of colour. The first attempt
+## stored whole colours and worked in HSV: chroma drifted from 0.006 to 0.034
+## between months, which is why some read as night and others as mud.
 ##
 ## Mood deliberately does not drive this. Mood is unpredictable and changes in
-## the middle of a decision; it already speaks through the environment shader. A
-## month is slow, foreseeable and part of the world.
-const MONTH_TINTS := [
-	Color("#101a22"), # январь — ледяной синий
-	Color("#15171f"), # февраль — сизый
-	Color("#111c1c"), # март — талый серо-зелёный
-	Color("#141d18"), # апрель — влажная земля
-	Color("#16200f"), # май — приглушённая зелень
-	Color("#1a1f10"), # июнь — густая листва
-	Color("#1f1d12"), # июль — выгоревшая пыль
-	Color("#211b12"), # август — тёплая охра
-	Color("#231a13"), # сентябрь — ржавая листва
-	Color("#211711"), # октябрь — опад
-	Color("#181b1d"), # ноябрь — мокрый асфальт
-	Color("#14161f"), # декабрь — ранние сумерки
+## the middle of a decision, and it already speaks through the environment
+## shader. A month is slow, foreseeable and part of the world.
+const MONTH_HUES := [
+	250.0, # январь — ледяной синий
+	285.0, # февраль — сизый, серо-фиолетовый
+	200.0, # март — талый холодный
+	155.0, # апрель — влажная земля
+	135.0, # май — зелень
+	120.0, # июнь — густая листва
+	100.0, # июль — выгоревшая пыль
+	80.0,  # август — тёплая охра
+	60.0,  # сентябрь — ржавая листва
+	45.0,  # октябрь — опад
+	230.0, # ноябрь — мокрый асфальт
+	275.0, # декабрь — ранние сумерки
 ]
 
+## A surface is tinted, not coloured. Above roughly 0.03 the cast stops reading
+## as a season and starts competing with the photograph behind it.
+const SURFACE_CHROMA := 0.022
 
-## Seasonal tint for a calendar month, 1–12. Out-of-range months fall back to
-## the neutral base rather than failing: a broken calendar must not black out
-## the interface.
-static func month_tint(month: int) -> Color:
-	if month < 1 or month > MONTH_TINTS.size():
-		return SURFACE_BASE
-	return MONTH_TINTS[month - 1]
 
-const HAIRLINE := Color("#5a686266")
-const HAIRLINE_STRONG := Color("#7f8d87a6")
-const BORDER_WIDTH := 1
-
-# Scrim laid under content that has to sit over a photograph. Content surfaces
-# themselves stay opaque: the photograph shows between blocks, not under lines.
-const SCRIM := Color("#0b1211d9")
-
-# Minimum touch target and the height of a main action, in device pixels.
-const TOUCH_MIN := 48
-const ACTION_HEIGHT := 56
+## Hue of a calendar month, 1–12. An out-of-range month falls back to a neutral
+## cold grey rather than failing: a broken calendar must not repaint the game.
+static func month_hue(month: int) -> float:
+	if month < 1 or month > MONTH_HUES.size():
+		return 230.0
+	return MONTH_HUES[month - 1]
 
 
 static func is_spacing(value: int) -> bool:

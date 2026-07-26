@@ -10,8 +10,7 @@ signal navigation_requested(tab_id: String)
 const BaseTheme: Theme = preload("res://ui/theme/m3_ui_theme.tres")
 const SafeAreaLayoutScript := preload("res://app/android/safe_area_layout.gd")
 const TokensScript := preload("res://ui/theme/tokens.gd")
-## The season is a cast over a neutral surface, not a colour of its own.
-const SEASON_CAST := 0.7
+const ColourSpace := preload("res://ui/theme/colour_space.gd")
 const BACKGROUNDS := {
 	"riverside_station_square_day": "res://assets/backgrounds/riverside_station_square_day.png",
 	"riverside_underpass_day": "res://assets/backgrounds/riverside_underpass_day.png",
@@ -177,7 +176,7 @@ func _rebuild_theme() -> void:
 ## alone: the gold accent and the danger red carry meaning, and meaning must not
 ## drift with the calendar.
 func _tint_surfaces(target: Theme) -> void:
-	var tint := TokensScript.month_tint(_month)
+	var hue := TokensScript.month_hue(_month)
 	for type_name in target.get_type_list():
 		for style_name in target.get_stylebox_list(type_name):
 			var box := target.get_stylebox(style_name, type_name) as StyleBoxFlat
@@ -186,7 +185,11 @@ func _tint_surfaces(target: Theme) -> void:
 			var source := box.bg_color
 			if source.v >= 0.35 or source.s >= 0.35:
 				continue
-			box.bg_color = Color.from_hsv(tint.h, tint.s * SEASON_CAST, source.v, source.a)
+			box.bg_color = ColourSpace.recast(
+				source,
+				TokensScript.SURFACE_CHROMA,
+				hue
+			)
 
 
 func _on_autosave_timer_timeout() -> void:
