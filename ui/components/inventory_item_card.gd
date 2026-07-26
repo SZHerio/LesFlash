@@ -2,15 +2,17 @@ class_name InventoryItemCard
 extends PanelContainer
 
 const Motion := preload("res://ui/theme/motion.gd")
+const Palette := preload("res://ui/theme/palette.gd")
 signal selected(stack_id: String)
 signal action_requested(stack_id: String, action_id: String, action_model: Dictionary)
 
 @onready var _header: Button = %HeaderButton
+@onready var _item_icon: SemanticIcon = %ItemIcon
 @onready var _title: Label = %TitleLabel
 @onready var _quantity: Label = %QuantityLabel
 @onready var _location: Label = %LocationLabel
 @onready var _summary: Label = %SummaryLabel
-@onready var _chevron: Label = %ChevronLabel
+@onready var _chevron: SemanticIcon = %ChevronIcon
 @onready var _details: VBoxContainer = %Details
 @onready var _description: Label = %DescriptionLabel
 @onready var _tags: Label = %TagsLabel
@@ -30,6 +32,7 @@ func _ready() -> void:
 
 func present(model: Dictionary, expanded: bool) -> void:
 	_model = model.duplicate(true)
+	_item_icon.present(StringName(model.get("item_icon_id", &"meta_item")), 32, Palette.GOLD)
 	_title.text = String(model.get("title", "Предмет"))
 	_quantity.text = String(model.get("quantity_text", ""))
 	_quantity.visible = not _quantity.text.is_empty()
@@ -98,7 +101,9 @@ func _build_actions(raw_actions: Array) -> void:
 
 func _set_expanded(expanded: bool, animate: bool) -> void:
 	_details.visible = expanded
-	_chevron.text = "⌃" if expanded else "⌄"
+	_chevron.present(&"utility_chevron_right", 16, Palette.TEXT)
+	_chevron.rotation_degrees = 90.0 if expanded else 0.0
+	_chevron.pivot_offset = Vector2(8, 8)
 	theme_type_variation = &"StatusDetailPanel" if expanded else &"SurfaceCard"
 	_details.modulate = Color(1, 1, 1, 0)
 	_tween = Motion.play(_tween, self, [

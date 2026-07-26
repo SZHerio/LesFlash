@@ -161,7 +161,7 @@ func _rebuild_theme() -> void:
 				type_scale = minf(type_scale, 1.2)
 			elif type_name == &"StatusValueLabel":
 				type_scale = minf(type_scale, 1.3)
-			elif type_name in [&"BottomNavButton", &"BottomNavButtonActive"]:
+			elif type_name in [&"BottomNavButton", &"BottomNavButtonActive", &"BottomNavLabel"]:
 				type_scale = minf(type_scale, 1.25)
 			elif type_name in [&"StepperNameButton", &"StepperValueLabel"]:
 				# They share one row with both controls, so they grow less than

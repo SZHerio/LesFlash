@@ -147,6 +147,22 @@ func _exercise(test_size: Vector2i) -> void:
 	_require(choice != null, "%s risk threshold did not open an encounter" % test_size)
 	if choice == null:
 		return
+	var option_list := choice.get_node("%Options") as VBoxContainer
+	var first_row := option_list.get_child(0) as ActionRow if option_list.get_child_count() > 0 else null
+	var category_icon := first_row.get_node("%CategoryIcon") as SemanticIcon if first_row != null else null
+	_require(
+		category_icon != null and category_icon.visible and category_icon.texture != null
+		and category_icon.size.x >= 32.0 and category_icon.size.y >= 32.0,
+		"%s encounter answer has no authored category icon" % test_size
+	)
+	var meta_row := first_row.get_node("%MetaRow") as DecisionCostRow if first_row != null else null
+	var first_token := meta_row.get_child(0) as MetaToken if meta_row != null and meta_row.get_child_count() > 0 else null
+	var token_icon := first_token.get_node("%Icon") as SemanticIcon if first_token != null else null
+	_require(
+		token_icon != null and token_icon.visible and token_icon.texture != null
+		and token_icon.size.x >= 16.0 and token_icon.size.y >= 16.0,
+		"%s encounter price has no authored metadata icon" % test_size
+	)
 	await _capture(viewport, test_size, "search_encounter")
 	var option_id := _first_available_option(persistence.session)
 	_require(not option_id.is_empty(), "%s encounter offers no available answer" % test_size)

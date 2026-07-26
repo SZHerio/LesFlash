@@ -7,6 +7,8 @@ signal travel_animation_finished
 
 const CityMapCanvasScript = preload("res://ui/components/city_map_canvas.gd")
 const Motion := preload("res://ui/theme/motion.gd")
+const Palette := preload("res://ui/theme/palette.gd")
+const CurrencyTextScript := preload("res://app/presentation/currency_text.gd")
 
 @onready var _layout: VBoxContainer = %Layout
 @onready var _back_button: Button = %BackButton
@@ -17,9 +19,9 @@ const Motion := preload("res://ui/theme/motion.gd")
 @onready var _map_canvas: CityMapCanvasScript = %MapCanvas
 @onready var _trip_panel: PanelContainer = %TripPanel
 @onready var _destination_label: Label = %DestinationLabel
-@onready var _route_state: Label = %RouteState
+@onready var _route_state: SemanticIcon = %RouteState
 @onready var _mode_picker: SegmentedRow = %ModePicker
-@onready var _mode_meta_label: Label = %ModeMetaLabel
+@onready var _mode_meta_row: DecisionCostRow = %ModeMetaRow
 @onready var _reason_label: Label = %ReasonLabel
 @onready var _confirm_button: Button = %ConfirmButton
 
@@ -89,7 +91,7 @@ func set_reduced_motion(enabled: bool) -> void:
 func animate_travel(from_id: String, to_id: String) -> void:
 	_travel_animating = true
 	_set_controls_locked(true)
-	_route_state.text = "●"
+	_route_state.present(&"utility_chevron_right", 20, Palette.GREEN_BRIGHT)
 	_reason_label.text = "Поездка рассчитана. Показываем путь."
 	_reason_label.visible = true
 	_map_canvas.animate_travel(from_id, to_id)
@@ -110,10 +112,10 @@ func _present_route(route: Dictionary) -> void:
 	_selected_mode_id = ""
 	if route.is_empty():
 		_confirm_button.disabled = true
-		_mode_meta_label.text = "Нет пути"
+		_mode_meta_row.present([_plain_meta("Нет пути")])
 		_reason_label.text = "Из текущего места сюда пока нет известного маршрута."
 		_reason_label.visible = true
-		_route_state.text = "×"
+		_route_state.present(&"utility_locked", 20, Palette.DANGER)
 		return
 
 	for raw_mode in route.get("modes", []):
@@ -148,7 +150,7 @@ func _mode_options() -> Array:
 		options.append({
 			"id": String(mode.get("id", "")),
 			"title": _mode_title(mode),
-			"icon": String(mode.get("id", "")),
+			"icon_id": StringName(mode.get("icon_id", &"")),
 			"enabled": bool(mode.get("available", true)),
 		})
 	return options
@@ -163,12 +165,16 @@ func _select_mode(mode_id: String) -> void:
 	_mode_picker.select(mode_id)
 	_selected_mode_id = String(mode.get("id", ""))
 	var available := bool(mode.get("available", true))
-	_mode_meta_label.text = _mode_meta(mode)
+	_mode_meta_row.present(_mode_tokens(mode))
 	_reason_label.text = String(mode.get("reason", mode.get("locked_reason", "")))
 	_reason_label.visible = not available and not _reason_label.text.is_empty()
 	_confirm_button.disabled = not available or _travel_animating
 	_confirm_button.text = "Отправиться · %s" % _mode_title(mode)
-	_route_state.text = "●" if available else "×"
+	_route_state.present(
+		&"utility_chevron_right" if available else &"utility_locked",
+		20,
+		Palette.GREEN_BRIGHT if available else Palette.DANGER
+	)
 
 
 func _on_confirm_pressed() -> void:
@@ -199,12 +205,12 @@ func _show_empty_trip() -> void:
 	_destination_label.text = "Выберите место на карте"
 	_mode_picker.present([], "")
 	_mode_models.clear()
-	_mode_meta_label.text = "Время и цена"
+	_mode_meta_row.present([_plain_meta("Время и цена")])
 	_reason_label.text = "Сначала выберите точку назначения."
 	_reason_label.visible = true
 	_confirm_button.text = "Отправиться"
 	_confirm_button.disabled = true
-	_route_state.text = "○"
+	_route_state.present(&"utility_info", 20, Palette.FAINT)
 
 
 func _find_mode(mode_id: String) -> Dictionary:
@@ -264,15 +270,35 @@ func _mode_title(mode: Dictionary) -> String:
 	return String(mode.get("transport", mode.get("title", "Маршрут")))
 
 
-func _mode_meta(mode: Dictionary) -> String:
-	var parts: Array[String] = []
+func _mode_tokens(mode: Dictionary) -> Array[Dictionary]:
+	var tokens: Array[Dictionary] = []
+	var raw_tokens: Variant = mode.get("meta_tokens", [])
+	if raw_tokens is Array:
+		for raw_token: Variant in raw_tokens:
+			if raw_token is Dictionary and not String(raw_token.get("text", "")).strip_edges().is_empty():
+				tokens.append(Dictionary(raw_token).duplicate(true))
+	if not tokens.is_empty():
+		return tokens
 	var duration := _duration_text(mode)
-	var cost := _cost_text(mode)
 	if not duration.is_empty():
-		parts.append(duration)
-	if not cost.is_empty():
-		parts.append(cost)
-	return "\n".join(PackedStringArray(parts)) if not parts.is_empty() else "Без данных"
+		tokens.append({
+			"icon_id": &"meta_time",
+			"text": duration,
+			"accessible_text": duration,
+		})
+	var raw_price: Variant = mode.get("price", mode.get("cost", null))
+	if raw_price is int or raw_price is float:
+		var price := maxi(int(round(float(raw_price))), 0)
+		tokens.append({
+			"icon_id": &"" if price == 0 else &"currency_arden_compact",
+			"text": "Бесплатно" if price == 0 else str(price),
+			"accessible_text": "Проезд бесплатный" if price == 0 else CurrencyTextScript.full(price),
+		})
+	else:
+		var legacy_cost := _cost_text(mode)
+		if not legacy_cost.is_empty():
+			tokens.append(_plain_meta(legacy_cost))
+	return tokens if not tokens.is_empty() else [_plain_meta("Без данных")]
 
 
 func _duration_text(mode: Dictionary) -> String:
@@ -290,8 +316,12 @@ func _cost_text(mode: Dictionary) -> String:
 	var raw_cost: Variant = mode.get("cost", "")
 	if raw_cost is int or raw_cost is float:
 		var amount := int(round(float(raw_cost)))
-		return "Бесплатно" if amount <= 0 else "%d ₽" % amount
+		return "Бесплатно" if amount <= 0 else CurrencyTextScript.compact(amount)
 	return String(raw_cost)
+
+
+func _plain_meta(text: String) -> Dictionary:
+	return {"icon_id": &"", "text": text, "accessible_text": text}
 
 
 func _animate_entrance() -> void:

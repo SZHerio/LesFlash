@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://ui/components/search_approach_row.gd" id="1_row"]
+[ext_resource type="PackedScene" path="res://ui/components/decision_cost_row.tscn" id="2_costs"]
 
 [sub_resource type="StyleBoxFlat" id="StyleRow"]
 bg_color = Color(0.105, 0.125, 0.13, 0.92)
@@ -49,12 +50,9 @@ theme_type_variation = &"BodyMuted"
 text = "Описание"
 autowrap_mode = 2
 
-[node name="Costs" type="Label" parent="Margin/Layout/Copy"]
+[node name="Costs" parent="Margin/Layout/Copy" instance=ExtResource("2_costs")]
 unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"ActionMetaLabel"
-text = "Время: 10 мин. · Энергия: −2"
-autowrap_mode = 2
 
 [node name="Blocked" type="Label" parent="Margin/Layout/Copy"]
 unique_name_in_owner = true

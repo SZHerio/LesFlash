@@ -5,7 +5,7 @@ signal confirmed(approach_id: String)
 
 @onready var _title: Label = %Title
 @onready var _description: Label = %Description
-@onready var _costs: Label = %Costs
+@onready var _costs: DecisionCostRow = %Costs
 @onready var _blocked: Label = %Blocked
 @onready var _confirm: Button = %Confirm
 
@@ -22,8 +22,7 @@ func present(model: Dictionary) -> void:
 	var description := String(model.get("description", "")).strip_edges()
 	_description.text = description
 	_description.visible = not description.is_empty()
-	var cost_text := String(model.get("cost_text", "")).strip_edges()
-	_costs.text = cost_text if not cost_text.is_empty() else "Без затрат"
+	_costs.present(_cost_tokens(model))
 	var reasons := _string_array(model.get("blocked_reasons", []))
 	_blocked.text = "\n".join(PackedStringArray(reasons))
 	_blocked.visible = not reasons.is_empty()
@@ -50,3 +49,20 @@ static func _string_array(value: Variant) -> Array[String]:
 			if not entry.is_empty():
 				result.append("• %s" % entry)
 	return result
+
+
+static func _cost_tokens(model: Dictionary) -> Array[Dictionary]:
+	var tokens: Array[Dictionary] = []
+	var raw_tokens: Variant = model.get("cost_tokens", [])
+	if raw_tokens is Array:
+		for raw_token: Variant in raw_tokens:
+			if raw_token is Dictionary:
+				tokens.append(Dictionary(raw_token).duplicate(true))
+	if not tokens.is_empty():
+		return tokens
+	var legacy_text := String(model.get("cost_text", "")).strip_edges()
+	return [{
+		"icon_id": &"",
+		"text": legacy_text if not legacy_text.is_empty() else "Без затрат",
+		"accessible_text": legacy_text if not legacy_text.is_empty() else "Без затрат",
+	}]

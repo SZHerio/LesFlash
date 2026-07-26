@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://ui/components/bottom_navigation.gd" id="1_nav"]
+[ext_resource type="PackedScene" path="res://ui/components/nav_tab_button.tscn" id="2_tab"]
 
 [node name="BottomNavigation" type="PanelContainer"]
 custom_minimum_size = Vector2(0, 68)
@@ -13,46 +14,28 @@ size_flags_horizontal = 3
 theme_override_constants/h_separation = 4
 columns = 5
 
-[node name="PlaceButton" type="Button" parent="Tabs"]
+[node name="PlaceButton" parent="Tabs" instance=ExtResource("2_tab")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(56, 58)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"BottomNavButtonActive"
-text = "Место"
-focus_mode = 2
-[node name="MapButton" type="Button" parent="Tabs"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(56, 58)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"BottomNavButton"
-text = "Карта"
-focus_mode = 2
 
-[node name="HeroButton" type="Button" parent="Tabs"]
+[node name="MapButton" parent="Tabs" instance=ExtResource("2_tab")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(56, 58)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_type_variation = &"BottomNavButton"
-text = "Герой"
-focus_mode = 2
 
-[node name="ItemsButton" type="Button" parent="Tabs"]
+[node name="HeroButton" parent="Tabs" instance=ExtResource("2_tab")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(56, 58)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_type_variation = &"BottomNavButton"
-text = "Вещи"
-focus_mode = 2
 
-[node name="TasksButton" type="Button" parent="Tabs"]
+[node name="ItemsButton" parent="Tabs" instance=ExtResource("2_tab")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(56, 58)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_type_variation = &"BottomNavButton"
-text = "Дела"
-focus_mode = 2
+
+[node name="TasksButton" parent="Tabs" instance=ExtResource("2_tab")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3

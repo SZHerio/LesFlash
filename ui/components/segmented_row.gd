@@ -50,6 +50,7 @@ func set_locked(locked: bool) -> void:
 		var segment := child as SegmentButton
 		if segment != null:
 			segment.disabled = locked or not _option_enabled(segment.option_id())
+			segment.sync_state()
 
 
 func _option_enabled(option_id: String) -> bool:

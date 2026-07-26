@@ -5,8 +5,12 @@ const Motion := preload("res://ui/theme/motion.gd")
 signal tab_requested(tab_id: String)
 
 const TAB_IDS: Array[StringName] = [&"place", &"map", &"hero", &"items", &"tasks"]
+const TAB_LABELS := ["Место", "Карта", "Герой", "Вещи", "Дела"]
+const TAB_ICONS: Array[StringName] = [
+	&"nav_place", &"nav_map", &"nav_hero", &"nav_items", &"nav_tasks"
+]
 
-@onready var _buttons: Array[Button] = [
+@onready var _buttons: Array[NavTabButton] = [
 	%PlaceButton,
 	%MapButton,
 	%HeroButton,
@@ -21,8 +25,9 @@ var _tweens: Dictionary = {}
 
 func _ready() -> void:
 	for index in range(_buttons.size()):
-		var button := _buttons[index]
+		var button: NavTabButton = _buttons[index]
 		var tab_id := TAB_IDS[index]
+		button.present(TAB_ICONS[index], TAB_LABELS[index])
 		button.pressed.connect(_on_tab_pressed.bind(tab_id))
 		button.button_down.connect(_animate_button.bind(button, 0.95))
 		button.button_up.connect(_animate_button.bind(button, 1.0))
@@ -37,6 +42,7 @@ func present(model: Dictionary) -> void:
 	for index in range(_buttons.size()):
 		var tab_id := TAB_IDS[index]
 		_buttons[index].disabled = not bool(enabled_tabs.get(tab_id, enabled_tabs.get(String(tab_id), true)))
+		_buttons[index].sync_state()
 	_apply_active_style()
 
 
@@ -61,6 +67,7 @@ func _apply_active_style() -> void:
 		_buttons[index].theme_type_variation = (
 			&"BottomNavButtonActive" if TAB_IDS[index] == _active_tab else &"BottomNavButton"
 		)
+		_buttons[index].sync_state()
 
 
 func _update_pivot(button: Button) -> void:

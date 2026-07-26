@@ -188,6 +188,9 @@ func _exercise_hero_tab(
 func _clock_text(screen: Control) -> String:
 	if screen == null:
 		return ""
+	var token := screen.find_child("DateToken", true, false) as Control
+	if token != null:
+		return String(token.get_meta(&"accessible_text", ""))
 	var label := screen.find_child("DateLabel", true, false) as Label
 	return label.text if label != null else ""
 

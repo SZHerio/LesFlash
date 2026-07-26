@@ -13,6 +13,7 @@
     {
       "id": "underpass_map_exits",
       "location_id": "underpass",
+      "category_id": "observe",
       "title": "Разобраться в переходах",
       "description": "Проследить за потоком людей и запомнить, куда ведут лестницы.",
       "duration_minutes": 8,
@@ -33,6 +34,7 @@
     {
       "id": "underpass_warm_by_pipes",
       "location_id": "underpass",
+      "category_id": "rest",
       "title": "Согреться у труб",
       "description": "Ненадолго сесть в сухом углу, восстановить силы и проверить вещи.",
       "duration_minutes": 15,
@@ -53,6 +55,7 @@
     {
       "id": "market_read_notices",
       "location_id": "market",
+      "category_id": "study",
       "title": "Изучить объявления",
       "description": "Сравнить записки у служебных ворот и отметить полезные часы работы.",
       "duration_minutes": 10,
@@ -73,6 +76,7 @@
     {
       "id": "market_shift_trolley",
       "location_id": "market",
+      "category_id": "work",
       "title": "Помочь с тележкой",
       "description": "Подтолкнуть застрявшую тележку и освободить проход между рядами.",
       "duration_minutes": 18,
@@ -95,6 +99,7 @@
     {
       "id": "station_study_board",
       "location_id": "station_square",
+      "category_id": "study",
       "title": "Изучить схему вокзала",
       "description": "Сопоставить платформы, служебные окна и проходы на старой схеме.",
       "duration_minutes": 12,
@@ -115,6 +120,7 @@
     {
       "id": "station_ask_directions",
       "location_id": "station_square",
+      "category_id": "talk",
       "title": "Расспросить о районе",
       "description": "Выбрать незанятого человека и уточнить, где находятся полезные службы.",
       "duration_minutes": 8,
@@ -135,6 +141,7 @@
     {
       "id": "station_watch_flow",
       "location_id": "station_square",
+      "category_id": "observe",
       "title": "Понаблюдать за площадью",
       "description": "Отойти к краю потока и понять, где люди задерживаются, а где проходят насквозь.",
       "duration_minutes": 6,
@@ -152,6 +159,7 @@
     {
       "id": "recycling_check_rates",
       "location_id": "recycling_point",
+      "category_id": "trade",
       "title": "Проверить расценки",
       "description": "Прочитать таблицу приёма и понять, что здесь действительно ценят.",
       "duration_minutes": 7,
@@ -170,6 +178,7 @@
     {
       "id": "recycling_watch_sorting",
       "location_id": "recycling_point",
+      "category_id": "observe",
       "title": "Понаблюдать за сортировкой",
       "description": "Проследить за маркировкой и порядком, не мешая рабочим.",
       "duration_minutes": 12,
@@ -190,6 +199,7 @@
     {
       "id": "recycling_move_bundle",
       "location_id": "recycling_point",
+      "category_id": "work",
       "title": "Убрать тюк с прохода",
       "description": "Перетащить тяжёлый тюк к навесу, чтобы освободить узкий проход.",
       "duration_minutes": 15,
@@ -211,6 +221,7 @@
     {
       "id": "clinic_read_notice",
       "location_id": "clinic_yard",
+      "category_id": "study",
       "title": "Прочитать стенд",
       "description": "Собрать полезные сведения из расписаний и старых объявлений.",
       "duration_minutes": 9,
@@ -231,6 +242,7 @@
     {
       "id": "clinic_rest_bench",
       "location_id": "clinic_yard",
+      "category_id": "rest",
       "title": "Передохнуть на скамейке",
       "description": "Сесть в тихом дворе, дать ногам отдохнуть и успокоиться.",
       "duration_minutes": 15,
@@ -251,6 +263,7 @@
     {
       "id": "clinic_ask_window",
       "location_id": "clinic_yard",
+      "category_id": "talk",
       "title": "Обратиться в служебное окно",
       "description": "Коротко объяснить ситуацию и узнать о доступной помощи.",
       "duration_minutes": 10,
@@ -271,6 +284,7 @@
     {
       "id": "embankment_walk",
       "location_id": "embankment",
+      "category_id": "rest",
       "title": "Пройтись вдоль воды",
       "description": "Спокойно пройти по открытой части набережной и собраться с мыслями.",
       "duration_minutes": 14,
@@ -292,6 +306,7 @@
     {
       "id": "embankment_watch_lights",
       "location_id": "embankment",
+      "category_id": "rest",
       "title": "Посмотреть на вечерние огни",
       "description": "Остановиться у парапета, когда город зажигает свет на другом берегу.",
       "duration_minutes": 10,

@@ -2,6 +2,7 @@ extends SceneTree
 
 const InventoryModels := preload("res://app/inventory/inventory_view_model.gd")
 const InventoryStateScript := preload("res://core/inventory/inventory_state.gd")
+const IconRegistryScript := preload("res://ui/icons/icon_registry.gd")
 
 
 func _init() -> void:
@@ -62,6 +63,11 @@ func _init() -> void:
 	if items.size() != 4:
 		_fail("carried and external stacks did not become four item cards")
 		return
+	for item: Dictionary in items:
+		var item_icon_id := StringName(item.get("item_icon_id", &""))
+		if not IconRegistryScript.has(item_icon_id):
+			_fail("item card has no registered explicit icon ID")
+			return
 	var unknown := _item(items, "forgotten_v2_item")
 	if not bool(unknown.get("unknown_fallback", false)):
 		_fail("unknown legacy item was not marked as fallback")

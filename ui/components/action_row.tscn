@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://ui/components/action_row.gd" id="1_action"]
+[ext_resource type="PackedScene" path="res://ui/components/semantic_icon.tscn" id="2_icon"]
+[ext_resource type="PackedScene" path="res://ui/components/decision_cost_row.tscn" id="3_costs"]
 
 [node name="ActionRow" type="Button"]
 custom_minimum_size = Vector2(0, 92)
@@ -30,6 +32,12 @@ layout_mode = 2
 mouse_filter = 2
 color = Color(0.87, 0.72, 0.42, 1)
 
+[node name="CategoryIcon" parent="Content" instance=ExtResource("2_icon")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
+
 [node name="Copy" type="VBoxContainer" parent="Content"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -50,12 +58,9 @@ theme_type_variation = &"ActionDescriptionLabel"
 text = "Понять, что происходит вокруг."
 autowrap_mode = 2
 
-[node name="MetaLabel" type="Label" parent="Content/Copy"]
+[node name="MetaRow" parent="Content/Copy" instance=ExtResource("3_costs")]
 unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"ActionMetaLabel"
-text = "5 мин  ·  Без риска"
-autowrap_mode = 2
 
 [node name="ReasonLabel" type="Label" parent="Content/Copy"]
 unique_name_in_owner = true
@@ -65,11 +70,8 @@ theme_type_variation = &"ActionReasonLabel"
 text = "Недоступно"
 autowrap_mode = 2
 
-[node name="TrailingLabel" type="Label" parent="Content"]
+[node name="TrailingIcon" parent="Content" instance=ExtResource("2_icon")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(20, 0)
+custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
-theme_type_variation = &"LocationTitleLabel"
-text = "›"
-horizontal_alignment = 1
-vertical_alignment = 1
+size_flags_vertical = 4

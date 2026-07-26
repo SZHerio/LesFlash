@@ -2,6 +2,7 @@ class_name CityMapViewModel
 extends RefCounted
 
 const UiModels := preload("res://app/ui_model_factory.gd")
+const CurrencyTextScript := preload("res://app/presentation/currency_text.gd")
 const MAP_POSITIONS := {
 	"station_square": Vector2(0.18, 0.18),
 	"underpass": Vector2(0.17, 0.52),
@@ -20,11 +21,24 @@ const MAP_LABELS := {
 }
 const COMPACT_LABEL_OFFSETS := {
 	"station_square": Vector2(0.0, -25.0),
-	"underpass": Vector2(-18.0, 5.0),
+	"underpass": Vector2(-38.0, -25.0),
 	"market": Vector2(0.0, 36.0),
 	"recycling_point": Vector2(0.0, -25.0),
 	"clinic_yard": Vector2(-20.0, 36.0),
 	"embankment": Vector2(38.0, 5.0),
+}
+const PLACE_ICON_IDS := {
+	"station_square": &"place_station",
+	"underpass": &"place_underpass",
+	"market": &"place_market",
+	"recycling_point": &"place_recycling",
+	"clinic_yard": &"place_clinic",
+	"embankment": &"place_embankment",
+}
+const TRANSPORT_ICON_IDS := {
+	"walk": &"transport_walk",
+	"bus": &"transport_bus",
+	"tram": &"transport_tram",
 }
 
 
@@ -47,6 +61,10 @@ static func build(raw_model: Dictionary, reduced_motion: bool) -> Dictionary:
 			"position": MAP_POSITIONS.get(location_id, Vector2(0.5, 0.5)),
 			"known": bool(location.get("known", true)),
 			"current": location_id == current_id,
+			"place_icon_id": StringName(location.get(
+				"place_icon_id",
+				PLACE_ICON_IDS.get(location_id, &"")
+			)),
 		}
 		nodes.append(node)
 		if location_id == current_id:
@@ -71,13 +89,21 @@ static func build(raw_model: Dictionary, reduced_motion: bool) -> Dictionary:
 				"modes": [],
 			}
 		var grouped: Dictionary = grouped_routes[route_key]
+		var minutes := maxi(int(route.get("minutes", 1)), 1)
 		var price := maxi(int(route.get("price", 0)), 0)
 		var modes: Array = grouped["modes"]
 		modes.append({
 			"id": mode_id,
+			"icon_id": StringName(route.get(
+				"icon_id",
+				TRANSPORT_ICON_IDS.get(mode_id, &"")
+			)),
 			"transport": String(route.get("mode_title", "Пешком" if mode_id == "walk" else mode_id)),
-			"duration": "%d мин" % maxi(int(route.get("minutes", 1)), 1),
-			"cost": "Бесплатно" if price == 0 else "%d ₽" % price,
+			"duration_minutes": minutes,
+			"price": price,
+			"duration": "%d мин" % minutes,
+			"cost": "Бесплатно" if price == 0 else CurrencyTextScript.compact(price),
+			"meta_tokens": _mode_meta_tokens(minutes, price),
 			"available": bool(route.get("available", true)),
 			"reason": UiModels.reason_text(route.get("reasons", [])),
 		})
@@ -95,3 +121,27 @@ static func build(raw_model: Dictionary, reduced_motion: bool) -> Dictionary:
 		"routes": grouped_routes.values(),
 		"reduced_motion": reduced_motion,
 	}
+
+
+static func _mode_meta_tokens(minutes: int, price: int) -> Array[Dictionary]:
+	var tokens: Array[Dictionary] = [{
+		"kind": &"time",
+		"icon_id": &"meta_time",
+		"text": "%d мин" % minutes,
+		"accessible_text": "Время в пути: %d минут" % minutes,
+	}]
+	if price <= 0:
+		tokens.append({
+			"kind": &"money",
+			"icon_id": &"",
+			"text": "Бесплатно",
+			"accessible_text": "Проезд бесплатный",
+		})
+	else:
+		tokens.append({
+			"kind": &"money",
+			"icon_id": &"currency_arden_compact",
+			"text": str(price),
+			"accessible_text": CurrencyTextScript.full(price),
+		})
+	return tokens

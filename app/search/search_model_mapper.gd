@@ -117,6 +117,7 @@ static func _approach_models(
 			"blocked_reasons": blocked_reasons,
 			"costs": costs,
 			"cost_rows": _cost_rows(costs),
+			"cost_tokens": _cost_tokens(costs),
 			"cost_text": _cost_text(costs),
 		})
 	return result
@@ -155,6 +156,51 @@ static func _cost_rows(costs: Dictionary) -> Array:
 	if repeated != 0:
 		rows.append({"label": "Повторная попытка", "value": "%+d" % repeated, "tone": "warning"})
 	return rows
+
+
+static func _cost_tokens(costs: Dictionary) -> Array[Dictionary]:
+	var tokens: Array[Dictionary] = []
+	var minutes := int(costs.get("minutes", 0))
+	var energy := int(costs.get("energy", 0))
+	var noise := int(costs.get("noise", 0))
+	var trespass := int(costs.get("trespass", 0))
+	var repeated := int(costs.get("repeated", 0))
+	if minutes > 0:
+		tokens.append({
+			"kind": &"time",
+			"icon_id": &"meta_time",
+			"text": "%d мин." % minutes,
+			"accessible_text": "Время: %d минут" % minutes,
+		})
+	if energy > 0:
+		tokens.append({
+			"kind": &"energy",
+			"icon_id": &"meta_energy",
+			"text": "−%d" % energy,
+			"accessible_text": "Энергия: минус %d" % energy,
+		})
+	if noise != 0:
+		tokens.append({
+			"kind": &"risk",
+			"icon_id": &"meta_risk",
+			"text": "Шум %+d" % noise,
+			"accessible_text": "Шум: %+d" % noise,
+		})
+	if trespass != 0:
+		tokens.append({
+			"kind": &"risk",
+			"icon_id": &"meta_risk",
+			"text": "Чужая территория %+d" % trespass,
+			"accessible_text": "Риск проникновения: %+d" % trespass,
+		})
+	if repeated != 0:
+		tokens.append({
+			"kind": &"risk",
+			"icon_id": &"meta_risk",
+			"text": "Повтор %+d" % repeated,
+			"accessible_text": "Риск повторной попытки: %+d" % repeated,
+		})
+	return tokens
 
 
 static func _cost_text(costs: Dictionary) -> String:

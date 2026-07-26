@@ -15,7 +15,7 @@ func _init() -> void:
 		],
 	}
 	var facts := UiModels.transaction_facts(transaction)
-	var expected := ["Деньги: +24 ₽", "Энергия: -7", "Энергия: +2", "Время: +120 мин", "Первая помощь: +1"]
+	var expected := ["Деньги: +24 ард.", "Энергия: -7", "Энергия: +2", "Время: +120 мин", "Первая помощь: +1"]
 	if facts != expected:
 		push_error("UI MODEL FACTORY FAILED: expected %s, got %s" % [expected, facts])
 		quit(1)

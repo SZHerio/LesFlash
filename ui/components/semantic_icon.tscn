@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/components/semantic_icon.gd" id="1_icon"]
+
+[node name="SemanticIcon" type="TextureRect"]
+custom_minimum_size = Vector2(24, 24)
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("1_icon")

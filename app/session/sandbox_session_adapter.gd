@@ -19,6 +19,14 @@ const SearchModels := preload("res://app/search/search_read_model.gd")
 const EncounterCommand := preload("res://game/events/search_encounter_command.gd")
 const HeroModels := preload("res://app/hero/hero_view_model.gd")
 
+const CATEGORY_BY_ACTION_KIND := {
+	"local": "observe",
+	"search": "search",
+	"job": "work",
+	"wait": "rest",
+	"shelter": "shelter",
+}
+
 
 static func create(characteristics: Dictionary, seed: int) -> RefCounted:
 	var session := LegacySessionScript.create_location_first(characteristics, seed)
@@ -54,17 +62,15 @@ func get_location_model() -> Dictionary:
 		if not raw_action is Dictionary:
 			continue
 		var action := Dictionary(raw_action).duplicate(true)
-		var risk := String(action.get("risk", "нет")).strip_edges()
 		action["kind"] = "local"
 		action["minutes"] = int(action.get("duration_minutes", 0))
-		action["meta"] = ["Риск: %s" % risk.capitalize()] if risk != "нет" else ["Без риска"]
-		sandbox_actions.append(action)
+		sandbox_actions.append(_with_action_semantics(action))
 	for raw_action in Array(model.get("actions", [])):
 		if raw_action is Dictionary and String(raw_action.get("kind", "")) != "event":
 			var inherited_action := Dictionary(raw_action).duplicate(true)
 			if String(inherited_action.get("kind", "")) == "wait":
 				inherited_action["description"] = "Перейти к вечерним делам и подготовке ночлега."
-			sandbox_actions.append(inherited_action)
+			sandbox_actions.append(_with_action_semantics(inherited_action))
 	var search_action := _search_action()
 	if not search_action.is_empty():
 		sandbox_actions.push_front(search_action)
@@ -83,6 +89,8 @@ func _search_action() -> Dictionary:
 	return {
 		"id": "search_zone:%s" % String(template.get("id", "")),
 		"kind": "search",
+		"category_id": "search",
+		"category_icon_id": String(LocationActions.category_icon_id("search")),
 		"location_id": _session.location,
 		"title": "Продолжить поиск" if _session.is_search_active() else "Искать полезное",
 		"description": "%s Ходьба по зоне не тратит время — его тратят только подтверждённые решения." % String(
@@ -92,8 +100,42 @@ func _search_action() -> Dictionary:
 		"risk": 0,
 		"available": true,
 		"reasons": [],
-		"meta": ["Мини-игра"],
+		"meta_tokens": [{
+			"icon_id": &"",
+			"text": "Мини-игра",
+			"accessible_text": "Мини-игра поиска",
+		}],
 	}
+
+
+func _with_action_semantics(raw_action: Dictionary) -> Dictionary:
+	var action := raw_action.duplicate(true)
+	var kind := String(action.get("kind", "local"))
+	var category_id := String(action.get("category_id", "")).strip_edges()
+	if category_id.is_empty():
+		category_id = String(CATEGORY_BY_ACTION_KIND.get(kind, "observe"))
+	action["category_id"] = category_id
+	action["category_icon_id"] = String(LocationActions.category_icon_id(category_id))
+	action["meta_tokens"] = _action_meta_tokens(action)
+	return action
+
+
+func _action_meta_tokens(action: Dictionary) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var has_time := false
+	for raw_token: Variant in Array(action.get("meta_tokens", [])):
+		if not raw_token is Dictionary:
+			continue
+		var token: Dictionary = Dictionary(raw_token).duplicate(true)
+		if String(token.get("text", "")).strip_edges().is_empty():
+			continue
+		has_time = has_time or String(token.get("icon_id", "")) == "meta_time"
+		result.append(token)
+	var minutes := int(action.get("minutes", action.get("duration_minutes", 0)))
+	if minutes > 0 and not has_time:
+		var time_text := "%d мин" % minutes
+		result.append({"icon_id": &"meta_time", "text": time_text, "accessible_text": time_text})
+	return result
 
 
 func perform_location_action(action_id: String) -> Dictionary:

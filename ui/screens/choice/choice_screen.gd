@@ -18,12 +18,14 @@ const ActionRowScene := preload("res://ui/components/action_row.tscn")
 @onready var _progress_value: ProgressBar = %ProgressValue
 @onready var _bottom_bar: HBoxContainer = %BottomBar
 @onready var _leave_button: Button = %LeaveButton
+@onready var _settings_button: SemanticIconButton = %SettingsButton
 
 var _reduced_motion := false
 
 
 func _ready() -> void:
-	%SettingsButton.pressed.connect(func() -> void: settings_requested.emit())
+	_settings_button.present(&"utility_settings", "Настройки", 24)
+	_settings_button.pressed.connect(func() -> void: settings_requested.emit())
 	_leave_button.pressed.connect(func() -> void: leave_requested.emit())
 
 

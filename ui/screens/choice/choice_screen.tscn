@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://ui/screens/choice/choice_screen.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://ui/components/semantic_icon_button.tscn" id="2_icon_button"]
 
 [node name="ChoiceScreen" type="Control"]
 layout_mode = 3
@@ -44,12 +45,10 @@ theme_type_variation = &"LocationTitleLabel"
 text = "Что произошло"
 autowrap_mode = 2
 
-[node name="SettingsButton" type="Button" parent="Layout/Header/Row"]
+[node name="SettingsButton" parent="Layout/Header/Row" instance=ExtResource("2_icon_button")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(52, 52)
 layout_mode = 2
-theme_type_variation = &"IconButton"
-text = "⚙"
 
 [node name="Scroll" type="ScrollContainer" parent="Layout"]
 layout_mode = 2

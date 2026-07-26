@@ -8,6 +8,17 @@ extends RefCounted
 const SCHEMA_VERSION := 1
 const DEFAULT_PATH := "res://game/location/data/location_actions_v1.json"
 const FirstDayContentScript := preload("res://game/first_day/first_day_content.gd")
+const CATEGORY_ICON_IDS := {
+	"observe": &"action_observe",
+	"search": &"action_search",
+	"talk": &"action_talk",
+	"work": &"action_work",
+	"trade": &"action_trade",
+	"food": &"action_food",
+	"rest": &"action_rest",
+	"study": &"action_study",
+	"shelter": &"action_shelter",
+}
 
 
 static func load_default() -> Dictionary:
@@ -34,6 +45,10 @@ static func load_path(path: String) -> Dictionary:
 		"catalog": catalog.duplicate(true),
 		"errors": [],
 	}
+
+
+static func category_icon_id(category_id: String) -> StringName:
+	return StringName(CATEGORY_ICON_IDS.get(category_id, &""))
 
 
 static func validate(catalog: Dictionary) -> Dictionary:
@@ -66,6 +81,7 @@ static func validate(catalog: Dictionary) -> Dictionary:
 		var prefix := "actions[%d]" % index
 		var action_id := String(action.get("id", "")).strip_edges()
 		var location_id := String(action.get("location_id", "")).strip_edges()
+		var category_id := String(action.get("category_id", "")).strip_edges()
 		if action_id.is_empty() or seen_actions.has(action_id):
 			errors.append("%s: пустой или повторный id «%s»" % [prefix, action_id])
 		else:
@@ -74,6 +90,8 @@ static func validate(catalog: Dictionary) -> Dictionary:
 			errors.append("%s: неизвестная локация «%s»" % [prefix, location_id])
 		else:
 			actions_per_location[location_id] = int(actions_per_location.get(location_id, 0)) + 1
+		if not CATEGORY_ICON_IDS.has(category_id):
+			errors.append("%s: неизвестная категория действия «%s»" % [prefix, category_id])
 		for field: String in ["title", "description", "outcome"]:
 			if String(action.get(field, "")).strip_edges().is_empty():
 				errors.append("%s: поле %s не заполнено" % [prefix, field])

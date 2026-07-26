@@ -7,12 +7,18 @@ signal travel_animation_finished
 const Palette = preload("res://ui/theme/palette.gd")
 const CityMapGeometry = preload("res://ui/components/city_map_geometry.gd")
 const Motion := preload("res://ui/theme/motion.gd")
+const IconRegistryScript := preload("res://ui/icons/icon_registry.gd")
+const MapNodeHotspotScript := preload("res://ui/components/map_node_hotspot.gd")
+const MapHotspotLayerScript := preload("res://ui/components/map_hotspot_layer.gd")
 
 const TOUCH_RADIUS := 28.0
+
+@onready var _hotspot_layer: MapHotspotLayerScript = %HotspotLayer
 
 var _geometry := CityMapGeometry.new()
 var _selected_id := ""
 var _hovered_id := ""
+var _focused_id := ""
 var _pressed_id := ""
 var _reduced_motion := false
 var _travel_active := false
@@ -23,6 +29,13 @@ var _travel_tween: Tween
 
 
 func _ready() -> void:
+	accessibility_name = "Карта района"
+	accessibility_description = "Известные места города и доступные маршруты."
+	resized.connect(_sync_hotspot_layer)
+	_hotspot_layer.destination_requested.connect(_select_destination)
+	_hotspot_layer.hovered_changed.connect(_on_hotspot_hovered)
+	_hotspot_layer.focused_changed.connect(_on_hotspot_focused)
+	_sync_hotspot_layer()
 	queue_redraw()
 
 
@@ -31,12 +44,16 @@ func present(model: Dictionary) -> void:
 	if not _geometry.is_selectable(_selected_id):
 		_selected_id = ""
 	_hovered_id = ""
+	_focused_id = ""
 	_pressed_id = ""
+	_sync_hotspot_layer()
 	queue_redraw()
 
 
 func set_selected_destination(destination_id: String) -> void:
 	_selected_id = destination_id if _geometry.is_selectable(destination_id) else ""
+	if is_node_ready():
+		_hotspot_layer.set_selected(_selected_id)
 	queue_redraw()
 
 
@@ -52,6 +69,8 @@ func animate_travel(from_id: String, to_id: String) -> void:
 	_travel_to = to_id
 	_travel_progress = 0.0
 	_travel_active = _geometry.nodes_by_id.has(from_id) and _geometry.nodes_by_id.has(to_id)
+	if is_node_ready():
+		_hotspot_layer.set_locked(_travel_active)
 	if not _travel_active or from_id == to_id:
 		_set_travel_progress(1.0)
 		call_deferred("_finish_travel_animation")
@@ -81,6 +100,15 @@ func get_node_position(node_id: String) -> Vector2:
 
 func get_node_touch_rect(node_id: String) -> Rect2:
 	return Rect2(get_node_position(node_id) - Vector2.ONE * TOUCH_RADIUS, Vector2.ONE * TOUCH_RADIUS * 2.0)
+
+
+func get_node_icon_id(node_id: String) -> StringName:
+	var node_model: Variant = _geometry.nodes_by_id.get(node_id, {})
+	return StringName(node_model.get("place_icon_id", &"")) if node_model is Dictionary else &""
+
+
+func get_node_hotspot(node_id: String) -> MapNodeHotspotScript:
+	return _hotspot_layer.hotspot(node_id) if is_node_ready() else null
 
 
 func _draw() -> void:
@@ -158,7 +186,12 @@ func _draw_nodes(map_rect: Rect2) -> void:
 		var known := bool(node_model.get("known", true))
 		var point := _node_position(node_id, map_rect)
 		var selected := node_id == _selected_id
-		var highlighted := selected or node_id == _hovered_id or node_id == _pressed_id
+		var highlighted := (
+			selected
+			or node_id == _hovered_id
+			or node_id == _focused_id
+			or node_id == _pressed_id
+		)
 		if highlighted:
 			var ring_color := Palette.GOLD if selected else Palette.GREEN_BRIGHT
 			draw_circle(point, 28.0, Color(ring_color, 0.15))
@@ -170,6 +203,17 @@ func _draw_nodes(map_rect: Rect2) -> void:
 		if not known:
 			draw_string(font, point + Vector2(-4.0, 5.0), "?", HORIZONTAL_ALIGNMENT_CENTER, 8.0, font_size, Palette.FAINT)
 			continue
+		var icon_texture := IconRegistryScript.texture(
+			StringName(node_model.get("place_icon_id", &""))
+		)
+		if icon_texture != null:
+			var icon_colour := Palette.GOLD if selected else Palette.GREEN_BRIGHT if highlighted else Palette.MUTED
+			draw_texture_rect(
+				icon_texture,
+				Rect2(point - Vector2(12.0, 12.0), Vector2(24.0, 24.0)),
+				false,
+				icon_colour
+			)
 
 		var node_title := String(node_model.get("map_title", node_model.get("title", node_id)))
 		var narrow_map := map_rect.size.x < 380.0
@@ -259,8 +303,35 @@ func _select_destination(destination_id: String) -> void:
 		return
 	_selected_id = destination_id
 	_hovered_id = destination_id
+	_hotspot_layer.set_selected(_selected_id)
 	queue_redraw()
 	destination_selected.emit(destination_id)
+
+
+func _sync_hotspot_layer() -> void:
+	if not is_node_ready():
+		return
+	var models: Array[Dictionary] = []
+	for node_model: Dictionary in _geometry.nodes:
+		var node_id := String(node_model.get("id", ""))
+		if not _geometry.is_selectable(node_id):
+			continue
+		models.append({
+			"id": node_id,
+			"title": String(node_model.get("title", node_id)),
+			"center": get_node_position(node_id),
+		})
+	_hotspot_layer.present(models, _selected_id, _travel_active)
+
+
+func _on_hotspot_hovered(node_id: String) -> void:
+	_hovered_id = node_id
+	queue_redraw()
+
+
+func _on_hotspot_focused(node_id: String) -> void:
+	_focused_id = node_id
+	queue_redraw()
 
 
 func _node_at(pointer: Vector2) -> String:
@@ -293,5 +364,7 @@ func _set_travel_progress(value: float) -> void:
 func _finish_travel_animation() -> void:
 	_travel_active = false
 	_travel_progress = 1.0
+	if is_node_ready():
+		_hotspot_layer.set_locked(false)
 	queue_redraw()
 	travel_animation_finished.emit()

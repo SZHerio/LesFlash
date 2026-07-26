@@ -2,6 +2,7 @@ class_name InventoryActionView
 extends RefCounted
 
 const ItemCatalog := preload("res://core/inventory/item_catalog.gd")
+const CurrencyTextScript := preload("res://app/presentation/currency_text.gd")
 
 const METER_TITLES := {
 	"health": "Здоровье",
@@ -64,7 +65,9 @@ static func _effect_lines(effects: Array) -> Array[String]:
 					_signed(int(effect.get("delta", 0))),
 				])
 			"change_money":
-				result.append("Деньги: %s ₽" % _signed(int(effect.get("delta", 0))))
+				result.append(
+					"Деньги: %s" % CurrencyTextScript.signed_compact(int(effect.get("delta", 0)))
+				)
 			"mastery":
 				result.append("Опыт навыка: %s" % _signed(int(effect.get("amount", 0))))
 			"shift_polarity":

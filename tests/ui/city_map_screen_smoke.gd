@@ -3,6 +3,8 @@ extends SceneTree
 const CityMapScreenScene = preload("res://ui/screens/city_map/city_map_screen.tscn")
 const CityMapScreenScript = preload("res://ui/screens/city_map/city_map_screen.gd")
 const CityMapCanvasScript = preload("res://ui/components/city_map_canvas.gd")
+const IconRegistryScript := preload("res://ui/icons/icon_registry.gd")
+const Palette := preload("res://ui/theme/palette.gd")
 const UiTheme = preload("res://ui/theme/m3_ui_theme.tres")
 const TEST_SIZES: Array[Vector2i] = [Vector2i(360, 640), Vector2i(540, 960)]
 const OUTPUT_DIR := "res://docs/qa/m3a"
@@ -85,25 +87,38 @@ func _check_layout(screen: CityMapScreenScript, test_size: Vector2i) -> void:
 			segment != null and segment.size.x >= 48.0 and segment.size.y >= 48.0,
 			"%s transport segment touch target is too small" % test_size
 		)
+		var glyph := segment.get_node("%Glyph") as SemanticIcon if segment != null else null
+		_require(
+			glyph != null and glyph.custom_minimum_size == Vector2(24, 24),
+			"%s transport icon is not rendered at 24 dp" % test_size
+		)
 	if canvas != null:
 		for node_id in ["market", "embankment", "clinic_yard"]:
 			var touch_rect: Rect2 = canvas.get_node_touch_rect(node_id)
 			_require(touch_rect.size.x >= 48.0 and touch_rect.size.y >= 48.0, "%s map node %s touch target is too small" % [test_size, node_id])
+			var hotspot: BaseButton = canvas.get_node_hotspot(node_id)
+			_require(
+				hotspot != null
+				and hotspot.focus_mode == Control.FOCUS_ALL
+				and not hotspot.accessibility_name.is_empty(),
+				"%s map node %s is not keyboard/screen-reader accessible" % [test_size, node_id]
+			)
+			_require(
+				IconRegistryScript.has(canvas.get_node_icon_id(node_id)),
+				"%s map node %s has no registered place icon" % [test_size, node_id]
+			)
 
 
 func _select_destination(screen: CityMapScreenScript, destination_id: String) -> void:
 	var canvas := screen.get_node("%MapCanvas") as CityMapCanvasScript
-	var point := canvas.get_node_position(destination_id)
-	var down := InputEventMouseButton.new()
-	down.button_index = MOUSE_BUTTON_LEFT
-	down.position = point
-	down.pressed = true
-	canvas.call("_gui_input", down)
-	var up := InputEventMouseButton.new()
-	up.button_index = MOUSE_BUTTON_LEFT
-	up.position = point
-	up.pressed = false
-	canvas.call("_gui_input", up)
+	var hotspot: BaseButton = canvas.get_node_hotspot(destination_id)
+	_require(hotspot != null, "map destination has no interactive hotspot")
+	if hotspot == null:
+		return
+	hotspot.grab_focus()
+	await process_frame
+	_require(hotspot.has_focus(), "map destination cannot receive keyboard focus")
+	hotspot.pressed.emit()
 	await process_frame
 
 
@@ -120,8 +135,13 @@ func _check_available_route(screen: CityMapScreenScript) -> void:
 	)
 	_require(not confirm.disabled, "available route left confirmation disabled")
 	_require(confirm.text.contains("Пешком"), "confirmation does not name the selected transport")
-	var meta := screen.get_node("%ModeMetaLabel") as Label
-	_require(meta.text == "18 мин\nБесплатно", "numeric route duration or cost was not formatted for the player")
+	var meta := screen.get_node("%ModeMetaRow") as DecisionCostRow
+	var meta_texts: Array[String] = []
+	for token: Control in meta.get_children():
+		var text_label := token.get_node("%Text") as Label
+		if text_label != null:
+			meta_texts.append(text_label.text)
+	_require(meta_texts == ["18 мин", "Бесплатно"], "typed route duration or cost was not formatted for the player")
 
 
 func _check_intents_and_animation(screen: CityMapScreenScript) -> void:
@@ -161,6 +181,14 @@ func _check_standard_animation(screen: CityMapScreenScript) -> void:
 	screen.animate_travel("station_square", "market")
 	var back_button := screen.get_node("%BackButton") as Button
 	_require(back_button.disabled, "travel controls did not lock during path animation")
+	var picker := screen.get_node("%ModePicker") as SegmentedRow
+	for child in picker.get_children():
+		var segment := child as SegmentButton
+		var glyph := segment.get_node("%Glyph") as SemanticIcon if segment != null else null
+		_require(
+			segment != null and segment.disabled and glyph != null and glyph.self_modulate == Palette.FAINT,
+			"locked transport segment kept its active icon state"
+		)
 	await create_timer(0.85).timeout
 	_require(_animation_finishes == 1, "standard travel animation did not emit its completion signal")
 	_require(not back_button.disabled, "standard travel animation left controls locked")
@@ -183,7 +211,7 @@ func _capture(viewport: SubViewport, test_size: Vector2i) -> void:
 
 
 func _preview_model() -> Dictionary:
-	return {
+	var model := {
 		"district": {"id": "riverside", "title": "Приречный район"},
 		"title": "Карта района",
 		"current_location": {"id": "station_square", "title": "Вокзальная площадь"},
@@ -203,7 +231,7 @@ func _preview_model() -> Dictionary:
 				"bidirectional": true,
 				"modes": [
 					{"id": "walk", "transport": "Пешком", "duration": 18, "cost": 0, "available": true},
-					{"id": "tram", "transport": "Трамвай", "duration": "7 мин", "cost": "12 ₽", "available": false, "reason": "На этом маршруте трамвай ещё не ходит."},
+					{"id": "tram", "transport": "Трамвай", "duration": "7 мин", "cost": "12 ард.", "available": false, "reason": "На этом маршруте трамвай ещё не ходит."},
 				],
 			},
 			{
@@ -232,6 +260,52 @@ func _preview_model() -> Dictionary:
 			},
 		],
 	}
+	var place_icons := {
+		"station_square": &"place_station",
+		"underpass": &"place_underpass",
+		"market": &"place_market",
+		"recycling_point": &"place_recycling",
+		"clinic_yard": &"place_clinic",
+		"embankment": &"place_embankment",
+	}
+	var map_titles := {
+		"station_square": "Вокзал",
+		"underpass": "Переход",
+		"market": "Рынок",
+		"recycling_point": "Приёмка",
+		"clinic_yard": "Клиника",
+		"embankment": "Река",
+	}
+	var compact_offsets := {
+		"station_square": Vector2(0.0, -25.0),
+		"underpass": Vector2(-38.0, -25.0),
+		"market": Vector2(0.0, 36.0),
+		"recycling_point": Vector2(0.0, -25.0),
+		"clinic_yard": Vector2(-20.0, 36.0),
+		"embankment": Vector2(38.0, 5.0),
+	}
+	for node: Dictionary in model["nodes"]:
+		var node_id := String(node.get("id", ""))
+		node["place_icon_id"] = place_icons.get(node_id, &"")
+		node["map_title"] = map_titles.get(node_id, node.get("title", node_id))
+		node["compact_label_offset"] = compact_offsets.get(node_id, Vector2(0.0, 36.0))
+	for route: Dictionary in model["routes"]:
+		for mode: Dictionary in route.get("modes", []):
+			var mode_id := String(mode.get("id", ""))
+			mode["icon_id"] = StringName("transport_%s" % mode_id)
+			var duration_text := str(mode.get("duration", ""))
+			if mode.get("duration") is int:
+				duration_text = "%d мин" % int(mode["duration"])
+			var price := 12 if mode_id == "tram" else 0
+			mode["meta_tokens"] = [
+				{"icon_id": &"meta_time", "text": duration_text, "accessible_text": duration_text},
+				{
+					"icon_id": &"" if price == 0 else &"currency_arden_compact",
+					"text": "Бесплатно" if price == 0 else str(price),
+					"accessible_text": "Проезд бесплатный" if price == 0 else "12 арденов",
+				},
+			]
+	return model
 
 
 func _on_travel_requested(destination_id: String, mode_id: String) -> void:

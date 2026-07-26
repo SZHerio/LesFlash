@@ -55,6 +55,10 @@ static func definition_for(action_id: String) -> Dictionary:
 	return service.get_action_definition(action_id) if service != null else {}
 
 
+static func category_icon_id(category_id: String) -> StringName:
+	return CatalogScript.category_icon_id(category_id)
+
+
 func _init(catalog: Dictionary = {}) -> void:
 	var source := catalog.duplicate(true)
 	if source.is_empty():
@@ -215,19 +219,47 @@ func _evaluate_time(run_state: Object, definition: Dictionary) -> Dictionary:
 
 
 func _to_read_model(definition: Dictionary, evaluation: Dictionary) -> Dictionary:
+	var category_id := String(definition.get("category_id", ""))
 	return {
 		"id": String(definition.get("id", "")),
 		"kind": "local",
 		"location_id": String(definition.get("location_id", "")),
+		"category_id": category_id,
+		"category_icon_id": String(category_icon_id(category_id)),
 		"title": String(definition.get("title", "")),
 		"description": String(definition.get("description", "")),
 		"duration_minutes": int(definition.get("duration_minutes", 0)),
 		"risk": String(definition.get("risk", "нет")),
+		"meta_tokens": _meta_tokens(definition),
 		"repeatable": bool(definition.get("repeatable", false)),
 		"available": bool(evaluation.get("available", false)),
 		"reasons": Array(evaluation.get("reasons", [])).duplicate(true),
 		"outcome_preview": String(definition.get("outcome", "")),
 	}
+
+
+func _meta_tokens(definition: Dictionary) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var minutes := int(definition.get("duration_minutes", 0))
+	if minutes > 0:
+		var duration_text := "%d мин" % minutes
+		result.append({
+			"icon_id": &"meta_time",
+			"text": duration_text,
+			"accessible_text": duration_text,
+		})
+	var risk := String(definition.get("risk", "нет")).strip_edges().to_lower()
+	var risk_text := "Без риска" if risk.is_empty() or risk == "нет" else "Риск: %s" % _sentence_case(risk)
+	result.append({
+		"icon_id": &"meta_risk",
+		"text": risk_text,
+		"accessible_text": risk_text,
+	})
+	return result
+
+
+func _sentence_case(value: String) -> String:
+	return value if value.is_empty() else value.left(1).to_upper() + value.substr(1)
 
 
 func _index_catalog() -> void:

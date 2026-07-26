@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://ui/components/meta_token.gd" id="1_token"]
+[ext_resource type="PackedScene" path="res://ui/components/semantic_icon.tscn" id="2_icon"]
+
+[node name="MetaToken" type="HBoxContainer"]
+visible = false
+theme_override_constants/separation = 4
+script = ExtResource("1_token")
+
+[node name="Icon" parent="." instance=ExtResource("2_icon")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+
+[node name="Text" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+vertical_alignment = 1

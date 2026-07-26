@@ -5,12 +5,13 @@ signal settings_requested
 
 @onready var _district_label: Label = %DistrictLabel
 @onready var _location_label: Label = %LocationLabel
-@onready var _date_label: Label = %DateLabel
-@onready var _money_label: Label = %MoneyLabel
-@onready var _settings_button: Button = %SettingsButton
+@onready var _date_token: MetaToken = %DateToken
+@onready var _money_amount: MoneyAmount = %MoneyAmount
+@onready var _settings_button: SemanticIconButton = %SettingsButton
 
 
 func _ready() -> void:
+	_settings_button.present(&"utility_settings", "Настройки", 24)
 	_settings_button.pressed.connect(func() -> void: settings_requested.emit())
 
 
@@ -25,11 +26,12 @@ func present(model: Dictionary) -> void:
 		date_parts.append(date_text)
 	if not time_text.is_empty():
 		date_parts.append(time_text)
-	_date_label.text = " · ".join(PackedStringArray(date_parts))
-	_date_label.visible = not _date_label.text.is_empty()
+	var date_copy := " · ".join(PackedStringArray(date_parts))
+	_date_token.present({
+		"icon_id": &"meta_time",
+		"text": date_copy,
+		"accessible_text": date_copy,
+	})
 
-	if model.has("money_text"):
-		_money_label.text = String(model.get("money_text", ""))
-	else:
-		_money_label.text = "%d ₽" % int(model.get("money", 0))
+	_money_amount.present({"amount": int(model.get("money", 0))})
 	_settings_button.visible = bool(model.get("show_settings", true))

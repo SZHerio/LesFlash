@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://ui/components/game_header.gd" id="1_header"]
+[ext_resource type="PackedScene" path="res://ui/components/semantic_icon_button.tscn" id="2_icon_button"]
+[ext_resource type="PackedScene" path="res://ui/components/money_amount.tscn" id="3_money"]
+[ext_resource type="PackedScene" path="res://ui/components/meta_token.tscn" id="4_meta"]
 
 [node name="GameHeader" type="PanelContainer"]
 theme_type_variation = &"ScreenHeaderPanel"
@@ -33,13 +36,10 @@ theme_type_variation = &"LocationTitleLabel"
 text = "Вокзальная площадь"
 autowrap_mode = 2
 
-[node name="SettingsButton" type="Button" parent="Content/TopRow"]
+[node name="SettingsButton" parent="Content/TopRow" instance=ExtResource("2_icon_button")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
-tooltip_text = "Настройки"
-text = "⋮"
-focus_mode = 2
 
 [node name="MetaRow" type="HBoxContainer" parent="Content"]
 layout_mode = 2
@@ -50,19 +50,14 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"PillPanel"
 
-[node name="DateLabel" type="Label" parent="Content/MetaRow/DatePill"]
+[node name="DateToken" parent="Content/MetaRow/DatePill" instance=ExtResource("4_meta")]
 unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"MutedLabel"
-text = "12 сентября 1974 · 08:20"
-autowrap_mode = 2
 
 [node name="MoneyPill" type="PanelContainer" parent="Content/MetaRow"]
 layout_mode = 2
 theme_type_variation = &"PillPanel"
 
-[node name="MoneyLabel" type="Label" parent="Content/MetaRow/MoneyPill"]
+[node name="MoneyAmount" parent="Content/MetaRow/MoneyPill" instance=ExtResource("3_money")]
 unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"MetaLabel"
-text = "0 ₽"

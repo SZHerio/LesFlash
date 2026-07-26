@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://ui/components/inventory_item_card.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://ui/components/semantic_icon.tscn" id="2_icon"]
 
 [node name="InventoryItemCard" type="PanelContainer"]
 size_flags_horizontal = 3
@@ -31,6 +32,12 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/separation = 8
+
+[node name="ItemIcon" parent="Content/HeaderButton/HeaderRow" instance=ExtResource("2_icon")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
 
 [node name="Copy" type="VBoxContainer" parent="Content/HeaderButton/HeaderRow"]
 layout_mode = 2
@@ -73,14 +80,11 @@ horizontal_alignment = 2
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="ChevronLabel" type="Label" parent="Content/HeaderButton/HeaderRow"]
+[node name="ChevronIcon" parent="Content/HeaderButton/HeaderRow" instance=ExtResource("2_icon")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(24, 0)
+custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
-theme_type_variation = &"ActionTitleLabel"
-text = "⌄"
-horizontal_alignment = 1
-vertical_alignment = 1
+size_flags_vertical = 4
 
 [node name="Details" type="VBoxContainer" parent="Content"]
 unique_name_in_owner = true

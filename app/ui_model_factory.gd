@@ -1,6 +1,9 @@
 class_name UiModelFactory
 extends RefCounted
 
+const CurrencyTextScript := preload("res://app/presentation/currency_text.gd")
+const LocationActionCatalogScript := preload("res://game/location/location_action_catalog.gd")
+
 const MONTHS := [
 	"января", "февраля", "марта", "апреля", "мая", "июня",
 	"июля", "августа", "сентября", "октября", "ноября", "декабря",
@@ -41,6 +44,14 @@ const CHANGE_TITLES := {
 	"knowledge_profile": "Профиль знаний",
 	"uncertainty_behavior": "Поведение в неизвестности",
 	"decision_priority": "Приоритет решений",
+}
+const CATEGORY_BY_ACTION_KIND := {
+	"event": "observe",
+	"local": "observe",
+	"search": "search",
+	"job": "work",
+	"wait": "rest",
+	"shelter": "shelter",
 }
 
 
@@ -86,9 +97,13 @@ static func event(raw_model: Dictionary) -> Dictionary:
 			continue
 		var option: Dictionary = raw_option
 		var locked := bool(option.get("locked", false))
+		var category_id := String(option.get("category_id", "observe"))
 		options.append({
 			"id": String(option.get("id", "")),
+			"category_id": category_id,
+			"category_icon_id": _resolved_category_icon(option, category_id),
 			"title": String(option.get("text", "Продолжить")),
+			"meta_tokens": _typed_meta_tokens(option.get("meta_tokens", [])),
 			"enabled": not locked,
 			"locked_reason": reason_text(option.get("reasons", [])),
 			"variant": "normal" if locked else "accent",
@@ -110,9 +125,13 @@ static func job(raw_model: Dictionary) -> Dictionary:
 			continue
 		var choice: Dictionary = raw_choice
 		var locked := bool(choice.get("locked", false))
+		var category_id := String(choice.get("category_id", "work"))
 		options.append({
 			"id": String(choice.get("id", "")),
+			"category_id": category_id,
+			"category_icon_id": _resolved_category_icon(choice, category_id, &"action_work"),
 			"title": String(choice.get("label", "Действовать")),
+			"meta_tokens": _typed_meta_tokens(choice.get("meta_tokens", [])),
 			"enabled": not locked,
 			"locked_reason": reason_text(choice.get("reasons", [])),
 			"variant": "normal" if locked else "accent",
@@ -141,13 +160,17 @@ static func shelters(raw_shelters: Array) -> Dictionary:
 			continue
 		var shelter: Dictionary = raw_shelter
 		var locked := bool(shelter.get("locked", false))
+		var quality_text := "Качество: %d/5" % int(shelter.get("quality", 0))
+		var risk_text := "Риск: %d/5" % int(shelter.get("risk", 0))
 		options.append({
 			"id": String(shelter.get("id", "")),
+			"category_id": "shelter",
+			"category_icon_id": &"action_shelter",
 			"title": String(shelter.get("title", "Ночлег")),
 			"description": String(shelter.get("description", "")),
-			"meta": [
-				"Качество: %d/5" % int(shelter.get("quality", 0)),
-				"Риск: %d/5" % int(shelter.get("risk", 0)),
+			"meta_tokens": [
+				{"icon_id": &"", "text": quality_text, "accessible_text": quality_text},
+				{"icon_id": &"meta_risk", "text": risk_text, "accessible_text": risk_text},
 			],
 			"enabled": not locked,
 			"locked_reason": reason_text(shelter.get("reasons", [])),
@@ -182,7 +205,7 @@ static func summary(raw_model: Dictionary) -> Dictionary:
 	var facts: Array = []
 	var final_state: Dictionary = Dictionary(biography.get("final_state", {})).duplicate(true)
 	if not final_state.is_empty():
-		facts.append("Деньги к утру: %d ₽" % int(final_state.get("money", 0)))
+		facts.append("Деньги к утру: %s" % CurrencyTextScript.compact(int(final_state.get("money", 0))))
 		var meters: Dictionary = Dictionary(final_state.get("meters", {})).duplicate(true)
 		for status_id in ["health", "hunger", "energy", "tension", "morale"]:
 			facts.append("%s: %d/100" % [STATUS_TITLES[status_id], int(meters.get(status_id, 0))])
@@ -253,8 +276,10 @@ static func transaction_facts(raw_transaction: Variant) -> Array:
 			facts.append("Время: +%d мин" % int(change.get("delta", 0)))
 		elif change.has("delta") and change.get("delta") is int:
 			var delta := int(change.get("delta", 0))
-			var suffix := " ₽" if effect_type == "change_money" else ""
-			facts.append("%s: %s%d%s" % [title, "+" if delta > 0 else "", delta, suffix])
+			if effect_type == "change_money":
+				facts.append("%s: %s" % [title, CurrencyTextScript.signed_compact(delta)])
+			else:
+				facts.append("%s: %s%d" % [title, "+" if delta > 0 else "", delta])
 		elif change.has("after"):
 			facts.append("%s: %s" % [title, str(change.get("after"))])
 	return facts
@@ -326,20 +351,42 @@ static func _location_action(raw: Dictionary) -> Dictionary:
 				description = "Сравнить доступные варианты ночлега."
 			"search":
 				description = "Обойти зону и решить, что здесь стоит забрать."
-	var meta: Array = Array(raw.get("meta", [])).duplicate(true)
-	if int(raw.get("minutes", 0)) > 0:
-		meta.append("%d мин" % int(raw.get("minutes", 0)))
-	if int(raw.get("price", 0)) > 0:
-		meta.append("%d ₽" % int(raw.get("price", 0)))
-	if int(raw.get("risk", 0)) > 0:
-		meta.append("Риск %d/5" % clampi(int(raw.get("risk", 0)), 1, 5))
+	var category_id := String(raw.get("category_id", "")).strip_edges()
+	if category_id.is_empty():
+		category_id = String(CATEGORY_BY_ACTION_KIND.get(kind, "observe"))
 	return {
 		"id": String(raw.get("id", "")),
 		"kind": kind,
+		"category_id": category_id,
+		"category_icon_id": _resolved_category_icon(raw, category_id),
 		"title": title,
 		"description": description,
-		"meta": meta,
+		"meta_tokens": _typed_meta_tokens(raw.get("meta_tokens", [])),
+		"meta": Array(raw.get("meta", [])).duplicate(true),
 		"enabled": enabled,
 		"locked_reason": "Уже завершено" if completed else reason_text(raw.get("reasons", [])),
 		"variant": "accent" if kind in ["local", "job", "shelter", "search"] and enabled else "normal",
 	}
+
+
+static func _typed_meta_tokens(raw_tokens: Variant) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	if not raw_tokens is Array:
+		return result
+	for raw_token: Variant in raw_tokens:
+		if not raw_token is Dictionary or String(raw_token.get("text", "")).strip_edges().is_empty():
+			continue
+		result.append(Dictionary(raw_token).duplicate(true))
+	return result
+
+
+static func _resolved_category_icon(
+	raw: Dictionary,
+	category_id: String,
+	fallback: StringName = &"action_observe"
+) -> StringName:
+	var explicit := String(raw.get("category_icon_id", "")).strip_edges()
+	if not explicit.is_empty():
+		return StringName(explicit)
+	var mapped := LocationActionCatalogScript.category_icon_id(category_id)
+	return fallback if mapped.is_empty() else mapped

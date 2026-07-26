@@ -23,6 +23,21 @@ const TAG_TITLES := {
 	"equipment": "Снаряжение",
 	"unknown": "Неизвестно",
 }
+const TAG_ICON_IDS := {
+	"food": &"action_food",
+	"medical": &"meta_item",
+	"repair": &"action_work",
+	"material": &"meta_item",
+	"recyclable": &"place_recycling",
+	"shelter": &"action_shelter",
+	"tool": &"action_work",
+	"equipment": &"nav_items",
+	"unknown": &"meta_item",
+}
+const TAG_ICON_PRIORITY := [
+	"food", "medical", "tool", "repair", "shelter", "equipment",
+	"recyclable", "material", "unknown",
+]
 
 
 static func build(
@@ -155,6 +170,7 @@ static func _items(inventory: Dictionary, containers: Array) -> Array:
 			"condition": int(stack.get("condition", 100)),
 			"condition_text": _condition_text(int(stack.get("condition", 100))),
 			"tags": _tag_titles(definition.tags()),
+			"item_icon_id": _item_icon_id(definition.tags()),
 			"actions": actions,
 			"move_targets": movable_targets.duplicate(true),
 			"unknown_fallback": definition.is_unknown(),
@@ -241,3 +257,10 @@ static func _tag_titles(raw_tags: Array) -> Array:
 		if TAG_TITLES.has(tag):
 			result.append(String(TAG_TITLES[tag]))
 	return result.slice(0, 3)
+
+
+static func _item_icon_id(raw_tags: Array) -> StringName:
+	for tag: String in TAG_ICON_PRIORITY:
+		if tag in raw_tags:
+			return StringName(TAG_ICON_IDS[tag])
+	return &"meta_item"

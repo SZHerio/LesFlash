@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://ui/components/city_map_canvas.gd" id="1_canvas"]
+[ext_resource type="PackedScene" path="res://ui/components/map_hotspot_layer.tscn" id="2_hotspots"]
 
 [node name="CityMapCanvas" type="Control"]
 custom_minimum_size = Vector2(0, 190)
@@ -15,3 +16,6 @@ focus_mode = 2
 clip_contents = true
 mouse_default_cursor_shape = 2
 script = ExtResource("1_canvas")
+
+[node name="HotspotLayer" parent="." instance=ExtResource("2_hotspots")]
+unique_name_in_owner = true

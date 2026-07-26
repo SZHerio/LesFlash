@@ -1,6 +1,7 @@
 extends SceneTree
 
 const CityMapModels := preload("res://app/map/city_map_view_model.gd")
+const IconRegistryScript := preload("res://ui/icons/icon_registry.gd")
 
 
 func _init() -> void:
@@ -51,8 +52,15 @@ func _init() -> void:
 	if String(Dictionary(modes[0]).get("duration", "")) != "32 мин":
 		_fail("walking duration was not formatted")
 		return
-	if String(Dictionary(modes[1]).get("cost", "")) != "8 ₽":
+	if String(Dictionary(modes[1]).get("cost", "")) != "8 ард.":
 		_fail("bus price was not formatted")
+		return
+	if (
+		StringName(Dictionary(modes[0]).get("icon_id", &"")) != &"transport_walk"
+		or StringName(Dictionary(modes[1]).get("icon_id", &"")) != &"transport_bus"
+		or Array(Dictionary(modes[1]).get("meta_tokens", [])).size() != 2
+	):
+		_fail("transport modes have no explicit icon or typed metadata")
 		return
 	if String(Dictionary(modes[1]).get("reason", "")) != "Не хватает денег":
 		_fail("locked transport reason was lost")
@@ -62,6 +70,10 @@ func _init() -> void:
 	if nodes.size() != 2 or not (node_position is Vector2):
 		_fail("map nodes have no stable presentation coordinates")
 		return
+	for node: Dictionary in nodes:
+		if not IconRegistryScript.has(StringName(node.get("place_icon_id", &""))):
+			_fail("map node has no registered place icon")
+			return
 	print("M3B CITY MAP VIEW-MODEL TEST PASSED: pure grouping, price, duration and reasons")
 	quit(0)
 

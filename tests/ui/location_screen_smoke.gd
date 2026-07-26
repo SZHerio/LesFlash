@@ -170,7 +170,7 @@ func _capture_preview(viewport: SubViewport, preview_size: Vector2i) -> void:
 
 
 func _preview_model(animated: bool) -> Dictionary:
-	return {
+	var model := {
 		"district_title": "Приречный район",
 		"location_title": "Вокзальная площадь",
 		"date_text": "12 сентября 1974",
@@ -192,10 +192,38 @@ func _preview_model(animated: bool) -> Dictionary:
 			{"id": "look_around", "title": "Осмотреться", "description": "Понять ритм площади и заметить доступные возможности.", "time_text": "5 мин", "risk_text": "Без риска", "variant": "accent"},
 			{"id": "search", "title": "Искать полезное", "description": "Зайти за служебные павильоны и внимательно осмотреть территорию.", "time_text": "От 10 мин", "energy_text": "Энергия −4", "risk_text": "Риск: средний"},
 			{"id": "ask_worker", "title": "Поговорить с носильщиком", "description": "Расспросить о подработке и безопасных местах поблизости.", "time_text": "15 мин", "risk_text": "Риск: низкий"},
-			{"id": "buy_tea", "title": "Купить горячий чай", "description": "Согреться у киоска и ненадолго перевести дух.", "time_text": "10 мин", "cost_text": "Нужно 18 ₽", "enabled": false, "locked_reason": "Не хватает 18 ₽"},
+			{"id": "buy_tea", "title": "Купить горячий чай", "description": "Согреться у киоска и ненадолго перевести дух.", "time_text": "10 мин", "cost_text": "Нужно 18 ард.", "enabled": false, "locked_reason": "Не хватает 18 арденов"},
 			{"id": "cross_tracks", "title": "Срезать путь через пути", "description": "Быстрый, но опасный способ попасть к складам.", "time_text": "8 мин", "risk_text": "Риск: высокий", "variant": "danger"},
 		],
 	}
+	model["date_text"] = "12 сентября 1980"
+	var category_icons := {
+		"look_around": &"action_observe",
+		"search": &"action_search",
+		"ask_worker": &"action_talk",
+		"buy_tea": &"action_food",
+		"cross_tracks": &"action_search",
+	}
+	for action: Dictionary in model["actions"]:
+		var action_id := String(action.get("id", ""))
+		action["category_icon_id"] = category_icons.get(action_id, &"action_observe")
+		if action_id == "buy_tea":
+			action.erase("cost_text")
+			action.erase("time_text")
+			action["meta_tokens"] = [
+			{
+				"icon_id": &"meta_time",
+				"text": "10 мин",
+				"accessible_text": "10 минут",
+			},
+			{
+				"icon_id": &"currency_arden_compact",
+				"text": "18",
+				"accessible_text": "18 арденов",
+			},
+		]
+			action["locked_reason"] = "Не хватает 18 арденов"
+	return model
 
 
 func _on_action_requested(action_id: String, action_model: Dictionary) -> void:
