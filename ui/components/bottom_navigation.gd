@@ -1,6 +1,7 @@
 class_name BottomNavigation
 extends PanelContainer
 
+const Motion := preload("res://ui/theme/motion.gd")
 signal tab_requested(tab_id: String)
 
 const TAB_IDS: Array[StringName] = [&"place", &"map", &"hero", &"items", &"tasks"]
@@ -67,12 +68,7 @@ func _update_pivot(button: Button) -> void:
 
 
 func _animate_button(button: Button, target: float) -> void:
-	if _reduced_motion or button.disabled:
-		return
 	var previous: Variant = _tweens.get(button)
-	if previous is Tween and previous.is_valid():
-		previous.kill()
-	var tween: Tween = create_tween()
-	tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_property(button, "scale", Vector2.ONE * target, 0.09)
-	_tweens[button] = tween
+	_tweens[button] = Motion.press(
+		previous as Tween, self, button, target, _reduced_motion or button.disabled
+	)

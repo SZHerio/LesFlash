@@ -1,6 +1,7 @@
 class_name SearchLootTray
 extends PanelContainer
 
+const Motion := preload("res://ui/theme/motion.gd")
 signal pickup_requested(stack_id: String, target_container_id: String)
 signal details_requested(stack_id: String)
 
@@ -93,15 +94,9 @@ func _apply_density() -> void:
 
 
 func _animate_entrance(reduced_motion: bool) -> void:
-	if _tween != null and _tween.is_valid():
-		_tween.kill()
-	position.y = 0.0
-	modulate = Color.WHITE
-	if reduced_motion:
-		return
 	position.y = 12.0
 	modulate = Color(1, 1, 1, 0)
-	_tween = create_tween().set_parallel(true)
-	_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_tween.tween_property(self, "position:y", 0.0, 0.2)
-	_tween.tween_property(self, "modulate", Color.WHITE, 0.16)
+	_tween = Motion.play(_tween, self, [
+		{"target": self, "property": "position:y", "to": 0.0, "duration": Motion.SHEET},
+		{"target": self, "property": "modulate", "to": Color.WHITE, "duration": Motion.FADE},
+	], reduced_motion)

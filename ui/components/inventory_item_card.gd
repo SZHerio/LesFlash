@@ -1,6 +1,7 @@
 class_name InventoryItemCard
 extends PanelContainer
 
+const Motion := preload("res://ui/theme/motion.gd")
 signal selected(stack_id: String)
 signal action_requested(stack_id: String, action_id: String, action_model: Dictionary)
 
@@ -99,12 +100,7 @@ func _set_expanded(expanded: bool, animate: bool) -> void:
 	_details.visible = expanded
 	_chevron.text = "⌃" if expanded else "⌄"
 	theme_type_variation = &"StatusDetailPanel" if expanded else &"SurfaceCard"
-	if not expanded or not animate or _reduced_motion:
-		_details.modulate = Color.WHITE
-		return
-	if _tween != null and _tween.is_valid():
-		_tween.kill()
 	_details.modulate = Color(1, 1, 1, 0)
-	_tween = create_tween()
-	_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_tween.tween_property(_details, "modulate", Color.WHITE, 0.2)
+	_tween = Motion.play(_tween, self, [
+		{"target": _details, "property": "modulate", "to": Color.WHITE, "duration": Motion.REVEAL},
+	], not expanded or not animate or _reduced_motion)

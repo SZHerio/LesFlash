@@ -8,6 +8,7 @@ extends HBoxContainer
 ## characteristics and their budget fit on one screen instead of turning the
 ## first decision of a run into a scroll.
 
+const Motion := preload("res://ui/theme/motion.gd")
 signal delta_requested(characteristic_id: String, delta: int)
 signal description_requested(characteristic_id: String)
 
@@ -40,7 +41,7 @@ func present(model: Dictionary) -> void:
 	_value_label.text = str(_value)
 	_minus_button.disabled = not bool(model.get("can_decrease", true))
 	_plus_button.disabled = not bool(model.get("can_increase", true))
-	if changed and not _reduced_motion and is_inside_tree():
+	if changed:
 		_animate_value()
 
 
@@ -55,13 +56,11 @@ func set_reduced_motion(enabled: bool) -> void:
 ## The value settles, it does not bounce: overshoot is the wrong voice for this
 ## game, and it is barred by the motion rules.
 func _animate_value() -> void:
-	if _value_tween != null and _value_tween.is_valid():
-		_value_tween.kill()
 	_value_label.pivot_offset = _value_label.size * 0.5
 	_value_label.scale = Vector2(0.88, 0.88)
-	_value_tween = create_tween()
-	_value_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_value_tween.tween_property(_value_label, "scale", Vector2.ONE, 0.16)
+	_value_tween = Motion.play(_value_tween, self, [
+		{"target": _value_label, "property": "scale", "to": Vector2.ONE, "duration": Motion.REVEAL},
+	], _reduced_motion)
 
 
 func _request_delta(delta: int) -> void:

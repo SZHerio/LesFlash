@@ -1,6 +1,7 @@
 class_name ToastOverlay
 extends Control
 
+const Motion := preload("res://ui/theme/motion.gd")
 @onready var _panel: PanelContainer = %ToastPanel
 @onready var _label: Label = %ToastLabel
 @onready var _timer: Timer = %HideTimer
@@ -23,13 +24,11 @@ func show_message(message: String, is_error: bool = false) -> void:
 	_panel.theme_type_variation = &"ToastErrorPanel" if is_error else &"ToastPanel"
 	_panel.visible = true
 	_panel.modulate = Color.WHITE
-	_timer.start(4.2 if is_error else 3.2)
-	if _reduced_motion:
-		return
+	_timer.start(Motion.TOAST_DWELL_ERROR if is_error else Motion.TOAST_DWELL)
 	_panel.modulate.a = 0.0
-	_tween = create_tween()
-	_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_tween.tween_property(_panel, "modulate:a", 1.0, 0.18)
+	_tween = Motion.play(_tween, self, [
+		{"target": _panel, "property": "modulate:a", "to": 1.0, "duration": Motion.FADE},
+	], _reduced_motion)
 
 
 func set_reduced_motion(enabled: bool) -> void:
@@ -42,11 +41,10 @@ func set_reduced_motion(enabled: bool) -> void:
 func _hide() -> void:
 	if not _panel.visible:
 		return
-	if _reduced_motion:
+	_tween = Motion.play(_tween, self, [
+		{"target": _panel, "property": "modulate:a", "to": 0.0, "duration": Motion.FADE},
+	], _reduced_motion, Motion.Shape.EXIT)
+	if _tween == null:
 		_panel.visible = false
-		return
-	if _tween != null and _tween.is_valid():
-		_tween.kill()
-	_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	_tween.tween_property(_panel, "modulate:a", 0.0, 0.16)
-	_tween.tween_callback(func() -> void: _panel.visible = false)
+	else:
+		_tween.tween_callback(func() -> void: _panel.visible = false)

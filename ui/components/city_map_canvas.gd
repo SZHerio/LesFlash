@@ -6,6 +6,7 @@ signal travel_animation_finished
 
 const Palette = preload("res://ui/theme/palette.gd")
 const CityMapGeometry = preload("res://ui/components/city_map_geometry.gd")
+const Motion := preload("res://ui/theme/motion.gd")
 
 const TOUCH_RADIUS := 28.0
 
@@ -51,16 +52,27 @@ func animate_travel(from_id: String, to_id: String) -> void:
 	_travel_to = to_id
 	_travel_progress = 0.0
 	_travel_active = _geometry.nodes_by_id.has(from_id) and _geometry.nodes_by_id.has(to_id)
-	if not _travel_active or from_id == to_id or _reduced_motion:
-		_travel_progress = 1.0
-		queue_redraw()
+	if not _travel_active or from_id == to_id:
+		_set_travel_progress(1.0)
 		call_deferred("_finish_travel_animation")
 		return
 
-	_travel_tween = create_tween()
-	_travel_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_travel_tween.tween_method(_set_travel_progress, 0.0, 1.0, 0.72)
-	_travel_tween.tween_callback(_finish_travel_animation)
+	_travel_tween = Motion.play_method(
+		_travel_tween,
+		self,
+		_set_travel_progress,
+		0.0,
+		1.0,
+		Motion.JOURNEY,
+		_reduced_motion,
+		Motion.Shape.TRAVEL
+	)
+	# Reduced motion jumps the trip to its end, so the completion the screen is
+	# waiting for has to be raised by hand rather than by the tween.
+	if _travel_tween == null:
+		call_deferred("_finish_travel_animation")
+	else:
+		_travel_tween.tween_callback(_finish_travel_animation)
 
 
 func get_node_position(node_id: String) -> Vector2:

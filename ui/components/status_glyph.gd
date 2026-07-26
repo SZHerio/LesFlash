@@ -4,6 +4,7 @@ extends BaseButton
 signal detail_requested(status_id: String)
 
 const Palette = preload("res://ui/theme/palette.gd")
+const Motion := preload("res://ui/theme/motion.gd")
 
 @onready var _value_label: Label = %ValueLabel
 @onready var _title_label: Label = %TitleLabel
@@ -67,14 +68,14 @@ func present(model: Dictionary) -> void:
 		("\n" + detail) if not detail.is_empty() else "",
 	]
 
-	if _reduced_motion or not is_inside_tree() or delta == 0 or not animate_delta:
-		_display_value = _target_value
-	else:
-		if _value_tween != null and _value_tween.is_valid():
-			_value_tween.kill()
-		_value_tween = create_tween()
-		_value_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		_value_tween.tween_property(self, "_display_value", _target_value, 0.36)
+	# A meter that moves by one point and one that halves must not take the same
+	# time, so the duration follows the size of the delta.
+	_value_tween = Motion.play(_value_tween, self, [{
+		"target": self,
+		"property": "_display_value",
+		"to": _target_value,
+		"duration": Motion.meter_duration(delta, _maximum),
+	}], _reduced_motion or delta == 0 or not animate_delta)
 	queue_redraw()
 
 
@@ -178,10 +179,4 @@ func _on_resized() -> void:
 
 
 func _animate_scale(target: float) -> void:
-	if _reduced_motion or disabled or not is_inside_tree():
-		return
-	if _scale_tween != null and _scale_tween.is_valid():
-		_scale_tween.kill()
-	_scale_tween = create_tween()
-	_scale_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_scale_tween.tween_property(self, "scale", Vector2.ONE * target, 0.1)
+	_scale_tween = Motion.press(_scale_tween, self, self, target, _reduced_motion or disabled)

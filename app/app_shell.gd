@@ -11,6 +11,7 @@ const BaseTheme: Theme = preload("res://ui/theme/m3_ui_theme.tres")
 const SafeAreaLayoutScript := preload("res://app/android/safe_area_layout.gd")
 const TokensScript := preload("res://ui/theme/tokens.gd")
 const ColourSpace := preload("res://ui/theme/colour_space.gd")
+const Motion := preload("res://ui/theme/motion.gd")
 const BACKGROUNDS := {
 	"riverside_station_square_day": "res://assets/backgrounds/riverside_station_square_day.png",
 	"riverside_underpass_day": "res://assets/backgrounds/riverside_underpass_day.png",
@@ -71,13 +72,12 @@ func show_screen(scene: PackedScene) -> Control:
 	instance.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	if instance.has_method("set_reduced_motion"):
 		instance.call("set_reduced_motion", _reduced_motion)
-	if not _reduced_motion:
-		instance.modulate.a = 0.0
-		instance.position.x = 10.0
-		_screen_tween = create_tween().set_parallel(true)
-		_screen_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		_screen_tween.tween_property(instance, "modulate:a", 1.0, 0.2)
-		_screen_tween.tween_property(instance, "position:x", 0.0, 0.22)
+	instance.modulate.a = 0.0
+	instance.position.x = 10.0
+	_screen_tween = Motion.play(_screen_tween, self, [
+		{"target": instance, "property": "modulate:a", "to": 1.0, "duration": Motion.FADE},
+		{"target": instance, "property": "position:x", "to": 0.0, "duration": Motion.SCREEN},
+	], _reduced_motion)
 	return instance
 
 

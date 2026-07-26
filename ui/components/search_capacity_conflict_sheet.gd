@@ -1,6 +1,7 @@
 class_name SearchCapacityConflictSheet
 extends Control
 
+const Motion := preload("res://ui/theme/motion.gd")
 signal replacement_requested(
 	incoming_stack_id: String,
 	displaced_stack_id: String,
@@ -125,18 +126,12 @@ func _on_leave() -> void:
 
 
 func _animate_open() -> void:
-	if _tween != null and _tween.is_valid():
-		_tween.kill()
-	_panel.position.y = 0.0
-	_panel.modulate = Color.WHITE
-	if _reduced_motion:
-		return
 	_panel.position.y = 24.0
 	_panel.modulate = Color(1, 1, 1, 0)
-	_tween = create_tween().set_parallel(true)
-	_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_tween.tween_property(_panel, "position:y", 0.0, 0.2)
-	_tween.tween_property(_panel, "modulate", Color.WHITE, 0.17)
+	_tween = Motion.play(_tween, self, [
+		{"target": _panel, "property": "position:y", "to": 0.0, "duration": Motion.SHEET},
+		{"target": _panel, "property": "modulate", "to": Color.WHITE, "duration": Motion.FADE},
+	], _reduced_motion)
 
 
 static func _capacity_text(model: Dictionary, incoming: Dictionary) -> String:

@@ -6,6 +6,7 @@ signal back_requested
 signal travel_animation_finished
 
 const CityMapCanvasScript = preload("res://ui/components/city_map_canvas.gd")
+const Motion := preload("res://ui/theme/motion.gd")
 
 @onready var _layout: VBoxContainer = %Layout
 @onready var _back_button: Button = %BackButton
@@ -294,12 +295,7 @@ func _cost_text(mode: Dictionary) -> String:
 
 
 func _animate_entrance() -> void:
-	if _reduced_motion:
-		_layout.modulate = Color.WHITE
-		return
-	if _entrance_tween != null and _entrance_tween.is_valid():
-		_entrance_tween.kill()
 	_layout.modulate = Color(1.0, 1.0, 1.0, 0.0)
-	_entrance_tween = create_tween()
-	_entrance_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_entrance_tween.tween_property(_layout, "modulate", Color.WHITE, 0.22)
+	_entrance_tween = Motion.play(_entrance_tween, self, [
+		{"target": _layout, "property": "modulate", "to": Color.WHITE, "duration": Motion.SCREEN},
+	], _reduced_motion)

@@ -7,6 +7,7 @@ extends Control
 ## never cost anything. Progressive disclosure: the screen behind it shows the
 ## choice, this shows what the choice means.
 
+const Motion := preload("res://ui/theme/motion.gd")
 signal dismissed
 
 @onready var _panel: PanelContainer = %SheetPanel
@@ -53,15 +54,9 @@ func set_reduced_motion(enabled: bool) -> void:
 
 
 func _animate_open() -> void:
-	if _tween != null and _tween.is_valid():
-		_tween.kill()
-	_panel.position.y = 0.0
-	_panel.modulate = Color.WHITE
-	if _reduced_motion:
-		return
 	_panel.position.y = 16.0
 	_panel.modulate = Color(1, 1, 1, 0)
-	_tween = create_tween().set_parallel(true)
-	_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_tween.tween_property(_panel, "position:y", 0.0, 0.18)
-	_tween.tween_property(_panel, "modulate", Color.WHITE, 0.14)
+	_tween = Motion.play(_tween, self, [
+		{"target": _panel, "property": "position:y", "to": 0.0, "duration": Motion.SHEET},
+		{"target": _panel, "property": "modulate", "to": Color.WHITE, "duration": Motion.FADE},
+	], _reduced_motion)

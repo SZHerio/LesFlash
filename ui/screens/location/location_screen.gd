@@ -6,6 +6,7 @@ signal status_requested(status_id: String)
 signal settings_requested
 
 const ActionRowScene = preload("res://ui/components/action_row.tscn")
+const Motion := preload("res://ui/theme/motion.gd")
 const STATUS_IDS: Array[StringName] = [&"health", &"hunger", &"energy", &"tension", &"morale"]
 const STATUS_TITLES := {
 	&"health": "Здоровье",
@@ -215,13 +216,10 @@ func _on_status_detail_requested(status_id: String) -> void:
 	_status_detail.visible = true
 	call_deferred("_reveal_status_detail")
 
-	if not _reduced_motion:
-		if _detail_tween != null and _detail_tween.is_valid():
-			_detail_tween.kill()
-		_status_detail.modulate = Color(1.0, 1.0, 1.0, 0.0)
-		_detail_tween = create_tween()
-		_detail_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		_detail_tween.tween_property(_status_detail, "modulate", Color.WHITE, 0.18)
+	_status_detail.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	_detail_tween = Motion.play(_detail_tween, self, [
+		{"target": _status_detail, "property": "modulate", "to": Color.WHITE, "duration": Motion.REVEAL},
+	], _reduced_motion)
 
 
 func _reveal_status_detail() -> void:
@@ -250,12 +248,7 @@ func _apply_reduced_motion() -> void:
 
 
 func _animate_entrance() -> void:
-	if _reduced_motion:
-		_content_frame.modulate = Color.WHITE
-		return
-	if _entrance_tween != null and _entrance_tween.is_valid():
-		_entrance_tween.kill()
 	_content_frame.modulate = Color(1.0, 1.0, 1.0, 0.0)
-	_entrance_tween = create_tween()
-	_entrance_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_entrance_tween.tween_property(_content_frame, "modulate", Color.WHITE, 0.24)
+	_entrance_tween = Motion.play(_entrance_tween, self, [
+		{"target": _content_frame, "property": "modulate", "to": Color.WHITE, "duration": Motion.SCREEN},
+	], _reduced_motion)

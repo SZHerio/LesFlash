@@ -1,6 +1,7 @@
 class_name InventoryCapacityCard
 extends PanelContainer
 
+const Motion := preload("res://ui/theme/motion.gd")
 @onready var _icon: Label = %IconLabel
 @onready var _title: Label = %TitleLabel
 @onready var _value: Label = %ValueLabel
@@ -27,16 +28,13 @@ func present(model: Dictionary) -> void:
 		if state == "overload"
 		else (Color(0.95, 0.73, 0.34) if state == "warning" else Color(0.55, 0.82, 0.64))
 	)
-	if _tween != null and _tween.is_valid():
-		_tween.kill()
-	if _reduced_motion:
-		_bar.value = ratio * 100.0
-	else:
-		var from := float(_bar.value)
-		_bar.value = from
-		_tween = create_tween()
-		_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		_tween.tween_property(_bar, "value", ratio * 100.0, 0.34)
+	var target := ratio * 100.0
+	_tween = Motion.play(_tween, self, [{
+		"target": _bar,
+		"property": "value",
+		"to": target,
+		"duration": Motion.meter_duration(target - float(_bar.value)),
+	}], _reduced_motion)
 
 
 func set_reduced_motion(enabled: bool) -> void:

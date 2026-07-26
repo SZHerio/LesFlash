@@ -4,6 +4,7 @@ extends Button
 signal action_requested(action_id: String)
 
 const Palette = preload("res://ui/theme/palette.gd")
+const Motion := preload("res://ui/theme/motion.gd")
 
 @onready var _accent_rail: ColorRect = %AccentRail
 @onready var _content: HBoxContainer = $Content
@@ -101,13 +102,7 @@ func _update_minimum_height() -> void:
 
 
 func _animate_scale(target: float) -> void:
-	if _reduced_motion or disabled:
-		return
-	if _motion_tween != null and _motion_tween.is_valid():
-		_motion_tween.kill()
-	_motion_tween = create_tween()
-	_motion_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_motion_tween.tween_property(self, "scale", Vector2.ONE * target, 0.1)
+	_motion_tween = Motion.press(_motion_tween, self, self, target, _reduced_motion or disabled)
 
 
 func _ignore_child_mouse(node: Node) -> void:
