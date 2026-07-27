@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "catalog_id": "world_definition_catalog_v1",
+  "metrics": [
+    {"id": "metric_riverside_goods_supply", "title": "Снабжение товарами", "description": "Доступность обычных товаров и устойчивость районных поставок.", "scope_kind": "district", "scope_id": "riverside_central", "minimum": 0, "maximum": 100, "default": 52},
+    {"id": "metric_riverside_job_availability", "title": "Доступность работы", "description": "Количество доступных смен, поручений и начальных вакансий в районе.", "scope_kind": "district", "scope_id": "riverside_central", "minimum": 0, "maximum": 100, "default": 45},
+    {"id": "metric_riverside_sanitation", "title": "Санитарное состояние", "description": "Чистота общественных мест, вывоз отходов и доступность санитарных мер.", "scope_kind": "district", "scope_id": "riverside_central", "minimum": 0, "maximum": 100, "default": 42},
+    {"id": "metric_riverside_safety", "title": "Безопасность района", "description": "Наблюдаемая безопасность улиц, рабочих площадок и ночных маршрутов.", "scope_kind": "district", "scope_id": "riverside_central", "minimum": 0, "maximum": 100, "default": 48},
+    {"id": "metric_riverside_institution_pressure", "title": "Давление учреждений", "description": "Интенсивность проверок, ограничений и административного внимания к району.", "scope_kind": "district", "scope_id": "riverside_central", "minimum": 0, "maximum": 100, "default": 35}
+  ],
+  "facts": [
+    {"id": "fact_recycling_scale_calibrated", "title": "Весы откалиброваны", "description": "Механические весы пункта проверены и дают допустимую погрешность.", "scope_kind": "location", "scope_id": "recycling_point", "value_type": "boolean", "default": false},
+    {"id": "fact_recycling_yard_cleared", "title": "Двор расчищен", "description": "Основные проходы и рабочие зоны пункта освобождены от опасного хлама.", "scope_kind": "location", "scope_id": "recycling_point", "value_type": "boolean", "default": false},
+    {"id": "fact_recycling_press_safe", "title": "Пресс безопасен", "description": "Пресс остановлен, ограждён и признан безопасным для штатной работы.", "scope_kind": "location", "scope_id": "recycling_point", "value_type": "boolean", "default": false}
+  ],
+  "processes": [
+    {
+      "id": "process_recycling_inspection",
+      "title": "Проверка пункта вторсырья",
+      "description": "Районная проверка условий труда, санитарии, весов и оборудования пункта.",
+      "scope_kind": "location",
+      "scope_id": "recycling_point",
+      "initial_stage_id": "latent",
+      "terminal_stage_ids": ["approved", "restricted", "closed_temporarily"],
+      "stages": [
+        {"id": "latent", "title": "О проверке ещё не объявлено", "terminal": false, "observable_refs": [{"kind": "location", "id": "recycling_point"}, {"kind": "npc", "id": "npc_viktor_koren"}]},
+        {"id": "warning", "title": "Получено предупреждение", "terminal": false, "observable_refs": [{"kind": "npc", "id": "npc_viktor_koren"}, {"kind": "job", "id": "job_recycling_sorter"}]},
+        {"id": "preparation", "title": "Пункт готовится", "terminal": false, "observable_refs": [{"kind": "fact", "id": "fact_recycling_scale_calibrated"}, {"kind": "fact", "id": "fact_recycling_yard_cleared"}, {"kind": "fact", "id": "fact_recycling_press_safe"}]},
+        {"id": "inspection", "title": "Идёт проверка", "terminal": false, "observable_refs": [{"kind": "location", "id": "recycling_point"}, {"kind": "npc", "id": "npc_viktor_koren"}]},
+        {"id": "approved", "title": "Работа разрешена", "terminal": true, "observable_refs": [{"kind": "job", "id": "job_recycling_sorter"}, {"kind": "reputation", "id": "rep_recycling_reliability"}]},
+        {"id": "restricted", "title": "Работа ограничена", "terminal": true, "observable_refs": [{"kind": "job", "id": "job_recycling_sorter"}, {"kind": "metric", "id": "metric_riverside_institution_pressure"}]},
+        {"id": "closed_temporarily", "title": "Пункт временно закрыт", "terminal": true, "observable_refs": [{"kind": "location", "id": "recycling_point"}, {"kind": "metric", "id": "metric_riverside_job_availability"}]}
+      ],
+      "transitions": [
+        {"id": "transition_recycling_inspection_warning", "from_stage_id": "latent", "to_stage_id": "warning", "trigger_id": "inspection_notice_received", "required_fact_ids": [], "excluded_fact_ids": []},
+        {"id": "transition_recycling_inspection_preparation", "from_stage_id": "warning", "to_stage_id": "preparation", "trigger_id": "preparation_started", "required_fact_ids": [], "excluded_fact_ids": []},
+        {"id": "transition_recycling_inspection_arrival", "from_stage_id": "preparation", "to_stage_id": "inspection", "trigger_id": "inspection_time_reached", "required_fact_ids": [], "excluded_fact_ids": []},
+        {"id": "transition_recycling_inspection_approved", "from_stage_id": "inspection", "to_stage_id": "approved", "trigger_id": "requirements_met", "required_fact_ids": ["fact_recycling_scale_calibrated", "fact_recycling_yard_cleared", "fact_recycling_press_safe"], "excluded_fact_ids": []},
+        {"id": "transition_recycling_inspection_restricted", "from_stage_id": "inspection", "to_stage_id": "restricted", "trigger_id": "correctable_violations_found", "required_fact_ids": ["fact_recycling_scale_calibrated"], "excluded_fact_ids": ["fact_recycling_press_safe"]},
+        {"id": "transition_recycling_inspection_closed", "from_stage_id": "inspection", "to_stage_id": "closed_temporarily", "trigger_id": "critical_hazard_confirmed", "required_fact_ids": [], "excluded_fact_ids": ["fact_recycling_press_safe"]}
+      ]
+    }
+  ]
+}

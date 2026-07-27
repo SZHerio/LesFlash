@@ -73,12 +73,12 @@ func _test_deep_copy() -> void:
 	var state := _state()
 	state.knowledge["yard_hint"] = 1
 	var world := _world()
-	world["relationships"] = {"caretaker": 2}
+	world["relationships"] = {"caretaker": {"trust": 2, "respect": 0, "affinity": 0, "fear": 0}}
 	var context := EventContextScript.build(state, _source(), world)
 	context["actor"]["knowledge"]["yard_hint"] = 99
-	context["relationships"]["caretaker"] = -50
+	context["relationships"]["caretaker"]["trust"] = -50
 	_expect_equal(state.knowledge["yard_hint"], 1, "actor data must be copied")
-	_expect_equal(world["relationships"]["caretaker"], 2, "world data must be copied")
+	_expect_equal(world["relationships"]["caretaker"]["trust"], 2, "world data must be copied")
 
 
 func _test_json_safety() -> void:

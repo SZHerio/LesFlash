@@ -227,7 +227,7 @@ func _location_model() -> Dictionary:
 		"context_tags": ["Утро", "Людно", "Прохладно"],
 		"reduced_motion": true,
 		"statuses": {
-			"health": 72, "hunger": 39, "energy": 58, "tension": 44, "morale": 61,
+			"health": 72, "hunger": 39, "energy": 58, "tension": 44, "mental_state": 61,
 		},
 		"actions": [
 			{"id": "look", "title": "Осмотреться", "description": "Понять ритм площади и доступные возможности.", "enabled": true},

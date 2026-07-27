@@ -65,8 +65,8 @@ func _test_v3_fixture() -> void:
 	if not bool(migration.get("ok", false)):
 		return
 	var migrated: Dictionary = migration["data"]
-	_expect_equal(migrated.get("schema_version"), 4, "envelope must reach v4")
-	_expect_equal(migrated["session"].get("session_version"), 4, "session must reach v4")
+	_expect_equal(migrated.get("schema_version"), 5, "envelope must reach v5")
+	_expect_equal(migrated["session"].get("session_version"), 5, "session must reach v5")
 	_expect_equal(
 		migrated["session"].get("active_activity"),
 		GameSession.empty_activity(),
@@ -101,9 +101,9 @@ func _test_current_round_trip() -> void:
 	var loaded := SaveScript.load_session(SAVE_PATH)
 	_expect(bool(loaded.get("ok", false)), "current envelope must load: %s" % str(loaded))
 	_expect(not bool(loaded.get("migrated", true)), "current envelope is not migrated")
-	_expect_equal(loaded.get("schema_version"), 4, "current envelope version")
-	_expect_equal(loaded.get("source_session_version"), 4, "current session version")
-	_expect_equal(loaded.get("source_run_state_version"), 3, "RunState version is unchanged")
+	_expect_equal(loaded.get("schema_version"), 5, "current envelope version")
+	_expect_equal(loaded.get("source_session_version"), 5, "current session version")
+	_expect_equal(loaded.get("source_run_state_version"), 4, "RunState version is unchanged")
 
 
 func _test_search_survives_load() -> void:

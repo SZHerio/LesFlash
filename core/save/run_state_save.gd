@@ -6,8 +6,9 @@ extends RefCounted
 ## The service deliberately returns data-rich result dictionaries instead of
 ## logging errors. This keeps it deterministic and convenient for headless tests.
 
-const PREVIOUS_SCHEMA_VERSION: int = 1
-const SCHEMA_VERSION: int = 2
+const LEGACY_SCHEMA_VERSION: int = 1
+const PREVIOUS_SCHEMA_VERSION: int = 2
+const SCHEMA_VERSION: int = 3
 const DEFAULT_SAVE_PATH: String = "user://run_state.json"
 
 
@@ -482,7 +483,7 @@ static func _parse_and_validate(payload: String, source_path: String) -> Diction
 			source_path,
 			{"actual_value": schema_value}
 		)
-	if schema_version not in [PREVIOUS_SCHEMA_VERSION, SCHEMA_VERSION]:
+	if schema_version not in [LEGACY_SCHEMA_VERSION, PREVIOUS_SCHEMA_VERSION, SCHEMA_VERSION]:
 		return _failure(
 			"unsupported_schema_version",
 			"This save schema version is not supported.",

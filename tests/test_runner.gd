@@ -352,7 +352,7 @@ func _test_calendar_and_age() -> void:
 	var minutes_in_year := 365 * 24 * 60
 	_expect(state.advance_time(minutes_in_year, "Прошёл год"), "explicit yearly advance must succeed")
 	_expect_equal(state.age_years, 19, "age must follow the calendar")
-	_expect_equal(state.calendar.year, 1971, "calendar must cross into the next year")
+	_expect_equal(state.calendar.year, 1981, "calendar must cross into the next year")
 	_expect_equal(state.calendar.month, 9, "calendar month must remain aligned")
 	_expect_equal(state.calendar.day, 1, "calendar day must remain aligned")
 	_expect_equal(state.calendar.minute_of_day, 8 * 60, "time of day must remain aligned")

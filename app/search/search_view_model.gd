@@ -1,6 +1,8 @@
 class_name SearchViewModel
 extends RefCounted
 
+const PsycheScaleScript := preload("res://core/state/psyche_scale.gd")
+
 const SearchModelMapper := preload("res://app/search/search_model_mapper.gd")
 
 
@@ -91,9 +93,7 @@ static func _effective_psyche_intensity(
 	var meters: Dictionary = Dictionary(
 		Dictionary(shell_model.get("status", {})).get("meters", {})
 	)
-	var tension := float(meters.get("tension", 0)) / 100.0
-	var low_morale := 1.0 - float(meters.get("morale", 100)) / 100.0
-	var intensity := clampf(tension * 0.55 + low_morale * 0.45, 0.0, 1.0)
+	var intensity := PsycheScaleScript.filter_for(int(meters.get("mental_state", 50)))
 	match mode:
 		"off":
 			return 0.0
@@ -115,7 +115,7 @@ static func _header(shell_model: Dictionary) -> Dictionary:
 		"date_text": "%02d.%02d.%04d" % [
 			int(calendar.get("day", 1)),
 			int(calendar.get("month", 1)),
-			int(calendar.get("year", 1970)),
+			int(calendar.get("year", 1980)),
 		],
 		"time_text": "%02d:%02d" % [minute / 60, minute % 60],
 		"money": int(status.get("money", 0)),

@@ -7,11 +7,19 @@ extends RefCounted
 ## mini-game is an interruptible activity layered on top of that location; UI
 ## routes are deliberately not represented here.
 
-const PREVIOUS_CONTRACT_VERSION := 2
-const CONTRACT_VERSION := 3
+const LEGACY_CONTRACT_VERSION := 2
+const PREVIOUS_CONTRACT_VERSION := 3
+const CONTRACT_VERSION := 4
 const NO_ACTIVITY_KIND := "none"
 
+const WorldStateScript := preload("res://core/world/world_state.gd")
+const SocialStateScript := preload("res://core/social/social_state.gd")
+const WorldReadModelScript := preload("res://core/world/world_read_model.gd")
+
 var run_state: RunState = RunState.new()
+var world_state: WorldState = WorldStateScript.new()
+var social_state: SocialState = SocialStateScript.new()
+var applied_command_ids: Dictionary = {}
 var base_location: String = ""
 var active_activity: Dictionary = empty_activity()
 
@@ -21,7 +29,10 @@ var _location_view_model: Dictionary = {}
 func _init(
 	initial_state: RunState = null,
 	initial_location: String = "",
-	initial_activity: Dictionary = {}
+	initial_activity: Dictionary = {},
+	initial_world_state: WorldState = null,
+	initial_social_state: SocialState = null,
+	initial_command_ids: Dictionary = {}
 ) -> void:
 	if initial_state != null:
 		run_state = initial_state
@@ -30,6 +41,11 @@ func _init(
 		var normalized := normalize_activity(initial_activity)
 		if not normalized.is_empty():
 			active_activity = normalized
+	if initial_world_state != null:
+		world_state = initial_world_state
+	if initial_social_state != null:
+		social_state = initial_social_state
+	applied_command_ids = initial_command_ids.duplicate(true)
 
 
 static func empty_activity() -> Dictionary:
@@ -132,6 +148,7 @@ func get_shell_model() -> Dictionary:
 			"age_years": age,
 			"calendar": calendar_model,
 		},
+		"world": Dictionary(WorldReadModelScript.build(world_state).get("observed", {})).duplicate(true),
 	}
 
 
@@ -155,6 +172,9 @@ func to_dict() -> Dictionary:
 	return {
 		"session_version": CONTRACT_VERSION,
 		"run_state": run_state.to_dict() if run_state != null else {},
+		"world_state": world_state.to_dict() if world_state != null else {},
+		"social_state": social_state.to_dict() if social_state != null else {},
+		"applied_command_ids": applied_command_ids.duplicate(true),
 		"base_location": base_location,
 		"active_activity": active_activity.duplicate(true),
 	}
@@ -162,7 +182,7 @@ func to_dict() -> Dictionary:
 
 static func from_dict(data: Dictionary) -> GameSession:
 	var version: Variant = _parse_integral(data.get("session_version", null))
-	if version == null or int(version) not in [PREVIOUS_CONTRACT_VERSION, CONTRACT_VERSION]:
+	if version == null or int(version) not in [LEGACY_CONTRACT_VERSION, PREVIOUS_CONTRACT_VERSION, CONTRACT_VERSION]:
 		return null
 	if typeof(data.get("run_state", null)) != TYPE_DICTIONARY:
 		return null
@@ -172,7 +192,25 @@ static func from_dict(data: Dictionary) -> GameSession:
 	var parsed_activity := normalize_activity(data.get("active_activity", null))
 	if parsed_state == null or parsed_activity.is_empty():
 		return null
-	var result := GameSession.new(parsed_state, String(data["base_location"]), parsed_activity)
+	var parsed_world := WorldStateScript.new()
+	var parsed_social := SocialStateScript.new()
+	var parsed_commands: Dictionary = {}
+	if int(version) == CONTRACT_VERSION:
+		if typeof(data.get("world_state", null)) != TYPE_DICTIONARY or typeof(data.get("social_state", null)) != TYPE_DICTIONARY or typeof(data.get("applied_command_ids", null)) != TYPE_DICTIONARY:
+			return null
+		parsed_world = WorldStateScript.from_dict(data["world_state"])
+		parsed_social = SocialStateScript.from_dict(data["social_state"])
+		parsed_commands = Dictionary(data["applied_command_ids"]).duplicate(true)
+		if parsed_world == null or parsed_social == null:
+			return null
+	var result := GameSession.new(
+		parsed_state,
+		String(data["base_location"]),
+		parsed_activity,
+		parsed_world,
+		parsed_social,
+		parsed_commands
+	)
 	return result if bool(result.validate().get("ok", false)) else null
 
 
@@ -185,11 +223,56 @@ func validate() -> Dictionary:
 		if not bool(state_validation.get("ok", false)):
 			for error in Array(state_validation.get("errors", [])):
 				errors.append("run_state: %s" % String(error))
+	if world_state == null:
+		errors.append("world_state is null")
+	else:
+		var world_validation := world_state.validate()
+		for error in Array(world_validation.get("errors", [])):
+			errors.append("world_state: %s" % String(error))
+	if social_state == null:
+		errors.append("social_state is null")
+	else:
+		var social_validation := social_state.validate()
+		for error in Array(social_validation.get("errors", [])):
+			errors.append("social_state: %s" % String(error))
+	_validate_command_ids(applied_command_ids, errors)
 	if base_location.is_empty():
 		errors.append("base_location is empty")
 	if normalize_activity(active_activity).is_empty():
 		errors.append("active_activity is invalid")
 	return {"ok": errors.is_empty(), "errors": errors}
+
+
+func clone() -> GameSession:
+	var result := GameSession.from_dict(to_dict())
+	if result != null:
+		result._location_view_model = _location_view_model.duplicate(true)
+	return result
+
+
+func replace_from(other: GameSession) -> bool:
+	if other == null or not bool(other.validate().get("ok", false)):
+		return false
+	if not run_state.replace_from(other.run_state):
+		return false
+	if not world_state.replace_from(other.world_state):
+		return false
+	if not social_state.replace_from(other.social_state):
+		return false
+	applied_command_ids = other.applied_command_ids.duplicate(true)
+	base_location = other.base_location
+	active_activity = other.active_activity.duplicate(true)
+	_location_view_model = other._location_view_model.duplicate(true)
+	return true
+
+
+static func _validate_command_ids(value: Variant, errors: Array[String]) -> void:
+	if not value is Dictionary:
+		errors.append("applied_command_ids must be a dictionary")
+		return
+	for raw_id: Variant in Dictionary(value):
+		if typeof(raw_id) != TYPE_STRING or String(raw_id).strip_edges().is_empty() or not Dictionary(value)[raw_id] is Dictionary:
+			errors.append("applied_command_ids contains an invalid entry")
 
 
 static func _parse_integral(value: Variant) -> Variant:

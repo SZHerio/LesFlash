@@ -23,7 +23,7 @@ func _init() -> void:
 	var shell_model := {
 		"location": {"title": "Вокзальная площадь", "actions": []},
 		"status": {
-			"meters": {"health": 70, "hunger": 40, "energy": 55, "tension": 100, "morale": 0},
+			"meters": {"health": 70, "hunger": 40, "energy": 55, "tension": 100, "mental_state": 0},
 			"calendar": {"year": 1974, "month": 9, "day": 12, "minute_of_day": 500},
 		},
 	}

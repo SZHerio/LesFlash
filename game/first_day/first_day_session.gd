@@ -5,7 +5,7 @@ extends RefCounted
 ## RunState changes are committed only through ActionTransaction. Flow changes
 ## are applied after a successful transaction and carry their own revision.
 
-const SESSION_VERSION := 4
+const SESSION_VERSION := 5
 const JOB_ROUNDS := 6
 const VALID_PHASES := ["uninitialized", "start", "map", "event", "job", "shelter", "completed"]
 const VALID_PSYCHE_MODES := ["off", "reduced", "full"]
@@ -15,6 +15,10 @@ const SHELTER_WAKE_MINUTE := 8 * 60
 
 const M2SessionMigrationScript := preload("res://game/first_day/first_day_session_migration.gd")
 const SearchSessionStateScript := preload("res://game/search/search_session_state.gd")
+const WorldStateScript := preload("res://core/world/world_state.gd")
+const SocialStateScript := preload("res://core/social/social_state.gd")
+const SystemBootstrapScript := preload("res://game/first_day/first_day_system_bootstrap.gd")
+const PsycheScaleScript := preload("res://core/state/psyche_scale.gd")
 
 const DEFERRED_PAYLOADS := {
 	"cold_symptoms": {"health": -5},
@@ -30,6 +34,9 @@ const DEFERRED_PAYLOADS := {
 }
 
 var run_state: RunState = RunState.new()
+var world_state: WorldState = WorldStateScript.new()
+var social_state: SocialState = SocialStateScript.fresh()
+var applied_command_ids: Dictionary = {}
 var phase: String = "uninitialized"
 var location: String = ""
 var current_event: String = ""
@@ -87,6 +94,14 @@ func start_new_run(
 	if starts.is_empty():
 		return _failure("missing_start_situations", "Не найдено ни одной стартовой ситуации")
 	var candidate_state := RunState.new(characteristics, seed)
+	var system_bootstrap := SystemBootstrapScript.create_world(candidate_state)
+	if not bool(system_bootstrap.get("ok", false)):
+		return _failure(
+			String(system_bootstrap.get("code", "world_bootstrap_failed")),
+			String(system_bootstrap.get("error", "Не удалось создать начальное состояние мира")),
+			{"errors": Array(system_bootstrap.get("errors", [])).duplicate(true)}
+		)
+	var candidate_world: WorldState = system_bootstrap["world_state"]
 	var chosen_start := _weighted_start(starts, candidate_state)
 	if chosen_start.is_empty():
 		return _failure("start_selection_failed", "Не удалось выбрать стартовую ситуацию")
@@ -111,6 +126,9 @@ func start_new_run(
 		return _failure("invalid_opening_event", "Стартовая ситуация указывает неизвестное событие")
 
 	run_state = candidate_state
+	world_state = candidate_world
+	social_state = SocialStateScript.fresh()
+	applied_command_ids = {}
 	phase = "event" if not opening_card.is_empty() else ("start" if not _choices_of(chosen_start).is_empty() else "map")
 	location = chosen_location
 	current_event = opening_card
@@ -752,15 +770,7 @@ func choose_shelter(shelter_id: String) -> Dictionary:
 func psyche_intensity() -> float:
 	if String(settings.get("psyche_effect_mode", "full")) == "off":
 		return 0.0
-	var morale_pressure := (100.0 - float(run_state.get_meter("morale"))) * 0.45
-	var tension_pressure := float(run_state.get_meter("tension")) * 0.25
-	var hunger_pressure := float(run_state.get_meter("hunger")) * 0.10
-	var energy_pressure := (100.0 - float(run_state.get_meter("energy"))) * 0.10
-	var health_pressure := (100.0 - float(run_state.get_meter("health"))) * 0.10
-	var pressure := clampf((morale_pressure + tension_pressure + hunger_pressure + energy_pressure + health_pressure) / 100.0, 0.0, 1.0)
-	# A neutral, tired day should stay colourful. The visual effect starts only
-	# after combined pressure crosses a meaningful threshold.
-	var raw := clampf((pressure - 0.25) / 0.75, 0.0, 1.0)
+	var raw := PsycheScaleScript.filter_for(run_state.get_meter("mental_state"))
 	if String(settings.get("psyche_effect_mode", "full")) == "reduced":
 		raw *= 0.5
 	return raw
@@ -782,6 +792,9 @@ func to_dict() -> Dictionary:
 	return {
 		"session_version": SESSION_VERSION,
 		"run_state": run_state.to_dict(),
+		"world_state": world_state.to_dict(),
+		"social_state": social_state.to_dict(),
+		"applied_command_ids": applied_command_ids.duplicate(true),
 		"base_location": location,
 		"active_activity": active_activity.duplicate(true),
 		"search_zone_states": search_zone_states.duplicate(true),
@@ -813,6 +826,12 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 	var parsed_state := RunState.from_dict(source["run_state"])
 	if parsed_state == null:
 		return null
+	if typeof(source.get("world_state", null)) != TYPE_DICTIONARY or typeof(source.get("social_state", null)) != TYPE_DICTIONARY or typeof(source.get("applied_command_ids", null)) != TYPE_DICTIONARY:
+		return null
+	var parsed_world := WorldStateScript.from_dict(source["world_state"])
+	var parsed_social := SocialStateScript.from_dict(source["social_state"])
+	if parsed_world == null or parsed_social == null:
+		return null
 	for key in ["phase", "location", "current_event", "start"]:
 		if typeof(source.get(key, null)) != TYPE_STRING:
 			return null
@@ -838,6 +857,9 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 		return null
 	var result := FirstDaySession.new()
 	result.run_state = parsed_state
+	result.world_state = parsed_world
+	result.social_state = parsed_social
+	result.applied_command_ids = Dictionary(source["applied_command_ids"]).duplicate(true)
 	result.phase = String(source["phase"])
 	result.location = String(source["location"])
 	result.current_event = String(source["current_event"])
@@ -866,6 +888,9 @@ func replace_from(other: FirstDaySession) -> bool:
 	if candidate == null:
 		return false
 	run_state = candidate.run_state
+	world_state = candidate.world_state
+	social_state = candidate.social_state
+	applied_command_ids = candidate.applied_command_ids
 	phase = candidate.phase
 	location = candidate.location
 	current_event = candidate.current_event
@@ -890,6 +915,15 @@ func validate() -> Dictionary:
 	else:
 		_append_validation("run_state", run_state.validate(), errors)
 		_validate_deferred_state(errors)
+	if world_state == null:
+		errors.append("world_state is null")
+	else:
+		_append_validation("world_state", world_state.validate(), errors)
+	if social_state == null:
+		errors.append("social_state is null")
+	else:
+		_append_validation("social_state", social_state.validate(), errors)
+	_validate_applied_commands(errors)
 	if phase not in VALID_PHASES:
 		errors.append("phase is unknown: %s" % phase)
 	if phase != "uninitialized":
@@ -952,6 +986,9 @@ func validate() -> Dictionary:
 		"current_event": current_event,
 		"start": start,
 		"job_state": job_state,
+		"world_state": world_state.to_dict() if world_state != null else {},
+		"social_state": social_state.to_dict() if social_state != null else {},
+		"applied_command_ids": applied_command_ids.duplicate(true),
 		"active_activity": active_activity,
 		"search_zone_states": search_zone_states,
 	})
@@ -962,6 +999,19 @@ func validate() -> Dictionary:
 	if not bool(content_validation.get("ok", false)):
 		_append_validation("content", content_validation, errors)
 	return {"ok": errors.is_empty(), "errors": errors}
+
+
+func _validate_applied_commands(errors: Array[String]) -> void:
+	for raw_id: Variant in applied_command_ids:
+		var command_id := String(raw_id).strip_edges()
+		var record: Variant = applied_command_ids[raw_id]
+		if typeof(raw_id) != TYPE_STRING or command_id.is_empty() or not record is Dictionary:
+			errors.append("applied_command_ids contains an invalid record")
+			continue
+		if typeof(Dictionary(record).get("source_id", null)) != TYPE_STRING:
+			errors.append("applied_command_ids.%s.source_id must be a string" % command_id)
+		if not Dictionary(record).get("applied_at", null) is Dictionary:
+			errors.append("applied_command_ids.%s.applied_at must be a dictionary" % command_id)
 
 
 func _validate_deferred_state(errors: Array[String]) -> void:

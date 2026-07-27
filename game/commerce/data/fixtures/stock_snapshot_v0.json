@@ -1,0 +1,31 @@
+{
+  "schema_version": 0,
+  "generator_version": 1,
+  "catalog_version": 1,
+  "chronology_version": 1,
+  "store_id": "store_market_food_row",
+  "restock_sequence": 0,
+  "generated_at": {
+    "year": 1980,
+    "month": 9,
+    "day": 1,
+    "minute_of_day": 480,
+    "elapsed_minutes": 0
+  },
+  "next_restock_at": 1440,
+  "seed": "13371337",
+  "offers": [
+    {
+      "offer_id": "offer:store_market_food_row:0:product_market_simple_meal",
+      "product_id": "product_market_simple_meal",
+      "item_id": "simple_meal",
+      "category_id": "prepared_food",
+      "quantity": 3,
+      "unit_price": 42,
+      "condition": 95,
+      "quality": 70,
+      "expires_at": 1440,
+      "batch_id": "batch:store_market_food_row:0:0"
+    }
+  ]
+}

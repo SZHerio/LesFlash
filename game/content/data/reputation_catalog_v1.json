@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "catalog_id": "reputation_catalog_v1",
+  "audiences": [
+    {"id": "org_riverside_recycling", "kind": "organization", "title": "Работники Приречного пункта вторсырья"},
+    {"id": "group_riverside_market_vendors", "kind": "group", "title": "Продавцы Центрального рынка"}
+  ],
+  "reputations": [
+    {
+      "id": "rep_recycling_reliability",
+      "title": "Надёжность на пункте",
+      "description": "Считает ли коллектив героя человеком, на которого можно положиться во время смены.",
+      "audience_id": "org_riverside_recycling",
+      "minimum": -100,
+      "maximum": 100,
+      "default": 0,
+      "requires_observed_source": true
+    },
+    {
+      "id": "rep_recycling_work_quality",
+      "title": "Качество сортировки",
+      "description": "Как работники пункта оценивают точность, безопасность и результат работы героя.",
+      "audience_id": "org_riverside_recycling",
+      "minimum": -100,
+      "maximum": 100,
+      "default": 0,
+      "requires_observed_source": true
+    },
+    {
+      "id": "rep_market_fair_dealing",
+      "title": "Честность сделок",
+      "description": "Считают ли продавцы рынка сделки героя понятными и честными.",
+      "audience_id": "group_riverside_market_vendors",
+      "minimum": -100,
+      "maximum": 100,
+      "default": 0,
+      "requires_observed_source": true
+    }
+  ]
+}

@@ -134,7 +134,7 @@ static func raw(run_state: RunState) -> Dictionary:
 	var knowledge: Array = run_state.knowledge.keys()
 	knowledge.sort()
 	return {
-		"psyche_value": int(run_state.meters.get("morale", 0)),
+		"psyche_value": int(run_state.meters.get("mental_state", 0)),
 		"age_years": run_state.get_age_years(),
 		"characteristics": characteristics,
 		"stored_polarities": run_state.stored_polarities.duplicate(true),

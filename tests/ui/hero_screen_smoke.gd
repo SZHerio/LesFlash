@@ -79,6 +79,9 @@ func _check_fits(screen: HeroScreen, test_size: Vector2i, label: String) -> void
 	var bar := scroll.get_v_scroll_bar()
 	if bar != null and bar.visible:
 		var lane := screen.get_node("%ScrollLane") as MarginContainer
+		_require(lane != null, "%s %s scroll lane exists" % [label, test_size])
+		if lane == null:
+			return
 		var clearance := scroll.global_position.x + scroll.size.x - (
 			lane.global_position.x + lane.size.x - lane.get_theme_constant(&"margin_right")
 		)
@@ -197,7 +200,7 @@ func _lived_in_model() -> Dictionary:
 	var state: RunState = RunStateScript.new(
 		{"strength": 6, "charisma": 3, "intelligence": 5, "luck": 4}, 4242
 	)
-	state.meters["morale"] = 44
+	state.meters["mental_state"] = 44
 	state.set_polarity("physical_specialization", -35)
 	state.set_polarity("execution_style", 40)
 	state.set_polarity("decision_priority", 12)

@@ -56,11 +56,11 @@ func _init() -> void:
 	var shell := {
 		"status": {
 			"money": 0,
-			"meters": {"tension": 80, "morale": 20},
+			"meters": {"tension": 80, "mental_state": 20},
 			"calendar": {
 				"day": 1,
 				"month": 9,
-				"year": 1970,
+				"year": 1980,
 				"minute_of_day": 480,
 			},
 		},

@@ -264,7 +264,7 @@ func _model() -> Dictionary:
 		"header": {
 			"district_title": "ПРИРЕЧНЫЙ РАЙОН",
 			"location_title": "Вещи",
-			"date_text": "1 сентября 1970",
+			"date_text": "1 сентября 1980",
 			"time_text": "08:00",
 			"money": 17,
 			"show_settings": true,

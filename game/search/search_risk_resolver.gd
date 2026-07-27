@@ -9,6 +9,8 @@ extends RefCounted
 
 const EventContextScript := preload("res://game/events/event_context.gd")
 const SelectorScript := preload("res://game/events/search_encounter_selector.gd")
+const WorldReadModelScript := preload("res://core/world/world_read_model.gd")
+const EventHistoryScript := preload("res://game/events/event_history.gd")
 
 const ENCOUNTER_THRESHOLD := 35
 
@@ -18,7 +20,7 @@ const RELIEF_DIVISOR := 2
 
 
 static func apply(
-	run_state: RunState,
+	session: Object,
 	snapshot: Dictionary,
 	source: Dictionary,
 	location_id: String,
@@ -26,6 +28,11 @@ static func apply(
 	trespass_delta: int,
 	repeated_delta: int = 0
 ) -> Dictionary:
+	if session == null:
+		return {"ok": false, "code": "missing_session", "error": "Игровая сессия отсутствует", "snapshot": snapshot.duplicate(true), "encounter": {}}
+	var run_state: Variant = session.get("run_state")
+	if not run_state is RunState:
+		return {"ok": false, "code": "missing_run_state", "error": "Состояние героя отсутствует", "snapshot": snapshot.duplicate(true), "encounter": {}}
 	var result := snapshot.duplicate(true)
 	var before: Dictionary = Dictionary(result.get("risk", {})).duplicate(true)
 	var before_score := score(before)
@@ -45,7 +52,7 @@ static func apply(
 		and int(after["score"]) >= ENCOUNTER_THRESHOLD
 		and Dictionary(result.get("pending_encounter", {})).is_empty()
 	):
-		encounter = _build_encounter(run_state, result, source, location_id, after)
+		encounter = _build_encounter(session, run_state, result, source, location_id, after)
 		if not encounter.is_empty():
 			result["pending_encounter"] = encounter
 	return {
@@ -83,6 +90,7 @@ static func score(risk: Dictionary) -> int:
 
 
 static func _build_encounter(
+	session: Object,
 	run_state: RunState,
 	snapshot: Dictionary,
 	source: Dictionary,
@@ -96,6 +104,19 @@ static func _build_encounter(
 		tags.append("trespass")
 	if int(risk["repeated_attempts"]) > 0:
 		tags.append("repeated_attempts")
+	var world_context := _session_context(session)
+	world_context.merge({
+		"location_id": location_id,
+		"weather_id": String(Dictionary(snapshot.get("generation_context", {})).get("weather", "dry")),
+		"cooldowns": Dictionary(snapshot.get("encounter_cooldowns", {})).duplicate(true),
+		"history_facts": EventHistoryScript.facts(run_state, Array(snapshot.get("encounter_history", []))),
+		"risk": {
+			"score": int(risk["score"]),
+			"noise": int(risk["noise"]),
+			"trespass": int(risk["trespass"]),
+			"tags": tags,
+		},
+	}, true)
 	var context := EventContextScript.build(
 		run_state,
 		{
@@ -104,24 +125,7 @@ static func _build_encounter(
 			"action_id": String(source.get("action_id", "")),
 			"object_id": String(source.get("object_id", "")),
 		},
-		{
-			"location_id": location_id,
-			"weather_id": String(
-				Dictionary(snapshot.get("generation_context", {})).get("weather", "dry")
-			),
-			"cooldowns": Dictionary(
-				snapshot.get("encounter_cooldowns", {})
-			).duplicate(true),
-			"history_facts": Array(
-				snapshot.get("encounter_history", [])
-			).duplicate(true),
-			"risk": {
-				"score": int(risk["score"]),
-				"noise": int(risk["noise"]),
-				"trespass": int(risk["trespass"]),
-				"tags": tags,
-			},
-		}
+		world_context
 	)
 	if context.is_empty():
 		return {}
@@ -148,3 +152,19 @@ static func _build_encounter(
 		"cooldown_minutes": int(selected.get("cooldown_minutes", 0)),
 		"context": context,
 	}
+
+
+static func _session_context(session: Object) -> Dictionary:
+	var result: Dictionary = {}
+	if session == null:
+		return result
+	var world: Variant = session.get("world_state")
+	if world is WorldState:
+		result["world"] = WorldReadModelScript.rules_projection(world)
+	var social: Variant = session.get("social_state")
+	if social is SocialState:
+		result["relationships"] = social.relationships.duplicate(true)
+		result["reputations"] = social.reputations.duplicate(true)
+		result["npc_memories"] = social.memories.duplicate(true)
+		result["commitments"] = social.commitments.duplicate(true)
+	return result

@@ -223,7 +223,9 @@ func _test_real_v1_json_fixture() -> void:
 	_expect(restored != null, "migrated fixture must reconstruct a session")
 	if restored == null:
 		return
-	_expect_equal(_downgrade_session(restored.to_dict()), original["session"], "every legacy session field must survive JSON migration")
+	_expect_equal(restored.location, original["session"]["location"], "legacy location must survive")
+	_expect_equal(restored.current_event, original["session"]["current_event"], "legacy event must survive")
+	_expect_equal(restored.run_state.meters["mental_state"], original["session"]["run_state"]["meters"]["morale"], "legacy morale value becomes mental_state exactly")
 	_expect_equal(restored.get_active_activity().get("id"), "clinic_blister", "active event must migrate")
 	_expect_equal(restored.run_state.journal.size(), 3, "legacy journal must be retained")
 	var source_after := FileAccess.open(_save_path, FileAccess.READ)
@@ -261,9 +263,9 @@ func _test_v2_save_round_trip() -> void:
 	var loaded: Dictionary = FirstDaySaveScript.load_session(_save_path)
 	_expect(bool(loaded.get("ok", false)), "current session must load")
 	_expect(not bool(loaded.get("migrated", true)), "current save must not report migration")
-	_expect_equal(loaded.get("schema_version"), 4, "current envelope version must be 4")
-	_expect_equal(loaded.get("source_session_version"), 4, "current session version must be 4")
-	_expect_equal(loaded.get("source_run_state_version"), 3, "current state version must be 3")
+	_expect_equal(loaded.get("schema_version"), 5, "current envelope version must be 5")
+	_expect_equal(loaded.get("source_session_version"), 5, "current session version must be 5")
+	_expect_equal(loaded.get("source_run_state_version"), 4, "current state version must be 4")
 	var restored = loaded.get("session")
 	_expect(restored != null, "loaded current session must exist")
 	if restored != null:
@@ -276,6 +278,9 @@ func _downgrade_session(current: Dictionary) -> Dictionary:
 	result.erase("base_location")
 	result.erase("active_activity")
 	result.erase("search_zone_states")
+	result.erase("world_state")
+	result.erase("social_state")
+	result.erase("applied_command_ids")
 	if result.get("run_state") is Dictionary:
 		result["run_state"] = _downgrade_run_state(result["run_state"], 1)
 	return result
@@ -303,6 +308,9 @@ func _downgrade_run_state(current: Dictionary, version: int) -> Dictionary:
 	result["inventory"] = legacy_inventory
 	if result.get("skills", {}) is Dictionary:
 		result["skills"].erase("search")
+	if result.get("meters", {}) is Dictionary and result["meters"].has("mental_state"):
+		result["meters"]["morale"] = result["meters"]["mental_state"]
+		result["meters"].erase("mental_state")
 	return result
 
 

@@ -157,8 +157,8 @@ static func start_situations() -> Array:
 			"opening_event_id": "underpass_first_minutes",
 			"opening_card_id": "underpass_first_minutes",
 			"conditions": [],
-			"initial_effects": [Effect.change_state(&"energy", -8), Effect.change_state(&"morale", -8)],
-			"effects": [Effect.change_state(&"energy", -8), Effect.change_state(&"morale", -8)],
+			"initial_effects": [Effect.change_state(&"energy", -8), Effect.change_state(&"mental_state", -8)],
+			"effects": [Effect.change_state(&"energy", -8), Effect.change_state(&"mental_state", -8)],
 		},
 		{
 			"id": "start_market_awning",
@@ -185,8 +185,8 @@ static func start_situations() -> Array:
 			"opening_event_id": "clinic_notice_board",
 			"opening_card_id": "clinic_notice_board",
 			"conditions": [],
-			"initial_effects": [Effect.change_state(&"energy", -3), Effect.change_state(&"morale", 4)],
-			"effects": [Effect.change_state(&"energy", -3), Effect.change_state(&"morale", 4)],
+			"initial_effects": [Effect.change_state(&"energy", -3), Effect.change_state(&"mental_state", 4)],
+			"effects": [Effect.change_state(&"energy", -3), Effect.change_state(&"mental_state", 4)],
 		},
 	]
 
@@ -339,7 +339,7 @@ static func shelters() -> Dictionary:
 			"risk": 4,
 			"quality": 1,
 			"conditions": [],
-			"effects": [Effect.advance_time(480, "Ночь в подземном переходе"), Effect.change_state(&"energy", 42), Effect.change_state(&"hunger", 24), Effect.change_state(&"tension", 14), Effect.change_state(&"morale", -6)],
+			"effects": [Effect.advance_time(480, "Ночь в подземном переходе"), Effect.change_state(&"energy", 42), Effect.change_state(&"hunger", 24), Effect.change_state(&"tension", 14), Effect.change_state(&"mental_state", -6)],
 		},
 		"station_waiting_room": {
 			"id": "station_waiting_room",
@@ -359,7 +359,7 @@ static func shelters() -> Dictionary:
 			"risk": 1,
 			"quality": 3,
 			"conditions": [Condition.with_reason(Condition.knowledge(&"clinic_back_gate"), "Вы ещё не знаете, когда открывается служебная калитка")],
-			"effects": [Effect.advance_time(450, "Ночь у котельной поликлиники"), Effect.change_state(&"energy", 60), Effect.change_state(&"hunger", 18), Effect.change_state(&"tension", -8), Effect.change_state(&"morale", 5)],
+			"effects": [Effect.advance_time(450, "Ночь у котельной поликлиники"), Effect.change_state(&"energy", 60), Effect.change_state(&"hunger", 18), Effect.change_state(&"tension", -8), Effect.change_state(&"mental_state", 5)],
 		},
 		"embankment_boathouse": {
 			"id": "embankment_boathouse",
@@ -407,7 +407,7 @@ static func _event_list() -> Array:
 					"underpass_rain_crowd.lift_stroller", "Помочь поднять коляску",
 					"Коляска оказывается тяжёлой, но проход быстро освобождается.",
 					[Condition.with_reason(Condition.stat(&"strength", 5), "Не хватает силы безопасно поднять коляску")],
-					[Effect.advance_time(10, "Помощь у лестницы"), Effect.change_state(&"energy", -5), Effect.change_state(&"morale", 6), Effect.mastery(1)]
+					[Effect.advance_time(10, "Помощь у лестницы"), Effect.change_state(&"energy", -5), Effect.change_state(&"mental_state", 6), Effect.mastery(1)]
 				),
 				_choice(
 					"underpass_rain_crowd.find_passage", "Пройти по сухой стороне",
@@ -436,12 +436,12 @@ static func _event_list() -> Array:
 					"underpass_sleeping_place.stand_ground", "Не отступать",
 					"Вы выдерживаете тяжёлый взгляд, но спокойнее от этого не становится.",
 					[Condition.with_reason(Condition.stat(&"strength", 8), "Вас не воспримут всерьёз без внушительной силы")],
-					[Effect.advance_time(8, "Спор за место"), Effect.change_state(&"tension", 12), Effect.change_state(&"morale", 2), Effect.shift_polarity(&"influence_style", -5)]
+					[Effect.advance_time(8, "Спор за место"), Effect.change_state(&"tension", 12), Effect.change_state(&"mental_state", 2), Effect.shift_polarity(&"influence_style", -5)]
 				),
 				_choice(
 					"underpass_sleeping_place.leave", "Не спорить и уйти",
 					"Вы оставляете картон на месте и избегаете конфликта.", [],
-					[Effect.advance_time(5, "Отказ от спора"), Effect.change_state(&"morale", -4), Effect.change_state(&"tension", -3)]
+					[Effect.advance_time(5, "Отказ от спора"), Effect.change_state(&"mental_state", -4), Effect.change_state(&"tension", -3)]
 				),
 			]
 		),
@@ -459,7 +459,7 @@ static func _event_list() -> Array:
 					"underpass_nightfall.notice_niche", "Заметить нишу за лестницей",
 					"За лестницей действительно есть сухой угол, невидимый от входа.",
 					[Condition.with_reason(Condition.stat(&"luck", 6), "Нужна удача, чтобы случайно заметить укрытие")],
-					[Effect.advance_time(8, "Осмотр перехода"), Effect.knowledge(&"underpass_niche", 1, &"unlock"), Effect.change_state(&"morale", 4)]
+					[Effect.advance_time(8, "Осмотр перехода"), Effect.knowledge(&"underpass_niche", 1, &"unlock"), Effect.change_state(&"mental_state", 4)]
 				),
 				_choice(
 					"underpass_nightfall.keep_moving", "Искать другое место",
@@ -499,13 +499,13 @@ static func _event_list() -> Array:
 					"market_dropped_bag.find_owner", "Найти владельца по приметам",
 					"Вы замечаете растерянную женщину у соседнего ряда. Она забирает сумку и благодарит вас.",
 					[Condition.with_reason(Condition.stat(&"luck", 6), "Нужно вовремя заметить владельца в толпе")],
-					[Effect.advance_time(12, "Поиск владельца сумки"), Effect.change_money(30), Effect.change_state(&"morale", 7), Effect.deferred(&"owner_remembers_help", 300, {"location_id": "market"}, &"market_owner_memory", &"market_dropped_bag")]
+					[Effect.advance_time(12, "Поиск владельца сумки"), Effect.change_money(30), Effect.change_state(&"mental_state", 7), Effect.deferred(&"owner_remembers_help", 300, {"location_id": "market"}, &"market_owner_memory", &"market_dropped_bag")]
 				),
 				_choice(
 					"market_dropped_bag.ask_stalls", "Расспросить соседних продавцов",
 					"Продавцы быстро находят хозяина сумки и начинают смотреть на вас доброжелательнее.",
 					[Condition.with_reason(Condition.stat(&"charisma", 5), "Нужно, чтобы продавцы захотели помочь")],
-					[Effect.advance_time(15, "Расспросы о сумке"), Effect.knowledge(&"market_regulars", 1, &"unlock"), Effect.change_state(&"morale", 5), Effect.shift_polarity(&"influence_style", 4)]
+					[Effect.advance_time(15, "Расспросы о сумке"), Effect.knowledge(&"market_regulars", 1, &"unlock"), Effect.change_state(&"mental_state", 5), Effect.shift_polarity(&"influence_style", 4)]
 				),
 				_choice(
 					"market_dropped_bag.leave", "Оставить сумку у охраны",
@@ -597,12 +597,12 @@ static func _event_list() -> Array:
 					"station_porter_offer.find_cart", "Найти свободную багажную тележку",
 					"Вы замечаете тележку за колонной и решаете задачу без надрыва.",
 					[Condition.with_reason(Condition.stat(&"luck", 6), "Свободная тележка попадается не всегда")],
-					[Effect.advance_time(15, "Поиск тележки"), Effect.change_money(40), Effect.change_state(&"morale", 4), Effect.shift_polarity(&"uncertainty_behavior", -3)]
+					[Effect.advance_time(15, "Поиск тележки"), Effect.change_money(40), Effect.change_state(&"mental_state", 4), Effect.shift_polarity(&"uncertainty_behavior", -3)]
 				),
 				_choice(
 					"station_porter_offer.point_way", "Показать, где стоят тележки",
 					"Вы подсказываете направление и не берётесь за неподходящую нагрузку.", [],
-					[Effect.advance_time(5, "Подсказка пассажирам"), Effect.change_state(&"morale", 2)]
+					[Effect.advance_time(5, "Подсказка пассажирам"), Effect.change_state(&"mental_state", 2)]
 				),
 			]
 		),
@@ -614,13 +614,13 @@ static func _event_list() -> Array:
 					"station_lost_wallet.find_owner", "Догнать владельца",
 					"По билету и времени отправления вы понимаете, где искать человека.",
 					[Condition.with_reason(Condition.stat(&"intelligence", 6), "Нужно сопоставить билет, платформу и расписание")],
-					[Effect.advance_time(25, "Возврат кошелька"), Effect.change_state(&"energy", -6), Effect.change_state(&"morale", 8), Effect.deferred(&"owner_favor", 180, {"money": 60}, &"station_wallet_favor", &"station_lost_wallet")]
+					[Effect.advance_time(25, "Возврат кошелька"), Effect.change_state(&"energy", -6), Effect.change_state(&"mental_state", 8), Effect.deferred(&"owner_favor", 180, {"money": 60}, &"station_wallet_favor", &"station_lost_wallet")]
 				),
 				_choice(
 					"station_lost_wallet.hand_to_clerk", "Передать в справочную",
 					"Сотрудница записывает находку и убирает кошелёк в сейф.",
 					[Condition.with_reason(Condition.stat(&"charisma", 4), "Нужно объяснить сотруднице, где лежал кошелёк")],
-					[Effect.advance_time(12, "Передача кошелька"), Effect.change_state(&"morale", 4), Effect.knowledge(&"station_desk", 1, &"unlock")]
+					[Effect.advance_time(12, "Передача кошелька"), Effect.change_state(&"mental_state", 4), Effect.knowledge(&"station_desk", 1, &"unlock")]
 				),
 				_choice(
 					"station_lost_wallet.leave", "Не трогать находку",
@@ -637,7 +637,7 @@ static func _event_list() -> Array:
 					"station_cardboard.ask", "Попросить один лист",
 					"Работник разрешает забрать картон, если не оставлять мусор на площади.",
 					[Condition.with_reason(Condition.stat(&"charisma", 5), "Нужно обратиться к работнику, не вызывая подозрений")],
-					[Effect.advance_time(8, "Разговор у контейнера"), Effect.add_item(&"cardboard_sheet"), Effect.change_state(&"morale", 3)]
+					[Effect.advance_time(8, "Разговор у контейнера"), Effect.add_item(&"cardboard_sheet"), Effect.change_state(&"mental_state", 3)]
 				),
 				_choice(
 					"station_cardboard.walk_past", "Пройти мимо",
@@ -687,7 +687,7 @@ static func _event_list() -> Array:
 					"recycling_scale_dispute.check", "Проверить нулевую отметку",
 					"Под платформой застрял кусок проволоки. После проверки весы снова показывают ровно.",
 					[Condition.with_reason(Condition.stat(&"intelligence", 6), "Нужно понимать, как исключить простую ошибку измерения")],
-					[Effect.advance_time(12, "Проверка весов"), Effect.knowledge(&"recycling_rules", 1, &"unlock"), Effect.unlock_skill(&"repair"), Effect.change_state(&"morale", 4)]
+					[Effect.advance_time(12, "Проверка весов"), Effect.knowledge(&"recycling_rules", 1, &"unlock"), Effect.unlock_skill(&"repair"), Effect.change_state(&"mental_state", 4)]
 				),
 				_choice(
 					"recycling_scale_dispute.mediate", "Предложить повторное взвешивание",
@@ -727,7 +727,7 @@ static func _event_list() -> Array:
 					"clinic_tea_window.ask", "Попросить горячей воды и еды",
 					"Сотрудница наливает чай и отдаёт бутерброд, оставшийся после дежурства.",
 					[Condition.with_reason(Condition.stat(&"charisma", 5), "Нужно спокойно объяснить свою ситуацию")],
-					[Effect.advance_time(15, "Разговор у служебного окна"), Effect.change_state(&"hunger", -18), Effect.change_state(&"morale", 6), Effect.shift_polarity(&"influence_style", 3)]
+					[Effect.advance_time(15, "Разговор у служебного окна"), Effect.change_state(&"hunger", -18), Effect.change_state(&"mental_state", 6), Effect.shift_polarity(&"influence_style", 3)]
 				),
 				_choice(
 					"clinic_tea_window.leave", "Не беспокоить сотрудников",
@@ -790,7 +790,7 @@ static func _event_list() -> Array:
 					"embankment_fisher.fix_strap", "Поправить ремень ящика",
 					"Зажим из проволоки держит ремень. Рыбак делится хлебом в благодарность.",
 					[Condition.with_reason(Condition.skill(&"repair", 1), "Нужен навык мелкого ремонта")],
-					[Effect.advance_time(15, "Ремонт рыбацкого ящика"), Effect.change_state(&"hunger", -12), Effect.change_state(&"morale", 5), Effect.mastery(1)]
+					[Effect.advance_time(15, "Ремонт рыбацкого ящика"), Effect.change_state(&"hunger", -12), Effect.change_state(&"mental_state", 5), Effect.mastery(1)]
 				),
 				_choice(
 					"embankment_fisher.pass", "Не мешать и пройти дальше",
@@ -824,7 +824,7 @@ static func _event_list() -> Array:
 					"embankment_bottles.search", "Проверить неприметные места",
 					"Под дальней скамьёй находится целый пакет сухих банок.",
 					[Condition.with_reason(Condition.stat(&"luck", 6), "Полезная находка попадается не каждый раз")],
-					[Effect.advance_time(15, "Поиск вторсырья"), Effect.add_item(&"recyclables", 3), Effect.change_state(&"morale", 4)]
+					[Effect.advance_time(15, "Поиск вторсырья"), Effect.add_item(&"recyclables", 3), Effect.change_state(&"mental_state", 4)]
 				),
 				_choice(
 					"embankment_bottles.route", "Собрать вдоль удобного маршрута",
@@ -853,7 +853,7 @@ static func _event_list() -> Array:
 					"embankment_nightfall.find_boathouse", "Осмотреть лодочную станцию",
 					"Боковая стенка закрывает угол от ветра, а дорожка сюда почти не просматривается.",
 					[Condition.with_reason(Condition.stat(&"luck", 7), "Нужно случайно заметить неприметный проход")],
-					[Effect.advance_time(10, "Осмотр лодочной станции"), Effect.knowledge(&"embankment_shelter", 1, &"unlock"), Effect.change_state(&"morale", 4)]
+					[Effect.advance_time(10, "Осмотр лодочной станции"), Effect.knowledge(&"embankment_shelter", 1, &"unlock"), Effect.change_state(&"mental_state", 4)]
 				),
 				_choice(
 					"embankment_nightfall.stay_exposed", "Остаться под открытым навесом",

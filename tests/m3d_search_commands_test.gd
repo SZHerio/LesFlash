@@ -194,7 +194,7 @@ func _test_risk() -> void:
 	var encounter: Dictionary = snapshot.get("pending_encounter", {})
 	_expect_equal(encounter.get("status"), "pending", "encounter is queued")
 	var context: Dictionary = encounter.get("context", {})
-	_expect_equal(context.get("schema_version"), 1, "EventContext is versioned")
+	_expect_equal(context.get("schema_version"), 2, "EventContext is versioned")
 	_expect_equal(
 		Dictionary(context.get("source", {})).get("object_id"),
 		"market_fence",

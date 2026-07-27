@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "catalog_id": "job_catalog_v1",
+  "task_classes": [
+    {
+      "id": "task_recycling_identify_material",
+      "title": "Определить материал",
+      "description": "Распознать материал, загрязнение и подходящую категорию сортировки.",
+      "primary_skill_id": "search",
+      "knowledge_ids": ["recycling_basics", "metal_grades"],
+      "world_fact_ids": [],
+      "tags": ["identification", "materials", "recycling"]
+    },
+    {
+      "id": "task_recycling_move_load",
+      "title": "Переместить груз",
+      "description": "Перенести или переместить партию с учётом массы, прохода и устойчивости груза.",
+      "primary_skill_id": "cargo_handling",
+      "knowledge_ids": ["recycling_shift_routine"],
+      "world_fact_ids": ["fact_recycling_yard_cleared"],
+      "tags": ["cargo", "physical_work", "recycling"]
+    },
+    {
+      "id": "task_recycling_prepare_scale",
+      "title": "Подготовить весы",
+      "description": "Проверить площадку, нулевую отметку и готовность механических весов.",
+      "primary_skill_id": "repair",
+      "knowledge_ids": ["recycling_scale", "recycling_shift_routine"],
+      "world_fact_ids": ["fact_recycling_scale_calibrated"],
+      "tags": ["equipment", "measurement", "recycling"]
+    },
+    {
+      "id": "task_recycling_clear_press",
+      "title": "Освободить пресс",
+      "description": "Безопасно остановить оборудование и устранить доступное заклинивание пресса.",
+      "primary_skill_id": "repair",
+      "knowledge_ids": ["recycling_safety"],
+      "world_fact_ids": ["fact_recycling_press_safe"],
+      "tags": ["equipment", "recycling", "safety"]
+    },
+    {
+      "id": "task_recycling_handle_customer",
+      "title": "Принять партию",
+      "description": "Объяснить категорию, взвесить материал и провести понятную сделку с посетителем.",
+      "primary_skill_id": "trade",
+      "knowledge_ids": ["recycling_rates", "recycling_basics"],
+      "world_fact_ids": [],
+      "tags": ["customer", "recycling", "trade"]
+    },
+    {
+      "id": "task_recycling_safety_check",
+      "title": "Проверить безопасность",
+      "description": "Осмотреть проходы, ограждения, рабочую площадку и готовность оборудования.",
+      "primary_skill_id": "search",
+      "knowledge_ids": ["recycling_safety", "recycling_inspection_rules"],
+      "world_fact_ids": ["fact_recycling_yard_cleared", "fact_recycling_press_safe"],
+      "tags": ["inspection", "recycling", "safety"]
+    }
+  ],
+  "jobs": [
+    {
+      "id": "job_recycling_sorter",
+      "title": "Сортировщик вторсырья",
+      "description": "Смена на Приречном пункте: сортировка, перенос, взвешивание и безопасная работа с оборудованием.",
+      "organization_id": "org_riverside_recycling",
+      "location_id": "recycling_point",
+      "supervisor_npc_id": "npc_viktor_koren",
+      "qualification_ids": [],
+      "task_class_ids": [
+        "task_recycling_identify_material",
+        "task_recycling_move_load",
+        "task_recycling_prepare_scale",
+        "task_recycling_clear_press",
+        "task_recycling_handle_customer",
+        "task_recycling_safety_check"
+      ],
+      "tasks_per_shift_min": 2,
+      "tasks_per_shift_max": 3,
+      "decisions_per_shift": 1,
+      "process_ids": ["process_recycling_inspection"]
+    }
+  ]
+}

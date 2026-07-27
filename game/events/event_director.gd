@@ -147,6 +147,19 @@ static func _analyze_card(card: Dictionary, context: Dictionary) -> Dictionary:
 			"message": "Повтор станет возможен через %d мин." % (ready_at - elapsed),
 			"ready_at": ready_at,
 		})
+	var occurrences := 0
+	var history_prefix := "event:%s:" % String(card.get("id", ""))
+	for raw_fact: Variant in Array(context.get("history_facts", [])):
+		if String(raw_fact).begins_with(history_prefix):
+			occurrences += 1
+	var max_occurrences := int(card.get("max_occurrences", 1))
+	if occurrences >= max_occurrences:
+		reasons.append({
+			"code": "max_occurrences_reached",
+			"message": "Ситуация уже исчерпана в этой жизни",
+			"occurrences": occurrences,
+			"max_occurrences": max_occurrences,
+		})
 	var conditions := ConditionEvaluator.evaluate_all(
 		context,
 		Array(card.get("conditions", []))
@@ -180,6 +193,9 @@ static func _analyze_card(card: Dictionary, context: Dictionary) -> Dictionary:
 		"luck_delta": luck_delta,
 		"luck_adjustment": luck_bias * luck_delta,
 		"adjusted_weight": adjusted_weight,
+		"family_id": String(card.get("family_id", "")),
+		"occurrences": occurrences,
+		"max_occurrences": max_occurrences,
 	}
 
 

@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "catalog_id": "m3f_stores",
+  "catalog_version": 1,
+  "schedules": [
+    {
+      "schedule_id": "schedule_store_market_food_row",
+      "entries": [
+        {"days": [2, 3, 4, 5, 6, 7], "opens_minute": 360, "closes_minute": 900}
+      ]
+    },
+    {
+      "schedule_id": "schedule_store_clinic_pharmacy_window",
+      "entries": [
+        {"days": [1, 2, 3, 4, 5], "opens_minute": 480, "closes_minute": 960},
+        {"days": [6], "opens_minute": 480, "closes_minute": 720}
+      ]
+    },
+    {
+      "schedule_id": "schedule_store_station_commission",
+      "entries": [
+        {"days": [1, 2, 3, 4, 5, 6], "opens_minute": 540, "closes_minute": 1200}
+      ]
+    }
+  ],
+  "archetypes": [
+    {
+      "archetype_id": "archetype_market_food",
+      "title": "Продуктовый ряд",
+      "category_weights": {
+        "prepared_food": 140,
+        "preserved_food": 120,
+        "household": 45,
+        "print": 35
+      },
+      "offer_count_range": [3, 4],
+      "price_band": [9200, 10800],
+      "quality_band": [45, 86],
+      "condition_range": [72, 100],
+      "quantity_range": [1, 6],
+      "restock_interval": 1440,
+      "used_goods_policy": "new_and_serviceable",
+      "payment_methods_by_era": [
+        {"available_from": 1980, "method_ids": ["cash_arden"]}
+      ],
+      "guaranteed_product_ids": ["product_market_simple_meal", "product_market_sealed_food_can"],
+      "buyback_policy": {
+        "enabled": false,
+        "accepted_category_ids": [],
+        "payout_basis_points": 0
+      }
+    },
+    {
+      "archetype_id": "archetype_clinic_pharmacy",
+      "title": "Аптечное окно",
+      "category_weights": {
+        "medicine": 100,
+        "medical_supply": 145
+      },
+      "offer_count_range": [2, 2],
+      "price_band": [9800, 11200],
+      "quality_band": [65, 96],
+      "condition_range": [86, 100],
+      "quantity_range": [1, 5],
+      "restock_interval": 2880,
+      "used_goods_policy": "sealed_only",
+      "payment_methods_by_era": [
+        {"available_from": 1980, "method_ids": ["cash_arden"]}
+      ],
+      "guaranteed_product_ids": ["product_pharmacy_cloth_rag"],
+      "buyback_policy": {
+        "enabled": false,
+        "accepted_category_ids": [],
+        "payout_basis_points": 0
+      }
+    },
+    {
+      "archetype_id": "archetype_station_commission",
+      "title": "Комиссионный магазин",
+      "category_weights": {
+        "outerwear": 105,
+        "tool": 115,
+        "equipment": 100,
+        "electronics": 70,
+        "component": 85
+      },
+      "offer_count_range": [3, 5],
+      "price_band": [8200, 10400],
+      "quality_band": [25, 82],
+      "condition_range": [18, 86],
+      "quantity_range": [1, 3],
+      "restock_interval": 10080,
+      "used_goods_policy": "second_hand",
+      "payment_methods_by_era": [
+        {"available_from": 1980, "method_ids": ["cash_arden"]}
+      ],
+      "guaranteed_product_ids": ["product_commission_rusty_tool"],
+      "buyback_policy": {
+        "enabled": true,
+        "accepted_category_ids": ["outerwear", "tool", "equipment", "electronics", "component"],
+        "payout_basis_points": 5000
+      }
+    }
+  ],
+  "stores": [
+    {
+      "store_id": "store_market_food_row",
+      "title": "Продуктовый ряд у рынка",
+      "archetype_id": "archetype_market_food",
+      "location_id": "market",
+      "owner_npc_id": "npc_tamara_roven",
+      "schedule_id": "schedule_store_market_food_row",
+      "markup_basis_points": 10200,
+      "assortment_rules": [],
+      "world_fact_requirements": []
+    },
+    {
+      "store_id": "store_clinic_pharmacy_window",
+      "title": "Аптечное окно при клинике",
+      "archetype_id": "archetype_clinic_pharmacy",
+      "location_id": "clinic_yard",
+      "schedule_id": "schedule_store_clinic_pharmacy_window",
+      "markup_basis_points": 10900,
+      "assortment_rules": [],
+      "world_fact_requirements": []
+    },
+    {
+      "store_id": "store_station_commission",
+      "title": "Комиссионный у вокзала",
+      "archetype_id": "archetype_station_commission",
+      "location_id": "station_square",
+      "schedule_id": "schedule_store_station_commission",
+      "markup_basis_points": 11600,
+      "assortment_rules": [],
+      "world_fact_requirements": []
+    }
+  ]
+}

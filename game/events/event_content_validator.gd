@@ -4,9 +4,9 @@ extends RefCounted
 const JsonValidator := preload("res://core/save/json_value_validator.gd")
 const ConditionEvaluator := preload("res://game/events/event_condition_evaluator.gd")
 
-const SCHEMA_VERSION := 1
+const SCHEMA_VERSION := 2
 const MIN_CARDS := 30
-const MAX_CARDS := 90
+const MAX_CARDS := 100
 const TONES := ["adverse", "neutral", "positive"]
 const EFFECT_TYPES := [
 	"advance_time",
@@ -20,6 +20,15 @@ const EFFECT_TYPES := [
 	"mastery",
 	"deferred",
 	"knowledge",
+	"change_relationship",
+	"add_npc_memory",
+	"change_reputation",
+	"set_world_fact",
+	"change_world_metric",
+	"advance_world_process",
+	"schedule_world_mutation",
+	"create_commitment",
+	"resolve_commitment",
 ]
 const OPERATORS := [">=", ">", "==", "!=", "<", "<="]
 
@@ -64,6 +73,13 @@ static func _validate_cards(cards: Array, errors: Array[String]) -> void:
 			errors.append("%s.id пуст, повторяется или имеет неверный формат" % path)
 		else:
 			ids[card_id] = true
+		if not _valid_id(card.get("family_id", null)):
+			errors.append("%s.family_id должен быть стабильным идентификатором" % path)
+		if not _integer_range(card.get("max_occurrences", null), 1, 1_000):
+			errors.append("%s.max_occurrences должен быть целым числом 1–1000" % path)
+		_validate_string_array(card.get("npc_ids", null), "%s.npc_ids" % path, false, errors)
+		if not _valid_id(card.get("causal_category", null)):
+			errors.append("%s.causal_category должна быть стабильным идентификатором" % path)
 		_validate_text(card.get("title", null), "%s.title" % path, 3, 80, errors)
 		_validate_text(card.get("body", null), "%s.body" % path, 20, 420, errors)
 		if String(card.get("tone", "")) not in TONES:
@@ -154,8 +170,19 @@ static func _validate_conditions(
 			errors.append("%s.kind неизвестен" % condition_path)
 		if String(condition.get("operator", "==")) not in OPERATORS:
 			errors.append("%s.operator неизвестен" % condition_path)
-		if not condition.has("value"):
+		var named_polarity := (
+			String(condition.get("kind", "")) == "polarity"
+			and condition.has("band")
+		)
+		if not condition.has("value") and not named_polarity:
 			errors.append("%s.value отсутствует" % condition_path)
+		if named_polarity:
+			if String(condition.get("band", "")) not in ConditionEvaluator.POLARITY_BANDS:
+				errors.append("%s.band неизвестен" % condition_path)
+			if String(condition.get("side", "")) not in ["left", "right", "center"]:
+				errors.append("%s.side неизвестен" % condition_path)
+		if String(condition.get("kind", "")) == "relationship" and String(condition.get("field", "")) not in ["trust", "respect", "affinity", "fear"]:
+			errors.append("%s.field должен называть поле отношения" % condition_path)
 		if String(condition.get("kind", "")) not in ["location", "era", "weather"]:
 			if not _valid_id(condition.get("id", null)):
 				errors.append("%s.id должен быть стабильным идентификатором" % condition_path)
@@ -198,6 +225,33 @@ static func _validate_effects(
 			errors.append("%s.minutes некорректно" % effect_path)
 		elif effect_type == "deferred":
 			_validate_deferred(effect, card_id, effect_path, deferred_ids, errors)
+		elif effect_type == "change_relationship":
+			if not _valid_id(effect.get("npc_id", null)) or String(effect.get("field", "")) not in ["trust", "respect", "affinity", "fear"] or not _integer_range(effect.get("delta", null), -200, 200):
+				errors.append("%s содержит неверное изменение отношения" % effect_path)
+		elif effect_type == "add_npc_memory":
+			if not _valid_id(effect.get("npc_id", null)) or not _valid_memory(effect.get("memory", null)):
+				errors.append("%s содержит неверную память NPC" % effect_path)
+		elif effect_type == "change_reputation":
+			if not _valid_id(effect.get("reputation_id", effect.get("id", null))) or not _integer_range(effect.get("delta", null), -200, 200):
+				errors.append("%s содержит неверное изменение репутации" % effect_path)
+		elif effect_type == "set_world_fact":
+			if not _valid_id(effect.get("id", null)) or typeof(effect.get("value", null)) != TYPE_BOOL:
+				errors.append("%s содержит неверный факт мира" % effect_path)
+		elif effect_type == "change_world_metric":
+			if not _valid_id(effect.get("id", null)) or not _integer_range(effect.get("delta", null), -100, 100):
+				errors.append("%s содержит неверный показатель мира" % effect_path)
+		elif effect_type == "advance_world_process":
+			if not _valid_id(effect.get("id", null)) or not _valid_id(effect.get("stage", effect.get("to_stage", null))) or not _valid_id(effect.get("trigger_id", null)):
+				errors.append("%s содержит неверный переход процесса" % effect_path)
+		elif effect_type == "schedule_world_mutation":
+			if not _valid_id(effect.get("mutation_id", effect.get("id", null))) or not _valid_due(effect.get("due", null)) or not _valid_scheduled_operations(effect.get("operations", null)):
+				errors.append("%s содержит неверную отложенную мутацию мира" % effect_path)
+		elif effect_type == "create_commitment":
+			if not _valid_commitment(effect.get("commitment", null)):
+				errors.append("%s содержит неверное обязательство" % effect_path)
+		elif effect_type == "resolve_commitment":
+			if not _valid_id(effect.get("commitment_id", effect.get("id", null))):
+				errors.append("%s содержит неверный ID обязательства" % effect_path)
 
 
 static func _validate_deferred(
@@ -220,6 +274,54 @@ static func _validate_deferred(
 		errors.append("%s.delay_minutes должен быть положительным целым числом" % path)
 	if not effect.get("payload", null) is Dictionary:
 		errors.append("%s.payload должен быть объектом" % path)
+
+
+static func _valid_memory(value: Variant) -> bool:
+	if not value is Dictionary:
+		return false
+	var memory: Dictionary = value
+	return (
+		_valid_id(memory.get("memory_id", null))
+		and String(memory.get("type_id", "")) in SocialState.MEMORY_TYPES
+		and _integer_range(memory.get("valence", null), -100, 100)
+		and _integer_range(memory.get("salience", null), 0, 100)
+	)
+
+
+static func _valid_commitment(value: Variant) -> bool:
+	if not value is Dictionary:
+		return false
+	var commitment: Dictionary = value
+	for field: String in ["commitment_id", "type_id", "debtor_id", "creditor_id", "subject_id"]:
+		if not _valid_id(commitment.get(field, null)):
+			return false
+	return true
+
+
+static func _valid_due(value: Variant) -> bool:
+	return (
+		value is Dictionary
+		and typeof(Dictionary(value).get("elapsed_minutes", null)) == TYPE_INT
+		and int(Dictionary(value).get("elapsed_minutes", -1)) >= 0
+	)
+
+
+static func _valid_scheduled_operations(value: Variant) -> bool:
+	if not value is Array or value.is_empty():
+		return false
+	for raw_operation: Variant in value:
+		if not raw_operation is Dictionary:
+			return false
+		var operation_type := String(Dictionary(raw_operation).get("type", ""))
+		if operation_type not in [
+			"set_world_fact",
+			"change_world_metric",
+			"advance_world_process",
+			"cancel_world_mutation",
+			"replace_stock",
+		]:
+			return false
+	return true
 
 
 static func _validate_string_array(

@@ -168,10 +168,10 @@ func _test_unformed_profile_says_so() -> void:
 
 func _test_psyche_word_replaces_the_number() -> void:
 	var state := _state()
-	state.meters["morale"] = 30
+	state.meters["mental_state"] = 30
 	var psyche: Dictionary = _built(state).get("psyche", {})
 	var word := String(psyche.get("step", ""))
-	_require(word == "уныние", "morale 30 reads as «%s»" % word)
+	_require(word == "уныние", "mental_state 30 reads as «%s»" % word)
 	_require(word == PsycheScaleScript.title_for(30), "the screen and the scale disagree")
 	for key: Variant in psyche:
 		_require(

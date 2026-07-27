@@ -3,6 +3,7 @@ extends RefCounted
 
 const CurrencyTextScript := preload("res://app/presentation/currency_text.gd")
 const LocationActionCatalogScript := preload("res://game/location/location_action_catalog.gd")
+const PsycheScaleScript := preload("res://core/state/psyche_scale.gd")
 
 const MONTHS := [
 	"января", "февраля", "марта", "апреля", "мая", "июня",
@@ -13,21 +14,21 @@ const STATUS_TITLES := {
 	"hunger": "Голод",
 	"energy": "Энергия",
 	"tension": "Напряжение",
-	"morale": "Мораль",
+	"mental_state": "Психика",
 }
 const STATUS_DETAILS := {
 	"health": "Общее физическое состояние. Травмы и болезни закрывают тяжёлые действия.",
 	"hunger": "Потребность в еде. Чем больше значение, тем сильнее голод.",
 	"energy": "Запас сил для работы, дороги и других нагрузок.",
 	"tension": "Накопившийся стресс. Чем больше значение, тем труднее сохранять контроль.",
-	"morale": "Желание продолжать и способность видеть доступные возможности.",
+	"mental_state": "Устойчивое психическое состояние, которое меняется медленнее текущего напряжения.",
 }
 const CHANGE_TITLES := {
 	"health": "Здоровье",
 	"hunger": "Голод",
 	"energy": "Энергия",
 	"tension": "Напряжение",
-	"morale": "Мораль",
+	"mental_state": "Психика",
 	"money": "Деньги",
 	"calendar": "Время",
 	"city_navigation": "Ориентирование в городе",
@@ -207,7 +208,7 @@ static func summary(raw_model: Dictionary) -> Dictionary:
 	if not final_state.is_empty():
 		facts.append("Деньги к утру: %s" % CurrencyTextScript.compact(int(final_state.get("money", 0))))
 		var meters: Dictionary = Dictionary(final_state.get("meters", {})).duplicate(true)
-		for status_id in ["health", "hunger", "energy", "tension", "morale"]:
+		for status_id in ["health", "hunger", "energy", "tension", "mental_state"]:
 			facts.append("%s: %d/100" % [STATUS_TITLES[status_id], int(meters.get(status_id, 0))])
 	return {
 		"eyebrow": "ЛИЧНАЯ ХРОНИКА",
@@ -221,8 +222,8 @@ static func summary(raw_model: Dictionary) -> Dictionary:
 static func format_date(stamp: Dictionary, compact: bool = false) -> String:
 	var month := clampi(int(stamp.get("month", 1)), 1, 12)
 	if compact:
-		return "%02d.%02d.%d" % [int(stamp.get("day", 1)), month, int(stamp.get("year", 1970))]
-	return "%d %s %d" % [int(stamp.get("day", 1)), MONTHS[month - 1], int(stamp.get("year", 1970))]
+		return "%02d.%02d.%d" % [int(stamp.get("day", 1)), month, int(stamp.get("year", 1980))]
+	return "%d %s %d" % [int(stamp.get("day", 1)), MONTHS[month - 1], int(stamp.get("year", 1980))]
 
 
 static func format_time(stamp: Dictionary) -> String:
@@ -232,9 +233,7 @@ static func format_time(stamp: Dictionary) -> String:
 
 static func psyche_intensity(shell_model: Dictionary) -> float:
 	var meters: Dictionary = Dictionary(Dictionary(shell_model.get("status", {})).get("meters", {}))
-	var tension := float(meters.get("tension", 0)) / 100.0
-	var low_morale := 1.0 - float(meters.get("morale", 100)) / 100.0
-	return clampf(tension * 0.55 + low_morale * 0.45, 0.0, 1.0)
+	return PsycheScaleScript.filter_for(int(meters.get("mental_state", 50)))
 
 
 static func effective_psyche_intensity(shell_model: Dictionary, mode: String) -> float:
@@ -308,7 +307,7 @@ static func _statuses(
 	animate_status_delta: bool = true
 ) -> Array:
 	var result: Array = []
-	for status_id in ["health", "hunger", "energy", "tension", "morale"]:
+	for status_id in ["health", "hunger", "energy", "tension", "mental_state"]:
 		var value := int(meters.get(status_id, 0))
 		result.append({
 			"id": status_id,

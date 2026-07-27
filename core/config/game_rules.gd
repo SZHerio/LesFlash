@@ -6,9 +6,13 @@ extends RefCounted
 ## Values that are likely to change during balancing live here so the state model
 ## and content resolvers do not have to duplicate magic numbers.
 
-const LEGACY_SAVE_VERSION := 1
-const PREVIOUS_SAVE_VERSION := 2
-const SAVE_VERSION := 3
+const RUN_STATE_VERSION_V1 := 1
+const RUN_STATE_VERSION_V2 := 2
+const RUN_STATE_VERSION_V3 := 3
+const RUN_STATE_VERSION_V4 := 4
+const LEGACY_SAVE_VERSION := RUN_STATE_VERSION_V1
+const PREVIOUS_SAVE_VERSION := RUN_STATE_VERSION_V3
+const SAVE_VERSION := RUN_STATE_VERSION_V4
 
 const CHARACTERISTIC_MIN := 1
 const CHARACTERISTIC_MAX := 10
@@ -33,14 +37,14 @@ const METER_KEYS := [
 	"hunger",
 	"energy",
 	"tension",
-	"morale",
+	"mental_state",
 ]
 const DEFAULT_METERS := {
 	"health": 100,
 	"hunger": 0,
 	"energy": 100,
 	"tension": 0,
-	"morale": 50,
+	"mental_state": 50,
 }
 
 const POLARITY_MIN := -100
@@ -100,14 +104,14 @@ const INVENTORY_QUANTITY_MIN := 1
 const INVENTORY_QUANTITY_MAX := 1_000_000
 
 const START_AGE_YEARS := 18
-const DEFAULT_START_YEAR := 1970
+const DEFAULT_START_YEAR := 1980
 const DEFAULT_START_MONTH := 9
 const DEFAULT_START_DAY := 1
 const DEFAULT_START_MINUTE_OF_DAY := 8 * 60
 const DEFAULT_MONTH_LENGTHS := [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 const DEFAULT_MINUTES_PER_DAY := 24 * 60
 
-const DEFAULT_RNG_SEED := 1_970_180_001
+const DEFAULT_RNG_SEED := 1_980_180_001
 
 
 static func default_characteristics() -> Dictionary:

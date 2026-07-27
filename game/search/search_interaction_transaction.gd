@@ -102,7 +102,7 @@ static func apply(
 		object
 	)
 	var risk_result := RiskResolver.apply(
-		run_state,
+		session,
 		updated,
 		{"action_id": approach_id, "object_id": object_id},
 		String(session.get("location")),

@@ -7,18 +7,22 @@ extends RefCounted
 
 const GameSessionScript := preload("res://app/session/game_session.gd")
 const SearchSessionStateScript := preload("res://game/search/search_session_state.gd")
+const WorldStateScript := preload("res://core/world/world_state.gd")
+const SocialStateScript := preload("res://core/social/social_state.gd")
+const EventContextScript := preload("res://game/events/event_context.gd")
 
 const LEGACY_VERSION := 1
 const INVENTORY_VERSION := 3
-const PREVIOUS_VERSION := INVENTORY_VERSION
-const CURRENT_VERSION := 4
+const SEARCH_VERSION := 4
+const PREVIOUS_VERSION := SEARCH_VERSION
+const CURRENT_VERSION := 5
 
 
 static func migrate_envelope(raw: Dictionary) -> Dictionary:
 	var source_version: Variant = _integral(raw.get("schema_version", null))
 	if source_version == null:
 		return _failure("invalid_schema_version", "Envelope schema_version must be an integer.")
-	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, CURRENT_VERSION]:
+	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, SEARCH_VERSION, CURRENT_VERSION]:
 		return _failure(
 			"unsupported_schema_version",
 			"Envelope schema version is unsupported.",
@@ -51,7 +55,7 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 	var source_version: Variant = _integral(raw.get("session_version", null))
 	if source_version == null:
 		return _failure("invalid_session_version", "session_version must be an integer.")
-	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, CURRENT_VERSION]:
+	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, SEARCH_VERSION, CURRENT_VERSION]:
 		return _failure(
 			"unsupported_session_version",
 			"FirstDaySession version is unsupported.",
@@ -84,6 +88,26 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 			return legacy_validation
 		migrated["active_activity"] = GameSessionScript.empty_activity()
 		migrated["search_zone_states"] = {}
+		migrated["session_version"] = SEARCH_VERSION
+		current_version = SEARCH_VERSION
+	if current_version == SEARCH_VERSION:
+		var migrated_activity := _migrate_event_contexts(
+			migrated.get("active_activity", null),
+			"active_activity"
+		)
+		if not bool(migrated_activity.get("ok", false)):
+			return migrated_activity
+		var migrated_zones := _migrate_event_contexts(
+			migrated.get("search_zone_states", null),
+			"search_zone_states"
+		)
+		if not bool(migrated_zones.get("ok", false)):
+			return migrated_zones
+		migrated["active_activity"] = migrated_activity["data"]
+		migrated["search_zone_states"] = migrated_zones["data"]
+		migrated["world_state"] = WorldStateScript.new().to_dict()
+		migrated["social_state"] = SocialStateScript.fresh().to_dict()
+		migrated["applied_command_ids"] = {}
 		migrated["session_version"] = CURRENT_VERSION
 		current_version = CURRENT_VERSION
 	if current_version != CURRENT_VERSION:
@@ -126,6 +150,18 @@ static func validate_contract_fields(data: Dictionary) -> Dictionary:
 			"invalid_search_zone_states",
 			"search_zone_states must be a dictionary."
 		)
+	if typeof(data.get("world_state", null)) != TYPE_DICTIONARY or WorldStateScript.from_dict(data["world_state"]) == null:
+		return _failure("invalid_world_state", "world_state is invalid.")
+	if typeof(data.get("social_state", null)) != TYPE_DICTIONARY or SocialStateScript.from_dict(data["social_state"]) == null:
+		return _failure("invalid_social_state", "social_state is invalid.")
+	if typeof(data.get("applied_command_ids", null)) != TYPE_DICTIONARY:
+		return _failure("invalid_command_ledger", "applied_command_ids must be a dictionary.")
+	var context_validation := _validate_event_contexts(data.get("active_activity", {}), "active_activity")
+	if not bool(context_validation.get("ok", false)):
+		return context_validation
+	context_validation = _validate_event_contexts(data.get("search_zone_states", {}), "search_zone_states")
+	if not bool(context_validation.get("ok", false)):
+		return context_validation
 	var search_validation := SearchSessionStateScript.validate(
 		normalized,
 		data["search_zone_states"]
@@ -219,6 +255,56 @@ static func _values_equal(left: Variant, right: Variant) -> bool:
 				return false
 		return true
 	return left == right
+
+
+static func _migrate_event_contexts(value: Variant, path: String) -> Dictionary:
+	if value is Array:
+		var array: Array = []
+		for index: int in value.size():
+			var nested := _migrate_event_contexts(value[index], "%s[%d]" % [path, index])
+			if not bool(nested.get("ok", false)):
+				return nested
+			array.append(nested["data"])
+		return _success({"data": array})
+	if value is Dictionary:
+		var dictionary: Dictionary = value
+		if dictionary.has("schema_version") and dictionary.has("source") and dictionary.has("actor") and dictionary.has("location_id"):
+			var migration := EventContextScript.migrate_serialized(dictionary)
+			if not bool(migration.get("ok", false)):
+				return _failure(
+					"event_context_migration_failed",
+					"Saved EventContext migration failed at %s." % path,
+					{"cause": migration}
+				)
+			return _success({"data": migration["data"]})
+		var output: Dictionary = {}
+		for raw_key: Variant in dictionary:
+			var nested := _migrate_event_contexts(dictionary[raw_key], "%s.%s" % [path, String(raw_key)])
+			if not bool(nested.get("ok", false)):
+				return nested
+			output[raw_key] = nested["data"]
+		return _success({"data": output})
+	return _success({"data": value})
+
+
+static func _validate_event_contexts(value: Variant, path: String) -> Dictionary:
+	if value is Array:
+		for index: int in value.size():
+			var nested := _validate_event_contexts(value[index], "%s[%d]" % [path, index])
+			if not bool(nested.get("ok", false)):
+				return nested
+	elif value is Dictionary:
+		var dictionary: Dictionary = value
+		if dictionary.has("schema_version") and dictionary.has("source") and dictionary.has("actor") and dictionary.has("location_id"):
+			var validation := EventContextScript.validate(dictionary)
+			if not bool(validation.get("ok", false)):
+				return _failure("invalid_saved_event_context", "Saved EventContext is invalid at %s." % path, {"validation": validation})
+			return _success()
+		for raw_key: Variant in dictionary:
+			var nested := _validate_event_contexts(dictionary[raw_key], "%s.%s" % [path, String(raw_key)])
+			if not bool(nested.get("ok", false)):
+				return nested
+	return _success()
 
 
 static func _integral(value: Variant) -> Variant:

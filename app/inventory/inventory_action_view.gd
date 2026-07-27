@@ -9,7 +9,7 @@ const METER_TITLES := {
 	"energy": "Энергия",
 	"hunger": "Голод",
 	"tension": "Напряжение",
-	"morale": "Настроение",
+	"mental_state": "Психика",
 }
 const REQUIREMENT_TITLES := {
 	"stat": "Характеристика",

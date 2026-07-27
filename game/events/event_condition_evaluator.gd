@@ -21,11 +21,23 @@ const SUPPORTED_KINDS := [
 	"item",
 	"relationship",
 	"reputation",
+	"world_fact",
+	"world_metric",
+	"world_process",
+	"npc_memory",
+	"commitment",
 	"history",
 	"cooldown",
 	"risk",
 ]
 const SUPPORTED_OPERATORS := [">=", ">", "==", "!=", "<", "<="]
+const POLARITY_BANDS := {
+	"neutral": 0,
+	"weak": 6,
+	"noticeable": 26,
+	"expressed": 51,
+	"extreme": 76,
+}
 
 
 static func evaluate_all(context: Dictionary, conditions: Array) -> Dictionary:
@@ -54,9 +66,11 @@ static func evaluate(context: Dictionary, raw_condition: Variant) -> Dictionary:
 	var operator := String(condition.get("operator", "==")).strip_edges()
 	if kind not in SUPPORTED_KINDS:
 		return _invalid(condition, "unknown_condition", "Неизвестный тип условия: %s" % kind)
+	if kind == "polarity" and condition.has("band"):
+		return _evaluate_polarity_band(context, condition, identifier)
 	if operator not in SUPPORTED_OPERATORS:
 		return _invalid(condition, "invalid_operator", "Неизвестный оператор: %s" % operator)
-	var lookup := _lookup(context, kind, identifier)
+	var lookup := _lookup(context, kind, identifier, condition)
 	if not bool(lookup.get("found", false)):
 		return _result(
 			condition,
@@ -92,7 +106,12 @@ static func evaluate(context: Dictionary, raw_condition: Variant) -> Dictionary:
 	)
 
 
-static func _lookup(context: Dictionary, kind: String, identifier: String) -> Dictionary:
+static func _lookup(
+	context: Dictionary,
+	kind: String,
+	identifier: String,
+	condition: Dictionary = {}
+) -> Dictionary:
 	match kind:
 		"source":
 			return _dictionary_value(context.get("source", {}), identifier)
@@ -126,9 +145,29 @@ static func _lookup(context: Dictionary, kind: String, identifier: String) -> Di
 				0
 			)
 		"relationship":
-			return _dictionary_value(context.get("relationships", {}), identifier, 0)
+			var relationship: Variant = Dictionary(context.get("relationships", {})).get(identifier)
+			var relationship_field := String(condition.get("field", ""))
+			if not relationship is Dictionary or relationship_field not in ["trust", "respect", "affinity", "fear"]:
+				return {"found": false, "value": 0, "message": "Не указано поле отношения NPC"}
+			return _dictionary_value(relationship, relationship_field)
 		"reputation":
 			return _dictionary_value(context.get("reputations", {}), identifier, 0)
+		"world_fact":
+			return _dictionary_value(Dictionary(context.get("world", {})).get("facts", {}), identifier, false)
+		"world_metric":
+			return _dictionary_value(Dictionary(context.get("world", {})).get("metrics", {}), identifier)
+		"world_process":
+			return _dictionary_value(Dictionary(context.get("world", {})).get("processes", {}), identifier)
+		"npc_memory":
+			return {"found": true, "value": _has_memory(context, identifier, String(condition.get("npc_id", "")))}
+		"commitment":
+			var commitment: Variant = Dictionary(context.get("commitments", {})).get(identifier)
+			var commitment_field := String(condition.get("field", ""))
+			if commitment_field.is_empty():
+				return {"found": true, "value": commitment is Dictionary}
+			if not commitment is Dictionary:
+				return {"found": false, "value": null, "message": "Обязательство не найдено"}
+			return _dictionary_value(commitment, commitment_field)
 		"history":
 			return {
 				"found": true,
@@ -141,6 +180,51 @@ static func _lookup(context: Dictionary, kind: String, identifier: String) -> Di
 		"risk":
 			return _dictionary_value(context.get("risk", {}), identifier, 0)
 	return {"found": false, "value": null, "message": "Неизвестный источник значения"}
+
+
+static func _has_memory(context: Dictionary, memory_id: String, npc_id: String) -> bool:
+	var memories: Dictionary = context.get("npc_memories", {})
+	var npc_ids: Array = [npc_id] if not npc_id.is_empty() else memories.keys()
+	for raw_npc_id: Variant in npc_ids:
+		for raw_memory: Variant in Array(memories.get(raw_npc_id, [])):
+			if raw_memory is Dictionary and String(raw_memory.get("memory_id", "")) == memory_id:
+				return true
+	return false
+
+
+static func _evaluate_polarity_band(
+	context: Dictionary,
+	condition: Dictionary,
+	identifier: String
+) -> Dictionary:
+	var band := String(condition.get("band", ""))
+	var side := String(condition.get("side", ""))
+	if band not in POLARITY_BANDS or side not in ["left", "right", "center"]:
+		return _invalid(condition, "invalid_polarity_band", "Неизвестный диапазон полярности")
+	var lookup := _lookup(context, "polarity", identifier, condition)
+	if not bool(lookup.get("found", false)):
+		return _invalid(condition, "missing_value", "Полярность отсутствует в контексте")
+	var actual := int(lookup.get("value", 0))
+	var threshold := int(POLARITY_BANDS[band])
+	var passed := false
+	if band == "neutral":
+		passed = absi(actual) <= 5 and side == "center"
+	elif side == "left":
+		passed = actual <= -threshold
+	elif side == "right":
+		passed = actual >= threshold
+	var message := "Условие выполнено" if passed else String(condition.get("blocked_reason", "Недостаточно выражен нужный способ действия"))
+	var result := _result(
+		condition,
+		passed,
+		"ok" if passed else "condition_not_met",
+		actual,
+		{"band": band, "side": side},
+		message
+	)
+	result["band"] = band
+	result["side"] = side
+	return result
 
 
 static func _actor_value(context: Dictionary, group: String, identifier: String) -> Dictionary:
@@ -234,6 +318,11 @@ static func _label(kind: String, identifier: String) -> String:
 		"item": "Предмет",
 		"relationship": "Отношение",
 		"reputation": "Репутация",
+		"world_fact": "Факт мира",
+		"world_metric": "Показатель мира",
+		"world_process": "Процесс мира",
+		"npc_memory": "Память NPC",
+		"commitment": "Обязательство",
 		"history": "История",
 		"cooldown": "Повтор",
 		"risk": "Риск",

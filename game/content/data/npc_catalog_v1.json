@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "catalog_id": "npc_catalog_v1",
+  "speech_profiles": [
+    {
+      "id": "speech_profile_viktor_koren",
+      "sentence_length": "short",
+      "vocabulary_ids": ["equipment", "recycling_operations", "work_safety"],
+      "style_notes": "Говорит прямо и по делу, уточняет порядок работы и называет конкретную опасность без унижения собеседника."
+    },
+    {
+      "id": "speech_profile_lidia_maren",
+      "sentence_length": "mixed",
+      "vocabulary_ids": ["clinic_procedure", "first_aid", "public_services"],
+      "style_notes": "Объясняет спокойно и точно, отделяет срочную помощь от плановой процедуры и не ставит диагноз по одному признаку."
+    },
+    {
+      "id": "speech_profile_tamara_roven",
+      "sentence_length": "mixed",
+      "vocabulary_ids": ["food_supply", "market_trade", "regular_customers"],
+      "style_notes": "Говорит практично, быстро называет товар и условие сделки, а доверие выражает делом, а не фамильярностью."
+    }
+  ],
+  "schedules": [
+    {
+      "id": "schedule_viktor_recycling",
+      "entries": [
+        {"days": [1, 2, 3, 4, 5, 6], "start_minute": 450, "end_minute": 1050, "location_id": "recycling_point"}
+      ]
+    },
+    {
+      "id": "schedule_lidia_clinic",
+      "entries": [
+        {"days": [1, 2, 3, 4, 5], "start_minute": 480, "end_minute": 960, "location_id": "clinic_yard"},
+        {"days": [6], "start_minute": 480, "end_minute": 720, "location_id": "clinic_yard"}
+      ]
+    },
+    {
+      "id": "schedule_tamara_market",
+      "entries": [
+        {"days": [2, 3, 4, 5, 6, 7], "start_minute": 360, "end_minute": 900, "location_id": "market"}
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "id": "npc_viktor_koren",
+      "display_name": "Виктор Корен",
+      "role_title": "Мастер Приречного пункта вторсырья",
+      "goal": "Сохранить работу пункта и добиться безопасной, надёжной смены.",
+      "schedule_id": "schedule_viktor_recycling",
+      "speech_profile_id": "speech_profile_viktor_koren",
+      "appearance_refs": [
+        {"kind": "location", "id": "recycling_point"},
+        {"kind": "job", "id": "job_recycling_sorter"},
+        {"kind": "world_process", "id": "process_recycling_inspection"}
+      ]
+    },
+    {
+      "id": "npc_lidia_maren",
+      "display_name": "Лидия Марен",
+      "role_title": "Медсестра Приречной поликлиники",
+      "goal": "Оказать доступную помощь в пределах времени, запасов и правил учреждения.",
+      "schedule_id": "schedule_lidia_clinic",
+      "speech_profile_id": "speech_profile_lidia_maren",
+      "appearance_refs": [
+        {"kind": "location", "id": "clinic_yard"},
+        {"kind": "knowledge", "id": "clinic_support"},
+        {"kind": "knowledge", "id": "recycling_safety"}
+      ]
+    },
+    {
+      "id": "npc_tamara_roven",
+      "display_name": "Тамара Ровен",
+      "role_title": "Продавщица Центрального рынка",
+      "goal": "Сохранить товар, постоянных покупателей и устойчивую торговую точку.",
+      "schedule_id": "schedule_tamara_market",
+      "speech_profile_id": "speech_profile_tamara_roven",
+      "appearance_refs": [
+        {"kind": "location", "id": "market"},
+        {"kind": "world_metric", "id": "metric_riverside_goods_supply"},
+        {"kind": "reputation", "id": "rep_market_fair_dealing"}
+      ]
+    }
+  ]
+}

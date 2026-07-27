@@ -3,6 +3,8 @@ extends RefCounted
 
 const Director := preload("res://game/events/event_director.gd")
 const Transaction := preload("res://core/rules/action_transaction.gd")
+const SessionTransaction := preload("res://game/session/session_command_transaction.gd")
+const WorldCatalog := preload("res://game/content/catalogs/world_definition_catalog.gd")
 
 
 static func execute(
@@ -68,6 +70,70 @@ static func execute(
 		"transaction": result.to_dict(),
 		"queued_consequences": _queued_consequences(result),
 	}
+
+
+static func execute_session(
+	session: Object,
+	catalog: Dictionary,
+	card_id: String,
+	option_id: String,
+	context: Dictionary
+) -> Dictionary:
+	if session == null:
+		return _failure("missing_session", "Игровая сессия отсутствует")
+	var preview := Director.preview(catalog, card_id, context)
+	if not bool(preview.get("ok", false)):
+		return _failure("unknown_card", "Карточка события не найдена")
+	var option := _find_option(preview, option_id)
+	if option.is_empty():
+		return _failure("unknown_option", "Вариант ответа не найден")
+	if not bool(option.get("available", false)):
+		return {
+			"ok": false,
+			"code": "option_blocked",
+			"error": "Этот вариант сейчас недоступен",
+			"blocked_reasons": Array(option.get("blocked_reasons", [])).duplicate(true),
+		}
+	var card := _find_card(catalog, card_id)
+	var world_loaded := WorldCatalog.load_default()
+	if not bool(world_loaded.get("ok", false)):
+		return _failure("world_catalog_failed", "Каталог состояния мира недоступен")
+	var elapsed := int(Dictionary(context.get("calendar", {})).get("elapsed_minutes", 0))
+	var source: Dictionary = context.get("source", {})
+	var command_id := "event_%s_%s_%s_%d" % [
+		card_id,
+		option_id,
+		String(source.get("id", "source")),
+		elapsed,
+	]
+	var result := SessionTransaction.execute(session, {
+		"command_id": command_id,
+		"source_id": "context_event_%s" % card_id,
+		"option_id": option_id,
+		"title": String(card.get("title", card_id)),
+		"option_title": String(option.get("label", option_id)),
+		"journal_message": "%s — %s" % [String(card.get("title", card_id)), String(option.get("label", option_id))],
+		"journal_payload": {
+			"event_id": card_id,
+			"event_tone": String(card.get("tone", "neutral")),
+			"source": source.duplicate(true),
+			"location_id": String(context.get("location_id", "")),
+		},
+		"conditions": [],
+		"effects": Array(option.get("effects", [])).duplicate(true),
+	}, {
+		"event_id": card_id,
+		"option_id": option_id,
+		"world_definitions": Dictionary(world_loaded.get("catalog", {})).duplicate(true),
+	})
+	if not bool(result.get("ok", false)):
+		return result
+	result["card_id"] = card_id
+	result["option_id"] = option_id
+	result["outcome"] = String(option.get("outcome", ""))
+	result["history_fact"] = "event:%s:%s" % [card_id, option_id]
+	result["cooldown_ready_at"] = elapsed + int(card.get("cooldown_minutes", 0))
+	return result
 
 
 static func _find_option(preview: Dictionary, option_id: String) -> Dictionary:

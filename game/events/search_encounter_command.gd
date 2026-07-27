@@ -16,6 +16,8 @@ const SessionTransaction := preload(
 	"res://game/search/search_session_transaction.gd"
 )
 const RiskResolver := preload("res://game/search/search_risk_resolver.gd")
+const WorldReadModelScript := preload("res://core/world/world_read_model.gd")
+const EventHistoryScript := preload("res://game/events/event_history.gd")
 
 
 static func pending(session: Object) -> Dictionary:
@@ -80,8 +82,8 @@ static func resolve(
 		)
 	var candidate: Object = prepared["candidate"]
 	var card_id := String(encounter.get("card_id", ""))
-	var executed: Dictionary = EventCommandScript.execute(
-		candidate.get("run_state"),
+	var executed: Dictionary = EventCommandScript.execute_session(
+		candidate,
 		loaded["catalog"],
 		card_id,
 		option_id,
@@ -127,19 +129,27 @@ static func _current_context(session: Object, encounter: Dictionary) -> Dictiona
 	var run_state: Variant = session.get("run_state")
 	if run_state == null or not run_state is RunState:
 		return stored
+	var world_context := {
+		"location_id": String(stored.get("location_id", "")),
+		"era_id": String(stored.get("era_id", "late_20th_century")),
+		"weather_id": String(stored.get("weather_id", "dry")),
+		"history_facts": EventHistoryScript.facts(run_state, Array(stored.get("history_facts", []))),
+		"cooldowns": stored.get("cooldowns", {}),
+		"risk": stored.get("risk", {}),
+	}
+	var world_state: Variant = session.get("world_state")
+	if world_state is WorldState:
+		world_context["world"] = WorldReadModelScript.rules_projection(world_state)
+	var social_state: Variant = session.get("social_state")
+	if social_state is SocialState:
+		world_context["relationships"] = social_state.relationships.duplicate(true)
+		world_context["reputations"] = social_state.reputations.duplicate(true)
+		world_context["npc_memories"] = social_state.memories.duplicate(true)
+		world_context["commitments"] = social_state.commitments.duplicate(true)
 	var refreshed := EventContextScript.build(
 		run_state,
 		Dictionary(stored.get("source", {})),
-		{
-			"location_id": String(stored.get("location_id", "")),
-			"era_id": String(stored.get("era_id", "late_20th_century")),
-			"weather_id": String(stored.get("weather_id", "dry")),
-			"relationships": stored.get("relationships", {}),
-			"reputations": stored.get("reputations", {}),
-			"history_facts": stored.get("history_facts", []),
-			"cooldowns": stored.get("cooldowns", {}),
-			"risk": stored.get("risk", {}),
-		}
+		world_context
 	)
 	return refreshed if not refreshed.is_empty() else stored
 

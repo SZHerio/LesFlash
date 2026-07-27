@@ -395,9 +395,10 @@ static func migrate_serialized(data: Dictionary) -> Dictionary:
 			"error": "RunState save_version must be an integer.",
 		}
 	if int(source_version) not in [
-		GameRules.LEGACY_SAVE_VERSION,
-		GameRules.PREVIOUS_SAVE_VERSION,
-		GameRules.SAVE_VERSION,
+		GameRules.RUN_STATE_VERSION_V1,
+		GameRules.RUN_STATE_VERSION_V2,
+		GameRules.RUN_STATE_VERSION_V3,
+		GameRules.RUN_STATE_VERSION_V4,
 	]:
 		return {
 			"ok": false,
@@ -407,10 +408,10 @@ static func migrate_serialized(data: Dictionary) -> Dictionary:
 		}
 	var migrated := data.duplicate(true)
 	var current_version := int(source_version)
-	if current_version == GameRules.LEGACY_SAVE_VERSION:
-		migrated["save_version"] = GameRules.PREVIOUS_SAVE_VERSION
-		current_version = GameRules.PREVIOUS_SAVE_VERSION
-	if current_version == GameRules.PREVIOUS_SAVE_VERSION:
+	if current_version == GameRules.RUN_STATE_VERSION_V1:
+		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V2
+		current_version = GameRules.RUN_STATE_VERSION_V2
+	if current_version == GameRules.RUN_STATE_VERSION_V2:
 		var legacy_inventory: Variant = migrated.get("inventory", null)
 		if not legacy_inventory is Dictionary:
 			return {
@@ -445,8 +446,42 @@ static func migrate_serialized(data: Dictionary) -> Dictionary:
 		parsed_legacy_skills["search"] = 0
 		migrated["skills"] = parsed_legacy_skills
 		migrated["inventory"] = InventoryStateScript.migrate_legacy(parsed_legacy_inventory)
-		migrated["save_version"] = GameRules.SAVE_VERSION
-		current_version = GameRules.SAVE_VERSION
+		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V3
+		current_version = GameRules.RUN_STATE_VERSION_V3
+	if current_version == GameRules.RUN_STATE_VERSION_V3:
+		var legacy_meters: Variant = migrated.get("meters", null)
+		if not legacy_meters is Dictionary:
+			return {
+				"ok": false,
+				"code": "invalid_legacy_meters",
+				"error": "RunState v3 meters must be a dictionary.",
+			}
+		var meter_map: Dictionary = Dictionary(legacy_meters).duplicate(true)
+		if meter_map.has("morale") and meter_map.has("mental_state"):
+			return {
+				"ok": false,
+				"code": "ambiguous_mental_state",
+				"error": "RunState v3 contains both morale and mental_state.",
+			}
+		if not meter_map.has("morale"):
+			return {
+				"ok": false,
+				"code": "missing_legacy_morale",
+				"error": "RunState v3 does not contain morale.",
+			}
+		meter_map["mental_state"] = meter_map["morale"]
+		meter_map.erase("morale")
+		migrated["meters"] = meter_map
+		for field: String in ["journal", "deferred_consequences"]:
+			var references := _rename_legacy_meter_references(
+				migrated.get(field, null),
+				field
+			)
+			if not bool(references.get("ok", false)):
+				return references
+			migrated[field] = references["data"]
+		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V4
+		current_version = GameRules.RUN_STATE_VERSION_V4
 	if current_version != GameRules.SAVE_VERSION:
 		return {
 			"ok": false,
@@ -462,6 +497,44 @@ static func migrate_serialized(data: Dictionary) -> Dictionary:
 		"migrated": int(source_version) != GameRules.SAVE_VERSION,
 		"source_version": int(source_version),
 	}
+
+
+static func _rename_legacy_meter_references(value: Variant, path: String) -> Dictionary:
+	if value is Array:
+		var output: Array = []
+		for index: int in value.size():
+			var item := _rename_legacy_meter_references(value[index], "%s[%d]" % [path, index])
+			if not bool(item.get("ok", false)):
+				return item
+			output.append(item["data"])
+		return {"ok": true, "data": output}
+	if value is Dictionary:
+		var source: Dictionary = value
+		var is_meter_map := path.ends_with(".meters") or path == "meters"
+		if is_meter_map and source.has("morale") and source.has("mental_state"):
+			return {
+				"ok": false,
+				"code": "ambiguous_mental_state_reference",
+				"error": "%s contains both morale and mental_state." % path,
+			}
+		var output: Dictionary = {}
+		for raw_key: Variant in source:
+			var key: Variant = (
+				"mental_state"
+				if is_meter_map and String(raw_key) == "morale"
+				else raw_key
+			)
+			var item := _rename_legacy_meter_references(source[raw_key], "%s.%s" % [path, String(raw_key)])
+			if not bool(item.get("ok", false)):
+				return item
+			output[key] = item["data"]
+		var effect_type := String(output.get("type", output.get("kind", ""))).to_lower()
+		if String(output.get("id", "")) == "morale" and effect_type in ["change_state", "change_meter", "meter"]:
+			output["id"] = "mental_state"
+		if String(output.get("target_id", "")) == "morale" and String(output.get("target_kind", "")) == "state":
+			output["target_id"] = "mental_state"
+		return {"ok": true, "data": output}
+	return {"ok": true, "data": value}
 
 
 static func from_dict(data: Dictionary) -> RunState:
