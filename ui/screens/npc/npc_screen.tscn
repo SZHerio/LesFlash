@@ -1,0 +1,254 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://ui/screens/npc/npc_screen.gd" id="1_screen"]
+[ext_resource type="PackedScene" path="res://ui/components/semantic_icon.tscn" id="2_icon"]
+[ext_resource type="Script" path="res://ui/components/focused_texture_rect.gd" id="3_focus"]
+
+[node name="NpcScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_screen")
+
+[node name="ScreenMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="Layout" type="VBoxContainer" parent="ScreenMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TopPanel" type="PanelContainer" parent="ScreenMargin/Layout"]
+layout_mode = 2
+theme_type_variation = &"ScreenHeaderPanel"
+
+[node name="TopRow" type="HBoxContainer" parent="ScreenMargin/Layout/TopPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BackButton" type="Button" parent="ScreenMargin/Layout/TopPanel/TopRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 48)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+focus_mode = 2
+text = "Назад"
+
+[node name="TopSpacer" type="Control" parent="ScreenMargin/Layout/TopPanel/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="ScreenKind" type="Label" parent="ScreenMargin/Layout/TopPanel/TopRow"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"EyebrowLabel"
+text = "ОБЩЕНИЕ"
+
+[node name="ContentPanel" type="PanelContainer" parent="ScreenMargin/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"SurfaceCard"
+
+[node name="ContentScroll" type="ScrollContainer" parent="ScreenMargin/Layout/ContentPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ScrollLane" type="MarginContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_right = 8
+
+[node name="Content" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="PortraitFrame" type="PanelContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+unique_name_in_owner = true
+clip_contents = true
+custom_minimum_size = Vector2(0, 176)
+layout_mode = 2
+theme_type_variation = &"EnvironmentPanel"
+
+[node name="PortraitTexture" type="Control" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/PortraitFrame"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("3_focus")
+
+[node name="PortraitFallback" type="CenterContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/PortraitFrame"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="FallbackCopy" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/PortraitFrame/PortraitFallback"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="PortraitIcon" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/PortraitFrame/PortraitFallback/FallbackCopy" instance=ExtResource("2_icon")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="FallbackLabel" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/PortraitFrame/PortraitFallback/FallbackCopy"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Портрет пока недоступен"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="IdentityPanel" type="PanelContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+layout_mode = 2
+theme_type_variation = &"StatusDetailPanel"
+
+[node name="Identity" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/IdentityPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="RoleLabel" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/IdentityPanel/Identity"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "МЕДСЕСТРА ПОЛИКЛИНИКИ"
+autowrap_mode = 2
+
+[node name="NameLabel" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/IdentityPanel/Identity"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ScreenTitle"
+text = "Лидия Марен"
+autowrap_mode = 2
+
+[node name="PresenceLabel" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/IdentityPanel/Identity"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Сейчас во дворе поликлиники"
+autowrap_mode = 2
+
+[node name="RelationshipPanel" type="PanelContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+layout_mode = 2
+theme_type_variation = &"PillPanel"
+
+[node name="RelationshipRow" type="HBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/RelationshipPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RelationshipIcon" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/RelationshipPanel/RelationshipRow" instance=ExtResource("2_icon")]
+icon_id = &"meta_relationship"
+icon_size_dp = 24
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="RelationshipCopy" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/RelationshipPanel/RelationshipRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="RelationshipLabel" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/RelationshipPanel/RelationshipRow/RelationshipCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Отношение"
+autowrap_mode = 2
+
+[node name="RelationshipValue" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/RelationshipPanel/RelationshipRow/RelationshipCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+text = "Осторожное доверие"
+autowrap_mode = 2
+
+[node name="OutcomePanel" type="PanelContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"SurfaceCard"
+
+[node name="OutcomeCopy" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/OutcomePanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="OutcomeTitle" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/OutcomePanel/OutcomeCopy"]
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "ПОСЛЕДНЯЯ РЕАКЦИЯ"
+
+[node name="OutcomeLabel" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/OutcomePanel/OutcomeCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyLabel"
+text = "Лидия выслушала героя."
+autowrap_mode = 2
+
+[node name="ReactionLabel" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/OutcomePanel/OutcomeCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Она запомнила просьбу."
+autowrap_mode = 2
+
+[node name="InteractionsTitle" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+layout_mode = 2
+theme_type_variation = &"SectionTitle"
+text = "Что сделать"
+
+[node name="InteractionList" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="EmptyState" type="MarginContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 160)
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 24
+
+[node name="EmptyCopy" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/EmptyState"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="EmptyIcon" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/EmptyState/EmptyCopy" instance=ExtResource("2_icon")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="EmptyTitle" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/EmptyState/EmptyCopy"]
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "Сейчас нечего обсуждать"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="EmptyHint" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/EmptyState/EmptyCopy"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Новые возможности появятся из поступков, знаний и отношения этого человека."
+horizontal_alignment = 1
+autowrap_mode = 2

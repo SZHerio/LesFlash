@@ -10,6 +10,7 @@ const LocationScene := preload("res://ui/screens/location/location_screen.tscn")
 const CityMapScene := preload("res://ui/screens/city_map/city_map_screen.tscn")
 const InventoryScene := preload("res://ui/screens/inventory/inventory_screen.tscn")
 const ShopScene := preload("res://ui/screens/shop/shop_screen.tscn")
+const NpcScene := preload("res://ui/screens/npc/npc_screen.tscn")
 const HeroScene := preload("res://ui/screens/hero/hero_screen.tscn")
 const HeroModels := preload("res://app/hero/hero_view_model.gd")
 const InventoryModels := preload("res://app/inventory/inventory_view_model.gd")
@@ -152,6 +153,20 @@ func show_shop(
 	var screen := _shell.show_screen(ShopScene) as ShopScreen
 	screen.back_requested.connect(_handler(handlers, "back"))
 	screen.purchase_requested.connect(_handler(handlers, "purchase"))
+	screen.present(model)
+	return screen
+
+
+func show_npc(
+	model: Dictionary,
+	shell_model: Dictionary,
+	preferences: Dictionary,
+	handlers: Dictionary
+) -> NpcScreen:
+	_prepare_location_activity(shell_model, preferences)
+	var screen := _shell.show_screen(NpcScene) as NpcScreen
+	screen.back_requested.connect(_handler(handlers, "back"))
+	screen.interaction_requested.connect(_handler(handlers, "interaction"))
 	screen.present(model)
 	return screen
 

@@ -11,8 +11,7 @@ extends FirstDaySessionAdapter
 const LegacySessionScript := preload("res://game/first_day/first_day_session.gd")
 const LegacySaveScript := preload("res://game/first_day/first_day_save.gd")
 const WeekCityMapModelScript := preload("res://app/map/week_city_map_model.gd")
-const InventoryTransaction := preload("res://core/inventory/inventory_transaction.gd")
-const WeekInventoryCommandScript := preload("res://game/week/week_inventory_command.gd")
+const WeekInventoryBoundary := preload("res://app/session/week_inventory_session_boundary.gd")
 const WeekFacade := preload("res://app/session/week_session_facade.gd")
 const SearchCommands := preload("res://app/session/search_session_commands.gd")
 const SearchModels := preload("res://app/search/search_read_model.gd")
@@ -122,6 +121,41 @@ func get_recycling_offers() -> Array[Dictionary]:
 	return [] if _session == null else WeekFacade.recycling_offers(_session)
 
 
+func get_npc_model(npc_id: String, reduced_motion: bool = false) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	var result := WeekFacade.npc_model(
+		_session,
+		npc_id,
+		bool(_session.settings.get("show_locked_options", false)),
+		reduced_motion
+	)
+	if bool(result.get("ok", false)):
+		result["expected_revision"] = _session.flow_revision
+	return result
+
+
+func preview_npc_interaction(npc_id: String, interaction_id: String) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return WeekFacade.preview_npc_interaction(_session, npc_id, interaction_id)
+
+
+func execute_npc_interaction(
+	npc_id: String,
+	interaction_id: String,
+	expected_flow_revision: int
+) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.execute_npc_interaction(
+		_session,
+		npc_id,
+		interaction_id,
+		expected_flow_revision
+	))
+
+
 func get_hero_model() -> Dictionary:
 	if _session == null or _session.run_state == null:
 		return {}
@@ -131,13 +165,7 @@ func get_hero_model() -> Dictionary:
 func get_inventory_model() -> Dictionary:
 	if _session == null or _session.run_state == null:
 		return {}
-	var location_model := get_location_model()
-	return {
-		"inventory": _session.run_state.inventory.duplicate(true),
-		"strength": _session.run_state.get_characteristic("strength"),
-		"location_id": _session.location,
-		"location_title": String(location_model.get("title", _session.location)),
-	}
+	return WeekInventoryBoundary.model(_session, get_location_model())
 
 
 func perform_inventory_action(
@@ -148,74 +176,13 @@ func perform_inventory_action(
 ) -> Dictionary:
 	if _session == null or _session.run_state == null:
 		return _missing_sandbox_session()
-	var result: Dictionary
-	match action_id:
-		"select":
-			result = InventoryTransaction.select(_session.run_state, stack_id)
-		"move":
-			result = InventoryTransaction.move(
-				_session.run_state,
-				stack_id,
-				target_container_id,
-				quantity
-			)
-		"pick_up":
-			result = InventoryTransaction.pick_up(
-				_session.run_state,
-				stack_id,
-				target_container_id,
-				quantity
-			)
-		"use":
-			result = WeekInventoryCommandScript.execute(
-				_session,
-				stack_id,
-				action_id,
-				_inventory_command_id(stack_id, action_id),
-				quantity
-			)
-		"disassemble":
-			result = WeekInventoryCommandScript.execute(
-				_session,
-				stack_id,
-				action_id,
-				_inventory_command_id(stack_id, action_id),
-				quantity
-			)
-		"sell":
-			result = WeekInventoryCommandScript.execute(
-				_session,
-				stack_id,
-				action_id,
-				_inventory_command_id(stack_id, action_id),
-				quantity
-			)
-		"drop":
-			result = InventoryTransaction.drop(
-				_session.run_state,
-				stack_id,
-				_session.location,
-				quantity
-			)
-		_:
-			return {
-				"ok": false,
-				"code": "unknown_inventory_action",
-				"error": "Неизвестное действие с предметом.",
-			}
-	if bool(result.get("ok", false)):
-		_session.flow_revision += 1
-		result["flow_revision"] = _session.flow_revision
-	return result
-
-
-func _inventory_command_id(stack_id: String, action_id: String) -> String:
-	return "week:item:%s:%s:%d:%d" % [
-		action_id,
+	return WeekInventoryBoundary.execute(
+		_session,
 		stack_id,
-		_session.run_state.calendar.elapsed_minutes,
-		_session.flow_revision,
-	]
+		action_id,
+		quantity,
+		target_container_id
+	)
 
 
 func _finish_week_command(result: Dictionary) -> Dictionary:
@@ -236,16 +203,12 @@ func perform_inventory_replacement(
 ) -> Dictionary:
 	if _session == null or _session.run_state == null:
 		return _missing_sandbox_session()
-	var result := InventoryTransaction.replace(
-		_session.run_state,
+	return WeekInventoryBoundary.replace(
+		_session,
 		incoming_stack_id,
 		displaced_stack_id,
 		target_container_id
 	)
-	if bool(result.get("ok", false)):
-		_session.flow_revision += 1
-		result["flow_revision"] = _session.flow_revision
-	return result
 
 
 func is_search_active() -> bool:

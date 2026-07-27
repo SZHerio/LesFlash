@@ -11,6 +11,7 @@ const PreferenceFlowScript := preload("res://app/flows/preference_flow_coordinat
 const InventoryFlowScript := preload("res://app/flows/inventory_flow_coordinator.gd")
 const SearchFlowScript := preload("res://app/flows/search_flow_coordinator.gd")
 const ShopFlowScript := preload("res://app/flows/shop_flow_coordinator.gd")
+const ShellNavigationFlowScript := preload("res://app/flows/shell_navigation_flow_coordinator.gd")
 const CommandRunnerScript := preload("res://app/flows/session_command_runner.gd")
 const LegacyActivityFlowScript := preload("res://app/flows/legacy_activity_flow_coordinator.gd")
 
@@ -26,6 +27,7 @@ var _preference_flow: RefCounted
 var _inventory_flow: InventoryFlowCoordinator
 var _search_flow: SearchFlowCoordinator
 var _shop_flow: ShopFlowCoordinator
+var _shell_navigation: ShellNavigationFlowCoordinator
 var _commands: SessionCommandRunner
 var _legacy_activity_flow: LegacyActivityFlowCoordinator
 var _route := "boot"
@@ -62,6 +64,23 @@ func _boot() -> void:
 	_commands = CommandRunnerScript.new()
 	_commands.configure(self, _shell, _lifecycle)
 	_legacy_activity_flow = LegacyActivityFlowScript.new()
+	_shell_navigation = ShellNavigationFlowScript.new()
+	_shell_navigation.configure(
+		_shell,
+		_commands,
+		_inventory_flow,
+		_search_flow,
+		{
+			"close": _on_close_requested,
+			"main_menu": _show_main_menu,
+			"return_settings": _return_from_settings,
+			"leave_session": _leave_session_to_menu,
+			"location": _show_location,
+			"map": _show_map,
+			"hero": _show_hero,
+			"inventory": _show_inventory,
+		}
+	)
 	_shell.back_requested.connect(_on_back_requested)
 	_shell.close_requested.connect(_on_close_requested)
 	_shell.pause_requested.connect(_save_session.bind(false))
@@ -195,7 +214,10 @@ func _show_location() -> void:
 		_commands.last_transaction(),
 		_commands.status_delta_pending(),
 		_flow_hooks({
-			"shelters": _show_shelters,
+			"npc_opened": func() -> void: _route = "npc",
+			"location": _show_location,
+			"finished": _route_session,
+			"shelters": _show_legacy.bind("shelter"),
 			"store": _show_store,
 			"recycling": _show_recycling,
 		})
@@ -273,29 +295,10 @@ func _on_map_arrived(result: Dictionary) -> void:
 		_shell.show_toast("Дорога заняла %d мин." % int(result.get("minutes", 0)))
 
 
-## Routes still served by the legacy M2 activity screens. They share one entry
-## point so the route name and the presented screen can never drift apart.
-const LEGACY_ROUTES := {
-	"event": "show_event",
-	"job": "show_job",
-	"shelter": "show_shelters",
-	"job_result": "show_job_result",
-	"summary": "show_summary",
-}
-
-
 func _show_legacy(route: String) -> void:
 	_route = route
 	_prepare_legacy_flow()
-	_legacy_activity_flow.call(StringName(LEGACY_ROUTES[route]))
-
-
-func _show_shelters() -> void:
-	_show_legacy("shelter")
-
-
-func _show_job_result() -> void:
-	_show_legacy("job_result")
+	_legacy_activity_flow.show(route)
 
 
 func _open_settings() -> void:
@@ -314,8 +317,7 @@ func _return_from_settings() -> void:
 		"map": _show_map()
 		"inventory": _show_inventory()
 		"shop": _show_store(_shop_store_id)
-		"shelter": _show_shelters()
-		"job_result": _show_job_result()
+		"shelter", "job_result": _show_legacy(_settings_return_route)
 		_: _route_session()
 
 
@@ -325,7 +327,7 @@ func _prepare_legacy_flow() -> void:
 		_screens,
 		_preferences.to_model(),
 		_flow_hooks({
-			"job_result": _show_job_result,
+			"job_result": _show_legacy.bind("job_result"),
 			"location": _show_location,
 			"leave": _leave_session_to_menu,
 		})
@@ -337,52 +339,11 @@ func _save_session(show_success: bool) -> Dictionary:
 
 
 func _on_navigation_requested(tab_id: String) -> void:
-	if _commands.in_flight():
-		return
-	if _route == "inventory" and _inventory_flow.has_modal():
-		return
-	# The search owns the screen until the player leaves the zone, so a stray
-	# tab request must not drop them out of an unfinished activity.
-	if _route == "search":
-		return
-	match tab_id:
-		"place":
-			_show_location()
-		"map":
-			_show_map()
-		"hero":
-			_show_hero()
-		"items":
-			_show_inventory()
+	_shell_navigation.navigate(tab_id, _route)
 
 
 func _on_back_requested() -> void:
-	if _commands.in_flight():
-		return
-	match _route:
-		"menu": _on_close_requested()
-		"creation":
-			var creation := _shell.current_screen() as CharacterCreationScreen
-			if creation == null or not creation.handle_back():
-				_show_main_menu()
-		"settings": _return_from_settings()
-		"location":
-			_leave_session_to_menu()
-		"map":
-			_show_location()
-		"hero": _show_location()
-		"inventory":
-			if not _inventory_flow.handle_back():
-				_show_location()
-		"shop": _show_location()
-		"search":
-			if not _search_flow.handle_back():
-				_show_location()
-		"shelter": _show_location()
-		"job_result": _show_location()
-		"summary": _leave_session_to_menu()
-		_:
-			_shell.show_toast("Сначала завершите текущее решение.")
+	_shell_navigation.handle_back(_route)
 
 
 func _leave_session_to_menu() -> void:

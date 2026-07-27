@@ -22,6 +22,17 @@ func configure(
 	_hooks = hooks.duplicate()
 
 
+func show(route: String) -> void:
+	match route:
+		"event": show_event()
+		"job": show_job()
+		"shelter": show_shelters()
+		"job_result": show_job_result()
+		"summary": show_summary()
+		_:
+			push_error("Unknown legacy activity route: %s" % route)
+
+
 func show_event() -> void:
 	_presenter.show_event(
 		_session.get_current_event_model(),

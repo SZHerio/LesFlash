@@ -18,6 +18,7 @@ const Motion := preload("res://ui/theme/motion.gd")
 var _action_id: StringName
 var _reduced_motion := false
 var _motion_tween: Tween
+var _pending_feedback := false
 
 
 func _ready() -> void:
@@ -33,6 +34,7 @@ func _ready() -> void:
 
 
 func present(model: Dictionary) -> void:
+	_pending_feedback = false
 	_action_id = StringName(model.get("id", &""))
 	_title_label.text = String(model.get("title", "Действие"))
 	_description_label.text = String(model.get("description", ""))
@@ -74,6 +76,25 @@ func present(model: Dictionary) -> void:
 	# No tooltip: both texts are already on the card. On a touch device a tooltip
 	# needs a long press and then covers the very thing it was called about.
 	call_deferred("_update_minimum_height")
+
+
+func set_pending_feedback(enabled: bool) -> void:
+	_pending_feedback = enabled
+	if not enabled:
+		return
+	_meta_row.present([{
+		"icon_id": &"meta_time",
+		"text": "Отправлено…",
+		"accessible_text": "Решение отправлено, ожидается результат",
+	}])
+	_trailing_icon.present(&"meta_time", 16, Palette.GOLD)
+	_accent_rail.color = Palette.GOLD
+	accessibility_name = "%s. Решение отправлено, ожидается результат" % _title_label.text
+	call_deferred("_update_minimum_height")
+
+
+func is_pending_feedback() -> bool:
+	return _pending_feedback
 
 
 func set_reduced_motion(enabled: bool) -> void:
