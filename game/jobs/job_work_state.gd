@@ -10,7 +10,21 @@ const ProgressScript := preload("res://game/jobs/job_shift_progress.gd")
 const MasteryScript := preload("res://game/jobs/job_mastery.gd")
 const JsonValidator := preload("res://core/save/json_value_validator.gd")
 
-const SCHEMA_VERSION := 1
+const SCHEMA_VERSION := 2
+
+## Viktor keeps the sorter on while the work is adequate. A shift that puts
+## people at risk counts double, a good one repairs standing, and three strikes
+## end the job. The player is never shown this count — the supervisor's line in
+## the shift result is how a person would learn it, and rule 3.4 says the
+## interface does not explain its own mechanics.
+const STRIKES_BEFORE_DISMISSAL := 3
+const GRADE_STRIKES := {
+	"unsafe": 2,
+	"weak": 1,
+	"acceptable": 0,
+	"solid": -1,
+	"excellent": -1,
+}
 const JOB_ID := "job_recycling_sorter"
 
 var snapshot: Dictionary = {}
@@ -18,10 +32,15 @@ var progress: Dictionary = {}
 var mastery: Dictionary = MasteryScript.fresh(JOB_ID)
 var next_shift_sequence: int = 1
 var last_completed_day_index: int = -1
+var standing: Dictionary = fresh_standing()
 
 
 static func fresh() -> JobWorkState:
 	return JobWorkState.new()
+
+
+static func fresh_standing() -> Dictionary:
+	return {"strikes": 0, "dismissed": false}
 
 
 static func from_dict(value: Variant) -> JobWorkState:
@@ -30,13 +49,19 @@ static func from_dict(value: Variant) -> JobWorkState:
 	var source: Dictionary = JsonValidator.normalize_numbers(
 		Dictionary(value).duplicate(true)
 	)
-	if source.size() != 6 or source.get("schema_version", null) != SCHEMA_VERSION:
+	var version: Variant = _integral(source.get("schema_version", null))
+	if version == null or int(version) < 1 or int(version) > SCHEMA_VERSION:
+		return null
+	if int(version) < 2:
+		source["standing"] = fresh_standing()
+		source["schema_version"] = SCHEMA_VERSION
+	if source.size() != 7:
 		return null
 	for field: String in ["snapshot", "progress", "mastery"]:
 		if not source.get(field, null) is Dictionary:
 			return null
-	var sequence := _integral(source.get("next_shift_sequence", null))
-	var completed_day := _integral(source.get("last_completed_day_index", null))
+	var sequence: Variant = _integral(source.get("next_shift_sequence", null))
+	var completed_day: Variant = _integral(source.get("last_completed_day_index", null))
 	if sequence == null or completed_day == null:
 		return null
 	var result := JobWorkState.new()
@@ -45,6 +70,16 @@ static func from_dict(value: Variant) -> JobWorkState:
 	result.mastery = Dictionary(source["mastery"]).duplicate(true)
 	result.next_shift_sequence = int(sequence)
 	result.last_completed_day_index = int(completed_day)
+	var standing_source: Variant = source.get("standing", null)
+	if not standing_source is Dictionary:
+		return null
+	var strikes: Variant = _integral(Dictionary(standing_source).get("strikes", null))
+	if strikes == null or typeof(Dictionary(standing_source).get("dismissed", null)) != TYPE_BOOL:
+		return null
+	result.standing = {
+		"strikes": clampi(int(strikes), 0, STRIKES_BEFORE_DISMISSAL),
+		"dismissed": bool(Dictionary(standing_source)["dismissed"]),
+	}
 	return result if bool(result.validate().get("ok", false)) else null
 
 
@@ -56,6 +91,7 @@ func to_dict() -> Dictionary:
 		"mastery": mastery.duplicate(true),
 		"next_shift_sequence": next_shift_sequence,
 		"last_completed_day_index": last_completed_day_index,
+		"standing": standing.duplicate(true),
 	}
 
 
@@ -143,7 +179,26 @@ func complete_shift(
 	progress = next_progress.duplicate(true)
 	mastery = next_mastery.duplicate(true)
 	last_completed_day_index = day_index
+	_record_standing(String(Dictionary(next_progress.get("result", {})).get("grade", "acceptable")))
 	return bool(validate().get("ok", false))
+
+
+func _record_standing(grade: String) -> void:
+	if bool(standing.get("dismissed", false)):
+		return
+	var strikes := clampi(
+		int(standing.get("strikes", 0)) + int(GRADE_STRIKES.get(grade, 0)),
+		0,
+		STRIKES_BEFORE_DISMISSAL
+	)
+	standing = {
+		"strikes": strikes,
+		"dismissed": strikes >= STRIKES_BEFORE_DISMISSAL,
+	}
+
+
+func is_dismissed() -> bool:
+	return bool(standing.get("dismissed", false))
 
 
 func activity_projection() -> Dictionary:

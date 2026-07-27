@@ -7,6 +7,7 @@ const SnapshotScript := preload("res://game/jobs/job_shift_snapshot.gd")
 const ProgressScript := preload("res://game/jobs/job_shift_progress.gd")
 const Service := preload("res://game/jobs/job_shift_service.gd")
 const Mastery := preload("res://game/jobs/job_mastery.gd")
+const WorkState := preload("res://game/jobs/job_work_state.gd")
 
 const RUN_SEED := 19_803_001
 const JOB_ID := "job_recycling_sorter"
@@ -36,6 +37,7 @@ func _init() -> void:
 	_run("varied practice unlocks quick resolve while repetition cannot farm mastery", _test_variety_and_antifarm)
 	_run("malformed catalog snapshot progress and history fail closed", _test_validation_failures)
 	_run("polarity affinity makes the shift personal", _test_polarity_affinity_makes_the_shift_personal)
+	_run("repeated bad shifts cost the job", _test_repeated_bad_shifts_cost_the_job)
 	_finish()
 
 
@@ -275,6 +277,46 @@ func _test_polarity_affinity_makes_the_shift_personal() -> void:
 			== int(careful_result.get("overall", 0)),
 		"the same hero and seed produced two different shifts"
 	)
+
+
+## Work badly enough for long enough and Viktor stops keeping you on. A good
+## shift repairs standing, so it is a slope rather than a trapdoor.
+func _test_repeated_bad_shifts_cost_the_job() -> void:
+	var state: JobWorkState = WorkState.fresh()
+	_expect(not state.is_dismissed(), "a fresh sorter is already dismissed")
+
+	state._record_standing("weak")
+	state._record_standing("weak")
+	_expect(not state.is_dismissed(), "two weak shifts already cost the job")
+	state._record_standing("solid")
+	_expect(
+		int(state.standing["strikes"]) == 1,
+		"a good shift repaired nothing: %d strikes" % int(state.standing["strikes"])
+	)
+
+	state._record_standing("unsafe")
+	_expect(
+		state.is_dismissed(),
+		"an unsafe shift on top of a warning did not end the job: %d strikes"
+			% int(state.standing["strikes"])
+	)
+	state._record_standing("excellent")
+	_expect(state.is_dismissed(), "a dismissal was undone by working well afterwards")
+
+	# A save written before standing existed starts clean: inventing strikes from
+	# a history the game never judged would punish the player retroactively.
+	var legacy: Dictionary = WorkState.fresh().to_dict()
+	legacy["schema_version"] = 1
+	legacy.erase("standing")
+	var migrated: JobWorkState = WorkState.from_dict(legacy)
+	_expect(migrated != null, "a version 1 work state no longer loads")
+	if migrated != null:
+		_expect(not migrated.is_dismissed(), "migration invented a dismissal")
+		_expect(int(migrated.standing["strikes"]) == 0, "migration invented strikes")
+		_expect(
+			int(migrated.to_dict()["schema_version"]) == WorkState.SCHEMA_VERSION,
+			"migration did not raise the schema version"
+		)
 
 
 func _weak_build() -> Dictionary:
