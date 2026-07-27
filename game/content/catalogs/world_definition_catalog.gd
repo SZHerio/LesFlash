@@ -3,10 +3,15 @@ extends RefCounted
 
 const CatalogIo := preload("res://game/content/catalogs/catalog_io.gd")
 const Rules := preload("res://game/content/catalogs/catalog_rules.gd")
+const ProcessDefinitionValidator := preload(
+	"res://game/world/world_process_definition_validator.gd"
+)
 
-const SCHEMA_VERSION := 1
-const CATALOG_ID := "world_definition_catalog_v1"
-const DEFAULT_PATH := "res://game/content/data/world_definition_catalog_v1.json"
+const PREVIOUS_SCHEMA_VERSION := 1
+const SCHEMA_VERSION := 2
+const CATALOG_ID := "world_definition_catalog_v2"
+const PREVIOUS_PATH := "res://game/content/data/world_definition_catalog_v1.json"
+const DEFAULT_PATH := "res://game/content/data/world_definition_catalog_v2.json"
 const KNOWN_SCOPE_KINDS := ["location", "district", "organization"]
 const KNOWN_LOCATION_IDS := [
 	"underpass", "market", "station_square", "recycling_point", "clinic_yard", "embankment",
@@ -111,6 +116,14 @@ static func _validate_process(
 			errors.append("%s содержит неизвестную терминальную стадию %s" % [path, stage_id])
 	_validate_stages(stages, terminal_ids, path, errors)
 	_validate_transitions(transitions, stages, facts, path, errors)
+	ProcessDefinitionValidator.validate(
+		process,
+		stages,
+		transitions,
+		facts,
+		path,
+		errors
+	)
 	_validate_graph(stages, transitions, initial_stage_id, terminal_ids, path, errors)
 
 

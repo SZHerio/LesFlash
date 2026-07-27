@@ -1,0 +1,53 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/components/job_metric_card.gd" id="1_metric"]
+
+[node name="JobMetricCard" type="PanelContainer"]
+custom_minimum_size = Vector2(88, 72)
+size_flags_horizontal = 3
+theme_type_variation = &"PillPanel"
+script = ExtResource("1_metric")
+
+[node name="Copy" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="MetricLabel" type="Label" parent="Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Выработка"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="MetricValue" type="Label" parent="Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "50"
+horizontal_alignment = 1
+
+[node name="MetricTrack" type="Control" parent="Copy"]
+unique_name_in_owner = true
+clip_contents = true
+custom_minimum_size = Vector2(0, 5)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TrackBackground" type="ColorRect" parent="Copy/MetricTrack"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.2, 0.25, 0.23, 1)
+
+[node name="MetricFill" type="ColorRect" parent="Copy/MetricTrack"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 44.0
+offset_bottom = 5.0
+mouse_filter = 2
+color = Color(0.608, 0.773, 0.655, 1)

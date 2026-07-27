@@ -1,0 +1,362 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://ui/screens/job/job_screen.gd" id="1_screen"]
+[ext_resource type="PackedScene" path="res://ui/components/semantic_icon.tscn" id="2_icon"]
+[ext_resource type="PackedScene" path="res://ui/components/decision_cost_row.tscn" id="3_costs"]
+[ext_resource type="PackedScene" path="res://ui/components/job_metric_card.tscn" id="4_metric"]
+
+[node name="JobScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_screen")
+
+[node name="ScreenMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="Layout" type="VBoxContainer" parent="ScreenMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ShiftHeader" type="PanelContainer" parent="ScreenMargin/Layout"]
+layout_mode = 2
+theme_type_variation = &"ScreenHeaderPanel"
+
+[node name="HeaderRow" type="HBoxContainer" parent="ScreenMargin/Layout/ShiftHeader"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HeaderRail" type="ColorRect" parent="ScreenMargin/Layout/ShiftHeader/HeaderRow"]
+custom_minimum_size = Vector2(5, 0)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.875, 0.722, 0.424, 1)
+
+[node name="WorkIcon" parent="ScreenMargin/Layout/ShiftHeader/HeaderRow" instance=ExtResource("2_icon")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="HeaderCopy" type="VBoxContainer" parent="ScreenMargin/Layout/ShiftHeader/HeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="ScreenKind" type="Label" parent="ScreenMargin/Layout/ShiftHeader/HeaderRow/HeaderCopy"]
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "РАБОЧАЯ СМЕНА"
+
+[node name="TitleLabel" type="Label" parent="ScreenMargin/Layout/ShiftHeader/HeaderRow/HeaderCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ScreenTitle"
+text = "Сортировщик вторсырья"
+autowrap_mode = 2
+
+[node name="SupervisorLabel" type="Label" parent="ScreenMargin/Layout/ShiftHeader/HeaderRow/HeaderCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Мастер смены · Виктор Корен"
+autowrap_mode = 2
+
+[node name="ContentPanel" type="PanelContainer" parent="ScreenMargin/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"SurfaceCard"
+
+[node name="ContentScroll" type="ScrollContainer" parent="ScreenMargin/Layout/ContentPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ScrollLane" type="MarginContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_right = 8
+
+[node name="Content" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="BriefingPanel" type="PanelContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+layout_mode = 2
+theme_type_variation = &"StatusDetailPanel"
+
+[node name="BriefingCopy" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/BriefingPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BriefingKind" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/BriefingPanel/BriefingCopy"]
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "ПЛАН СМЕНЫ"
+
+[node name="BriefingTitle" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/BriefingPanel/BriefingCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "Смена на сортировочной площадке"
+autowrap_mode = 2
+
+[node name="BriefingText" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/BriefingPanel/BriefingCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyLabel"
+text = "Выработка важна, но брак и нарушение безопасности уменьшают итог."
+autowrap_mode = 2
+
+[node name="ShiftMeta" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/BriefingPanel/BriefingCopy" instance=ExtResource("3_costs")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ProgressPanel" type="PanelContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+layout_mode = 2
+theme_type_variation = &"PillPanel"
+
+[node name="ProgressCopy" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ProgressPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ProgressLabel" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ProgressPanel/ProgressCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "Шаг 1 из 4"
+autowrap_mode = 2
+
+[node name="ProgressDetail" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ProgressPanel/ProgressCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "0 из 4 решений подтверждено"
+autowrap_mode = 2
+
+[node name="ProgressTrack" type="Control" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ProgressPanel/ProgressCopy"]
+unique_name_in_owner = true
+clip_contents = true
+custom_minimum_size = Vector2(0, 7)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="ProgressBackground" type="ColorRect" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ProgressPanel/ProgressCopy/ProgressTrack"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.2, 0.25, 0.23, 1)
+
+[node name="ProgressFill" type="ColorRect" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ProgressPanel/ProgressCopy/ProgressTrack"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 1.0
+offset_bottom = 7.0
+mouse_filter = 2
+color = Color(0.875, 0.722, 0.424, 1)
+
+[node name="MetricsTitle" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+layout_mode = 2
+theme_type_variation = &"SectionTitle"
+text = "Ход смены"
+
+[node name="MetricsRow" type="HBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ProductionMetric" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/MetricsRow" instance=ExtResource("4_metric")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="QualityMetric" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/MetricsRow" instance=ExtResource("4_metric")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SafetyMetric" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/MetricsRow" instance=ExtResource("4_metric")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="StepPanel" type="PanelContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"EnvironmentPanel"
+
+[node name="StepRow" type="HBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/StepPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="StepIcon" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/StepPanel/StepRow" instance=ExtResource("2_icon")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="StepCopy" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/StepPanel/StepRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="StepEyebrow" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/StepPanel/StepRow/StepCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "ЗАДАЧА СМЕНЫ"
+autowrap_mode = 2
+
+[node name="StepTitle" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/StepPanel/StepRow/StepCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "Разобрать смешанную партию"
+autowrap_mode = 2
+
+[node name="StepDescription" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/StepPanel/StepRow/StepCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyLabel"
+text = "Выберите способ работы с понятным компромиссом."
+autowrap_mode = 2
+
+[node name="ChoicesTitle" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"SectionTitle"
+text = "Как поступить"
+
+[node name="ChoiceList" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NoChoices" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Для этого шага пока нет доступного решения."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="QuickPanel" type="PanelContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"StatusDetailPanel"
+
+[node name="QuickCopy" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/QuickPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="QuickHeader" type="HBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/QuickPanel/QuickCopy"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="QuickIcon" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/QuickPanel/QuickCopy/QuickHeader" instance=ExtResource("2_icon")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="QuickDescription" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/QuickPanel/QuickCopy/QuickHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"MutedLabel"
+text = "Знакомые операции можно рассчитать сразу."
+autowrap_mode = 2
+
+[node name="QuickButton" type="Button" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/QuickPanel/QuickCopy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+focus_mode = 2
+text = "Рассчитать освоенную смену"
+
+[node name="ResultPanel" type="PanelContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"StatusDetailPanel"
+
+[node name="ResultCopy" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ResultPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ResultHeader" type="HBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ResultPanel/ResultCopy"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ResultIcon" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ResultPanel/ResultCopy/ResultHeader" instance=ExtResource("2_icon")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="ResultHeading" type="VBoxContainer" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ResultPanel/ResultCopy/ResultHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="ResultTitle" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ResultPanel/ResultCopy/ResultHeader/ResultHeading"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "Смена завершена"
+autowrap_mode = 2
+
+[node name="ResultGrade" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ResultPanel/ResultCopy/ResultHeader/ResultHeading"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "НАДЁЖНАЯ СМЕНА"
+autowrap_mode = 2
+
+[node name="ResultSummary" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ResultPanel/ResultCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyLabel"
+text = "Рабочая смена закончена, результат внесён в журнал."
+autowrap_mode = 2
+
+[node name="ResultOverall" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ResultPanel/ResultCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MetaLabel"
+text = "Общий результат: 65 из 100"
+autowrap_mode = 2
+
+[node name="ResultPayout" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ResultPanel/ResultCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyLabel"
+text = "Оплата: 220 арденов"
+autowrap_mode = 2
+
+[node name="ResultMastery" type="Label" parent="ScreenMargin/Layout/ContentPanel/ContentScroll/ScrollLane/Content/ResultPanel/ResultCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Новый опыт: +1"
+autowrap_mode = 2

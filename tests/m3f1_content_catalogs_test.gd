@@ -103,11 +103,18 @@ func _test_versioned_bundle() -> void:
 		"npcs": "npc_catalog_v1",
 		"reputations": "reputation_catalog_v1",
 		"jobs": "job_catalog_v1",
-		"world": "world_definition_catalog_v1",
+		"world": "world_definition_catalog_v2",
+	}
+	var expected_versions := {
+		"knowledge": 1, "npcs": 1, "reputations": 1, "jobs": 1, "world": 2,
 	}
 	for key: String in expected_ids:
 		var catalog: Dictionary = _catalogs.get(key, {})
-		_expect_equal(catalog.get("schema_version"), 1, "%s schema version" % key)
+		_expect_equal(
+			catalog.get("schema_version"),
+			expected_versions[key],
+			"%s schema version" % key
+		)
 		_expect_equal(catalog.get("catalog_id"), expected_ids[key], "%s catalog ID" % key)
 	var validation := Bundle.validate(_catalogs)
 	_expect(

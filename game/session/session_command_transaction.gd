@@ -10,6 +10,12 @@ const ActorTransaction := preload("res://core/rules/action_transaction.gd")
 const WorldMutationScript := preload("res://core/world/world_mutation.gd")
 const SocialMutationScript := preload("res://core/social/social_mutation.gd")
 const SurvivalPassageScript := preload("res://game/session/session_survival_passage.gd")
+const WorldProcessTimeAdvancerScript := preload(
+	"res://game/world/world_process_time_advancer.gd"
+)
+const WorldDefinitionCatalogScript := preload(
+	"res://game/content/catalogs/world_definition_catalog.gd"
+)
 
 const WORLD_EFFECTS := [
 	"set_world_fact",
@@ -52,12 +58,28 @@ static func execute(
 	var candidate: Variant = target.call("clone")
 	if candidate == null or not candidate is Object:
 		return _failure("session_clone_failed", "Не удалось создать копию игровой сессии")
+	var before_elapsed := _elapsed_minutes(candidate.get("run_state"))
 	var effects_value: Variant = command.get("effects", [])
 	if not effects_value is Array:
 		return _failure("invalid_effects", "Эффекты команды должны быть массивом")
 	var split := _split_effects(effects_value)
 	if not bool(split.get("ok", false)):
 		return split
+	var world_definitions: Dictionary = Dictionary(
+		context.get("world_definitions", {})
+	).duplicate(true)
+	if world_definitions.is_empty() and (
+		not Array(split.get("world", [])).is_empty()
+		or _effects_advance_time(Array(split.get("actor", [])))
+	):
+		var loaded_world := WorldDefinitionCatalogScript.load_default()
+		if not bool(loaded_world.get("ok", false)):
+			return _failure(
+				"world_definitions_load_failed",
+				"Каталог процессов мира недоступен",
+				{"cause": loaded_world}
+			)
+		world_definitions = Dictionary(loaded_world.get("catalog", {})).duplicate(true)
 	var survival_passage := SurvivalPassageScript.prepare(
 		candidate,
 		Array(split["actor"]),
@@ -98,6 +120,18 @@ static func execute(
 	var source_id := String(actor_action["id"])
 	var at: Dictionary = candidate.get("run_state").calendar.current_stamp()
 	var all_changes: Array = actor_result.changes.duplicate(true)
+	var after_elapsed := _elapsed_minutes(candidate.get("run_state"))
+	var advanced_minutes := _advanced_minutes(actor_result.changes)
+	if after_elapsed - before_elapsed != advanced_minutes:
+		return _failure(
+			"time_change_mismatch",
+			"Подтверждённое изменение времени не совпало с журналом эффектов",
+			{
+				"before_elapsed_minutes": before_elapsed,
+				"after_elapsed_minutes": after_elapsed,
+				"recorded_advanced_minutes": advanced_minutes,
+			}
+		)
 	if not Array(split["social"]).is_empty():
 		var social_result := SocialMutationScript.apply(candidate.get("social_state"), {
 			"schema_version": SocialMutationScript.SCHEMA_VERSION,
@@ -117,21 +151,63 @@ static func execute(
 				"at": at,
 				"operations": split["world"],
 			},
-			Dictionary(context.get("world_definitions", {}))
+			world_definitions
 		)
 		if not bool(world_result.get("ok", false)):
 			return _failure("world_effect_failed", String(world_result.get("error", "Мировой эффект не применился")), {"cause": world_result})
 		all_changes.append_array(Array(world_result.get("changes", [])).duplicate(true))
 	var due_result := {"ok": true, "changes": [], "applied": 0}
-	if _advanced_minutes(actor_result.changes) > 0:
+	if advanced_minutes > 0:
 		due_result = WorldMutationScript.apply_due(
 			candidate.get("world_state"),
 			at,
-			Dictionary(context.get("world_definitions", {}))
+			world_definitions
 		)
 		if not bool(due_result.get("ok", false)):
 			return _failure("due_world_effect_failed", String(due_result.get("error", "Отложенное изменение мира не применилось")), {"cause": due_result})
 		all_changes.append_array(Array(due_result.get("changes", [])).duplicate(true))
+
+	var autonomous_result := {
+		"ok": true,
+		"code": "no_confirmed_time",
+		"advanced": false,
+		"effects": [],
+	}
+	if advanced_minutes > 0:
+		autonomous_result = WorldProcessTimeAdvancerScript.plan(
+			candidate.get("world_state"),
+			before_elapsed,
+			after_elapsed,
+			world_definitions
+		)
+		if not bool(autonomous_result.get("ok", false)):
+			return _failure(
+				"autonomous_world_process_failed",
+				String(autonomous_result.get("error", "Процесс мира не смог продвинуться")),
+				{"cause": autonomous_result}
+			)
+		if bool(autonomous_result.get("advanced", false)):
+			var autonomous_mutation := WorldMutationScript.apply(
+				candidate.get("world_state"),
+				{
+					"schema_version": WorldMutationScript.SCHEMA_VERSION,
+					"source_id": "confirmed_time:%s" % source_id,
+					"at": at,
+					"operations": Array(
+						autonomous_result.get("effects", [])
+					).duplicate(true),
+				},
+				world_definitions
+			)
+			if not bool(autonomous_mutation.get("ok", false)):
+				return _failure(
+					"autonomous_world_mutation_failed",
+					String(autonomous_mutation.get("error", "Процесс мира не применился")),
+					{"cause": autonomous_mutation, "plan": autonomous_result}
+				)
+			all_changes.append_array(
+				Array(autonomous_mutation.get("changes", [])).duplicate(true)
+			)
 
 	var candidate_ledger: Dictionary = candidate.get("applied_command_ids")
 	candidate_ledger[command_id] = {
@@ -155,6 +231,7 @@ static func execute(
 		"changes": all_changes,
 		"actor_transaction": actor_result.to_dict(),
 		"due_world_mutations": int(due_result.get("applied", 0)),
+		"autonomous_world_process": autonomous_result.duplicate(true),
 	}
 
 
@@ -220,6 +297,28 @@ static func _advanced_minutes(changes: Array) -> int:
 		if raw_change is Dictionary and String(raw_change.get("effect_type", "")) == "advance_time":
 			total += maxi(int(raw_change.get("delta", 0)), 0)
 	return total
+
+
+static func _effects_advance_time(effects: Array) -> bool:
+	for raw_effect: Variant in effects:
+		if not raw_effect is Dictionary:
+			continue
+		var effect_type := String(
+			Dictionary(raw_effect).get(
+				"type",
+				Dictionary(raw_effect).get("kind", "")
+			)
+		).strip_edges().to_lower().replace("-", "_")
+		if effect_type in ["advance_time", "time", "advance_clock"]:
+			return true
+	return false
+
+
+static func _elapsed_minutes(run_state: Object) -> int:
+	if run_state == null:
+		return -1
+	var calendar: Variant = run_state.get("calendar")
+	return int(calendar.get("elapsed_minutes")) if calendar != null else -1
 
 
 static func _failure(code: String, message: String, details: Dictionary = {}) -> Dictionary:

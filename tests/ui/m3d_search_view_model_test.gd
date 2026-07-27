@@ -3,6 +3,7 @@ extends SceneTree
 const SearchModels := preload("res://app/search/search_view_model.gd")
 const ZoneCatalog := preload("res://game/search/search_zone_catalog.gd")
 const SnapshotGenerator := preload("res://game/search/search_snapshot_generator.gd")
+const PsycheScaleScript = preload("res://core/state/psyche_scale.gd")
 
 
 func _init() -> void:
@@ -118,8 +119,15 @@ func _init() -> void:
 			not String(Dictionary(tray[0]).get("mass_text", "")).is_empty(),
 			"loot mass was not formatted"
 		)
+	# The filter follows the psyche step alone. It used to blend tension with
+	# low morale, but under the three-layer model in ROADMAP 7.1 tension causes
+	# disorders instead of dimming the world directly. Asserted against the
+	# scale rather than a literal so the two cannot drift apart again.
 	_expect(
-		is_equal_approx(float(model.get("psyche_intensity", -1.0)), 0.36),
+		is_equal_approx(
+			float(model.get("psyche_intensity", -1.0)),
+			PsycheScaleScript.filter_for(20) * 0.45
+		),
 		"reduced psyche intensity was not calculated"
 	)
 	_expect(
