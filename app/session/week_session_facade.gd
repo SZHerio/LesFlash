@@ -12,6 +12,9 @@ const CommerceCommandScript := preload("res://game/commerce/commerce_session_com
 const ShelterServiceScript := preload("res://game/shelter/shelter_session_service.gd")
 const RecyclingServiceScript := preload("res://game/recycling/recycling_service.gd")
 const NpcInteractionServiceScript := preload("res://game/npc/npc_interaction_service.gd")
+const JobLocationActionsScript := preload("res://game/jobs/job_location_actions.gd")
+const JobSessionCommandScript := preload("res://game/jobs/job_session_command.gd")
+const JobShiftViewModelScript := preload("res://app/jobs/job_shift_view_model.gd")
 const NpcInteractionCommandScript := preload("res://game/npc/npc_interaction_command.gd")
 const StoreViewModelScript := preload("res://app/commerce/store_view_model.gd")
 const NpcInteractionViewModelScript := preload("res://app/npc/npc_interaction_view_model.gd")
@@ -29,6 +32,7 @@ static func location_model(
 		session,
 		include_blocked
 	))
+	actions.append_array(JobLocationActionsScript.location_actions(session, include_blocked))
 	result["actions"] = actions
 	return result
 
@@ -254,3 +258,32 @@ static func _applied_command_id(
 		if command_id.begins_with(prefix) and command_id.ends_with(suffix):
 			return command_id
 	return ""
+
+
+static func job_shift_model(session: Object, reduced_motion: bool = false) -> Dictionary:
+	if session == null:
+		return {}
+	var work_state: JobWorkState = session.get("job_work_state")
+	var raw := work_state.to_dict()
+	raw["dismissed"] = work_state.is_dismissed()
+	return JobShiftViewModelScript.build(raw, reduced_motion)
+
+
+static func begin_job_shift(session: Object, flow_revision: int) -> Dictionary:
+	return JobSessionCommandScript.begin(
+		session,
+		_command_id(session, "job_shift_begin", flow_revision)
+	)
+
+
+static func resolve_job_shift_step(
+	session: Object,
+	choice_id: String,
+	flow_revision: int
+) -> Dictionary:
+	return JobSessionCommandScript.resolve_step(
+		session,
+		choice_id,
+		_command_id(session, "job_shift_step:%s" % choice_id, flow_revision)
+	)
+

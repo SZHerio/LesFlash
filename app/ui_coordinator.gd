@@ -12,6 +12,7 @@ const InventoryFlowScript := preload("res://app/flows/inventory_flow_coordinator
 const SearchFlowScript := preload("res://app/flows/search_flow_coordinator.gd")
 const ShopFlowScript := preload("res://app/flows/shop_flow_coordinator.gd")
 const ShellNavigationFlowScript := preload("res://app/flows/shell_navigation_flow_coordinator.gd")
+const JobShiftFlowScript := preload("res://app/flows/job_shift_flow_coordinator.gd")
 const CommandRunnerScript := preload("res://app/flows/session_command_runner.gd")
 const LegacyActivityFlowScript := preload("res://app/flows/legacy_activity_flow_coordinator.gd")
 
@@ -27,6 +28,7 @@ var _preference_flow: RefCounted
 var _inventory_flow: InventoryFlowCoordinator
 var _search_flow: SearchFlowCoordinator
 var _shop_flow: ShopFlowCoordinator
+var _job_shift_flow: JobShiftFlowCoordinator
 var _shell_navigation: ShellNavigationFlowCoordinator
 var _commands: SessionCommandRunner
 var _legacy_activity_flow: LegacyActivityFlowCoordinator
@@ -64,6 +66,7 @@ func _boot() -> void:
 	_commands = CommandRunnerScript.new()
 	_commands.configure(self, _shell, _lifecycle)
 	_legacy_activity_flow = LegacyActivityFlowScript.new()
+	_job_shift_flow = JobShiftFlowScript.new()
 	_shell_navigation = ShellNavigationFlowScript.new()
 	_shell_navigation.configure(
 		_shell,
@@ -174,6 +177,11 @@ func _route_session() -> void:
 	if _session.is_search_active():
 		_show_search()
 		return
+	# A shift is the same kind of layered activity, and six hours of it may
+	# already be committed, so it is restored before the underlying phase.
+	if _session.is_job_shift_active():
+		_show_job_shift()
+		return
 	match _session.get_phase():
 		"start", "event":
 			_show_legacy("event")
@@ -215,6 +223,7 @@ func _show_location() -> void:
 		_commands.status_delta_pending(),
 		_flow_hooks({
 			"npc_opened": func() -> void: _route = "npc",
+			"job_shift_opened": func() -> void: _route = "job_shift",
 			"location": _show_location,
 			"finished": _route_session,
 			"shelters": _show_legacy.bind("shelter"),
@@ -223,6 +232,16 @@ func _show_location() -> void:
 		})
 	)
 	_commands.clear_status_delta()
+
+
+func _show_job_shift() -> void:
+	_route = "job_shift"
+	_job_shift_flow.show(
+		_session,
+		_screens,
+		_preferences.to_model(),
+		_flow_hooks({"back": _show_location, "location": _show_location, "finished": _route_session})
+	)
 
 
 func _show_search() -> void:

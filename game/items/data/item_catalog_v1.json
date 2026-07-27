@@ -1,333 +1,1336 @@
 {
-	"schema_version": 1,
-	"items": [
-		{
-			"id": "cardboard_sheet",
-			"title": "Лист сухого картона",
-			"description": "Большой лист без следов масла. Годится как подстилка или простая теплоизоляция.",
-			"tags": ["material", "shelter", "bulky"],
-			"stack_limit": 3,
-			"mass_grams": 340,
-			"volume_ml": 1800,
-			"base_value": 8,
-			"actions": {
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"give": {"title": "Отдать", "duration_minutes": 2, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "simple_meal",
-			"title": "Простая еда",
-			"description": "Небольшая порция готовой еды. Лучше съесть её сегодня.",
-			"tags": ["food", "perishable"],
-			"stack_limit": 1,
-			"mass_grams": 460,
-			"volume_ml": 650,
-			"base_value": 45,
-			"actions": {
-				"use": {
-					"title": "Поесть",
-					"duration_minutes": 12,
-					"consumes": true,
-					"conditions": [],
-					"effects": [
-						{"type": "change_state", "id": "hunger", "delta": -28},
-						{"type": "change_state", "id": "energy", "delta": 5},
-						{"type": "change_state", "id": "mental_state", "delta": 3}
-					]
-				},
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"give": {"title": "Поделиться", "duration_minutes": 4, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "scrap_wire",
-			"title": "Обрывки провода",
-			"description": "Смешанный провод в старой изоляции. После аккуратного разбора останется цветной металл.",
-			"tags": ["material", "repair", "recyclable"],
-			"stack_limit": 8,
-			"mass_grams": 180,
-			"volume_ml": 140,
-			"base_value": 16,
-			"actions": {
-				"disassemble": {
-					"title": "Снять изоляцию",
-					"duration_minutes": 18,
-					"consumes": true,
-					"conditions": [],
-					"effects": [{"type": "change_state", "id": "energy", "delta": -2}],
-					"outputs": [{"item_id": "copper_scrap", "quantity": 1, "condition": 100}]
-				},
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"sell": {"title": "Сдать", "duration_minutes": 0, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "recyclables",
-			"title": "Смешанное вторсырьё",
-			"description": "Банки, плотный пластик и мелкий металл. Сортировка повысит цену, но займёт время.",
-			"tags": ["recyclable", "mixed", "bulky"],
-			"stack_limit": 10,
-			"mass_grams": 520,
-			"volume_ml": 900,
-			"base_value": 12,
-			"actions": {
-				"disassemble": {
-					"title": "Рассортировать",
-					"duration_minutes": 15,
-					"consumes": true,
-					"conditions": [],
-					"effects": [{"type": "change_state", "id": "energy", "delta": -2}],
-					"outputs": [{"item_id": "sorted_recyclables", "quantity": 1, "condition": 100}]
-				},
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"sell": {"title": "Сдать как есть", "duration_minutes": 0, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "sorted_recyclables",
-			"title": "Отсортированное вторсырьё",
-			"description": "Разделённые по материалу банки и пластик. Приёмщик оценит их выше смешанной кучи.",
-			"tags": ["recyclable", "sorted"],
-			"stack_limit": 12,
-			"mass_grams": 500,
-			"volume_ml": 720,
-			"base_value": 22,
-			"actions": {
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"sell": {"title": "Сдать", "duration_minutes": 0, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "copper_scrap",
-			"title": "Медный лом",
-			"description": "Небольшой моток очищенной меди. Компактный и ценнее смешанного провода.",
-			"tags": ["material", "metal", "recyclable"],
-			"stack_limit": 12,
-			"mass_grams": 105,
-			"volume_ml": 55,
-			"base_value": 28,
-			"actions": {
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"sell": {"title": "Сдать", "duration_minutes": 0, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "plastic_bottle",
-			"title": "Пластиковая бутылка",
-			"description": "Чистая бутылка с крышкой. Можно наполнить водой или сдать как вторсырьё.",
-			"tags": ["container", "recyclable"],
-			"stack_limit": 4,
-			"mass_grams": 45,
-			"volume_ml": 700,
-			"base_value": 4,
-			"actions": {
-				"use": {
-					"title": "Проверить и убрать",
-					"duration_minutes": 1,
-					"consumes": false,
-					"conditions": [],
-					"effects": []
-				},
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"sell": {"title": "Сдать", "duration_minutes": 0, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "aluminum_can",
-			"title": "Алюминиевая банка",
-			"description": "Лёгкая смятая банка. Почти не весит, но занимает место до уплотнения.",
-			"tags": ["metal", "recyclable"],
-			"stack_limit": 12,
-			"mass_grams": 18,
-			"volume_ml": 160,
-			"base_value": 5,
-			"actions": {
-				"disassemble": {
-					"title": "Смять плотнее",
-					"duration_minutes": 2,
-					"consumes": true,
-					"conditions": [],
-					"effects": [],
-					"outputs": [{"item_id": "sorted_recyclables", "quantity": 1, "condition": 100}]
-				},
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"sell": {"title": "Сдать", "duration_minutes": 0, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "cloth_rag",
-			"title": "Чистая ткань",
-			"description": "Кусок плотной ткани без резкого запаха. Пригодится для ремонта или перевязки.",
-			"tags": ["material", "medical", "repair"],
-			"stack_limit": 6,
-			"mass_grams": 90,
-			"volume_ml": 240,
-			"base_value": 9,
-			"actions": {
-				"use": {
-					"title": "Сделать простую повязку",
-					"duration_minutes": 8,
-					"consumes": true,
-					"conditions": [],
-					"effects": [{"type": "change_state", "id": "health", "delta": 2}]
-				},
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"give": {"title": "Отдать", "duration_minutes": 2, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "sealed_food_can",
-			"title": "Закрытая банка еды",
-			"description": "Целая консервная банка без вздутия. Нужен подходящий инструмент, чтобы открыть её безопасно.",
-			"tags": ["food", "durable"],
-			"stack_limit": 2,
-			"mass_grams": 390,
-			"volume_ml": 430,
-			"base_value": 58,
-			"actions": {
-				"use": {
-					"title": "Открыть и съесть",
-					"duration_minutes": 15,
-					"consumes": true,
-					"conditions": [],
-					"effects": [
-						{"type": "change_state", "id": "hunger", "delta": -32},
-						{"type": "change_state", "id": "energy", "delta": 4}
-					]
-				},
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"give": {"title": "Отдать", "duration_minutes": 2, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "blanket_roll",
-			"title": "Свёрнутое одеяло",
-			"description": "Потёртое, но сухое одеяло. Тяжёлое и объёмное, зато заметно улучшает ночлег.",
-			"tags": ["shelter", "heavy", "bulky"],
-			"stack_limit": 1,
-			"mass_grams": 1900,
-			"volume_ml": 7200,
-			"base_value": 95,
-			"actions": {
-				"equip": {"title": "Закрепить на снаряжении", "duration_minutes": 5, "conditions": [], "effects": []},
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"give": {"title": "Отдать", "duration_minutes": 3, "conditions": [], "effects": []},
-				"sell": {"title": "Продать", "duration_minutes": 0, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "rusty_tool",
-			"title": "Старый разводной ключ",
-			"description": "Тяжёлый инструмент с поверхностной ржавчиной. Работает, если не требовать точности.",
-			"tags": ["tool", "repair", "heavy"],
-			"stack_limit": 1,
-			"mass_grams": 760,
-			"volume_ml": 520,
-			"base_value": 70,
-			"actions": {
-				"equip": {"title": "Держать наготове", "duration_minutes": 1, "conditions": [], "effects": []},
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"sell": {"title": "Продать", "duration_minutes": 0, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "medicine_blister",
-			"title": "Целый блистер обезболивающего",
-			"description": "Маркировка читается, срок годности не истёк. Поможет при боли, но не лечит причину.",
-			"tags": ["medical", "consumable"],
-			"stack_limit": 3,
-			"mass_grams": 24,
-			"volume_ml": 35,
-			"base_value": 85,
-			"actions": {
-				"use": {
-					"title": "Принять таблетку",
-					"duration_minutes": 3,
-					"consumes": true,
-					"conditions": [],
-					"effects": [
-						{"type": "change_state", "id": "health", "delta": 5},
-						{"type": "change_state", "id": "tension", "delta": -4}
-					]
-				},
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"give": {"title": "Отдать", "duration_minutes": 2, "conditions": [], "effects": []},
-				"sell": {"title": "Продать", "duration_minutes": 0, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "broken_radio",
-			"title": "Сломанный карманный приёмник",
-			"description": "Корпус треснут, но внутри остались катушка, провод и несколько целых деталей.",
-			"tags": ["electronics", "repair", "salvage"],
-			"stack_limit": 1,
-			"mass_grams": 640,
-			"volume_ml": 1150,
-			"base_value": 32,
-			"actions": {
-				"disassemble": {
-					"title": "Разобрать на детали",
-					"duration_minutes": 25,
-					"consumes": true,
-					"conditions": [],
-					"effects": [
-						{"type": "change_state", "id": "energy", "delta": -3},
-						{"type": "mastery", "amount": 1}
-					],
-					"outputs": [
-						{"item_id": "scrap_wire", "quantity": 2, "condition": 80},
-						{"item_id": "small_parts", "quantity": 1, "condition": 70}
-					]
-				},
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"sell": {"title": "Продать как есть", "duration_minutes": 0, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "small_parts",
-			"title": "Мелкие радиодетали",
-			"description": "Несколько исправных деталей в бумажном свёртке. Полезны при тонком ремонте.",
-			"tags": ["electronics", "repair", "material"],
-			"stack_limit": 8,
-			"mass_grams": 70,
-			"volume_ml": 90,
-			"base_value": 24,
-			"actions": {
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"sell": {"title": "Продать", "duration_minutes": 0, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "newspaper_bundle",
-			"title": "Пачка старых газет",
-			"description": "Сухие газеты, стянутые бечёвкой. Подойдут для растопки, упаковки или утепления.",
-			"tags": ["material", "shelter", "bulky"],
-			"stack_limit": 2,
-			"mass_grams": 820,
-			"volume_ml": 2400,
-			"base_value": 10,
-			"actions": {
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"give": {"title": "Отдать", "duration_minutes": 2, "conditions": [], "effects": []},
-				"sell": {"title": "Сдать", "duration_minutes": 0, "conditions": [], "effects": []}
-			}
-		},
-		{
-			"id": "work_gloves",
-			"title": "Рабочие перчатки",
-			"description": "Пара плотных перчаток разного оттенка. Защищают руки при поиске и сортировке.",
-			"tags": ["equipment", "safety", "work"],
-			"stack_limit": 1,
-			"mass_grams": 180,
-			"volume_ml": 420,
-			"base_value": 48,
-			"actions": {
-				"equip": {"title": "Надеть", "duration_minutes": 1, "conditions": [], "effects": []},
-				"drop": {"title": "Оставить", "duration_minutes": 0, "conditions": [], "effects": []},
-				"give": {"title": "Отдать", "duration_minutes": 2, "conditions": [], "effects": []},
-				"sell": {"title": "Продать", "duration_minutes": 0, "conditions": [], "effects": []}
-			}
-		}
-	]
+  "schema_version": 1,
+  "items": [
+    {
+      "id": "cardboard_sheet",
+      "title": "Лист сухого картона",
+      "description": "Большой лист без следов масла. Годится как подстилка или простая теплоизоляция.",
+      "tags": [
+        "material",
+        "shelter",
+        "bulky"
+      ],
+      "stack_limit": 3,
+      "mass_grams": 340,
+      "volume_ml": 1800,
+      "base_value": 8,
+      "actions": {
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "simple_meal",
+      "title": "Простая еда",
+      "description": "Небольшая порция готовой еды. Лучше съесть её сегодня.",
+      "tags": [
+        "food",
+        "perishable"
+      ],
+      "stack_limit": 1,
+      "mass_grams": 460,
+      "volume_ml": 650,
+      "base_value": 45,
+      "actions": {
+        "use": {
+          "title": "Поесть",
+          "duration_minutes": 12,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "hunger",
+              "delta": -28
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": 5
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 3
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Поделиться",
+          "duration_minutes": 4,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "scrap_wire",
+      "title": "Обрывки провода",
+      "description": "Смешанный провод в старой изоляции. После аккуратного разбора останется цветной металл.",
+      "tags": [
+        "material",
+        "repair",
+        "recyclable"
+      ],
+      "stack_limit": 8,
+      "mass_grams": 180,
+      "volume_ml": 140,
+      "base_value": 16,
+      "actions": {
+        "disassemble": {
+          "title": "Снять изоляцию",
+          "duration_minutes": 18,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -2
+            }
+          ],
+          "outputs": [
+            {
+              "item_id": "copper_scrap",
+              "quantity": 1,
+              "condition": 100
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Сдать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "recyclables",
+      "title": "Смешанное вторсырьё",
+      "description": "Банки, плотный пластик и мелкий металл. Сортировка повысит цену, но займёт время.",
+      "tags": [
+        "recyclable",
+        "mixed",
+        "bulky"
+      ],
+      "stack_limit": 10,
+      "mass_grams": 520,
+      "volume_ml": 900,
+      "base_value": 12,
+      "actions": {
+        "disassemble": {
+          "title": "Рассортировать",
+          "duration_minutes": 15,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -2
+            }
+          ],
+          "outputs": [
+            {
+              "item_id": "sorted_recyclables",
+              "quantity": 1,
+              "condition": 100
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Сдать как есть",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "sorted_recyclables",
+      "title": "Отсортированное вторсырьё",
+      "description": "Разделённые по материалу банки и пластик. Приёмщик оценит их выше смешанной кучи.",
+      "tags": [
+        "recyclable",
+        "sorted"
+      ],
+      "stack_limit": 12,
+      "mass_grams": 500,
+      "volume_ml": 720,
+      "base_value": 22,
+      "actions": {
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Сдать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "copper_scrap",
+      "title": "Медный лом",
+      "description": "Небольшой моток очищенной меди. Компактный и ценнее смешанного провода.",
+      "tags": [
+        "material",
+        "metal",
+        "recyclable"
+      ],
+      "stack_limit": 12,
+      "mass_grams": 105,
+      "volume_ml": 55,
+      "base_value": 28,
+      "actions": {
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Сдать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "plastic_bottle",
+      "title": "Пластиковая бутылка",
+      "description": "Чистая бутылка с крышкой. Можно наполнить водой или сдать как вторсырьё.",
+      "tags": [
+        "container",
+        "recyclable"
+      ],
+      "stack_limit": 4,
+      "mass_grams": 45,
+      "volume_ml": 700,
+      "base_value": 4,
+      "actions": {
+        "use": {
+          "title": "Проверить и убрать",
+          "duration_minutes": 1,
+          "consumes": false,
+          "conditions": [],
+          "effects": []
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Сдать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "aluminum_can",
+      "title": "Алюминиевая банка",
+      "description": "Лёгкая смятая банка. Почти не весит, но занимает место до уплотнения.",
+      "tags": [
+        "metal",
+        "recyclable"
+      ],
+      "stack_limit": 12,
+      "mass_grams": 18,
+      "volume_ml": 160,
+      "base_value": 5,
+      "actions": {
+        "disassemble": {
+          "title": "Смять плотнее",
+          "duration_minutes": 2,
+          "consumes": true,
+          "conditions": [],
+          "effects": [],
+          "outputs": [
+            {
+              "item_id": "sorted_recyclables",
+              "quantity": 1,
+              "condition": 100
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Сдать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "cloth_rag",
+      "title": "Чистая ткань",
+      "description": "Кусок плотной ткани без резкого запаха. Пригодится для ремонта или перевязки.",
+      "tags": [
+        "material",
+        "medical",
+        "repair"
+      ],
+      "stack_limit": 6,
+      "mass_grams": 90,
+      "volume_ml": 240,
+      "base_value": 9,
+      "actions": {
+        "use": {
+          "title": "Сделать простую повязку",
+          "duration_minutes": 8,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": 2
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "sealed_food_can",
+      "title": "Закрытая банка еды",
+      "description": "Целая консервная банка без вздутия. Нужен подходящий инструмент, чтобы открыть её безопасно.",
+      "tags": [
+        "food",
+        "durable"
+      ],
+      "stack_limit": 2,
+      "mass_grams": 390,
+      "volume_ml": 430,
+      "base_value": 58,
+      "actions": {
+        "use": {
+          "title": "Открыть и съесть",
+          "duration_minutes": 15,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "hunger",
+              "delta": -32
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": 4
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "blanket_roll",
+      "title": "Свёрнутое одеяло",
+      "description": "Потёртое, но сухое одеяло. Тяжёлое и объёмное, зато заметно улучшает ночлег.",
+      "tags": [
+        "shelter",
+        "heavy",
+        "bulky"
+      ],
+      "stack_limit": 1,
+      "mass_grams": 1900,
+      "volume_ml": 7200,
+      "base_value": 95,
+      "actions": {
+        "equip": {
+          "title": "Закрепить на снаряжении",
+          "duration_minutes": 5,
+          "conditions": [],
+          "effects": []
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 3,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "rusty_tool",
+      "title": "Старый разводной ключ",
+      "description": "Тяжёлый инструмент с поверхностной ржавчиной. Работает, если не требовать точности.",
+      "tags": [
+        "tool",
+        "repair",
+        "heavy"
+      ],
+      "stack_limit": 1,
+      "mass_grams": 760,
+      "volume_ml": 520,
+      "base_value": 70,
+      "actions": {
+        "equip": {
+          "title": "Держать наготове",
+          "duration_minutes": 1,
+          "conditions": [],
+          "effects": []
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "medicine_blister",
+      "title": "Целый блистер обезболивающего",
+      "description": "Маркировка читается, срок годности не истёк. Поможет при боли, но не лечит причину.",
+      "tags": [
+        "medical",
+        "consumable"
+      ],
+      "stack_limit": 3,
+      "mass_grams": 24,
+      "volume_ml": 35,
+      "base_value": 85,
+      "actions": {
+        "use": {
+          "title": "Принять таблетку",
+          "duration_minutes": 3,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": 5
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": -4
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "broken_radio",
+      "title": "Сломанный карманный приёмник",
+      "description": "Корпус треснут, но внутри остались катушка, провод и несколько целых деталей.",
+      "tags": [
+        "electronics",
+        "repair",
+        "salvage"
+      ],
+      "stack_limit": 1,
+      "mass_grams": 640,
+      "volume_ml": 1150,
+      "base_value": 32,
+      "actions": {
+        "disassemble": {
+          "title": "Разобрать на детали",
+          "duration_minutes": 25,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -3
+            },
+            {
+              "type": "mastery",
+              "amount": 1
+            }
+          ],
+          "outputs": [
+            {
+              "item_id": "scrap_wire",
+              "quantity": 2,
+              "condition": 80
+            },
+            {
+              "item_id": "small_parts",
+              "quantity": 1,
+              "condition": 70
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать как есть",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "small_parts",
+      "title": "Мелкие радиодетали",
+      "description": "Несколько исправных деталей в бумажном свёртке. Полезны при тонком ремонте.",
+      "tags": [
+        "electronics",
+        "repair",
+        "material"
+      ],
+      "stack_limit": 8,
+      "mass_grams": 70,
+      "volume_ml": 90,
+      "base_value": 24,
+      "actions": {
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "newspaper_bundle",
+      "title": "Пачка старых газет",
+      "description": "Сухие газеты, стянутые бечёвкой. Подойдут для растопки, упаковки или утепления.",
+      "tags": [
+        "material",
+        "shelter",
+        "bulky"
+      ],
+      "stack_limit": 2,
+      "mass_grams": 820,
+      "volume_ml": 2400,
+      "base_value": 10,
+      "actions": {
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Сдать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "work_gloves",
+      "title": "Рабочие перчатки",
+      "description": "Пара плотных перчаток разного оттенка. Защищают руки при поиске и сортировке.",
+      "tags": [
+        "equipment",
+        "safety",
+        "work"
+      ],
+      "stack_limit": 1,
+      "mass_grams": 180,
+      "volume_ml": 420,
+      "base_value": 48,
+      "actions": {
+        "equip": {
+          "title": "Надеть",
+          "duration_minutes": 1,
+          "conditions": [],
+          "effects": []
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "canvas_satchel",
+      "title": "Холщовая сумка",
+      "description": "Простая сумка через плечо. Немного, зато руки остаются свободными.",
+      "tags": [
+        "equipment",
+        "container"
+      ],
+      "stack_limit": 1,
+      "mass_grams": 520,
+      "volume_ml": 900,
+      "base_value": 130,
+      "actions": {
+        "equip": {
+          "title": "Взять на плечо",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "shoulder_bag_large",
+      "title": "Большая заплечная сумка",
+      "description": "Вместительная, с широкими лямками. С полной сумкой ходить тяжелее.",
+      "tags": [
+        "equipment",
+        "container",
+        "bulky"
+      ],
+      "stack_limit": 1,
+      "mass_grams": 1250,
+      "volume_ml": 2100,
+      "base_value": 260,
+      "actions": {
+        "equip": {
+          "title": "Надеть",
+          "duration_minutes": 3,
+          "conditions": [],
+          "effects": []
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "thermos_flask",
+      "title": "Термос",
+      "description": "Помятый, но держит тепло до вечера. Горячее зимой стоит дороже денег.",
+      "tags": [
+        "equipment",
+        "comfort"
+      ],
+      "stack_limit": 1,
+      "mass_grams": 640,
+      "volume_ml": 1100,
+      "base_value": 150,
+      "actions": {
+        "use": {
+          "title": "Выпить горячего",
+          "duration_minutes": 6,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": 8
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 5
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "warm_jacket",
+      "title": "Тёплая куртка",
+      "description": "Ватник с чужого плеча. Швы разошлись, но греет.",
+      "tags": [
+        "equipment",
+        "clothing",
+        "bulky"
+      ],
+      "stack_limit": 1,
+      "mass_grams": 2100,
+      "volume_ml": 8600,
+      "base_value": 320,
+      "actions": {
+        "equip": {
+          "title": "Надеть",
+          "duration_minutes": 4,
+          "conditions": [],
+          "effects": []
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "sturdy_boots",
+      "title": "Крепкие ботинки",
+      "description": "Разношенные, но подошва целая. Ноги — главный инструмент в этом городе.",
+      "tags": [
+        "equipment",
+        "clothing"
+      ],
+      "stack_limit": 1,
+      "mass_grams": 1400,
+      "volume_ml": 3200,
+      "base_value": 280,
+      "actions": {
+        "equip": {
+          "title": "Обуть",
+          "duration_minutes": 5,
+          "conditions": [],
+          "effects": []
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "bread_loaf",
+      "title": "Буханка хлеба",
+      "description": "Вчерашняя, но целая. Делится на несколько раз.",
+      "tags": [
+        "food"
+      ],
+      "stack_limit": 2,
+      "mass_grams": 800,
+      "volume_ml": 2400,
+      "base_value": 30,
+      "actions": {
+        "use": {
+          "title": "Отломить кусок",
+          "duration_minutes": 5,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "hunger",
+              "delta": -16
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": 3
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Поделиться",
+          "duration_minutes": 3,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "tea_packet",
+      "title": "Пачка чая",
+      "description": "Грузинский, третий сорт. На площадке его меняют охотнее, чем деньги.",
+      "tags": [
+        "food",
+        "trade"
+      ],
+      "stack_limit": 4,
+      "mass_grams": 90,
+      "volume_ml": 260,
+      "base_value": 22,
+      "actions": {
+        "use": {
+          "title": "Заварить",
+          "duration_minutes": 10,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": 6
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 4
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "cigarette_pack",
+      "title": "Пачка сигарет",
+      "description": "Валюта разговора. Сам куришь или угощаешь — решать по обстановке.",
+      "tags": [
+        "trade"
+      ],
+      "stack_limit": 5,
+      "mass_grams": 24,
+      "volume_ml": 90,
+      "base_value": 35,
+      "actions": {
+        "use": {
+          "title": "Закурить",
+          "duration_minutes": 8,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 6
+            },
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": -2
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Угостить",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "bandage_roll",
+      "title": "Бинт",
+      "description": "Неполный рулон в бумаге. На один серьёзный порез хватит.",
+      "tags": [
+        "medicine"
+      ],
+      "stack_limit": 2,
+      "mass_grams": 60,
+      "volume_ml": 180,
+      "base_value": 40,
+      "actions": {
+        "use": {
+          "title": "Перевязать",
+          "duration_minutes": 12,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": 14
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "painkiller_strip",
+      "title": "Анальгин",
+      "description": "Полоска таблеток. Снимает боль, но не причину.",
+      "tags": [
+        "medicine"
+      ],
+      "stack_limit": 3,
+      "mass_grams": 18,
+      "volume_ml": 40,
+      "base_value": 32,
+      "actions": {
+        "use": {
+          "title": "Принять",
+          "duration_minutes": 4,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": 6
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 4
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "hand_saw",
+      "title": "Ножовка",
+      "description": "Зубья сточены с одного края. Разбирать ей сподручнее, чем ломать.",
+      "tags": [
+        "tool",
+        "work"
+      ],
+      "stack_limit": 1,
+      "mass_grams": 780,
+      "volume_ml": 1900,
+      "base_value": 190,
+      "actions": {
+        "equip": {
+          "title": "Взять в руки",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "pliers",
+      "title": "Пассатижи",
+      "description": "Ручки обмотаны изолентой. Провод без них не размотать.",
+      "tags": [
+        "tool",
+        "work"
+      ],
+      "stack_limit": 1,
+      "mass_grams": 320,
+      "volume_ml": 620,
+      "base_value": 140,
+      "actions": {
+        "equip": {
+          "title": "Взять в руки",
+          "duration_minutes": 1,
+          "conditions": [],
+          "effects": []
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "glass_jar",
+      "title": "Стеклянная банка",
+      "description": "Трёхлитровая, без сколов. Такие принимают за деньги.",
+      "tags": [
+        "material",
+        "recyclable",
+        "bulky"
+      ],
+      "stack_limit": 4,
+      "mass_grams": 620,
+      "volume_ml": 3200,
+      "base_value": 12,
+      "actions": {
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "brass_fittings",
+      "title": "Латунные детали",
+      "description": "Горсть кранов и муфт. Тяжёлые, но за цветмет платят отдельно.",
+      "tags": [
+        "material",
+        "recyclable",
+        "valuable",
+        "heavy"
+      ],
+      "stack_limit": 3,
+      "mass_grams": 1450,
+      "volume_ml": 900,
+      "base_value": 210,
+      "actions": {
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Отдать",
+          "duration_minutes": 2,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "id": "ration_can",
+      "title": "Банка тушёнки",
+      "description": "Со склада, без этикетки. Тяжёлая и сытная — берегут на плохой день.",
+      "tags": [
+        "food"
+      ],
+      "stack_limit": 2,
+      "mass_grams": 540,
+      "volume_ml": 700,
+      "base_value": 85,
+      "actions": {
+        "use": {
+          "title": "Открыть и съесть",
+          "duration_minutes": 15,
+          "consumes": true,
+          "conditions": [],
+          "effects": [
+            {
+              "type": "change_state",
+              "id": "hunger",
+              "delta": -38
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": 10
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 6
+            }
+          ]
+        },
+        "drop": {
+          "title": "Оставить",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        },
+        "give": {
+          "title": "Поделиться",
+          "duration_minutes": 5,
+          "conditions": [],
+          "effects": []
+        },
+        "sell": {
+          "title": "Продать",
+          "duration_minutes": 0,
+          "conditions": [],
+          "effects": []
+        }
+      }
+    }
+  ]
 }

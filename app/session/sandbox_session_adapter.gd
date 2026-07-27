@@ -185,6 +185,35 @@ func perform_inventory_action(
 	)
 
 
+func get_job_shift_model(reduced_motion: bool = false) -> Dictionary:
+	if _session == null:
+		return {}
+	return WeekFacade.job_shift_model(_session, reduced_motion)
+
+
+func is_job_shift_active() -> bool:
+	if _session == null:
+		return false
+	var work_state: JobWorkState = _session.job_work_state
+	return work_state != null and work_state.is_active()
+
+
+func begin_job_shift() -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.begin_job_shift(_session, _session.flow_revision))
+
+
+func resolve_job_shift_step(choice_id: String) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.resolve_job_shift_step(
+		_session,
+		choice_id,
+		_session.flow_revision
+	))
+
+
 func _finish_week_command(result: Dictionary) -> Dictionary:
 	if (
 		bool(result.get("ok", false))

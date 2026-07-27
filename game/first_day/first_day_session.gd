@@ -5,7 +5,7 @@ extends RefCounted
 ## RunState changes are committed only through ActionTransaction. Flow changes
 ## are applied after a successful transaction and carry their own revision.
 
-const SESSION_VERSION := 6
+const SESSION_VERSION := 7
 const JOB_ROUNDS := 6
 const VALID_PHASES := ["uninitialized", "start", "map", "event", "job", "shelter", "completed"]
 const VALID_PSYCHE_MODES := ["off", "reduced", "full"]
@@ -18,6 +18,7 @@ const SearchSessionStateScript := preload("res://game/search/search_session_stat
 const WorldStateScript := preload("res://core/world/world_state.gd")
 const SocialStateScript := preload("res://core/social/social_state.gd")
 const SurvivalStateScript := preload("res://game/survival/survival_state.gd")
+const JobWorkStateScript := preload("res://game/jobs/job_work_state.gd")
 const SystemBootstrapScript := preload("res://game/first_day/first_day_system_bootstrap.gd")
 const SessionCommandBridgeScript := preload("res://game/first_day/first_day_session_command_bridge.gd")
 const PsycheScaleScript := preload("res://core/state/psyche_scale.gd")
@@ -39,6 +40,7 @@ var run_state: RunState = RunState.new()
 var world_state: WorldState = WorldStateScript.new()
 var social_state: SocialState = SocialStateScript.fresh()
 var survival_state: SurvivalState = SurvivalStateScript.fresh()
+var job_work_state: JobWorkState = JobWorkStateScript.fresh()
 var applied_command_ids: Dictionary = {}
 var phase: String = "uninitialized"
 var location: String = ""
@@ -132,6 +134,7 @@ func start_new_run(
 	world_state = candidate_world
 	social_state = SocialStateScript.fresh()
 	survival_state = SurvivalStateScript.fresh(candidate_state.calendar.elapsed_minutes)
+	job_work_state = JobWorkStateScript.fresh()
 	applied_command_ids = {}
 	phase = "event" if not opening_card.is_empty() else ("start" if not _choices_of(chosen_start).is_empty() else "map")
 	location = chosen_location
@@ -800,6 +803,7 @@ func to_dict() -> Dictionary:
 		"world_state": world_state.to_dict(),
 		"social_state": social_state.to_dict(),
 		"survival_state": survival_state.to_dict(),
+		"job_work_state": job_work_state.to_dict(),
 		"applied_command_ids": applied_command_ids.duplicate(true),
 		"base_location": location,
 		"active_activity": active_activity.duplicate(true),
@@ -825,7 +829,7 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 	var source: Dictionary = migration["data"]
 	var version: Variant = _integral(source.get("session_version", null))
 	var revision: Variant = _integral(source.get("flow_revision", null))
-	if version == null or int(version) != SESSION_VERSION or revision == null or int(revision) < 0:
+	if version == null or int(version) < 6 or int(version) > SESSION_VERSION or revision == null or int(revision) < 0:
 		return null
 	if typeof(source.get("run_state", null)) != TYPE_DICTIONARY:
 		return null
@@ -836,6 +840,12 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 		return null
 	var parsed_world := WorldStateScript.from_dict(source["world_state"])
 	var parsed_social := SocialStateScript.from_dict(source["social_state"])
+	# Session 6 knew no standing employment, so a save from it starts clean.
+	if int(version) < 7 or not source.has("job_work_state"):
+		source["job_work_state"] = JobWorkStateScript.fresh().to_dict()
+	var parsed_job: JobWorkState = JobWorkStateScript.from_dict(source["job_work_state"])
+	if parsed_job == null:
+		return null
 	var parsed_survival := SurvivalStateScript.from_dict(source["survival_state"])
 	if parsed_world == null or parsed_social == null or parsed_survival == null:
 		return null
@@ -867,6 +877,7 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 	result.world_state = parsed_world
 	result.social_state = parsed_social
 	result.survival_state = parsed_survival
+	result.job_work_state = parsed_job
 	result.applied_command_ids = _normalize_json_numbers(
 		Dictionary(source["applied_command_ids"]).duplicate(true)
 	)
@@ -901,6 +912,7 @@ func replace_from(other: FirstDaySession) -> bool:
 	world_state = candidate.world_state
 	social_state = candidate.social_state
 	survival_state = candidate.survival_state
+	job_work_state = candidate.job_work_state
 	applied_command_ids = candidate.applied_command_ids
 	phase = candidate.phase
 	location = candidate.location
@@ -939,6 +951,10 @@ func validate() -> Dictionary:
 		errors.append("social_state is null")
 	else:
 		_append_validation("social_state", social_state.validate(), errors)
+	if job_work_state == null:
+		errors.append("job_work_state is null")
+	else:
+		_append_validation("job_work_state", job_work_state.validate(), errors)
 	if survival_state == null:
 		errors.append("survival_state is null")
 	else:

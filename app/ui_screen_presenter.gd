@@ -12,6 +12,7 @@ const InventoryScene := preload("res://ui/screens/inventory/inventory_screen.tsc
 const ShopScene := preload("res://ui/screens/shop/shop_screen.tscn")
 const NpcScene := preload("res://ui/screens/npc/npc_screen.tscn")
 const HeroScene := preload("res://ui/screens/hero/hero_screen.tscn")
+const JobShiftScene := preload("res://ui/screens/job/job_screen.tscn")
 const HeroModels := preload("res://app/hero/hero_view_model.gd")
 const InventoryModels := preload("res://app/inventory/inventory_view_model.gd")
 const SearchScene := preload("res://ui/screens/search/search_screen.tscn")
@@ -153,6 +154,24 @@ func show_shop(
 	var screen := _shell.show_screen(ShopScene) as ShopScreen
 	screen.back_requested.connect(_handler(handlers, "back"))
 	screen.purchase_requested.connect(_handler(handlers, "purchase"))
+	screen.present(model)
+	return screen
+
+
+## A shift is an interruptible activity like the search, not a navigation tab,
+## so the bottom navigation steps aside until the hero leaves the yard.
+func show_job_shift(
+	model: Dictionary,
+	shell_model: Dictionary,
+	preferences: Dictionary,
+	handlers: Dictionary
+) -> JobScreen:
+	_prepare_location_activity(shell_model, preferences)
+	var screen := _shell.show_screen(JobShiftScene) as JobScreen
+	screen.choice_requested.connect(
+		func(choice_id: String, _revision: int) -> void:
+			_handler(handlers, "choice").call(choice_id)
+	)
 	screen.present(model)
 	return screen
 

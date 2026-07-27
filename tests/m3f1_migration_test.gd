@@ -98,8 +98,8 @@ func _test_session_fixture() -> void:
 	if not bool(migration.get("ok", false)):
 		return
 	var data: Dictionary = migration["data"]
-	_expect_equal(data.get("schema_version"), 6, "envelope reaches v6")
-	_expect_equal(data["session"].get("session_version"), 6, "session reaches v6")
+	_expect_equal(data.get("schema_version"), FirstDayMigration.CURRENT_VERSION, "envelope reaches the current version")
+	_expect_equal(data["session"].get("session_version"), FirstDayMigration.CURRENT_VERSION, "session reaches the current version")
 	_expect_equal(data["session"]["run_state"].get("save_version"), 4, "nested RunState reaches v4")
 	_expect_equal(data["session"]["run_state"]["calendar"]["stamp"]["year"], 1970, "legacy calendar is preserved")
 	_expect(data["session"].has("world_state"), "world state is added")
@@ -127,8 +127,8 @@ func _test_m3f2_session_fixture() -> void:
 	if bool(migration.get("ok", false)):
 		var migrated: Dictionary = migration["data"]
 		var migrated_session: Dictionary = migrated["session"]
-		_expect_equal(migrated.get("schema_version"), 6, "v5 envelope reaches v6")
-		_expect_equal(migrated_session.get("session_version"), 6, "v5 session reaches v6")
+		_expect_equal(migrated.get("schema_version"), FirstDayMigration.CURRENT_VERSION, "v5 envelope reaches the current version")
+		_expect_equal(migrated_session.get("session_version"), FirstDayMigration.CURRENT_VERSION, "v5 session reaches the current version")
 		_expect_equal(migrated_session["run_state"]["calendar"]["stamp"]["year"], 1970, "recorded 1970 calendar survives")
 		_expect_equal(migrated_session["run_state"]["birth_date"]["year"], 1952, "recorded birth year survives")
 		_expect_equal(migrated_session["run_state"]["rng"]["seed"], "1970180001", "recorded RNG survives")

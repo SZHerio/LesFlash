@@ -5,12 +5,14 @@ extends RefCounted
 ## into domain commands. The root coordinator retains saving and global routes.
 
 const NpcFlowScript := preload("res://app/flows/npc_flow_coordinator.gd")
+const JobShiftFlowScript := preload("res://app/flows/job_shift_flow_coordinator.gd")
 
 var _session: SandboxSessionAdapter
 var _presenter: UiScreenPresenter
 var _preferences: Dictionary = {}
 var _hooks: Dictionary = {}
 var _npc_flow: NpcFlowCoordinator = NpcFlowScript.new()
+var _job_shift_flow: JobShiftFlowCoordinator = JobShiftFlowScript.new()
 
 
 func show(
@@ -51,6 +53,8 @@ func _on_action_requested(_action_id: String, action_model: Dictionary) -> void:
 			_hook("store").call(String(payload.get("store_id", "")))
 		"npc":
 			_show_npc(action_model)
+		"job_shift":
+			_show_job_shift()
 		"recycling":
 			_hook("recycling").call()
 		"wait":
@@ -59,6 +63,13 @@ func _on_action_requested(_action_id: String, action_model: Dictionary) -> void:
 			if bool(_hook("begin_command").call()):
 				_hook("shelters").call()
 				_hook("release_command").call()
+
+
+func _show_job_shift() -> void:
+	var shift_hooks := _hooks.duplicate()
+	shift_hooks["back"] = _hook("location")
+	_hook("job_shift_opened").call()
+	_job_shift_flow.show(_session, _presenter, _preferences, shift_hooks)
 
 
 func _show_npc(action_model: Dictionary) -> void:

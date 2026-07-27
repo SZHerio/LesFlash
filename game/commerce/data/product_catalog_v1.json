@@ -10,9 +10,18 @@
       "category_id": "prepared_food",
       "base_value_1980": 45,
       "available_from": 1980,
-      "quality_range": [55, 82],
-      "condition_range": [88, 100],
-      "stock_quantity_range": [2, 6],
+      "quality_range": [
+        55,
+        82
+      ],
+      "condition_range": [
+        88,
+        100
+      ],
+      "stock_quantity_range": [
+        2,
+        6
+      ],
       "perishable_days": 1,
       "selection_weight": 130,
       "rarity": "common",
@@ -27,9 +36,18 @@
       "category_id": "preserved_food",
       "base_value_1980": 58,
       "available_from": 1968,
-      "quality_range": [48, 78],
-      "condition_range": [75, 100],
-      "stock_quantity_range": [1, 5],
+      "quality_range": [
+        48,
+        78
+      ],
+      "condition_range": [
+        75,
+        100
+      ],
+      "stock_quantity_range": [
+        1,
+        5
+      ],
       "selection_weight": 115,
       "rarity": "common",
       "required_world_facts": [],
@@ -43,9 +61,18 @@
       "category_id": "household",
       "base_value_1980": 4,
       "available_from": 1975,
-      "quality_range": [35, 70],
-      "condition_range": [60, 95],
-      "stock_quantity_range": [1, 4],
+      "quality_range": [
+        35,
+        70
+      ],
+      "condition_range": [
+        60,
+        95
+      ],
+      "stock_quantity_range": [
+        1,
+        4
+      ],
       "selection_weight": 70,
       "rarity": "common",
       "required_world_facts": [],
@@ -59,9 +86,18 @@
       "category_id": "print",
       "base_value_1980": 10,
       "available_from": 1948,
-      "quality_range": [65, 90],
-      "condition_range": [85, 100],
-      "stock_quantity_range": [2, 8],
+      "quality_range": [
+        65,
+        90
+      ],
+      "condition_range": [
+        85,
+        100
+      ],
+      "stock_quantity_range": [
+        2,
+        8
+      ],
       "perishable_days": 2,
       "selection_weight": 80,
       "rarity": "common",
@@ -76,9 +112,18 @@
       "category_id": "medicine",
       "base_value_1980": 85,
       "available_from": 1972,
-      "quality_range": [72, 96],
-      "condition_range": [90, 100],
-      "stock_quantity_range": [1, 3],
+      "quality_range": [
+        72,
+        96
+      ],
+      "condition_range": [
+        90,
+        100
+      ],
+      "stock_quantity_range": [
+        1,
+        3
+      ],
       "selection_weight": 70,
       "rarity": "uncommon",
       "required_world_facts": [],
@@ -92,9 +137,18 @@
       "category_id": "medical_supply",
       "base_value_1980": 9,
       "available_from": 1940,
-      "quality_range": [68, 92],
-      "condition_range": [88, 100],
-      "stock_quantity_range": [2, 7],
+      "quality_range": [
+        68,
+        92
+      ],
+      "condition_range": [
+        88,
+        100
+      ],
+      "stock_quantity_range": [
+        2,
+        7
+      ],
       "selection_weight": 125,
       "rarity": "common",
       "required_world_facts": [],
@@ -108,9 +162,18 @@
       "category_id": "outerwear",
       "base_value_1980": 95,
       "available_from": 1950,
-      "quality_range": [35, 78],
-      "condition_range": [30, 82],
-      "stock_quantity_range": [1, 2],
+      "quality_range": [
+        35,
+        78
+      ],
+      "condition_range": [
+        30,
+        82
+      ],
+      "stock_quantity_range": [
+        1,
+        2
+      ],
       "selection_weight": 90,
       "rarity": "common",
       "required_world_facts": [],
@@ -124,9 +187,18 @@
       "category_id": "tool",
       "base_value_1980": 70,
       "available_from": 1955,
-      "quality_range": [28, 72],
-      "condition_range": [25, 80],
-      "stock_quantity_range": [1, 3],
+      "quality_range": [
+        28,
+        72
+      ],
+      "condition_range": [
+        25,
+        80
+      ],
+      "stock_quantity_range": [
+        1,
+        3
+      ],
       "selection_weight": 100,
       "rarity": "common",
       "required_world_facts": [],
@@ -140,9 +212,18 @@
       "category_id": "equipment",
       "base_value_1980": 48,
       "available_from": 1962,
-      "quality_range": [35, 78],
-      "condition_range": [35, 86],
-      "stock_quantity_range": [1, 3],
+      "quality_range": [
+        35,
+        78
+      ],
+      "condition_range": [
+        35,
+        86
+      ],
+      "stock_quantity_range": [
+        1,
+        3
+      ],
       "selection_weight": 95,
       "rarity": "common",
       "required_world_facts": [],
@@ -158,9 +239,18 @@
       "available_from": 1960,
       "ordinary_until": 1999,
       "legacy_until": 2026,
-      "quality_range": [25, 70],
-      "condition_range": [15, 65],
-      "stock_quantity_range": [1, 2],
+      "quality_range": [
+        25,
+        70
+      ],
+      "condition_range": [
+        15,
+        65
+      ],
+      "stock_quantity_range": [
+        1,
+        2
+      ],
       "selection_weight": 55,
       "rarity": "uncommon",
       "required_world_facts": [],
@@ -174,9 +264,18 @@
       "category_id": "component",
       "base_value_1980": 24,
       "available_from": 1958,
-      "quality_range": [30, 75],
-      "condition_range": [30, 85],
-      "stock_quantity_range": [1, 5],
+      "quality_range": [
+        30,
+        75
+      ],
+      "condition_range": [
+        30,
+        85
+      ],
+      "stock_quantity_range": [
+        1,
+        5
+      ],
       "selection_weight": 85,
       "rarity": "common",
       "required_world_facts": [],
@@ -190,14 +289,326 @@
       "category_id": "component",
       "base_value_1980": 135,
       "available_from": 1985,
-      "quality_range": [25, 65],
-      "condition_range": [12, 60],
-      "stock_quantity_range": [1, 1],
+      "quality_range": [
+        25,
+        65
+      ],
+      "condition_range": [
+        12,
+        60
+      ],
+      "stock_quantity_range": [
+        1,
+        1
+      ],
       "selection_weight": 30,
       "rarity": "rare",
       "required_world_facts": [],
       "excluded_world_facts": [],
-      "replacement_product_ids": ["product_commission_small_parts"]
+      "replacement_product_ids": [
+        "product_commission_small_parts"
+      ]
+    },
+    {
+      "product_id": "product_market_bread_loaf",
+      "item_id": "bread_loaf",
+      "title": "Хлеб вчерашней выпечки",
+      "category_id": "prepared_food",
+      "base_value_1980": 30,
+      "available_from": 1980,
+      "quality_range": [
+        40,
+        70
+      ],
+      "condition_range": [
+        80,
+        100
+      ],
+      "stock_quantity_range": [
+        2,
+        8
+      ],
+      "perishable_days": 2,
+      "selection_weight": 150,
+      "rarity": "common",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
+    },
+    {
+      "product_id": "product_market_ration_can",
+      "item_id": "ration_can",
+      "title": "Банка тушёнки",
+      "category_id": "preserved_food",
+      "base_value_1980": 85,
+      "available_from": 1980,
+      "quality_range": [
+        60,
+        90
+      ],
+      "condition_range": [
+        92,
+        100
+      ],
+      "stock_quantity_range": [
+        1,
+        4
+      ],
+      "selection_weight": 90,
+      "rarity": "common",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
+    },
+    {
+      "product_id": "product_market_tea_packet",
+      "item_id": "tea_packet",
+      "title": "Пачка чая",
+      "category_id": "preserved_food",
+      "base_value_1980": 22,
+      "available_from": 1980,
+      "quality_range": [
+        45,
+        75
+      ],
+      "condition_range": [
+        88,
+        100
+      ],
+      "stock_quantity_range": [
+        2,
+        6
+      ],
+      "selection_weight": 110,
+      "rarity": "common",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
+    },
+    {
+      "product_id": "product_market_cigarette_pack",
+      "item_id": "cigarette_pack",
+      "title": "Пачка сигарет",
+      "category_id": "household",
+      "base_value_1980": 35,
+      "available_from": 1980,
+      "quality_range": [
+        50,
+        80
+      ],
+      "condition_range": [
+        90,
+        100
+      ],
+      "stock_quantity_range": [
+        2,
+        5
+      ],
+      "selection_weight": 95,
+      "rarity": "common",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
+    },
+    {
+      "product_id": "product_market_glass_jar",
+      "item_id": "glass_jar",
+      "title": "Трёхлитровая банка",
+      "category_id": "household",
+      "base_value_1980": 12,
+      "available_from": 1980,
+      "quality_range": [
+        55,
+        85
+      ],
+      "condition_range": [
+        70,
+        100
+      ],
+      "stock_quantity_range": [
+        3,
+        9
+      ],
+      "selection_weight": 70,
+      "rarity": "common",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
+    },
+    {
+      "product_id": "product_pharmacy_bandage_roll",
+      "item_id": "bandage_roll",
+      "title": "Бинт стерильный",
+      "category_id": "medical_supply",
+      "base_value_1980": 40,
+      "available_from": 1980,
+      "quality_range": [
+        70,
+        95
+      ],
+      "condition_range": [
+        95,
+        100
+      ],
+      "stock_quantity_range": [
+        2,
+        6
+      ],
+      "selection_weight": 130,
+      "rarity": "common",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
+    },
+    {
+      "product_id": "product_pharmacy_painkiller_strip",
+      "item_id": "painkiller_strip",
+      "title": "Анальгин",
+      "category_id": "medicine",
+      "base_value_1980": 32,
+      "available_from": 1980,
+      "quality_range": [
+        65,
+        90
+      ],
+      "condition_range": [
+        95,
+        100
+      ],
+      "stock_quantity_range": [
+        2,
+        5
+      ],
+      "selection_weight": 120,
+      "rarity": "common",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
+    },
+    {
+      "product_id": "product_commission_warm_jacket",
+      "item_id": "warm_jacket",
+      "title": "Ватная куртка",
+      "category_id": "outerwear",
+      "base_value_1980": 320,
+      "available_from": 1980,
+      "quality_range": [
+        35,
+        70
+      ],
+      "condition_range": [
+        55,
+        88
+      ],
+      "stock_quantity_range": [
+        1,
+        2
+      ],
+      "selection_weight": 85,
+      "rarity": "uncommon",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
+    },
+    {
+      "product_id": "product_commission_sturdy_boots",
+      "item_id": "sturdy_boots",
+      "title": "Ботинки рабочие",
+      "category_id": "outerwear",
+      "base_value_1980": 280,
+      "available_from": 1980,
+      "quality_range": [
+        40,
+        72
+      ],
+      "condition_range": [
+        60,
+        90
+      ],
+      "stock_quantity_range": [
+        1,
+        2
+      ],
+      "selection_weight": 80,
+      "rarity": "uncommon",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
+    },
+    {
+      "product_id": "product_commission_shoulder_bag",
+      "item_id": "shoulder_bag_large",
+      "title": "Заплечная сумка",
+      "category_id": "equipment",
+      "base_value_1980": 260,
+      "available_from": 1980,
+      "quality_range": [
+        45,
+        78
+      ],
+      "condition_range": [
+        62,
+        92
+      ],
+      "stock_quantity_range": [
+        1,
+        2
+      ],
+      "selection_weight": 75,
+      "rarity": "uncommon",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
+    },
+    {
+      "product_id": "product_commission_canvas_satchel",
+      "item_id": "canvas_satchel",
+      "title": "Холщовая сумка",
+      "category_id": "equipment",
+      "base_value_1980": 130,
+      "available_from": 1980,
+      "quality_range": [
+        40,
+        75
+      ],
+      "condition_range": [
+        58,
+        90
+      ],
+      "stock_quantity_range": [
+        1,
+        3
+      ],
+      "selection_weight": 105,
+      "rarity": "common",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
+    },
+    {
+      "product_id": "product_commission_pliers",
+      "item_id": "pliers",
+      "title": "Пассатижи",
+      "category_id": "tool",
+      "base_value_1980": 140,
+      "available_from": 1980,
+      "quality_range": [
+        45,
+        80
+      ],
+      "condition_range": [
+        60,
+        92
+      ],
+      "stock_quantity_range": [
+        1,
+        3
+      ],
+      "selection_weight": 100,
+      "rarity": "common",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
     }
   ]
 }

@@ -10,21 +10,23 @@ const SearchSessionStateScript := preload("res://game/search/search_session_stat
 const WorldStateScript := preload("res://core/world/world_state.gd")
 const SocialStateScript := preload("res://core/social/social_state.gd")
 const EventContextScript := preload("res://game/events/event_context.gd")
+const JobWorkStateScript := preload("res://game/jobs/job_work_state.gd")
 const SurvivalStateScript := preload("res://game/survival/survival_state.gd")
 
 const LEGACY_VERSION := 1
 const INVENTORY_VERSION := 3
 const SEARCH_VERSION := 4
 const SYSTEMS_VERSION := 5
-const PREVIOUS_VERSION := SYSTEMS_VERSION
-const CURRENT_VERSION := 6
+const WEEK_VERSION := 6
+const PREVIOUS_VERSION := WEEK_VERSION
+const CURRENT_VERSION := 7
 
 
 static func migrate_envelope(raw: Dictionary) -> Dictionary:
 	var source_version: Variant = _integral(raw.get("schema_version", null))
 	if source_version == null:
 		return _failure("invalid_schema_version", "Envelope schema_version must be an integer.")
-	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, SEARCH_VERSION, SYSTEMS_VERSION, CURRENT_VERSION]:
+	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, SEARCH_VERSION, SYSTEMS_VERSION, WEEK_VERSION, CURRENT_VERSION]:
 		return _failure(
 			"unsupported_schema_version",
 			"Envelope schema version is unsupported.",
@@ -57,7 +59,7 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 	var source_version: Variant = _integral(raw.get("session_version", null))
 	if source_version == null:
 		return _failure("invalid_session_version", "session_version must be an integer.")
-	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, SEARCH_VERSION, SYSTEMS_VERSION, CURRENT_VERSION]:
+	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, SEARCH_VERSION, SYSTEMS_VERSION, WEEK_VERSION, CURRENT_VERSION]:
 		return _failure(
 			"unsupported_session_version",
 			"FirstDaySession version is unsupported.",
@@ -125,6 +127,12 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 				normalized_job_state["result"] = normalized_result
 				migrated["job_state"] = normalized_job_state
 		migrated["survival_state"] = SurvivalStateScript.fresh(elapsed).to_dict()
+		migrated["session_version"] = WEEK_VERSION
+		current_version = WEEK_VERSION
+	if current_version == WEEK_VERSION:
+		# Session 6 had no standing employment. A save from it starts with a
+		# clean record rather than strikes invented from shifts nobody graded.
+		migrated["job_work_state"] = JobWorkStateScript.fresh().to_dict()
 		migrated["session_version"] = CURRENT_VERSION
 		current_version = CURRENT_VERSION
 	if current_version != CURRENT_VERSION:

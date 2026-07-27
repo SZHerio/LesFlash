@@ -5,7 +5,7 @@ extends RefCounted
 ## A valid .tmp file is treated as an interrupted newer save and is promoted on
 ## load before the primary or .bak candidates are considered.
 
-const SCHEMA_VERSION := 6
+const SCHEMA_VERSION := 7
 const DEFAULT_SAVE_PATH := "user://first_day_session.json"
 
 const M2SessionMigrationScript := preload("res://game/first_day/first_day_session_migration.gd")

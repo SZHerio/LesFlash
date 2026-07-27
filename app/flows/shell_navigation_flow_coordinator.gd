@@ -46,7 +46,7 @@ func navigate(tab_id: String, current_route: String) -> void:
 		return
 	# Search is an interruptible activity and owns the screen until the player
 	# explicitly leaves it; a stray bottom-tab signal cannot abandon the zone.
-	if current_route == "search":
+	if current_route in ["search", "job_shift"]:
 		return
 	match tab_id:
 		"place": _hook("location").call()
@@ -75,7 +75,7 @@ func handle_back(current_route: String) -> void:
 		"search":
 			if not _search_flow.handle_back():
 				_hook("location").call()
-		"map", "hero", "npc", "shop", "shelter", "job_result":
+		"map", "hero", "npc", "shop", "shelter", "job_result", "job_shift":
 			_hook("location").call()
 		_:
 			_shell.show_toast("Сначала завершите текущее решение.")
