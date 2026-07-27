@@ -5,6 +5,19 @@ const JsonValidator := preload("res://core/save/json_value_validator.gd")
 const ConditionEvaluator := preload("res://game/events/event_condition_evaluator.gd")
 
 const SCHEMA_VERSION := 2
+
+## The six content groups. Without them "ninety cards" can mean ninety cards
+## about food: the count says nothing about whether the week is covered. Every
+## card declares which part of the game it belongs to, and the suite checks the
+## spread rather than the total.
+const CONTENT_GROUPS := [
+	"survival", ## потребности, еда, сон, здоровье, холод
+	"place", ## локации, поездки и поиск
+	"social", ## NPC, отношения, репутация
+	"work", ## работа и экономика
+	"world", ## мировые процессы и причинные возвраты
+	"rare", ## редкие удачные и неблагоприятные случаи
+]
 const MIN_CARDS := 30
 const MAX_CARDS := 100
 const TONES := ["adverse", "neutral", "positive"]
@@ -80,6 +93,11 @@ static func _validate_cards(cards: Array, errors: Array[String]) -> void:
 		_validate_string_array(card.get("npc_ids", null), "%s.npc_ids" % path, false, errors)
 		if not _valid_id(card.get("causal_category", null)):
 			errors.append("%s.causal_category должна быть стабильным идентификатором" % path)
+		if String(card.get("group_id", "")) not in CONTENT_GROUPS:
+			errors.append(
+				"%s.group_id должен быть одним из: %s"
+				% [path, ", ".join(CONTENT_GROUPS)]
+			)
 		_validate_text(card.get("title", null), "%s.title" % path, 3, 80, errors)
 		_validate_text(card.get("body", null), "%s.body" % path, 20, 420, errors)
 		if String(card.get("tone", "")) not in TONES:

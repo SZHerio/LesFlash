@@ -59,6 +59,12 @@ static func migrate_serialized(value: Variant) -> Dictionary:
 			card["npc_ids"] = []
 			var source_kinds: Array = Array(card.get("source_kinds", []))
 			card["causal_category"] = String(source_kinds.front()) if not source_kinds.is_empty() else "ambient"
+			# A card written before content groups existed still has to load, so
+			# the migration assigns one. Whether the shipped catalog is actually
+			# spread across the six groups is checked against the catalog itself,
+			# not left to this default.
+			if not Validator.CONTENT_GROUPS.has(String(card.get("group_id", ""))):
+				card["group_id"] = "place"
 			migrated_cards.append(card)
 		migrated["cards"] = migrated_cards
 		migrated["schema_version"] = Validator.SCHEMA_VERSION

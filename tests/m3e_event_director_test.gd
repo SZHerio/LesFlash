@@ -52,7 +52,26 @@ func _test_catalog() -> void:
 	var validation := Validator.validate(_catalog)
 	_expect(bool(validation.get("ok", false)), "catalog must validate: %s" % str(validation.get("errors", [])))
 	var cards: Array = _catalog.get("cards", [])
-	_expect(cards.size() >= 30 and cards.size() <= 50, "M3E bank must contain 30–50 cards")
+	# M3F target, not the M3E bank it replaced. The count alone says nothing —
+	# ninety cards could all be about food — so the spread across the six content
+	# groups is what is actually asserted.
+	_expect(
+		cards.size() >= 80 and cards.size() <= 100,
+		"M3F bank must contain 80–100 cards, has %d" % cards.size()
+	)
+	var by_group: Dictionary = {}
+	for raw_group_card: Variant in cards:
+		var group_id := String(Dictionary(raw_group_card).get("group_id", ""))
+		by_group[group_id] = int(by_group.get(group_id, 0)) + 1
+	var floors := {
+		"survival": 20, "place": 15, "social": 15, "work": 15, "world": 10, "rare": 10,
+	}
+	for group_id: String in floors:
+		_expect(
+			int(by_group.get(group_id, 0)) >= int(floors[group_id]),
+			"group %s holds %d cards, needs at least %d"
+				% [group_id, int(by_group.get(group_id, 0)), int(floors[group_id])]
+		)
 	for raw_card: Variant in cards:
 		if not raw_card is Dictionary:
 			continue
