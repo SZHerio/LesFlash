@@ -35,7 +35,9 @@ static func preview(snapshot: Dictionary, progress: Dictionary, actor_profile: D
 			"id": String(choice["id"]),
 			"title": String(choice["title"]),
 			"description": String(choice["description"]),
-			"projected_score_deltas": _score_deltas(choice, modifier),
+			"projected_score_deltas": _score_deltas(
+				choice, modifier, _affinity_modifier(choice, profile)
+			),
 		})
 	return {
 		"ok": true,
@@ -64,8 +66,10 @@ static func resolve_step(
 	if choice.is_empty():
 		return _failure("unknown_choice", "Вариант больше не относится к текущему шагу")
 	var candidate := progress.duplicate(true)
-	var modifier := _competence_modifier(step, _normalize_profile(actor_profile))
-	var deltas := _score_deltas(choice, modifier)
+	var profile := _normalize_profile(actor_profile)
+	var modifier := _competence_modifier(step, profile)
+	var affinity := _affinity_modifier(choice, profile)
+	var deltas := _score_deltas(choice, modifier, affinity)
 	var scores: Dictionary = candidate["scores"]
 	for field: String in SCORE_FIELDS:
 		scores[field] = clampi(int(scores[field]) + int(deltas[field]), 0, 100)
@@ -78,6 +82,7 @@ static func resolve_step(
 		"outcome": String(choice["outcome"]),
 		"task_class_id": String(step.get("task_class_id", "")),
 		"competence_modifier": modifier,
+		"affinity_modifier": affinity,
 		"score_deltas": deltas,
 		"scores_after": scores.duplicate(true),
 	}
@@ -139,7 +144,18 @@ static func _normalize_profile(source: Dictionary) -> Dictionary:
 	var normalized_skills := {}
 	for raw_id: Variant in skills:
 		normalized_skills[String(raw_id)] = clampi(int(skills[raw_id]), 0, 3)
-	return {"characteristics": normalized_characteristics, "skills": normalized_skills}
+	var normalized_polarities := {}
+	for raw_id: Variant in Dictionary(source.get("polarities", {})):
+		normalized_polarities[String(raw_id)] = clampi(
+			int(Dictionary(source["polarities"])[raw_id]),
+			GameRules.POLARITY_MIN,
+			GameRules.POLARITY_MAX
+		)
+	return {
+		"characteristics": normalized_characteristics,
+		"skills": normalized_skills,
+		"polarities": normalized_polarities,
+	}
 
 
 static func _competence_modifier(step: Dictionary, profile: Dictionary) -> int:
@@ -161,12 +177,33 @@ static func _competence_modifier(step: Dictionary, profile: Dictionary) -> int:
 	return -1
 
 
-static func _score_deltas(choice: Dictionary, competence_modifier: int) -> Dictionary:
+## How well the approach suits the way this person works. A hero who leans
+## towards Мощь really is better at heaving one heavy load and really is worse
+## at the patient version, which is what makes the same shift a different shift
+## for a different hero instead of one optimal button for everyone.
+##
+## The middle option of a step carries no affinity, so a hero standing in the
+## centre of every axis gets no bonus and no penalty anywhere.
+static func _affinity_modifier(choice: Dictionary, profile: Dictionary) -> int:
+	var affinity: Dictionary = Dictionary(choice.get("polarity_affinity", {}))
+	if affinity.is_empty():
+		return 0
+	var polarities: Dictionary = Dictionary(profile.get("polarities", {}))
+	var position := int(polarities.get(String(affinity["axis"]), 0)) * int(affinity["direction"])
+	return clampi(roundi(float(position) / 33.0), -3, 3)
+
+
+static func _score_deltas(
+	choice: Dictionary,
+	competence_modifier: int,
+	affinity_modifier: int = 0
+) -> Dictionary:
 	var authored: Dictionary = choice["scores"]
+	var total := competence_modifier + affinity_modifier
 	return {
-		"production": int(authored["production"]) + competence_modifier,
-		"quality": int(authored["quality"]) + competence_modifier,
-		"safety": int(authored["safety"]) + competence_modifier,
+		"production": int(authored["production"]) + total,
+		"quality": int(authored["quality"]) + total,
+		"safety": int(authored["safety"]) + total,
 	}
 
 

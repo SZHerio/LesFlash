@@ -176,7 +176,13 @@ static func _validate_choices(value: Variant, path: String, errors: Array[String
 			errors.append("%s[%d] должен быть объектом" % [path, index])
 			continue
 		var choice: Dictionary = raw
-		_expect_keys(choice, ["id", "title", "description", "scores", "outcome"], "%s[%d]" % [path, index], errors)
+		_expect_keys(
+			choice,
+			["id", "title", "description", "scores", "outcome", "polarity_affinity"],
+			"%s[%d]" % [path, index],
+			errors
+		)
+		_validate_affinity(choice.get("polarity_affinity", null), "%s[%d]" % [path, index], errors)
 		var choice_id := String(choice.get("id", ""))
 		if not Rules.valid_id(choice_id) or ids.has(choice_id):
 			errors.append("%s[%d].id некорректен или повторяется" % [path, index])
@@ -200,6 +206,21 @@ static func _append_json_errors(value: Variant, errors: Array[String]) -> void:
 static func _integer(value: Variant, minimum: int, maximum: int, path: String, errors: Array[String]) -> void:
 	if typeof(value) != TYPE_INT or int(value) < minimum or int(value) > maximum:
 		errors.append("%s должен быть целым числом %d..%d" % [path, minimum, maximum])
+
+
+## Optional: a step's middle option deliberately has none.
+static func _validate_affinity(value: Variant, path: String, errors: Array[String]) -> void:
+	if value == null:
+		return
+	if not value is Dictionary:
+		errors.append("%s.polarity_affinity должен быть объектом" % path)
+		return
+	var affinity: Dictionary = value
+	_expect_keys(affinity, ["axis", "direction"], "%s.polarity_affinity" % path, errors)
+	if not GameRules.is_stored_polarity(String(affinity.get("axis", ""))):
+		errors.append("%s.polarity_affinity.axis не является хранимой полярностью" % path)
+	if int(affinity.get("direction", 0)) not in [-1, 1]:
+		errors.append("%s.polarity_affinity.direction должен быть -1 или 1" % path)
 
 
 static func _expect_keys(value: Dictionary, allowed: Array, path: String, errors: Array[String]) -> void:

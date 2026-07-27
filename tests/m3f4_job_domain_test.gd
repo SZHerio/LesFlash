@@ -35,6 +35,7 @@ func _init() -> void:
 	_run("weak balanced and specialist builds produce coherent distinct results", _test_builds)
 	_run("varied practice unlocks quick resolve while repetition cannot farm mastery", _test_variety_and_antifarm)
 	_run("malformed catalog snapshot progress and history fail closed", _test_validation_failures)
+	_run("polarity affinity makes the shift personal", _test_polarity_affinity_makes_the_shift_personal)
 	_finish()
 
 
@@ -227,6 +228,53 @@ func _complete(snapshot: Dictionary, build: Dictionary, choice_index: int) -> Di
 			return latest
 		progress = Dictionary(latest["progress"])
 	return latest
+
+
+## The point of the stage: the same shift has to be a different shift for a
+## different hero, not one optimal button pressed by everyone.
+func _test_polarity_affinity_makes_the_shift_personal() -> void:
+	var snapshot := _snapshot(3)
+	var careful := _balanced_build()
+	careful["polarities"] = {"execution_style": 80, "decision_priority": 70}
+	var hasty := _balanced_build()
+	hasty["polarities"] = {"execution_style": -80, "decision_priority": -70}
+	var centred := _balanced_build()
+	centred["polarities"] = {}
+
+	# Index 0 is the careful approach of every step.
+	var careful_result: Dictionary = Dictionary(_complete(snapshot, careful, 0).get("result", {}))
+	var hasty_result: Dictionary = Dictionary(_complete(snapshot, hasty, 0).get("result", {}))
+	var centred_result: Dictionary = Dictionary(_complete(snapshot, centred, 0).get("result", {}))
+	_expect(
+		int(careful_result.get("overall", 0)) > int(centred_result.get("overall", 0)),
+		"a hero who works the way the approach wants gained nothing: %d against %d"
+			% [int(careful_result.get("overall", 0)), int(centred_result.get("overall", 0))]
+	)
+	_expect(
+		int(hasty_result.get("overall", 0)) < int(centred_result.get("overall", 0)),
+		"leaning the opposite way to the approach cost nothing: %d against %d"
+			% [int(hasty_result.get("overall", 0)), int(centred_result.get("overall", 0))]
+	)
+
+	# A hero in the middle of every axis must be untouched, not merely average:
+	# the middle option of a step carries no affinity at all.
+	var start := Service.start(snapshot)
+	var progress: Dictionary = start["progress"]
+	var preview := Service.preview(snapshot, progress, centred)
+	var middle_id := String(Dictionary(Array(preview["choices"])[1])["id"])
+	var resolved := Service.resolve_step(snapshot, progress, middle_id, centred)
+	var step_record: Dictionary = Array(Dictionary(resolved["progress"])["completed_steps"]).back()
+	_expect(
+		int(step_record.get("affinity_modifier", 99)) == 0,
+		"the middle approach applied an affinity of %d" % int(step_record.get("affinity_modifier", 99))
+	)
+
+	# Determinism: the same hero on the same seed must land on the same number.
+	_expect(
+		int(Dictionary(_complete(snapshot, careful, 0).get("result", {})).get("overall", -1))
+			== int(careful_result.get("overall", 0)),
+		"the same hero and seed produced two different shifts"
+	)
 
 
 func _weak_build() -> Dictionary:

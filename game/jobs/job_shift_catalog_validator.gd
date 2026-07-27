@@ -104,7 +104,13 @@ static func _validate_choices(value: Variant, path: String, errors: Array[String
 	for choice_id: String in indexed:
 		var choice: Dictionary = indexed[choice_id]
 		var choice_path := "%s.%s" % [path, choice_id]
-		_expect_keys(choice, ["id", "title", "description", "scores", "outcome"], choice_path, errors)
+		_expect_keys(
+			choice,
+			["id", "title", "description", "scores", "outcome", "polarity_affinity"],
+			choice_path,
+			errors
+		)
+		_validate_affinity(choice.get("polarity_affinity", null), choice_path, errors)
 		for field: String in ["title", "description", "outcome"]:
 			Rules.validate_text(choice.get(field, null), "%s.%s" % [choice_path, field], errors)
 		var scores: Variant = choice.get("scores", null)
@@ -137,6 +143,22 @@ static func _sorted(values: Array) -> Array:
 	var result := values.duplicate()
 	result.sort()
 	return result
+
+
+## Optional by design: the middle option of a step carries no affinity, so a
+## hero standing in the centre of every axis gets no bonus and no penalty.
+static func _validate_affinity(value: Variant, path: String, errors: Array[String]) -> void:
+	if value == null:
+		return
+	if not value is Dictionary:
+		errors.append("%s.polarity_affinity должен быть объектом" % path)
+		return
+	var affinity: Dictionary = value
+	_expect_keys(affinity, ["axis", "direction"], "%s.polarity_affinity" % path, errors)
+	if not GameRules.is_stored_polarity(String(affinity.get("axis", ""))):
+		errors.append("%s.polarity_affinity.axis не является хранимой полярностью" % path)
+	if int(affinity.get("direction", 0)) not in [-1, 1]:
+		errors.append("%s.polarity_affinity.direction должен быть -1 или 1" % path)
 
 
 static func _expect_keys(value: Dictionary, allowed: Array, path: String, errors: Array[String]) -> void:

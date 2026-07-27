@@ -18,7 +18,10 @@
         "task_recycling_handle_customer",
         "task_recycling_safety_check"
       ],
-      "tasks_per_shift": [2, 3],
+      "tasks_per_shift": [
+        2,
+        3
+      ],
       "decisions_per_shift": 1,
       "duration_minutes": 360,
       "base_payout_ard": 220
@@ -34,9 +37,47 @@
       "skill_id": "search",
       "difficulty": 6,
       "choices": [
-        {"id": "inspect_each_bundle", "title": "Осмотреть каждую связку", "description": "Медленнее, зато отделить сомнительные включения.", "scores": {"production": -4, "quality": 12, "safety": 5}, "outcome": "Партия разобрана аккуратно, хотя очередь продвинулась медленнее."},
-        {"id": "sort_by_visible_signs", "title": "Сортировать по заметным признакам", "description": "Держать ровный темп и перепроверять только спорное.", "scores": {"production": 7, "quality": 5, "safety": 2}, "outcome": "Партия разобрана в рабочем темпе с небольшим числом спорных позиций."},
-        {"id": "clear_bags_quickly", "title": "Быстро освободить мешки", "description": "Гнаться за объёмом, почти не задерживаясь на загрязнениях.", "scores": {"production": 13, "quality": -9, "safety": -3}, "outcome": "Очередь сократилась, но в контейнеры попали сомнительные материалы."}
+        {
+          "id": "inspect_each_bundle",
+          "title": "Осмотреть каждую связку",
+          "description": "Медленнее, зато отделить сомнительные включения.",
+          "scores": {
+            "production": -4,
+            "quality": 12,
+            "safety": 5
+          },
+          "outcome": "Партия разобрана аккуратно, хотя очередь продвинулась медленнее.",
+          "polarity_affinity": {
+            "axis": "execution_style",
+            "direction": 1
+          }
+        },
+        {
+          "id": "sort_by_visible_signs",
+          "title": "Сортировать по заметным признакам",
+          "description": "Держать ровный темп и перепроверять только спорное.",
+          "scores": {
+            "production": 7,
+            "quality": 5,
+            "safety": 2
+          },
+          "outcome": "Партия разобрана в рабочем темпе с небольшим числом спорных позиций."
+        },
+        {
+          "id": "clear_bags_quickly",
+          "title": "Быстро освободить мешки",
+          "description": "Гнаться за объёмом, почти не задерживаясь на загрязнениях.",
+          "scores": {
+            "production": 13,
+            "quality": -9,
+            "safety": -3
+          },
+          "outcome": "Очередь сократилась, но в контейнеры попали сомнительные материалы.",
+          "polarity_affinity": {
+            "axis": "execution_style",
+            "direction": -1
+          }
+        }
       ]
     },
     {
@@ -48,9 +89,47 @@
       "skill_id": "cargo_handling",
       "difficulty": 7,
       "choices": [
-        {"id": "secure_and_move_in_pairs", "title": "Закрепить и переносить попарно", "description": "Проверять устойчивость каждого тюка и не перегружать тележку.", "scores": {"production": 1, "quality": 6, "safety": 12}, "outcome": "Груз уложен устойчиво, проход остаётся свободным."},
-        {"id": "keep_steady_loads", "title": "Возить ровными партиями", "description": "Не останавливаться без причины, но соблюдать допустимую нагрузку.", "scores": {"production": 8, "quality": 4, "safety": 4}, "outcome": "Тюки перемещены без серьёзной задержки и опасной спешки."},
-        {"id": "overload_the_cart", "title": "Перегрузить тележку", "description": "Сократить число рейсов ценой устойчивости груза.", "scores": {"production": 14, "quality": -3, "safety": -12}, "outcome": "Рейсов стало меньше, но один тюк едва не сорвался с тележки."}
+        {
+          "id": "secure_and_move_in_pairs",
+          "title": "Закрепить и переносить попарно",
+          "description": "Проверять устойчивость каждого тюка и не перегружать тележку.",
+          "scores": {
+            "production": 1,
+            "quality": 6,
+            "safety": 12
+          },
+          "outcome": "Груз уложен устойчиво, проход остаётся свободным.",
+          "polarity_affinity": {
+            "axis": "physical_specialization",
+            "direction": 1
+          }
+        },
+        {
+          "id": "keep_steady_loads",
+          "title": "Возить ровными партиями",
+          "description": "Не останавливаться без причины, но соблюдать допустимую нагрузку.",
+          "scores": {
+            "production": 8,
+            "quality": 4,
+            "safety": 4
+          },
+          "outcome": "Тюки перемещены без серьёзной задержки и опасной спешки."
+        },
+        {
+          "id": "overload_the_cart",
+          "title": "Перегрузить тележку",
+          "description": "Сократить число рейсов ценой устойчивости груза.",
+          "scores": {
+            "production": 14,
+            "quality": -3,
+            "safety": -12
+          },
+          "outcome": "Рейсов стало меньше, но один тюк едва не сорвался с тележки.",
+          "polarity_affinity": {
+            "axis": "physical_specialization",
+            "direction": -1
+          }
+        }
       ]
     },
     {
@@ -62,9 +141,47 @@
       "skill_id": "repair",
       "difficulty": 6,
       "choices": [
-        {"id": "clean_and_calibrate", "title": "Очистить и проверить ноль", "description": "Потратить время на площадку и контрольную гирю.", "scores": {"production": -2, "quality": 13, "safety": 7}, "outcome": "Весы подготовлены и дают устойчивое показание."},
-        {"id": "adjust_zero_only", "title": "Подправить ноль", "description": "Убрать явный мусор и быстро отрегулировать стрелку.", "scores": {"production": 7, "quality": 4, "safety": 3}, "outcome": "Весы готовы к обычной работе, хотя полная проверка не проведена."},
-        {"id": "start_without_check", "title": "Начать без проверки", "description": "Не задерживать очередь и принять риск неточного взвешивания.", "scores": {"production": 12, "quality": -11, "safety": -4}, "outcome": "Очередь двинулась сразу, но несколько показаний вызывают сомнение."}
+        {
+          "id": "clean_and_calibrate",
+          "title": "Очистить и проверить ноль",
+          "description": "Потратить время на площадку и контрольную гирю.",
+          "scores": {
+            "production": -2,
+            "quality": 13,
+            "safety": 7
+          },
+          "outcome": "Весы подготовлены и дают устойчивое показание.",
+          "polarity_affinity": {
+            "axis": "execution_style",
+            "direction": 1
+          }
+        },
+        {
+          "id": "adjust_zero_only",
+          "title": "Подправить ноль",
+          "description": "Убрать явный мусор и быстро отрегулировать стрелку.",
+          "scores": {
+            "production": 7,
+            "quality": 4,
+            "safety": 3
+          },
+          "outcome": "Весы готовы к обычной работе, хотя полная проверка не проведена."
+        },
+        {
+          "id": "start_without_check",
+          "title": "Начать без проверки",
+          "description": "Не задерживать очередь и принять риск неточного взвешивания.",
+          "scores": {
+            "production": 12,
+            "quality": -11,
+            "safety": -4
+          },
+          "outcome": "Очередь двинулась сразу, но несколько показаний вызывают сомнение.",
+          "polarity_affinity": {
+            "axis": "execution_style",
+            "direction": -1
+          }
+        }
       ]
     },
     {
@@ -76,9 +193,47 @@
       "skill_id": "repair",
       "difficulty": 8,
       "choices": [
-        {"id": "isolate_and_clear", "title": "Остановить и обесточить пресс", "description": "Выполнить безопасную остановку и только затем убрать проволоку.", "scores": {"production": -5, "quality": 8, "safety": 16}, "outcome": "Подача освобождена после полной безопасной остановки."},
-        {"id": "ask_supervisor_and_clear", "title": "Позвать Виктора и убрать вместе", "description": "Потерять немного времени, но работать под наблюдением.", "scores": {"production": 0, "quality": 7, "safety": 11}, "outcome": "Заклинивание устранено вдвоём без нарушения порядка."},
-        {"id": "pull_wire_while_idle", "title": "Вытянуть проволоку на холостом ходу", "description": "Не проводить полную остановку оборудования.", "scores": {"production": 13, "quality": -4, "safety": -19}, "outcome": "Подача заработала быстро, но способ был опасным."}
+        {
+          "id": "isolate_and_clear",
+          "title": "Остановить и обесточить пресс",
+          "description": "Выполнить безопасную остановку и только затем убрать проволоку.",
+          "scores": {
+            "production": -5,
+            "quality": 8,
+            "safety": 16
+          },
+          "outcome": "Подача освобождена после полной безопасной остановки.",
+          "polarity_affinity": {
+            "axis": "decision_priority",
+            "direction": 1
+          }
+        },
+        {
+          "id": "ask_supervisor_and_clear",
+          "title": "Позвать Виктора и убрать вместе",
+          "description": "Потерять немного времени, но работать под наблюдением.",
+          "scores": {
+            "production": 0,
+            "quality": 7,
+            "safety": 11
+          },
+          "outcome": "Заклинивание устранено вдвоём без нарушения порядка."
+        },
+        {
+          "id": "pull_wire_while_idle",
+          "title": "Вытянуть проволоку на холостом ходу",
+          "description": "Не проводить полную остановку оборудования.",
+          "scores": {
+            "production": 13,
+            "quality": -4,
+            "safety": -19
+          },
+          "outcome": "Подача заработала быстро, но способ был опасным.",
+          "polarity_affinity": {
+            "axis": "decision_priority",
+            "direction": -1
+          }
+        }
       ]
     },
     {
@@ -90,9 +245,47 @@
       "skill_id": "trade",
       "difficulty": 6,
       "choices": [
-        {"id": "explain_and_separate", "title": "Объяснить и разделить партию", "description": "Показать различия и отдельно взвесить каждую категорию.", "scores": {"production": -3, "quality": 12, "safety": 4}, "outcome": "Посетитель понял расчёт, а партия оформлена по категориям."},
-        {"id": "state_rate_and_process", "title": "Назвать ставку и оформить", "description": "Кратко объяснить правило и не затягивать очередь.", "scores": {"production": 8, "quality": 4, "safety": 2}, "outcome": "Партия принята в обычном темпе без долгого спора."},
-        {"id": "accept_claimed_grade", "title": "Принять заявленную категорию", "description": "Не спорить и провести всё по более высокой ставке.", "scores": {"production": 11, "quality": -13, "safety": -2}, "outcome": "Очередь прошла быстро, но расчёт оказался неточным."}
+        {
+          "id": "explain_and_separate",
+          "title": "Объяснить и разделить партию",
+          "description": "Показать различия и отдельно взвесить каждую категорию.",
+          "scores": {
+            "production": -3,
+            "quality": 12,
+            "safety": 4
+          },
+          "outcome": "Посетитель понял расчёт, а партия оформлена по категориям.",
+          "polarity_affinity": {
+            "axis": "influence_style",
+            "direction": 1
+          }
+        },
+        {
+          "id": "state_rate_and_process",
+          "title": "Назвать ставку и оформить",
+          "description": "Кратко объяснить правило и не затягивать очередь.",
+          "scores": {
+            "production": 8,
+            "quality": 4,
+            "safety": 2
+          },
+          "outcome": "Партия принята в обычном темпе без долгого спора.",
+          "polarity_affinity": {
+            "axis": "influence_style",
+            "direction": -1
+          }
+        },
+        {
+          "id": "accept_claimed_grade",
+          "title": "Принять заявленную категорию",
+          "description": "Не спорить и провести всё по более высокой ставке.",
+          "scores": {
+            "production": 11,
+            "quality": -13,
+            "safety": -2
+          },
+          "outcome": "Очередь прошла быстро, но расчёт оказался неточным."
+        }
       ]
     },
     {
@@ -104,9 +297,47 @@
       "skill_id": "search",
       "difficulty": 7,
       "choices": [
-        {"id": "close_lane_and_restore", "title": "Перекрыть проход и восстановить порядок", "description": "Временно задержать приёмку, убрать обрезки и вернуть ограждение.", "scores": {"production": -6, "quality": 6, "safety": 17}, "outcome": "Площадка приведена в безопасное состояние до начала наплыва."},
-        {"id": "clear_hazards_first", "title": "Убрать главное без остановки", "description": "Сразу убрать обрезки и поправить ограждение между партиями.", "scores": {"production": 5, "quality": 5, "safety": 8}, "outcome": "Основные опасности устранены без полной остановки работы."},
-        {"id": "leave_for_later", "title": "Отложить до перерыва", "description": "Не мешать текущей приёмке и вернуться к площадке позже.", "scores": {"production": 12, "quality": -2, "safety": -16}, "outcome": "Приёмка не остановилась, но опасный участок остался открытым."}
+        {
+          "id": "close_lane_and_restore",
+          "title": "Перекрыть проход и восстановить порядок",
+          "description": "Временно задержать приёмку, убрать обрезки и вернуть ограждение.",
+          "scores": {
+            "production": -6,
+            "quality": 6,
+            "safety": 17
+          },
+          "outcome": "Площадка приведена в безопасное состояние до начала наплыва.",
+          "polarity_affinity": {
+            "axis": "decision_priority",
+            "direction": 1
+          }
+        },
+        {
+          "id": "clear_hazards_first",
+          "title": "Убрать главное без остановки",
+          "description": "Сразу убрать обрезки и поправить ограждение между партиями.",
+          "scores": {
+            "production": 5,
+            "quality": 5,
+            "safety": 8
+          },
+          "outcome": "Основные опасности устранены без полной остановки работы."
+        },
+        {
+          "id": "leave_for_later",
+          "title": "Отложить до перерыва",
+          "description": "Не мешать текущей приёмке и вернуться к площадке позже.",
+          "scores": {
+            "production": 12,
+            "quality": -2,
+            "safety": -16
+          },
+          "outcome": "Приёмка не остановилась, но опасный участок остался открытым.",
+          "polarity_affinity": {
+            "axis": "decision_priority",
+            "direction": -1
+          }
+        }
       ]
     }
   ],
@@ -116,9 +347,47 @@
       "title": "Что делать с сомнительными тюками",
       "description": "Часть уже спрессованной партии содержит заметные примеси. Перед проверкой можно скрыть проблему, переделать тюки или зафиксировать брак.",
       "choices": [
-        {"id": "stop_and_rework", "title": "Остановить отгрузку и переделать", "description": "Потерять выработку, но исправить партию до проверки.", "scores": {"production": -12, "quality": 18, "safety": 7}, "outcome": "Сомнительные тюки отправлены на повторную сортировку."},
-        {"id": "mark_and_report", "title": "Отметить и доложить Виктору", "description": "Не скрывать проблему и отделить тюки до решения мастера.", "scores": {"production": -4, "quality": 11, "safety": 11}, "outcome": "Партия отделена, а проблема внесена в журнал смены."},
-        {"id": "send_with_regular_load", "title": "Отправить вместе с остальными", "description": "Сохранить план смены, рассчитывая, что примеси не заметят.", "scores": {"production": 15, "quality": -21, "safety": -7}, "outcome": "План выполнен, но сомнительная партия ушла без отметки."}
+        {
+          "id": "stop_and_rework",
+          "title": "Остановить отгрузку и переделать",
+          "description": "Потерять выработку, но исправить партию до проверки.",
+          "scores": {
+            "production": -12,
+            "quality": 18,
+            "safety": 7
+          },
+          "outcome": "Сомнительные тюки отправлены на повторную сортировку.",
+          "polarity_affinity": {
+            "axis": "decision_priority",
+            "direction": 1
+          }
+        },
+        {
+          "id": "mark_and_report",
+          "title": "Отметить и доложить Виктору",
+          "description": "Не скрывать проблему и отделить тюки до решения мастера.",
+          "scores": {
+            "production": -4,
+            "quality": 11,
+            "safety": 11
+          },
+          "outcome": "Партия отделена, а проблема внесена в журнал смены."
+        },
+        {
+          "id": "send_with_regular_load",
+          "title": "Отправить вместе с остальными",
+          "description": "Сохранить план смены, рассчитывая, что примеси не заметят.",
+          "scores": {
+            "production": 15,
+            "quality": -21,
+            "safety": -7
+          },
+          "outcome": "План выполнен, но сомнительная партия ушла без отметки.",
+          "polarity_affinity": {
+            "axis": "decision_priority",
+            "direction": -1
+          }
+        }
       ]
     },
     {
@@ -126,9 +395,47 @@
       "title": "Очередь у опасного прохода",
       "description": "К концу смены приёмка заполнена, а безопасный проход сужен временно сложенными тюками.",
       "choices": [
-        {"id": "pause_and_clear", "title": "Приостановить приёмку", "description": "Освободить проход, даже если часть посетителей не успеет сегодня.", "scores": {"production": -13, "quality": 5, "safety": 20}, "outcome": "Проход освобождён до завершения смены."},
-        {"id": "redirect_and_finish", "title": "Перенаправить очередь", "description": "Организовать обход и закончить текущие партии без новых приёмок.", "scores": {"production": 2, "quality": 6, "safety": 10}, "outcome": "Текущие партии завершены по безопасному временному маршруту."},
-        {"id": "keep_accepting", "title": "Продолжить приёмку", "description": "Не терять выработку и оставить проход как есть до закрытия.", "scores": {"production": 16, "quality": -3, "safety": -20}, "outcome": "План превышен, но люди проходили рядом с неустойчивыми тюками."}
+        {
+          "id": "pause_and_clear",
+          "title": "Приостановить приёмку",
+          "description": "Освободить проход, даже если часть посетителей не успеет сегодня.",
+          "scores": {
+            "production": -13,
+            "quality": 5,
+            "safety": 20
+          },
+          "outcome": "Проход освобождён до завершения смены.",
+          "polarity_affinity": {
+            "axis": "execution_style",
+            "direction": 1
+          }
+        },
+        {
+          "id": "redirect_and_finish",
+          "title": "Перенаправить очередь",
+          "description": "Организовать обход и закончить текущие партии без новых приёмок.",
+          "scores": {
+            "production": 2,
+            "quality": 6,
+            "safety": 10
+          },
+          "outcome": "Текущие партии завершены по безопасному временному маршруту."
+        },
+        {
+          "id": "keep_accepting",
+          "title": "Продолжить приёмку",
+          "description": "Не терять выработку и оставить проход как есть до закрытия.",
+          "scores": {
+            "production": 16,
+            "quality": -3,
+            "safety": -20
+          },
+          "outcome": "План превышен, но люди проходили рядом с неустойчивыми тюками.",
+          "polarity_affinity": {
+            "axis": "execution_style",
+            "direction": -1
+          }
+        }
       ]
     }
   ]
