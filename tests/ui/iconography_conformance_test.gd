@@ -114,7 +114,7 @@ func _scan_live_text(root_path: String) -> void:
 		if directory.current_is_dir():
 			_scan_live_text(path)
 		elif LIVE_TEXT_EXTENSIONS.has(entry.get_extension().to_lower()):
-			if path in ["res://ui/main.gd", "res://ui/main.tscn"]:
+			if path == "res://ui/main.tscn":
 				entry = directory.get_next()
 				continue
 			var source := FileAccess.get_file_as_string(path)

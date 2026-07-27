@@ -15,9 +15,9 @@ const Motion = preload("res://ui/theme/motion.gd")
 ## disappears fails the test rather than silently stopping being checked.
 var _tokens: Dictionary = (load("res://ui/theme/motion.gd") as GDScript).get_script_constant_map()
 
-## Legacy M2 screen, removed in M3F. Excluded from the scale conformance test
-## for the same reason and named here so the hole is deliberate, not silent.
-const EXEMPT := ["res://ui/main.gd"]
+## Nothing is exempt. The legacy M2 screen was the only entry here and M3F.7
+## deleted it, so "motion is a system" is now true of every live script.
+const EXEMPT: Array[String] = []
 
 ## The trip along a map route is not the interface answering a tap, so §4 does
 ## not govern it. Named explicitly rather than left as an unchecked constant.

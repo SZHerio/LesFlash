@@ -11,7 +11,9 @@ const Tokens := preload("res://ui/theme/tokens.gd")
 const ROOTS := ["res://ui", "res://app"]
 ## The legacy M2 screen still carries hand-picked values. It is deleted at M3F
 ## rather than migrated, so it is excluded instead of silently failing.
-const LEGACY := ["res://ui/main.gd", "res://ui/main.tscn"]
+## main.tscn is a bare instance of app_shell.tscn and holds no spacing of its
+## own. The legacy script it used to sit beside was deleted in M3F.7.
+const LEGACY: Array[String] = []
 const SCANNED_SUFFIXES := [".tres", ".tscn", ".gd"]
 
 var _failures: Array[String] = []
