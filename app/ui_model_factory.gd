@@ -4,6 +4,7 @@ extends RefCounted
 const CurrencyTextScript := preload("res://app/presentation/currency_text.gd")
 const LocationActionCatalogScript := preload("res://game/location/location_action_catalog.gd")
 const PsycheScaleScript := preload("res://core/state/psyche_scale.gd")
+const SummaryViewModelScript := preload("res://app/summary/summary_view_model.gd")
 
 const MONTHS := [
 	"января", "февраля", "марта", "апреля", "мая", "июня",
@@ -199,24 +200,7 @@ static func job_result(raw_model: Dictionary) -> Dictionary:
 
 
 static func summary(raw_model: Dictionary) -> Dictionary:
-	var biography: Dictionary = {}
-	var entries: Array = raw_model.get("biography", [])
-	if not entries.is_empty() and entries.back() is Dictionary:
-		biography = Dictionary(entries.back()).duplicate(true)
-	var facts: Array = []
-	var final_state: Dictionary = Dictionary(biography.get("final_state", {})).duplicate(true)
-	if not final_state.is_empty():
-		facts.append("Деньги к утру: %s" % CurrencyTextScript.compact(int(final_state.get("money", 0))))
-		var meters: Dictionary = Dictionary(final_state.get("meters", {})).duplicate(true)
-		for status_id in ["health", "hunger", "energy", "tension", "mental_state"]:
-			facts.append("%s: %d/100" % [STATUS_TITLES[status_id], int(meters.get(status_id, 0))])
-	return {
-		"eyebrow": "ЛИЧНАЯ ХРОНИКА",
-		"title": "Первый день прожит",
-		"body": String(biography.get("summary", "Герой пережил свой первый день в городе.")),
-		"facts": facts,
-		"confirm_text": "В главное меню",
-	}
+	return SummaryViewModelScript.build(raw_model)
 
 
 static func format_date(stamp: Dictionary, compact: bool = false) -> String:
@@ -362,6 +346,8 @@ static func _location_action(raw: Dictionary) -> Dictionary:
 		"description": description,
 		"meta_tokens": _typed_meta_tokens(raw.get("meta_tokens", [])),
 		"meta": Array(raw.get("meta", [])).duplicate(true),
+		"intent": Dictionary(raw.get("intent", {})).duplicate(true),
+		"confirmation_required": bool(raw.get("confirmation_required", false)),
 		"enabled": enabled,
 		"locked_reason": "Уже завершено" if completed else reason_text(raw.get("reasons", [])),
 		"variant": "accent" if kind in ["local", "job", "shelter", "search"] and enabled else "normal",

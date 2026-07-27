@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "catalog_id": "riverside_week_activities",
+  "catalog_version": 1,
+  "profiles": [
+    {
+      "activity_id": "activity_underpass_rest_by_pipes",
+      "effects": [
+        {"type": "change_state", "id": "energy", "delta": 5},
+        {"type": "change_state", "id": "tension", "delta": -4}
+      ]
+    },
+    {
+      "activity_id": "activity_recycling_move_bundle",
+      "effects": [
+        {"type": "change_state", "id": "energy", "delta": -8},
+        {"type": "change_state", "id": "hunger", "delta": 3},
+        {"type": "shift_polarity", "id": "physical_specialization", "delta": -1},
+        {"type": "mastery", "delta": 1}
+      ]
+    },
+    {
+      "activity_id": "activity_clinic_rest_bench",
+      "effects": [
+        {"type": "change_state", "id": "energy", "delta": 6},
+        {"type": "change_state", "id": "tension", "delta": -5}
+      ]
+    },
+    {
+      "activity_id": "activity_embankment_walk_waterfront",
+      "effects": [
+        {"type": "change_state", "id": "energy", "delta": -3},
+        {"type": "change_state", "id": "tension", "delta": -4},
+        {"type": "change_state", "id": "mental_state", "delta": 1},
+        {"type": "shift_polarity", "id": "physical_specialization", "delta": 1}
+      ]
+    },
+    {
+      "activity_id": "activity_embankment_watch_lights",
+      "effects": [
+        {"type": "change_state", "id": "tension", "delta": -5},
+        {"type": "change_state", "id": "mental_state", "delta": 2}
+      ]
+    }
+  ]
+}

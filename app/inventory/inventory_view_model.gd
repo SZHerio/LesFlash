@@ -51,7 +51,11 @@ static func build(
 	var status: Dictionary = Dictionary(shell_model.get("status", {}))
 	var calendar: Dictionary = Dictionary(status.get("calendar", {}))
 	var containers := _containers(inventory, strength)
-	var items := _items(inventory, containers)
+	var items := _items(
+		inventory,
+		containers,
+		String(raw_model.get("location_id", ""))
+	)
 	var summary := _summary(containers)
 	return {
 		"header": {
@@ -117,7 +121,11 @@ static func _containers(inventory: Dictionary, strength: int) -> Array:
 	return result
 
 
-static func _items(inventory: Dictionary, containers: Array) -> Array:
+static func _items(
+	inventory: Dictionary,
+	containers: Array,
+	location_id: String
+) -> Array:
 	var container_titles: Dictionary = {}
 	var movable_targets: Array = []
 	for raw_container in containers:
@@ -154,6 +162,14 @@ static func _items(inventory: Dictionary, containers: Array) -> Array:
 						quantity,
 						"danger" if action_id == "drop" else "normal"
 					))
+			if location_id == "recycling_point" and "recyclable" in definition.tags():
+				actions.append(ActionView.build(
+					"sell",
+					"Сдать в приёмный пункт",
+					{},
+					quantity,
+					"accent"
+				))
 		result.append({
 			"stack_id": String(stack.get("stack_id", "")),
 			"item_id": definition.id(),

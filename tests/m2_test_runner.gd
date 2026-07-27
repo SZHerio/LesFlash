@@ -3,6 +3,7 @@ extends SceneTree
 const FirstDayContentScript = preload("res://game/first_day/first_day_content.gd")
 const FirstDaySessionScript = preload("res://game/first_day/first_day_session.gd")
 const FirstDaySaveScript = preload("res://game/first_day/first_day_save.gd")
+const SessionCommandTransactionScript = preload("res://game/session/session_command_transaction.gd")
 
 var _failures: Array[String] = []
 var _tests_run := 0
@@ -363,7 +364,23 @@ func _test_shelter_window() -> void:
 	_expect(_travel_to(after_midnight, "underpass"), "after-midnight run must reach underpass")
 	var one_am_elapsed := 17 * 60
 	var until_one_am := one_am_elapsed - int(after_midnight.run_state.calendar.elapsed_minutes)
-	_expect(until_one_am >= 0 and after_midnight.run_state.advance_time(until_one_am, "test_after_midnight"), "test must advance to 01:00")
+	var midnight_setup := SessionCommandTransactionScript.execute(after_midnight, {
+		"command_id": "test:after_midnight:setup",
+		"source_id": "test_after_midnight",
+		"title": "Подготовка времени ночлега",
+		"conditions": [],
+		"effects": [{
+			"type": "advance_time",
+			"minutes": until_one_am,
+			"reason": "Тестовый подтверждённый переход к 01:00",
+		}],
+	}) if until_one_am >= 0 else {"ok": false}
+	_expect(bool(midnight_setup.get("ok", false)), "test must advance to 01:00 through the session time gateway")
+	_expect_equal(
+		after_midnight.survival_state.processed_elapsed_minutes,
+		after_midnight.run_state.calendar.elapsed_minutes,
+		"after-midnight fixture must keep survival and calendar synchronized"
+	)
 	var before_sleep := int(after_midnight.run_state.calendar.elapsed_minutes)
 	_expect(bool(after_midnight.choose_shelter("underpass_niche").get("ok", false)), "01:00 shelter must be accepted")
 	_expect_equal(

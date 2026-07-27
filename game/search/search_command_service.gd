@@ -50,7 +50,8 @@ static func confirm_interaction(
 		prepared["snapshot"],
 		object_id,
 		approach_id,
-		true
+		true,
+		command_id
 	)
 	if not bool(applied.get("ok", false)):
 		return applied

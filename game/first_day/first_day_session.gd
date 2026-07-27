@@ -5,7 +5,7 @@ extends RefCounted
 ## RunState changes are committed only through ActionTransaction. Flow changes
 ## are applied after a successful transaction and carry their own revision.
 
-const SESSION_VERSION := 5
+const SESSION_VERSION := 6
 const JOB_ROUNDS := 6
 const VALID_PHASES := ["uninitialized", "start", "map", "event", "job", "shelter", "completed"]
 const VALID_PSYCHE_MODES := ["off", "reduced", "full"]
@@ -17,7 +17,9 @@ const M2SessionMigrationScript := preload("res://game/first_day/first_day_sessio
 const SearchSessionStateScript := preload("res://game/search/search_session_state.gd")
 const WorldStateScript := preload("res://core/world/world_state.gd")
 const SocialStateScript := preload("res://core/social/social_state.gd")
+const SurvivalStateScript := preload("res://game/survival/survival_state.gd")
 const SystemBootstrapScript := preload("res://game/first_day/first_day_system_bootstrap.gd")
+const SessionCommandBridgeScript := preload("res://game/first_day/first_day_session_command_bridge.gd")
 const PsycheScaleScript := preload("res://core/state/psyche_scale.gd")
 
 const DEFERRED_PAYLOADS := {
@@ -36,6 +38,7 @@ const DEFERRED_PAYLOADS := {
 var run_state: RunState = RunState.new()
 var world_state: WorldState = WorldStateScript.new()
 var social_state: SocialState = SocialStateScript.fresh()
+var survival_state: SurvivalState = SurvivalStateScript.fresh()
 var applied_command_ids: Dictionary = {}
 var phase: String = "uninitialized"
 var location: String = ""
@@ -128,6 +131,7 @@ func start_new_run(
 	run_state = candidate_state
 	world_state = candidate_world
 	social_state = SocialStateScript.fresh()
+	survival_state = SurvivalStateScript.fresh(candidate_state.calendar.elapsed_minutes)
 	applied_command_ids = {}
 	phase = "event" if not opening_card.is_empty() else ("start" if not _choices_of(chosen_start).is_empty() else "map")
 	location = chosen_location
@@ -602,6 +606,7 @@ func answer_job(category: String) -> Dictionary:
 		"tier_id": String(tier.get("id", "")),
 		"label": String(tier.get("label", tier.get("title", ""))),
 		"score": int(candidate["score"]),
+		"completed_day_index": int(run_state.calendar.elapsed_minutes / 1440),
 		"transaction": transaction.to_dict(),
 	}
 	job_state = candidate
@@ -794,6 +799,7 @@ func to_dict() -> Dictionary:
 		"run_state": run_state.to_dict(),
 		"world_state": world_state.to_dict(),
 		"social_state": social_state.to_dict(),
+		"survival_state": survival_state.to_dict(),
 		"applied_command_ids": applied_command_ids.duplicate(true),
 		"base_location": location,
 		"active_activity": active_activity.duplicate(true),
@@ -826,11 +832,12 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 	var parsed_state := RunState.from_dict(source["run_state"])
 	if parsed_state == null:
 		return null
-	if typeof(source.get("world_state", null)) != TYPE_DICTIONARY or typeof(source.get("social_state", null)) != TYPE_DICTIONARY or typeof(source.get("applied_command_ids", null)) != TYPE_DICTIONARY:
+	if typeof(source.get("world_state", null)) != TYPE_DICTIONARY or typeof(source.get("social_state", null)) != TYPE_DICTIONARY or typeof(source.get("survival_state", null)) != TYPE_DICTIONARY or typeof(source.get("applied_command_ids", null)) != TYPE_DICTIONARY:
 		return null
 	var parsed_world := WorldStateScript.from_dict(source["world_state"])
 	var parsed_social := SocialStateScript.from_dict(source["social_state"])
-	if parsed_world == null or parsed_social == null:
+	var parsed_survival := SurvivalStateScript.from_dict(source["survival_state"])
+	if parsed_world == null or parsed_social == null or parsed_survival == null:
 		return null
 	for key in ["phase", "location", "current_event", "start"]:
 		if typeof(source.get(key, null)) != TYPE_STRING:
@@ -859,7 +866,10 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 	result.run_state = parsed_state
 	result.world_state = parsed_world
 	result.social_state = parsed_social
-	result.applied_command_ids = Dictionary(source["applied_command_ids"]).duplicate(true)
+	result.survival_state = parsed_survival
+	result.applied_command_ids = _normalize_json_numbers(
+		Dictionary(source["applied_command_ids"]).duplicate(true)
+	)
 	result.phase = String(source["phase"])
 	result.location = String(source["location"])
 	result.current_event = String(source["current_event"])
@@ -890,6 +900,7 @@ func replace_from(other: FirstDaySession) -> bool:
 	run_state = candidate.run_state
 	world_state = candidate.world_state
 	social_state = candidate.social_state
+	survival_state = candidate.survival_state
 	applied_command_ids = candidate.applied_command_ids
 	phase = candidate.phase
 	location = candidate.location
@@ -914,7 +925,12 @@ func validate() -> Dictionary:
 		errors.append("run_state is null")
 	else:
 		_append_validation("run_state", run_state.validate(), errors)
-		_validate_deferred_state(errors)
+		# RunState owns a generic, data-only deferred queue. An effect unknown to
+		# the legacy M2 resolver is still a cloneable/saveable queue record; it is
+		# rejected atomically with deferred_resolution_failed only when it becomes
+		# due. Eager M2-specific validation here would prevent the common session
+		# transaction from cloning the aggregate and hide the real domain error as
+		# session_clone_failed.
 	if world_state == null:
 		errors.append("world_state is null")
 	else:
@@ -923,6 +939,12 @@ func validate() -> Dictionary:
 		errors.append("social_state is null")
 	else:
 		_append_validation("social_state", social_state.validate(), errors)
+	if survival_state == null:
+		errors.append("survival_state is null")
+	else:
+		_append_validation("survival_state", survival_state.validate(), errors)
+		if run_state != null and run_state.calendar != null and survival_state.processed_elapsed_minutes != run_state.calendar.elapsed_minutes:
+			errors.append("survival_state and calendar are desynchronized")
 	_validate_applied_commands(errors)
 	if phase not in VALID_PHASES:
 		errors.append("phase is unknown: %s" % phase)
@@ -968,8 +990,6 @@ func validate() -> Dictionary:
 		var elapsed := int(run_state.calendar.elapsed_minutes)
 		if day_completed and elapsed != FIRST_DAY_DURATION_MINUTES:
 			errors.append("completed first day must end exactly at the next 08:00")
-		elif not day_completed and elapsed >= FIRST_DAY_DURATION_MINUTES:
-			errors.append("active first day cannot cross the next 08:00")
 	if flow_revision < 0:
 		errors.append("flow_revision cannot be negative")
 	var search_validation := SearchSessionStateScript.validate(
@@ -980,6 +1000,7 @@ func validate() -> Dictionary:
 	if is_search_active() and phase != "map":
 		errors.append("active search requires map phase")
 	var contract_validation := M2SessionMigrationScript.validate_contract_fields({
+		"run_state": run_state.to_dict() if run_state != null else {},
 		"phase": phase,
 		"location": location,
 		"base_location": location,
@@ -988,6 +1009,7 @@ func validate() -> Dictionary:
 		"job_state": job_state,
 		"world_state": world_state.to_dict() if world_state != null else {},
 		"social_state": social_state.to_dict() if social_state != null else {},
+		"survival_state": survival_state.to_dict() if survival_state != null else {},
 		"applied_command_ids": applied_command_ids.duplicate(true),
 		"active_activity": active_activity,
 		"search_zone_states": search_zone_states,
@@ -1012,18 +1034,6 @@ func _validate_applied_commands(errors: Array[String]) -> void:
 			errors.append("applied_command_ids.%s.source_id must be a string" % command_id)
 		if not Dictionary(record).get("applied_at", null) is Dictionary:
 			errors.append("applied_command_ids.%s.applied_at must be a dictionary" % command_id)
-
-
-func _validate_deferred_state(errors: Array[String]) -> void:
-	for index in range(run_state.deferred_consequences.size()):
-		var consequence_value: Variant = run_state.deferred_consequences[index]
-		if not consequence_value is Dictionary:
-			continue
-		var conversion := _deferred_effects(consequence_value)
-		if not bool(conversion.get("ok", false)):
-			errors.append(
-				"deferred_consequences[%d]: %s" % [index, String(conversion.get("message", "invalid M2 consequence"))]
-			)
 
 
 func _validate_job_state(errors: Array[String]) -> void:
@@ -1151,39 +1161,13 @@ func _execute_action_with_due(
 	context: Dictionary,
 	completes_day: bool = false
 ) -> ActionResult:
-	if is_search_active():
-		return ActionResult.failed(
-			&"search_active",
-			"Сначала завершите или покиньте текущий поиск"
-		)
-	var candidate := run_state.clone()
-	if candidate == null:
-		return ActionResult.failed(&"clone_failed", "Не удалось подготовить безопасную копию состояния")
-	var transaction := ActionTransaction.execute(candidate, action, context)
-	if not transaction.success:
-		return transaction
-	var elapsed := int(candidate.calendar.elapsed_minutes)
-	if (completes_day and elapsed != FIRST_DAY_DURATION_MINUTES) or (
-		not completes_day and elapsed >= FIRST_DAY_DURATION_MINUTES
-	):
-		return ActionResult.failed(
-			&"first_day_deadline",
-			"Действие выходит за пределы первого игрового дня"
-		)
-	var due_result := _resolve_due_consequences(candidate, context)
-	if not bool(due_result.get("ok", false)):
-		return ActionResult.failed(
-			&"deferred_resolution_failed",
-			String(due_result.get("message", "Не удалось применить отложенное последствие")),
-			int(due_result.get("failed_effect_index", -1)),
-			_typed_dictionary_array(due_result.get("changes", []))
-		)
-	if not run_state.replace_from(candidate):
-		return ActionResult.failed(&"commit_failed", "Не удалось зафиксировать действие и его последствия")
-	var combined_changes: Array[Dictionary] = []
-	combined_changes.append_array(transaction.changes.duplicate(true))
-	combined_changes.append_array(_typed_dictionary_array(due_result.get("changes", [])))
-	return ActionResult.succeeded(combined_changes, transaction.journal_entry)
+	return SessionCommandBridgeScript.execute(
+		self,
+		action,
+		context,
+		completes_day,
+		FIRST_DAY_DURATION_MINUTES
+	)
 
 
 func _resolve_due_consequences(candidate: RunState, context: Dictionary) -> Dictionary:
@@ -1274,8 +1258,12 @@ func _prepare_job_state(approach: String) -> Dictionary:
 		return _failure("job_not_here", "Эта работа находится в другой локации")
 	if bool(job_state.get("active", false)):
 		return _failure("job_already_active", "Смена уже началась")
-	if not Dictionary(job_state.get("result", {})).is_empty():
-		return _failure("job_already_completed", "Эта смена уже завершена")
+	var previous_result: Dictionary = Dictionary(job_state.get("result", {}))
+	if not previous_result.is_empty():
+		var current_day := int(run_state.calendar.elapsed_minutes / 1440)
+		var completed_day := int(previous_result.get("completed_day_index", current_day))
+		if completed_day >= current_day:
+			return _failure("job_already_completed", "Сегодняшняя смена уже завершена")
 	var entry_check := CheckResolver.evaluate_all(
 		run_state,
 		_array_copy(job.get("entry_conditions", job.get("conditions", []))),

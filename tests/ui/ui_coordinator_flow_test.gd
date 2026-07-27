@@ -76,8 +76,9 @@ func _run() -> void:
 		return
 
 	var adapter := coordinator.get("_session") as SandboxSessionAdapter
+	var command_runner := coordinator.get("_commands") as SessionCommandRunner
 	var location_screen := shell.current_screen() as LocationScreen
-	if adapter == null or location_screen == null:
+	if adapter == null or command_runner == null or location_screen == null:
 		_fail("new session did not route directly to its location")
 		return
 	if adapter.get_phase() != "map" or not adapter.get_current_event_model().is_empty():
@@ -93,7 +94,7 @@ func _run() -> void:
 	if adapter.get_flow_revision() != revision_before or persistence.save_calls != 1:
 		_fail(
 			"a second tap crossed the screen transition gate (revision %d→%d, saves=%d, locked=%s)"
-			% [revision_before, adapter.get_flow_revision(), persistence.save_calls, coordinator.get("_command_in_flight")]
+			% [revision_before, adapter.get_flow_revision(), persistence.save_calls, command_runner.in_flight()]
 		)
 		return
 
@@ -103,17 +104,15 @@ func _run() -> void:
 		_fail("the transition gate did not release for the next deliberate action")
 		return
 
-	while (
-		bool(coordinator.get("_command_in_flight"))
-		or Time.get_ticks_msec() < int(coordinator.get("_command_unlock_at_msec"))
-	):
+	while command_runner.locked():
 		await process_frame
 	persistence.fail_save = true
-	coordinator.call(
-		"_run_command",
+	command_runner.run(
 		func() -> Dictionary:
 			return {"ok": true, "outcome": "SAVE_FAILURE_OUTCOME"},
-		true
+		true,
+		adapter,
+		Callable(coordinator, "_route_session")
 	)
 	await process_frame
 	var toast_label := shell.get_node(
@@ -127,10 +126,7 @@ func _run() -> void:
 		_fail("successful outcome hid the save failure warning")
 		return
 	persistence.fail_save = false
-	while (
-		bool(coordinator.get("_command_in_flight"))
-		or Time.get_ticks_msec() < int(coordinator.get("_command_unlock_at_msec"))
-	):
+	while command_runner.locked():
 		await process_frame
 	var time_before_map := int(adapter.get_city_map_model().get("calendar", {}).get("elapsed_minutes", -1))
 	var revision_before_map := adapter.get_flow_revision()
@@ -174,15 +170,14 @@ func _run() -> void:
 	if adapter.get_flow_revision() != revision_after_travel or persistence.save_calls != 5:
 		_fail("travel input lock allowed a duplicate domain command")
 		return
-	await create_timer(0.85, true, false, true).timeout
+	var animation_deadline := Time.get_ticks_msec() + 3000
+	while shell.current_screen() == map_screen and Time.get_ticks_msec() < animation_deadline:
+		await process_frame
 	if shell.current_screen() as LocationScreen == null:
 		_fail("completed route animation did not return to the destination location")
 		return
 
-	while (
-		bool(coordinator.get("_command_in_flight"))
-		or Time.get_ticks_msec() < int(coordinator.get("_command_unlock_at_msec"))
-	):
+	while command_runner.locked():
 		await process_frame
 	shell.navigation_requested.emit("map")
 	await process_frame
@@ -219,10 +214,7 @@ func _run() -> void:
 	if shell.current_screen() as LocationScreen == null:
 		_fail("failed travel save did not show the committed destination immediately")
 		return
-	while (
-		bool(coordinator.get("_command_in_flight"))
-		or Time.get_ticks_msec() < int(coordinator.get("_command_unlock_at_msec"))
-	):
+	while command_runner.locked():
 		await process_frame
 	shell.navigation_requested.emit("map")
 	await process_frame
@@ -247,8 +239,8 @@ func _run() -> void:
 				persistence.save_calls,
 				revision_before_barrier,
 				adapter.get_flow_revision(),
-				coordinator.get("_command_in_flight"),
-				int(coordinator.get("_command_unlock_at_msec")) - Time.get_ticks_msec(),
+				command_runner.in_flight(),
+				command_runner.unlock_remaining_msec(),
 			]
 		)
 		return

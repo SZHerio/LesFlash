@@ -1,0 +1,209 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://ui/screens/shop/shop_screen.gd" id="1_screen"]
+[ext_resource type="PackedScene" path="res://ui/components/money_amount.tscn" id="2_money"]
+[ext_resource type="PackedScene" path="res://ui/components/semantic_icon.tscn" id="3_icon"]
+
+[node name="ShopScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_screen")
+
+[node name="ScreenMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="Layout" type="VBoxContainer" parent="ScreenMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TopPanel" type="PanelContainer" parent="ScreenMargin/Layout"]
+layout_mode = 2
+theme_type_variation = &"ScreenHeaderPanel"
+
+[node name="TopLayout" type="VBoxContainer" parent="ScreenMargin/Layout/TopPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ControlRow" type="HBoxContainer" parent="ScreenMargin/Layout/TopPanel/TopLayout"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BackButton" type="Button" parent="ScreenMargin/Layout/TopPanel/TopLayout/ControlRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 48)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+focus_mode = 2
+text = "Назад"
+
+[node name="Spacer" type="Control" parent="ScreenMargin/Layout/TopPanel/TopLayout/ControlRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="WalletPanel" type="PanelContainer" parent="ScreenMargin/Layout/TopPanel/TopLayout/ControlRow"]
+custom_minimum_size = Vector2(96, 48)
+layout_mode = 2
+theme_type_variation = &"PillPanel"
+
+[node name="WalletMoney" parent="ScreenMargin/Layout/TopPanel/TopLayout/ControlRow/WalletPanel" instance=ExtResource("2_money")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Eyebrow" type="Label" parent="ScreenMargin/Layout/TopPanel/TopLayout"]
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "ТОРГОВАЯ ТОЧКА"
+
+[node name="TitleLabel" type="Label" parent="ScreenMargin/Layout/TopPanel/TopLayout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ScreenTitle"
+text = "Рыночный продовольственный ряд"
+autowrap_mode = 2
+
+[node name="OffersPanel" type="PanelContainer" parent="ScreenMargin/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"SurfaceCard"
+
+[node name="OffersScroll" type="ScrollContainer" parent="ScreenMargin/Layout/OffersPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ScrollLane" type="MarginContainer" parent="ScreenMargin/Layout/OffersPanel/OffersScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_right = 8
+
+[node name="Content" type="VBoxContainer" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="StateBand" type="PanelContainer" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content"]
+layout_mode = 2
+theme_type_variation = &"StatusDetailPanel"
+
+[node name="StateRow" type="HBoxContainer" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content/StateBand"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="StateIcon" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content/StateBand/StateRow" instance=ExtResource("3_icon")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="StateCopy" type="VBoxContainer" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content/StateBand/StateRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="StateTitle" type="Label" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content/StateBand/StateRow/StateCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"EyebrowLabel"
+text = "МОЖНО КУПИТЬ"
+autowrap_mode = 2
+
+[node name="AvailabilityLabel" type="Label" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content/StateBand/StateRow/StateCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BodyLabel"
+text = "Открыто"
+autowrap_mode = 2
+
+[node name="OfferList" type="VBoxContainer" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ClosedState" type="MarginContainer" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 24
+
+[node name="ClosedCopy" type="VBoxContainer" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content/ClosedState"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="ClosedIcon" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content/ClosedState/ClosedCopy" instance=ExtResource("3_icon")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="ClosedTitle" type="Label" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content/ClosedState/ClosedCopy"]
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "Вернитесь в рабочее время"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ClosedHint" type="Label" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content/ClosedState/ClosedCopy"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Узнанные часы работы указаны выше. Просмотр не двигает игровое время."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="EmptyState" type="MarginContainer" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 24
+
+[node name="EmptyCopy" type="VBoxContainer" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content/EmptyState"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="EmptyIcon" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content/EmptyState/EmptyCopy" instance=ExtResource("3_icon")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="EmptyTitle" type="Label" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content/EmptyState/EmptyCopy"]
+layout_mode = 2
+theme_type_variation = &"ActionTitleLabel"
+text = "На полках ничего не осталось"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="EmptyHint" type="Label" parent="ScreenMargin/Layout/OffersPanel/OffersScroll/ScrollLane/Content/EmptyState/EmptyCopy"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Новый завоз появится только после продвижения игрового времени."
+horizontal_alignment = 1
+autowrap_mode = 2

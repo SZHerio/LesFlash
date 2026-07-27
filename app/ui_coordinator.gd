@@ -10,6 +10,8 @@ const LocationFlowScript := preload("res://app/flows/location_flow_coordinator.g
 const PreferenceFlowScript := preload("res://app/flows/preference_flow_coordinator.gd")
 const InventoryFlowScript := preload("res://app/flows/inventory_flow_coordinator.gd")
 const SearchFlowScript := preload("res://app/flows/search_flow_coordinator.gd")
+const ShopFlowScript := preload("res://app/flows/shop_flow_coordinator.gd")
+const CommandRunnerScript := preload("res://app/flows/session_command_runner.gd")
 const LegacyActivityFlowScript := preload("res://app/flows/legacy_activity_flow_coordinator.gd")
 
 var _shell: AppShell
@@ -23,13 +25,12 @@ var _location_flow: LocationFlowCoordinator
 var _preference_flow: RefCounted
 var _inventory_flow: InventoryFlowCoordinator
 var _search_flow: SearchFlowCoordinator
+var _shop_flow: ShopFlowCoordinator
+var _commands: SessionCommandRunner
 var _legacy_activity_flow: LegacyActivityFlowCoordinator
 var _route := "boot"
+var _shop_store_id := ""
 var _settings_return_route := "menu"
-var _command_in_flight := false
-var _command_unlock_at_msec := 0
-var _last_transaction: Dictionary = {}
-var _status_delta_pending := false
 
 
 func configure(persistence: SessionPersistence = null, preferences: UiPreferences = null) -> void:
@@ -57,6 +58,9 @@ func _boot() -> void:
 	_preference_flow = PreferenceFlowScript.new(_shell, _preferences, _lifecycle, _screens)
 	_inventory_flow = InventoryFlowScript.new()
 	_search_flow = SearchFlowScript.new()
+	_shop_flow = ShopFlowScript.new()
+	_commands = CommandRunnerScript.new()
+	_commands.configure(self, _shell, _lifecycle)
 	_legacy_activity_flow = LegacyActivityFlowScript.new()
 	_shell.back_requested.connect(_on_back_requested)
 	_shell.close_requested.connect(_on_close_requested)
@@ -73,8 +77,7 @@ func _boot() -> void:
 func _show_main_menu() -> void:
 	_route = "menu"
 	_session = null
-	_last_transaction.clear()
-	_status_delta_pending = false
+	_commands.reset_feedback()
 	_screens.show_main_menu(
 		_persistence.has_candidates(),
 		{
@@ -94,43 +97,41 @@ func _show_character_creation() -> void:
 
 
 func _create_new_session(characteristics: Dictionary) -> void:
-	if not _try_begin_command():
+	if not _commands.try_begin(_session):
 		return
 	var seed := int(Time.get_unix_time_from_system()) ^ int(Time.get_ticks_msec())
 	var candidate := _persistence.create_session(characteristics, seed) as SandboxSessionAdapter
 	if candidate == null or not candidate.is_valid():
 		_shell.show_toast("Не удалось начать новую жизнь.", true)
-		_release_command_after_transition()
+		_commands.release()
 		return
 	_session = candidate
-	_last_transaction.clear()
-	_status_delta_pending = false
+	_commands.reset_feedback()
 	_preference_flow.apply_to_session(_session)
 	var save_result := _save_session(false)
 	if not bool(save_result.get("ok", false)):
 		_session = null
-		_release_command_after_transition()
+		_commands.release()
 		return
 	_route_session()
-	_release_command_after_transition()
+	_commands.release()
 
 
 func _continue_game() -> void:
-	if not _try_begin_command():
+	if not _commands.try_begin(_session):
 		return
 	var result: Dictionary = _persistence.load_session()
 	if not bool(result.get("ok", false)):
 		_shell.show_toast("Сохранение не загружено: %s" % _lifecycle.error_message(result), true)
-		_release_command_after_transition()
+		_commands.release()
 		return
 	_session = result.get("adapter") as SandboxSessionAdapter
 	if _session == null or not _session.is_valid():
 		_shell.show_toast("Сохранение не содержит рабочую игровую сессию.", true)
 		_session = null
-		_release_command_after_transition()
+		_commands.release()
 		return
-	_last_transaction.clear()
-	_status_delta_pending = false
+	_commands.reset_feedback()
 	_preference_flow.apply_to_session(_session)
 	_route_session()
 	if bool(result.get("migrated", false)):
@@ -139,12 +140,15 @@ func _continue_game() -> void:
 			_shell.show_toast("Старое сохранение безопасно обновлено.")
 	elif bool(result.get("recovered_from_temporary", false)) or bool(result.get("recovered_from_backup", false)):
 		_shell.show_toast("Попытка восстановлена после прерванного сохранения.")
-	_release_command_after_transition()
+	_commands.release()
 
 
 func _route_session() -> void:
 	if _session == null:
 		_show_main_menu()
+		return
+	if _session.get_phase() == "completed":
+		_show_legacy("summary")
 		return
 	# The search is an activity layered on the location, so it wins over the
 	# underlying phase and is restored first after a reload or a kill.
@@ -170,13 +174,13 @@ func _route_session() -> void:
 func _flow_hooks(routes: Dictionary = {}) -> Dictionary:
 	var hooks := {
 		"settings": _open_settings,
-		"run_command": _run_command,
-		"begin_command": _try_begin_command,
-		"accept_result": _accept_result,
-		"capture_transaction": _capture_transaction,
-		"save": _save_session.bind(false),
+		"run_command": _commands.run.bind(_session, _route_session),
+		"begin_command": _commands.try_begin.bind(_session),
+		"accept_result": _commands.accept_result,
+		"capture_transaction": _commands.capture_transaction,
+		"save": _commands.save.bind(_session),
 		"toast": _shell.show_toast,
-		"release_command": _release_command_after_transition,
+		"release_command": _commands.release,
 	}
 	hooks.merge(routes, true)
 	return hooks
@@ -188,11 +192,15 @@ func _show_location() -> void:
 		_session,
 		_screens,
 		_preferences.to_model(),
-		_last_transaction,
-		_status_delta_pending,
-		_flow_hooks({"shelters": _show_shelters})
+		_commands.last_transaction(),
+		_commands.status_delta_pending(),
+		_flow_hooks({
+			"shelters": _show_shelters,
+			"store": _show_store,
+			"recycling": _show_recycling,
+		})
 	)
-	_status_delta_pending = false
+	_commands.clear_status_delta()
 
 
 func _show_search() -> void:
@@ -203,7 +211,7 @@ func _show_search() -> void:
 		_preferences.to_model(),
 		_flow_hooks({"location": _show_location})
 	)
-	_status_delta_pending = false
+	_commands.clear_status_delta()
 
 
 func _show_map() -> void:
@@ -234,6 +242,29 @@ func _show_inventory() -> void:
 		_preferences.to_model(),
 		_flow_hooks()
 	)
+
+
+func _show_store(store_id: String) -> void:
+	if store_id.strip_edges().is_empty():
+		_shell.show_toast("Торговая точка не найдена.", true)
+		return
+	_route = "shop"
+	_shop_store_id = store_id
+	_shop_flow.show(
+		_session,
+		_screens,
+		_preferences.to_model(),
+		store_id,
+		_flow_hooks({"back": _show_location, "finished": _route_session})
+	)
+
+
+func _show_recycling() -> void:
+	_show_inventory()
+	if _session.get_recycling_offers().is_empty():
+		_shell.show_toast("В вещах пока нет вторсырья, которое здесь примут.")
+	else:
+		_shell.show_toast("Выберите вторсырьё и нажмите «Сдать в приёмный пункт».")
 
 
 func _on_map_arrived(result: Dictionary) -> void:
@@ -282,6 +313,7 @@ func _return_from_settings() -> void:
 		"creation": _show_character_creation()
 		"map": _show_map()
 		"inventory": _show_inventory()
+		"shop": _show_store(_shop_store_id)
 		"shelter": _show_shelters()
 		"job_result": _show_job_result()
 		_: _route_session()
@@ -300,63 +332,12 @@ func _prepare_legacy_flow() -> void:
 	)
 
 
-func _run_command(command: Callable, show_outcome: bool = false) -> void:
-	if not _try_begin_command():
-		return
-	var result: Dictionary = command.call()
-	if not _accept_result(result):
-		_release_command_after_transition()
-		return
-	_capture_transaction(result)
-	var save_result := _save_session(false)
-	_route_session()
-	if (
-		bool(save_result.get("ok", false))
-		and show_outcome
-		and not String(result.get("outcome", "")).is_empty()
-	):
-		_shell.show_toast(String(result.get("outcome", "")))
-	_release_command_after_transition()
-
-
 func _save_session(show_success: bool) -> Dictionary:
-	return _lifecycle.save(_session, show_success)
-
-
-func _accept_result(result: Dictionary) -> bool:
-	if bool(result.get("ok", false)):
-		return true
-	_shell.show_toast(_lifecycle.error_message(result), true)
-	return false
-
-
-func _capture_transaction(result: Dictionary) -> void:
-	var raw_transaction: Variant = result.get("transaction", null)
-	if raw_transaction is Dictionary and raw_transaction.get("changes", null) is Array:
-		_last_transaction = Dictionary(raw_transaction).duplicate(true)
-		_status_delta_pending = true
-
-
-func _release_command_after_transition() -> void:
-	_command_unlock_at_msec = maxi(_command_unlock_at_msec, Time.get_ticks_msec() + 250)
-	if not is_inside_tree():
-		_command_in_flight = false
-		return
-	await get_tree().process_frame
-	_command_in_flight = false
-
-
-func _try_begin_command() -> bool:
-	if _command_in_flight or Time.get_ticks_msec() < _command_unlock_at_msec:
-		return false
-	if not _lifecycle.ensure_durable(_session):
-		return false
-	_command_in_flight = true
-	return true
+	return _commands.save(_session, show_success)
 
 
 func _on_navigation_requested(tab_id: String) -> void:
-	if _command_in_flight:
+	if _commands.in_flight():
 		return
 	if _route == "inventory" and _inventory_flow.has_modal():
 		return
@@ -376,7 +357,7 @@ func _on_navigation_requested(tab_id: String) -> void:
 
 
 func _on_back_requested() -> void:
-	if _command_in_flight:
+	if _commands.in_flight():
 		return
 	match _route:
 		"menu": _on_close_requested()
@@ -393,6 +374,7 @@ func _on_back_requested() -> void:
 		"inventory":
 			if not _inventory_flow.handle_back():
 				_show_location()
+		"shop": _show_location()
 		"search":
 			if not _search_flow.handle_back():
 				_show_location()

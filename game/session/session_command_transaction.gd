@@ -9,6 +9,7 @@ extends RefCounted
 const ActorTransaction := preload("res://core/rules/action_transaction.gd")
 const WorldMutationScript := preload("res://core/world/world_mutation.gd")
 const SocialMutationScript := preload("res://core/social/social_mutation.gd")
+const SurvivalPassageScript := preload("res://game/session/session_survival_passage.gd")
 
 const WORLD_EFFECTS := [
 	"set_world_fact",
@@ -57,6 +58,15 @@ static func execute(
 	var split := _split_effects(effects_value)
 	if not bool(split.get("ok", false)):
 		return split
+	var survival_passage := SurvivalPassageScript.prepare(
+		candidate,
+		Array(split["actor"]),
+		command_id,
+		Dictionary(command.get("survival_profile", {}))
+	)
+	if not bool(survival_passage.get("ok", false)):
+		return survival_passage
+	split["actor"] = Array(survival_passage.get("effects", split["actor"])).duplicate(true)
 
 	var actor_action := command.duplicate(true)
 	actor_action["id"] = String(command.get("source_id", command.get("id", command_id)))
@@ -71,6 +81,19 @@ static func execute(
 		actor_failure["ok"] = false
 		actor_failure["error"] = actor_result.message
 		return actor_failure
+	if bool(survival_passage.get("active", false)):
+		var survival_candidate: SurvivalState = survival_passage["survival_state"]
+		if not survival_candidate.record_applied(command_id):
+			return _failure("survival_ledger_failed", "Не удалось записать подтверждённый промежуток времени")
+		var session_survival: SurvivalState = candidate.get("survival_state")
+		if not session_survival.replace_from(survival_candidate):
+			return _failure("survival_commit_failed", "Не удалось подготовить состояние выживания")
+		if session_survival.is_terminal():
+			candidate.get("run_state").add_journal_entry("lifecycle", "survival_%s" % session_survival.status, {
+				"status": session_survival.status,
+				"death_reason": session_survival.death_reason,
+				"passage_id": command_id,
+			})
 
 	var source_id := String(actor_action["id"])
 	var at: Dictionary = candidate.get("run_state").calendar.current_stamp()

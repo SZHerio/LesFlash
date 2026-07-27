@@ -10,19 +10,21 @@ const SearchSessionStateScript := preload("res://game/search/search_session_stat
 const WorldStateScript := preload("res://core/world/world_state.gd")
 const SocialStateScript := preload("res://core/social/social_state.gd")
 const EventContextScript := preload("res://game/events/event_context.gd")
+const SurvivalStateScript := preload("res://game/survival/survival_state.gd")
 
 const LEGACY_VERSION := 1
 const INVENTORY_VERSION := 3
 const SEARCH_VERSION := 4
-const PREVIOUS_VERSION := SEARCH_VERSION
-const CURRENT_VERSION := 5
+const SYSTEMS_VERSION := 5
+const PREVIOUS_VERSION := SYSTEMS_VERSION
+const CURRENT_VERSION := 6
 
 
 static func migrate_envelope(raw: Dictionary) -> Dictionary:
 	var source_version: Variant = _integral(raw.get("schema_version", null))
 	if source_version == null:
 		return _failure("invalid_schema_version", "Envelope schema_version must be an integer.")
-	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, SEARCH_VERSION, CURRENT_VERSION]:
+	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, SEARCH_VERSION, SYSTEMS_VERSION, CURRENT_VERSION]:
 		return _failure(
 			"unsupported_schema_version",
 			"Envelope schema version is unsupported.",
@@ -55,7 +57,7 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 	var source_version: Variant = _integral(raw.get("session_version", null))
 	if source_version == null:
 		return _failure("invalid_session_version", "session_version must be an integer.")
-	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, SEARCH_VERSION, CURRENT_VERSION]:
+	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, SEARCH_VERSION, SYSTEMS_VERSION, CURRENT_VERSION]:
 		return _failure(
 			"unsupported_session_version",
 			"FirstDaySession version is unsupported.",
@@ -108,6 +110,21 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 		migrated["world_state"] = WorldStateScript.new().to_dict()
 		migrated["social_state"] = SocialStateScript.fresh().to_dict()
 		migrated["applied_command_ids"] = {}
+		migrated["session_version"] = SYSTEMS_VERSION
+		current_version = SYSTEMS_VERSION
+	if current_version == SYSTEMS_VERSION:
+		var elapsed := int(Dictionary(Dictionary(state_result["data"]).get("calendar", {})).get("stamp", {}).get("elapsed_minutes", 0))
+		var legacy_job_state: Variant = migrated.get("job_state", {})
+		if legacy_job_state is Dictionary:
+			var normalized_job_state: Dictionary = Dictionary(legacy_job_state).duplicate(true)
+			var legacy_result: Variant = normalized_job_state.get("result", {})
+			if legacy_result is Dictionary and not Dictionary(legacy_result).is_empty():
+				var normalized_result: Dictionary = Dictionary(legacy_result).duplicate(true)
+				if not normalized_result.has("completed_day_index"):
+					normalized_result["completed_day_index"] = int(elapsed / 1440)
+				normalized_job_state["result"] = normalized_result
+				migrated["job_state"] = normalized_job_state
+		migrated["survival_state"] = SurvivalStateScript.fresh(elapsed).to_dict()
 		migrated["session_version"] = CURRENT_VERSION
 		current_version = CURRENT_VERSION
 	if current_version != CURRENT_VERSION:
@@ -156,6 +173,14 @@ static func validate_contract_fields(data: Dictionary) -> Dictionary:
 		return _failure("invalid_social_state", "social_state is invalid.")
 	if typeof(data.get("applied_command_ids", null)) != TYPE_DICTIONARY:
 		return _failure("invalid_command_ledger", "applied_command_ids must be a dictionary.")
+	if typeof(data.get("survival_state", null)) != TYPE_DICTIONARY:
+		return _failure("invalid_survival_state", "survival_state must be a dictionary.")
+	var survival := SurvivalStateScript.from_dict(data["survival_state"])
+	if survival == null:
+		return _failure("invalid_survival_state", "survival_state is invalid.")
+	var elapsed := int(Dictionary(Dictionary(data.get("run_state", {})).get("calendar", {})).get("stamp", {}).get("elapsed_minutes", -1))
+	if survival.processed_elapsed_minutes != elapsed:
+		return _failure("survival_time_mismatch", "survival_state and calendar are desynchronized.")
 	var context_validation := _validate_event_contexts(data.get("active_activity", {}), "active_activity")
 	if not bool(context_validation.get("ok", false)):
 		return context_validation

@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "catalog_id": "m3f_shelters",
+  "catalog_version": 1,
+  "currency_code": "ARD",
+  "options": [
+    {
+      "shelter_id": "shelter_underpass_niche",
+      "category_id": "street",
+      "title": "Ниша под мостом",
+      "description": "Сухой угол за бетонной опорой. Денег не попросят, но шум и холод не дадут полноценно восстановиться.",
+      "location_ids": ["underpass"],
+      "check_in_windows": [
+        {"opens_minute": 1080, "closes_minute": 300}
+      ],
+      "wake_minute": 390,
+      "minimum_sleep_minutes": 120,
+      "price_arden": 0,
+      "meter_effects": {
+        "health": -3,
+        "energy": 32,
+        "tension": 5,
+        "mental_state": -2
+      }
+    },
+    {
+      "shelter_id": "shelter_municipal_night_room",
+      "category_id": "night_shelter",
+      "title": "Муниципальная ночлежка",
+      "description": "Общая комната с дежурным и жёсткой койкой. Место бесплатное, но двери закрывают рано.",
+      "location_ids": ["station_square"],
+      "check_in_windows": [
+        {"opens_minute": 1080, "closes_minute": 1320}
+      ],
+      "wake_minute": 420,
+      "minimum_sleep_minutes": 180,
+      "price_arden": 0,
+      "meter_effects": {
+        "energy": 46,
+        "tension": -7,
+        "mental_state": 2
+      }
+    },
+    {
+      "shelter_id": "shelter_station_safe_room",
+      "category_id": "paid_room",
+      "title": "Комната отдыха при вокзале",
+      "description": "Запираемая тёплая комната с чистой постелью. Это безопасный, но платный ночлег.",
+      "location_ids": ["station_square"],
+      "check_in_windows": [
+        {"opens_minute": 960, "closes_minute": 1380}
+      ],
+      "wake_minute": 480,
+      "minimum_sleep_minutes": 240,
+      "price_arden": 100,
+      "meter_effects": {
+        "health": 2,
+        "energy": 58,
+        "tension": -12,
+        "mental_state": 5
+      }
+    }
+  ]
+}

@@ -105,7 +105,11 @@ func get_shell_model() -> Dictionary:
 	var contract := GameSessionScript.new(
 		_session.run_state,
 		_session.location,
-		get_active_activity()
+		get_active_activity(),
+		_session.world_state,
+		_session.social_state,
+		_session.applied_command_ids,
+		_session.survival_state
 	)
 	contract.set_location_view_model(get_location_model())
 	var result: Dictionary = contract.get_shell_model()

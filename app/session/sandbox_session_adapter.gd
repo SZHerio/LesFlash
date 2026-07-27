@@ -10,23 +10,14 @@ extends FirstDaySessionAdapter
 
 const LegacySessionScript := preload("res://game/first_day/first_day_session.gd")
 const LegacySaveScript := preload("res://game/first_day/first_day_save.gd")
-const FirstDayContentScript := preload("res://game/first_day/first_day_content.gd")
-const LocationActions := preload("res://game/location/location_action_service.gd")
-const LocationActionCommand := preload("res://game/location/first_day_location_action_command.gd")
+const WeekCityMapModelScript := preload("res://app/map/week_city_map_model.gd")
 const InventoryTransaction := preload("res://core/inventory/inventory_transaction.gd")
+const WeekInventoryCommandScript := preload("res://game/week/week_inventory_command.gd")
+const WeekFacade := preload("res://app/session/week_session_facade.gd")
 const SearchCommands := preload("res://app/session/search_session_commands.gd")
 const SearchModels := preload("res://app/search/search_read_model.gd")
 const EncounterCommand := preload("res://game/events/search_encounter_command.gd")
 const HeroModels := preload("res://app/hero/hero_view_model.gd")
-
-const CATEGORY_BY_ACTION_KIND := {
-	"local": "observe",
-	"search": "search",
-	"job": "work",
-	"wait": "rest",
-	"shelter": "shelter",
-}
-
 
 static func create(characteristics: Dictionary, seed: int) -> RefCounted:
 	var session := LegacySessionScript.create_location_first(characteristics, seed)
@@ -50,98 +41,85 @@ func start_new_run(characteristics: Dictionary, seed: int) -> Dictionary:
 	return _session.start_new_location_first(characteristics, seed)
 
 
+func get_phase() -> String:
+	if _session == null:
+		return "uninitialized"
+	if _session.survival_state != null and _session.survival_state.is_terminal():
+		return "completed"
+	return _session.phase
+
+
+func get_summary_model() -> Dictionary:
+	var result := super.get_summary_model()
+	if _session != null and _session.survival_state != null:
+		result["lifecycle"] = _session.survival_state.to_dict()
+	return result
+
+
 func get_location_model() -> Dictionary:
-	var model := super.get_location_model()
-	var sandbox_actions: Array = []
-	var include_blocked := bool(_session.settings.get("show_locked_options", false))
-	for raw_action in LocationActions.get_actions(
-		_session,
-		_session.location,
-		{"include_blocked": include_blocked}
-	):
-		if not raw_action is Dictionary:
-			continue
-		var action := Dictionary(raw_action).duplicate(true)
-		action["kind"] = "local"
-		action["minutes"] = int(action.get("duration_minutes", 0))
-		sandbox_actions.append(_with_action_semantics(action))
-	for raw_action in Array(model.get("actions", [])):
-		if raw_action is Dictionary and String(raw_action.get("kind", "")) != "event":
-			var inherited_action := Dictionary(raw_action).duplicate(true)
-			if String(inherited_action.get("kind", "")) == "wait":
-				inherited_action["description"] = "Перейти к вечерним делам и подготовке ночлега."
-			sandbox_actions.append(_with_action_semantics(inherited_action))
-	var search_action := _search_action()
-	if not search_action.is_empty():
-		sandbox_actions.push_front(search_action)
-	model["actions"] = sandbox_actions
-	return model
-
-
-## The searchable yard is the headline activity of the place that owns it, so it
-## leads the list instead of sitting below the ordinary actions.
-func _search_action() -> Dictionary:
 	if _session == null:
 		return {}
-	var template := SearchModels.zone_for_location(_session.location)
-	if template.is_empty():
-		return {}
-	return {
-		"id": "search_zone:%s" % String(template.get("id", "")),
-		"kind": "search",
-		"category_id": "search",
-		"category_icon_id": String(LocationActions.category_icon_id("search")),
-		"location_id": _session.location,
-		"title": "Продолжить поиск" if _session.is_search_active() else "Искать полезное",
-		"description": "%s Ходьба по зоне не тратит время — его тратят только подтверждённые решения." % String(
-			template.get("description", "")
-		),
-		"minutes": 0,
-		"risk": 0,
-		"available": true,
-		"reasons": [],
-		"meta_tokens": [{
-			"icon_id": &"",
-			"text": "Мини-игра",
-			"accessible_text": "Мини-игра поиска",
-		}],
-	}
-
-
-func _with_action_semantics(raw_action: Dictionary) -> Dictionary:
-	var action := raw_action.duplicate(true)
-	var kind := String(action.get("kind", "local"))
-	var category_id := String(action.get("category_id", "")).strip_edges()
-	if category_id.is_empty():
-		category_id = String(CATEGORY_BY_ACTION_KIND.get(kind, "observe"))
-	action["category_id"] = category_id
-	action["category_icon_id"] = String(LocationActions.category_icon_id(category_id))
-	action["meta_tokens"] = _action_meta_tokens(action)
-	return action
-
-
-func _action_meta_tokens(action: Dictionary) -> Array[Dictionary]:
-	var result: Array[Dictionary] = []
-	var has_time := false
-	for raw_token: Variant in Array(action.get("meta_tokens", [])):
-		if not raw_token is Dictionary:
-			continue
-		var token: Dictionary = Dictionary(raw_token).duplicate(true)
-		if String(token.get("text", "")).strip_edges().is_empty():
-			continue
-		has_time = has_time or String(token.get("icon_id", "")) == "meta_time"
-		result.append(token)
-	var minutes := int(action.get("minutes", action.get("duration_minutes", 0)))
-	if minutes > 0 and not has_time:
-		var time_text := "%d мин" % minutes
-		result.append({"icon_id": &"meta_time", "text": time_text, "accessible_text": time_text})
-	return result
+	return WeekFacade.location_model(
+		_session,
+		super.get_location_model(),
+		bool(_session.settings.get("show_locked_options", false))
+	)
 
 
 func perform_location_action(action_id: String) -> Dictionary:
 	if _session == null:
 		return _missing_sandbox_session()
-	return LocationActionCommand.execute(_session, action_id)
+	return _finish_week_command(WeekFacade.execute_location_action(
+		_session,
+		action_id,
+		_session.flow_revision
+	))
+
+
+func get_store_model(store_id: String, reduced_motion: bool = false) -> Dictionary:
+	return (
+		WeekFacade.store_model(_session, store_id, reduced_motion)
+		if _session != null
+		else _missing_sandbox_session()
+	)
+
+
+func buy_store_offer(
+	store_id: String,
+	offer_id: String,
+	quantity: int,
+	target_container_id: String,
+	expected_revision: int
+) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.buy(
+		_session,
+		store_id,
+		offer_id,
+		quantity,
+		target_container_id,
+		expected_revision,
+		_session.flow_revision
+	))
+
+
+func available_shelters() -> Array:
+	return [] if _session == null else WeekFacade.shelters(_session)
+
+
+func choose_shelter(shelter_id: String) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.sleep(
+		_session,
+		shelter_id,
+		_session.flow_revision
+	))
+
+
+func get_recycling_offers() -> Array[Dictionary]:
+	return [] if _session == null else WeekFacade.recycling_offers(_session)
 
 
 func get_hero_model() -> Dictionary:
@@ -189,9 +167,29 @@ func perform_inventory_action(
 				quantity
 			)
 		"use":
-			result = InventoryTransaction.use(_session.run_state, stack_id)
+			result = WeekInventoryCommandScript.execute(
+				_session,
+				stack_id,
+				action_id,
+				_inventory_command_id(stack_id, action_id),
+				quantity
+			)
 		"disassemble":
-			result = InventoryTransaction.disassemble(_session.run_state, stack_id)
+			result = WeekInventoryCommandScript.execute(
+				_session,
+				stack_id,
+				action_id,
+				_inventory_command_id(stack_id, action_id),
+				quantity
+			)
+		"sell":
+			result = WeekInventoryCommandScript.execute(
+				_session,
+				stack_id,
+				action_id,
+				_inventory_command_id(stack_id, action_id),
+				quantity
+			)
 		"drop":
 			result = InventoryTransaction.drop(
 				_session.run_state,
@@ -208,6 +206,26 @@ func perform_inventory_action(
 	if bool(result.get("ok", false)):
 		_session.flow_revision += 1
 		result["flow_revision"] = _session.flow_revision
+	return result
+
+
+func _inventory_command_id(stack_id: String, action_id: String) -> String:
+	return "week:item:%s:%s:%d:%d" % [
+		action_id,
+		stack_id,
+		_session.run_state.calendar.elapsed_minutes,
+		_session.flow_revision,
+	]
+
+
+func _finish_week_command(result: Dictionary) -> Dictionary:
+	if (
+		bool(result.get("ok", false))
+		and String(result.get("code", "")) != "already_applied"
+		and bool(result.get("mutated", true))
+	):
+		_session.flow_revision += 1
+	result["flow_revision"] = _session.flow_revision if _session != null else 0
 	return result
 
 
@@ -310,44 +328,17 @@ func resolve_encounter(option_id: String) -> Dictionary:
 
 
 func get_city_map_model() -> Dictionary:
-	if _session == null:
-		return {}
-	var raw_model: Dictionary = _session.get_map_model()
-	var locations: Array = []
-	for raw_location in Array(raw_model.get("locations", [])):
-		if not raw_location is Dictionary:
-			continue
-		var location_model := Dictionary(raw_location).duplicate(true)
-		location_model["known"] = true
-		locations.append(location_model)
-	var routes: Array = []
-	var origin := String(raw_model.get("current_location_id", _session.location))
-	for raw_route in Array(raw_model.get("routes", [])):
-		if not raw_route is Dictionary:
-			continue
-		var route := Dictionary(raw_route).duplicate(true)
-		var destination := String(route.get("destination_id", ""))
-		var mode := String(route.get("mode", "walk"))
-		route["from_location_id"] = origin
-		route["option_id"] = "%s:%s:%s" % [origin, destination, mode]
-		route["price"] = _route_price(origin, destination, mode)
-		routes.append(route)
-	var district: Dictionary = FirstDayContentScript.district()
-	return {
-		"district_id": String(district.get("id", "")),
-		"district_title": String(district.get("title", "Город")),
-		"district_description": String(district.get("description", "")),
-		"current_location_id": origin,
-		"locations": locations,
-		"routes": routes,
-		"calendar": Dictionary(raw_model.get("calendar", {})).duplicate(true),
-	}
+	return {} if _session == null else WeekCityMapModelScript.build(_session)
 
 
 func travel(destination: String, mode: String = "walk") -> Dictionary:
 	if _session == null:
 		return _missing_sandbox_session()
-	var selected_route := _find_map_route(destination, mode)
+	var selected_route := WeekCityMapModelScript.find_route(
+		get_city_map_model(),
+		destination,
+		mode
+	)
 	var result := super.travel(destination, mode)
 	if bool(result.get("ok", false)) and not selected_route.is_empty():
 		result["route_option_id"] = String(selected_route.get("option_id", ""))
@@ -355,37 +346,6 @@ func travel(destination: String, mode: String = "walk") -> Dictionary:
 		result["minutes"] = int(selected_route.get("minutes", 0))
 		result["price"] = int(selected_route.get("price", 0))
 	return result
-
-
-func _find_map_route(destination: String, mode: String) -> Dictionary:
-	for raw_route in Array(get_city_map_model().get("routes", [])):
-		if not raw_route is Dictionary:
-			continue
-		var route: Dictionary = raw_route
-		if (
-			String(route.get("destination_id", "")) == destination
-			and String(route.get("mode", "walk")) == mode
-		):
-			return route.duplicate(true)
-	return {}
-
-
-func _route_price(origin: String, destination: String, mode: String) -> int:
-	if mode != "bus":
-		return 0
-	var place: Dictionary = FirstDayContentScript.location(origin)
-	for raw_route in Array(place.get("routes", [])):
-		if not raw_route is Dictionary:
-			continue
-		var route: Dictionary = raw_route
-		var route_destination := String(
-			route.get("destination_id", route.get("destination", route.get("to", "")))
-		)
-		if route_destination == destination:
-			return maxi(int(route.get("fare", 0)), 0)
-	return 0
-
-
 func _missing_sandbox_session() -> Dictionary:
 	return {
 		"ok": false,

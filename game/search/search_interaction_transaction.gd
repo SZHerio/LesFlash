@@ -6,6 +6,9 @@ const InteractionResolver := preload(
 )
 const LootTransaction := preload("res://game/search/search_loot_transaction.gd")
 const RiskResolver := preload("res://game/search/search_risk_resolver.gd")
+const SessionCommandTransaction := preload(
+	"res://game/session/session_command_transaction.gd"
+)
 
 const QUICK_SEARCH_RESOLVED_REQUIRED := 6
 
@@ -15,7 +18,8 @@ static func apply(
 	snapshot: Dictionary,
 	object_id: String,
 	approach_id: String,
-	require_proximity: bool = true
+	require_proximity: bool = true,
+	command_id: String = ""
 ) -> Dictionary:
 	var run_state: RunState = session.get("run_state")
 	var preview := InteractionResolver.preview(
@@ -56,9 +60,18 @@ static func apply(
 		and run_state.get_skill_rank("search") < 1
 	):
 		effects.append({"type": "unlock_skill", "id": "search", "rank": 1})
-	var transaction := ActionTransaction.execute(
-		run_state,
+	var session_command_id := command_id.strip_edges()
+	if session_command_id.is_empty():
+		session_command_id = _derived_command_id(
+			snapshot,
+			object_id,
+			approach_id
+		)
+	var transaction := SessionCommandTransaction.execute(
+		session,
 		{
+			"command_id": session_command_id,
+			"source_id": "search:%s:%s" % [object_id, approach_id],
 			"id": "search:%s:%s" % [object_id, approach_id],
 			"title": String(approach.get("title", approach_id)),
 			"conditions": Array(preview.get("conditions", [])).duplicate(true),
@@ -79,11 +92,20 @@ static func apply(
 			"action_id": approach_id,
 		}
 	)
-	if not transaction.success:
+	if not bool(transaction.get("ok", false)):
 		return _failure(
-			String(transaction.code),
-			transaction.message,
-			{"transaction": transaction.to_dict()}
+			String(transaction.get("code", "search_transaction_failed")),
+			String(transaction.get("error", transaction.get("message", "Поиск не выполнен."))),
+			{"transaction": _actor_transaction(transaction)}
+		)
+	# SessionCommandTransaction publishes a cloned aggregate. Never retain the
+	# pre-commit RunState reference: a valid session implementation may replace
+	# that object instead of mutating it in place.
+	run_state = session.get("run_state")
+	if run_state == null:
+		return _failure(
+			"missing_run_state_after_commit",
+			"После решения поиска состояние героя недоступно."
 		)
 	object["state"] = "exhausted"
 	object["revealed"] = true
@@ -105,20 +127,48 @@ static func apply(
 		session,
 		updated,
 		{"action_id": approach_id, "object_id": object_id},
-		String(session.get("location")),
+		_location_id(session),
 		int(costs["noise"]),
 		int(costs["trespass"])
 	)
+	if not bool(risk_result.get("ok", false)):
+		return risk_result
 	return {
 		"ok": true,
 		"code": "ok",
 		"error": "",
 		"snapshot": risk_result["snapshot"],
-		"transaction": transaction.to_dict(),
+		"transaction": _actor_transaction(transaction),
 		"ground_items": Array(loot_result.get("ground_items", [])).duplicate(true),
 		"encounter": Dictionary(risk_result.get("encounter", {})).duplicate(true),
 		"preview": preview,
 	}
+
+
+static func _derived_command_id(
+	snapshot: Dictionary,
+	object_id: String,
+	approach_id: String
+) -> String:
+	return "search_interaction:%s:%d:%s:%s" % [
+		String(snapshot.get("template_id", "zone")),
+		int(snapshot.get("visit_index", 1)),
+		object_id,
+		approach_id,
+	]
+
+
+static func _actor_transaction(transaction: Dictionary) -> Dictionary:
+	var actor: Variant = transaction.get("actor_transaction", transaction)
+	return Dictionary(actor).duplicate(true) if actor is Dictionary else {}
+
+
+static func _location_id(session: Object) -> String:
+	for field: String in ["base_location", "location"]:
+		for raw_property: Variant in session.get_property_list():
+			if raw_property is Dictionary and String(raw_property.get("name", "")) == field:
+				return String(session.get(field))
+	return ""
 
 
 static func _failure(

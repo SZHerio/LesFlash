@@ -320,9 +320,51 @@ func _expect(condition: bool, message: String) -> void:
 
 func _expect_equal(actual: Variant, expected: Variant, message: String) -> void:
 	if actual != expected:
-		_failures.append("%s — %s (expected=%s, actual=%s)" % [
+		_failures.append("%s — %s (%s)" % [
 			_current_test,
 			message,
-			str(expected),
-			str(actual),
+			_first_difference(actual, expected),
 		])
+
+
+func _first_difference(actual: Variant, expected: Variant, path: String = "root") -> String:
+	if typeof(actual) != typeof(expected):
+		return "%s type expected=%s actual=%s" % [
+			path,
+			type_string(typeof(expected)),
+			type_string(typeof(actual)),
+		]
+	if actual is Dictionary:
+		for key: Variant in Dictionary(expected):
+			if not Dictionary(actual).has(key):
+				return "%s.%s missing" % [path, String(key)]
+			var nested := _first_difference(
+				Dictionary(actual)[key],
+				Dictionary(expected)[key],
+				"%s.%s" % [path, String(key)]
+			)
+			if not nested.is_empty():
+				return nested
+		for key: Variant in Dictionary(actual):
+			if not Dictionary(expected).has(key):
+				return "%s.%s unexpected" % [path, String(key)]
+		return ""
+	if actual is Array:
+		if Array(actual).size() != Array(expected).size():
+			return "%s size expected=%d actual=%d" % [
+				path,
+				Array(expected).size(),
+				Array(actual).size(),
+			]
+		for index: int in Array(actual).size():
+			var nested := _first_difference(
+				Array(actual)[index],
+				Array(expected)[index],
+				"%s[%d]" % [path, index]
+			)
+			if not nested.is_empty():
+				return nested
+		return ""
+	if actual != expected:
+		return "%s expected=%s actual=%s" % [path, str(expected), str(actual)]
+	return ""

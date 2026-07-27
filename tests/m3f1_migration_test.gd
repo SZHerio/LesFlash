@@ -12,6 +12,7 @@ const InventoryStateScript := preload("res://core/inventory/inventory_state.gd")
 
 const RUN_V2_FIXTURE := "res://tests/fixtures/run_state_envelope_v2.json"
 const SESSION_V4_FIXTURE := "res://tests/fixtures/m3f1_session_v4.json"
+const SESSION_V5_FIXTURE := "res://tests/fixtures/m3f2_session_v5.json"
 
 var _failures: Array[String] = []
 var _tests_run := 0
@@ -22,6 +23,7 @@ func _init() -> void:
 	_run("new life starts in 1980 with exact renamed state", _test_fresh_start)
 	_run("previous RunState envelope migrates without changing 1970", _test_run_state_fixture)
 	_run("previous session envelope migrates every schema level", _test_session_fixture)
+	_run("M3F.2 v5 envelope adds survival without rewriting history", _test_m3f2_session_fixture)
 	_run("ambiguous morale migration fails without mutation", _test_ambiguous_meter)
 	_run("EventContext v1 migrates exactly to v2", _test_event_context_migration)
 	_run("active and archived encounter contexts migrate inside search", _test_nested_context_migration)
@@ -96,18 +98,55 @@ func _test_session_fixture() -> void:
 	if not bool(migration.get("ok", false)):
 		return
 	var data: Dictionary = migration["data"]
-	_expect_equal(data.get("schema_version"), 5, "envelope reaches v5")
-	_expect_equal(data["session"].get("session_version"), 5, "session reaches v5")
+	_expect_equal(data.get("schema_version"), 6, "envelope reaches v6")
+	_expect_equal(data["session"].get("session_version"), 6, "session reaches v6")
 	_expect_equal(data["session"]["run_state"].get("save_version"), 4, "nested RunState reaches v4")
 	_expect_equal(data["session"]["run_state"]["calendar"]["stamp"]["year"], 1970, "legacy calendar is preserved")
 	_expect(data["session"].has("world_state"), "world state is added")
 	_expect(data["session"].has("social_state"), "social state is added")
+	_expect(data["session"].has("survival_state"), "survival state is added")
 	_expect_equal(data["session"].get("applied_command_ids"), {}, "command ledger starts empty")
 	var loaded := FirstDaySave.load_session(ProjectSettings.globalize_path(SESSION_V4_FIXTURE))
 	_expect(bool(loaded.get("ok", false)), "previous full envelope loads: %s" % str(loaded))
 	_expect_equal(loaded.get("source_schema_version"), 4, "source envelope reported")
 	_expect_equal(loaded.get("source_session_version"), 4, "source session reported")
 	_expect_equal(loaded.get("source_run_state_version"), 3, "source RunState reported")
+
+
+func _test_m3f2_session_fixture() -> void:
+	var source := _read_json(SESSION_V5_FIXTURE)
+	_expect_equal(source.get("schema_version"), 5, "fixture is a previous v5 envelope")
+	_expect_equal(Dictionary(source.get("session", {})).get("session_version"), 5, "fixture is a previous v5 session")
+	_expect(not Dictionary(source.get("session", {})).has("survival_state"), "v5 fixture predates survival state")
+	var before := source.duplicate(true)
+	var migration := FirstDayMigration.migrate_envelope(source)
+	_expect(bool(migration.get("ok", false)), "v5 envelope migrates: %s" % str(migration))
+	_expect_equal(source, before, "v5 migration does not mutate its source")
+	_expect_equal(migration.get("source_schema_version"), 5, "v5 source envelope is reported")
+	_expect_equal(migration.get("source_session_version"), 5, "v5 source session is reported")
+	if bool(migration.get("ok", false)):
+		var migrated: Dictionary = migration["data"]
+		var migrated_session: Dictionary = migrated["session"]
+		_expect_equal(migrated.get("schema_version"), 6, "v5 envelope reaches v6")
+		_expect_equal(migrated_session.get("session_version"), 6, "v5 session reaches v6")
+		_expect_equal(migrated_session["run_state"]["calendar"]["stamp"]["year"], 1970, "recorded 1970 calendar survives")
+		_expect_equal(migrated_session["run_state"]["birth_date"]["year"], 1952, "recorded birth year survives")
+		_expect_equal(migrated_session["run_state"]["rng"]["seed"], "1970180001", "recorded RNG survives")
+		_expect_equal(migrated_session["survival_state"].get("processed_elapsed_minutes"), 0, "survival starts at recorded elapsed time")
+
+	var loaded := FirstDaySave.load_session(ProjectSettings.globalize_path(SESSION_V5_FIXTURE))
+	_expect(bool(loaded.get("ok", false)), "v5 fixture loads: %s" % str(loaded))
+	_expect_equal(loaded.get("source_schema_version"), 5, "load reports v5 envelope")
+	_expect_equal(loaded.get("source_session_version"), 5, "load reports v5 session")
+	if bool(loaded.get("ok", false)):
+		_expect_equal(loaded["session"].run_state.calendar.current_stamp()["year"], 1970, "loaded session remains in 1970")
+
+	var invalid := source.duplicate(true)
+	invalid["session"]["social_state"] = {}
+	var invalid_before := invalid.duplicate(true)
+	var rejected := FirstDayMigration.migrate_envelope(invalid)
+	_expect(not bool(rejected.get("ok", true)), "invalid v5 payload is rejected")
+	_expect_equal(invalid, invalid_before, "failed v5 migration leaves source untouched")
 
 
 func _test_ambiguous_meter() -> void:
@@ -166,6 +205,7 @@ func _test_nested_context_migration() -> void:
 	legacy_session["session_version"] = 4
 	legacy_session.erase("world_state")
 	legacy_session.erase("social_state")
+	legacy_session.erase("survival_state")
 	legacy_session.erase("applied_command_ids")
 	legacy_session["run_state"] = _as_run_state_v3(legacy_session["run_state"])
 	var before := legacy_session.duplicate(true)

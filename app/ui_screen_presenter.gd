@@ -9,6 +9,7 @@ const SettingsScene := preload("res://ui/screens/settings/settings_screen.tscn")
 const LocationScene := preload("res://ui/screens/location/location_screen.tscn")
 const CityMapScene := preload("res://ui/screens/city_map/city_map_screen.tscn")
 const InventoryScene := preload("res://ui/screens/inventory/inventory_screen.tscn")
+const ShopScene := preload("res://ui/screens/shop/shop_screen.tscn")
 const HeroScene := preload("res://ui/screens/hero/hero_screen.tscn")
 const HeroModels := preload("res://app/hero/hero_view_model.gd")
 const InventoryModels := preload("res://app/inventory/inventory_view_model.gd")
@@ -138,6 +139,20 @@ func show_inventory(
 		bool(preferences.get("reduced_motion", false)),
 		float(preferences.get("font_scale", 1.0))
 	))
+	return screen
+
+
+func show_shop(
+	model: Dictionary,
+	shell_model: Dictionary,
+	preferences: Dictionary,
+	handlers: Dictionary
+) -> ShopScreen:
+	_prepare_location_activity(shell_model, preferences)
+	var screen := _shell.show_screen(ShopScene) as ShopScreen
+	screen.back_requested.connect(_handler(handlers, "back"))
+	screen.purchase_requested.connect(_handler(handlers, "purchase"))
+	screen.present(model)
 	return screen
 
 

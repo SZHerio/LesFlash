@@ -8,17 +8,20 @@ extends RefCounted
 ## routes are deliberately not represented here.
 
 const LEGACY_CONTRACT_VERSION := 2
-const PREVIOUS_CONTRACT_VERSION := 3
-const CONTRACT_VERSION := 4
+const PREVIOUS_CONTRACT_VERSION := 4
+const CONTRACT_VERSION := 5
 const NO_ACTIVITY_KIND := "none"
 
 const WorldStateScript := preload("res://core/world/world_state.gd")
 const SocialStateScript := preload("res://core/social/social_state.gd")
 const WorldReadModelScript := preload("res://core/world/world_read_model.gd")
+const SurvivalStateScript := preload("res://game/survival/survival_state.gd")
+const JsonValueValidatorScript := preload("res://core/save/json_value_validator.gd")
 
 var run_state: RunState = RunState.new()
 var world_state: WorldState = WorldStateScript.new()
 var social_state: SocialState = SocialStateScript.new()
+var survival_state: SurvivalState = SurvivalStateScript.fresh()
 var applied_command_ids: Dictionary = {}
 var base_location: String = ""
 var active_activity: Dictionary = empty_activity()
@@ -32,7 +35,8 @@ func _init(
 	initial_activity: Dictionary = {},
 	initial_world_state: WorldState = null,
 	initial_social_state: SocialState = null,
-	initial_command_ids: Dictionary = {}
+	initial_command_ids: Dictionary = {},
+	initial_survival_state: SurvivalState = null
 ) -> void:
 	if initial_state != null:
 		run_state = initial_state
@@ -45,6 +49,10 @@ func _init(
 		world_state = initial_world_state
 	if initial_social_state != null:
 		social_state = initial_social_state
+	if initial_survival_state != null:
+		survival_state = initial_survival_state
+	elif run_state != null and run_state.calendar != null:
+		survival_state = SurvivalStateScript.fresh(run_state.calendar.elapsed_minutes)
 	applied_command_ids = initial_command_ids.duplicate(true)
 
 
@@ -148,6 +156,7 @@ func get_shell_model() -> Dictionary:
 			"age_years": age,
 			"calendar": calendar_model,
 		},
+		"lifecycle": survival_state.to_dict() if survival_state != null else {},
 		"world": Dictionary(WorldReadModelScript.build(world_state).get("observed", {})).duplicate(true),
 	}
 
@@ -174,6 +183,7 @@ func to_dict() -> Dictionary:
 		"run_state": run_state.to_dict() if run_state != null else {},
 		"world_state": world_state.to_dict() if world_state != null else {},
 		"social_state": social_state.to_dict() if social_state != null else {},
+		"survival_state": survival_state.to_dict() if survival_state != null else {},
 		"applied_command_ids": applied_command_ids.duplicate(true),
 		"base_location": base_location,
 		"active_activity": active_activity.duplicate(true),
@@ -182,7 +192,7 @@ func to_dict() -> Dictionary:
 
 static func from_dict(data: Dictionary) -> GameSession:
 	var version: Variant = _parse_integral(data.get("session_version", null))
-	if version == null or int(version) not in [LEGACY_CONTRACT_VERSION, PREVIOUS_CONTRACT_VERSION, CONTRACT_VERSION]:
+	if version == null or int(version) not in [LEGACY_CONTRACT_VERSION, 3, PREVIOUS_CONTRACT_VERSION, CONTRACT_VERSION]:
 		return null
 	if typeof(data.get("run_state", null)) != TYPE_DICTIONARY:
 		return null
@@ -195,13 +205,22 @@ static func from_dict(data: Dictionary) -> GameSession:
 	var parsed_world := WorldStateScript.new()
 	var parsed_social := SocialStateScript.new()
 	var parsed_commands: Dictionary = {}
-	if int(version) == CONTRACT_VERSION:
+	var parsed_survival: SurvivalState = SurvivalStateScript.fresh(parsed_state.calendar.elapsed_minutes)
+	if int(version) >= PREVIOUS_CONTRACT_VERSION:
 		if typeof(data.get("world_state", null)) != TYPE_DICTIONARY or typeof(data.get("social_state", null)) != TYPE_DICTIONARY or typeof(data.get("applied_command_ids", null)) != TYPE_DICTIONARY:
 			return null
 		parsed_world = WorldStateScript.from_dict(data["world_state"])
 		parsed_social = SocialStateScript.from_dict(data["social_state"])
-		parsed_commands = Dictionary(data["applied_command_ids"]).duplicate(true)
+		parsed_commands = JsonValueValidatorScript.normalize_numbers(
+			Dictionary(data["applied_command_ids"]).duplicate(true)
+		)
 		if parsed_world == null or parsed_social == null:
+			return null
+	if int(version) == CONTRACT_VERSION:
+		if typeof(data.get("survival_state", null)) != TYPE_DICTIONARY:
+			return null
+		parsed_survival = SurvivalStateScript.from_dict(data["survival_state"])
+		if parsed_survival == null:
 			return null
 	var result := GameSession.new(
 		parsed_state,
@@ -209,7 +228,8 @@ static func from_dict(data: Dictionary) -> GameSession:
 		parsed_activity,
 		parsed_world,
 		parsed_social,
-		parsed_commands
+		parsed_commands,
+		parsed_survival
 	)
 	return result if bool(result.validate().get("ok", false)) else null
 
@@ -235,6 +255,14 @@ func validate() -> Dictionary:
 		var social_validation := social_state.validate()
 		for error in Array(social_validation.get("errors", [])):
 			errors.append("social_state: %s" % String(error))
+	if survival_state == null:
+		errors.append("survival_state is null")
+	else:
+		var survival_validation := survival_state.validate()
+		for error in Array(survival_validation.get("errors", [])):
+			errors.append("survival_state: %s" % String(error))
+		if run_state != null and run_state.calendar != null and survival_state.processed_elapsed_minutes != run_state.calendar.elapsed_minutes:
+			errors.append("survival_state and calendar are desynchronized")
 	_validate_command_ids(applied_command_ids, errors)
 	if base_location.is_empty():
 		errors.append("base_location is empty")
@@ -258,6 +286,8 @@ func replace_from(other: GameSession) -> bool:
 	if not world_state.replace_from(other.world_state):
 		return false
 	if not social_state.replace_from(other.social_state):
+		return false
+	if not survival_state.replace_from(other.survival_state):
 		return false
 	applied_command_ids = other.applied_command_ids.duplicate(true)
 	base_location = other.base_location

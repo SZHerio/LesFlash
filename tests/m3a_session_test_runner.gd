@@ -7,6 +7,7 @@ const FirstDaySessionScript := preload("res://game/first_day/first_day_session.g
 const FirstDaySaveScript := preload("res://game/first_day/first_day_save.gd")
 
 const V1_FIXTURE_PATH := "res://tests/fixtures/m2_first_day_v1.json"
+const GAME_SESSION_V4_FIXTURE_PATH := "res://tests/fixtures/game_session_v4.json"
 
 var _failures: Array[String] = []
 var _tests_run := 0
@@ -19,6 +20,7 @@ func _init() -> void:
 		"res://.godot/.m3a_session_test_%d_%d.json" % [OS.get_process_id(), Time.get_ticks_usec()]
 	)
 	_run_test("generic GameSession round-trip", _test_generic_session_round_trip)
+	_run_test("physical GameSession v4 fixture migrates", _test_game_session_v4_fixture)
 	_run_test("shell and location models are pure", _test_read_models_are_pure)
 	_run_test("M2 commands remain available through adapter", _test_adapter_commands)
 	_run_test("location actions expose completion reasons", _test_location_action_reasons)
@@ -69,18 +71,71 @@ func _test_generic_session_round_trip() -> void:
 		"actions": [{"id": "look", "kind": "event"}],
 	}), "location view-model must be accepted")
 	_expect(session.begin_activity("search", "market_search", {"hero": {"x": 4, "y": 7}}), "activity must start")
-	var restored := GameSessionScript.from_dict(session.to_dict())
+	var serialized := session.to_dict()
+	_expect_equal(serialized.get("session_version"), 5, "GameSession must serialize as v5")
+	_expect(serialized.has("survival_state"), "GameSession v5 must persist survival state")
+	var shell := session.get_shell_model()
+	_expect_equal(shell.get("contract_version"), 5, "shell model must expose GameSession v5")
+	var restored := GameSessionScript.from_dict(serialized)
 	_expect(restored != null, "generic session must deserialize")
 	if restored == null:
 		return
 	_expect_equal(restored.to_dict(), session.to_dict(), "generic session data must round-trip")
 	_expect_equal(restored.active_activity.get("kind"), "search", "activity kind must survive")
 	_expect_equal(restored.base_location, "market", "base location must survive")
+	var previous := serialized.duplicate(true)
+	previous["session_version"] = 4
+	previous.erase("survival_state")
+	var migrated_previous := GameSessionScript.from_dict(previous)
+	_expect(migrated_previous != null, "GameSession v4 must migrate to v5 defaults")
+	if migrated_previous != null:
+		_expect_equal(
+			migrated_previous.survival_state.processed_elapsed_minutes,
+			state.calendar.elapsed_minutes,
+			"migrated survival state must start at the recorded calendar"
+		)
 	_expect(session.set_base_location("underpass"), "base location must be changeable")
 	var changed_location: Dictionary = session.get_location_model()
 	_expect_equal(changed_location.get("id"), "underpass", "changed model must use the new location id")
 	_expect_equal(changed_location.get("title"), "underpass", "stale location title must be cleared")
 	_expect(Array(changed_location.get("actions", [])).is_empty(), "stale location actions must be cleared")
+
+
+func _test_game_session_v4_fixture() -> void:
+	var file := FileAccess.open(GAME_SESSION_V4_FIXTURE_PATH, FileAccess.READ)
+	_expect(file != null, "physical GameSession v4 fixture must be readable")
+	if file == null:
+		return
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	_expect(parsed is Dictionary, "physical GameSession v4 fixture must contain a JSON object")
+	if not parsed is Dictionary:
+		return
+	var source: Dictionary = Dictionary(parsed).duplicate(true)
+	_expect_equal(source.get("session_version"), 4.0, "fixture must remain a physical v4 payload")
+	_expect(not source.has("survival_state"), "v4 fixture must predate SurvivalState")
+	var migrated := GameSessionScript.from_dict(source)
+	_expect(migrated != null, "physical GameSession v4 fixture must migrate")
+	if migrated == null:
+		return
+	_expect_equal(migrated.to_dict().get("session_version"), 5, "migrated session must serialize as v5")
+	_expect_equal(migrated.base_location, "market", "migration must preserve the base location")
+	_expect(
+		migrated.applied_command_ids.has("fixture:command"),
+		"migration must preserve the command ledger"
+	)
+	var migrated_timestamp: Dictionary = Dictionary(
+		migrated.applied_command_ids["fixture:command"]
+	).get("applied_at", {})
+	_expect(
+		typeof(migrated_timestamp.get("year")) == TYPE_INT,
+		"JSON command timestamps must normalize back to integers"
+	)
+	_expect_equal(
+		migrated.survival_state.processed_elapsed_minutes,
+		migrated.run_state.calendar.elapsed_minutes,
+		"migration must initialize survival at the recorded calendar"
+	)
+	_expect_equal(source.get("session_version"), 4.0, "migration must not mutate the physical fixture")
 
 
 func _test_read_models_are_pure() -> void:
@@ -263,8 +318,8 @@ func _test_v2_save_round_trip() -> void:
 	var loaded: Dictionary = FirstDaySaveScript.load_session(_save_path)
 	_expect(bool(loaded.get("ok", false)), "current session must load")
 	_expect(not bool(loaded.get("migrated", true)), "current save must not report migration")
-	_expect_equal(loaded.get("schema_version"), 5, "current envelope version must be 5")
-	_expect_equal(loaded.get("source_session_version"), 5, "current session version must be 5")
+	_expect_equal(loaded.get("schema_version"), 6, "current envelope version must be 6")
+	_expect_equal(loaded.get("source_session_version"), 6, "current session version must be 6")
 	_expect_equal(loaded.get("source_run_state_version"), 4, "current state version must be 4")
 	var restored = loaded.get("session")
 	_expect(restored != null, "loaded current session must exist")
@@ -280,6 +335,7 @@ func _downgrade_session(current: Dictionary) -> Dictionary:
 	result.erase("search_zone_states")
 	result.erase("world_state")
 	result.erase("social_state")
+	result.erase("survival_state")
 	result.erase("applied_command_ids")
 	if result.get("run_state") is Dictionary:
 		result["run_state"] = _downgrade_run_state(result["run_state"], 1)
