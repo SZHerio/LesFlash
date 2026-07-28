@@ -18,8 +18,10 @@ const CONTENT_GROUPS := [
 	"world", ## мировые процессы и причинные возвраты
 	"rare", ## редкие удачные и неблагоприятные случаи
 ]
+## M4 raises the bank to 150-250 for one finished district; the floor stays
+## where M3E put it so a stripped catalog still fails.
 const MIN_CARDS := 30
-const MAX_CARDS := 100
+const MAX_CARDS := 250
 const TONES := ["adverse", "neutral", "positive"]
 const EFFECT_TYPES := [
 	"advance_time",

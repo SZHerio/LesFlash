@@ -3600,7 +3600,9 @@
             },
             {
               "type": "knowledge",
-              "id": "scrap_buyer_contact"
+              "id": "scrap_buyer_contact",
+              "amount": 1,
+              "mode": "unlock"
             }
           ],
           "outcome": "Он объясняет, у какого гаража стоит по вечерам."
@@ -3747,7 +3749,9 @@
             },
             {
               "type": "knowledge",
-              "id": "market_day_loading"
+              "id": "market_day_loading",
+              "amount": 1,
+              "mode": "unlock"
             }
           ],
           "outcome": "Бригадир объясняет, к какому часу подходить утром."
@@ -3937,7 +3941,9 @@
             },
             {
               "type": "knowledge",
-              "id": "riverside_shortcut"
+              "id": "riverside_shortcut",
+              "amount": 1,
+              "mode": "unlock"
             },
             {
               "type": "change_state",
@@ -4018,7 +4024,9 @@
             },
             {
               "type": "knowledge",
-              "id": "basement_relocked"
+              "id": "basement_relocked",
+              "amount": 1,
+              "mode": "unlock"
             }
           ],
           "outcome": "Замок новый. Значит, кто-то сюда ещё вернётся."
@@ -4124,7 +4132,9 @@
             },
             {
               "type": "knowledge",
-              "id": "suburban_timetable_1980"
+              "id": "suburban_timetable_1980",
+              "amount": 1,
+              "mode": "unlock"
             },
             {
               "type": "change_state",
@@ -4146,7 +4156,9 @@
             },
             {
               "type": "knowledge",
-              "id": "suburban_timetable_1980"
+              "id": "suburban_timetable_1980",
+              "amount": 1,
+              "mode": "unlock"
             },
             {
               "type": "change_reputation",
@@ -4679,7 +4691,9 @@
             },
             {
               "type": "knowledge",
-              "id": "district_word_of_mouth"
+              "id": "district_word_of_mouth",
+              "amount": 1,
+              "mode": "unlock"
             }
           ],
           "outcome": "Говорят о ерунде, но уходить не хочется."
@@ -5254,7 +5268,9 @@
             },
             {
               "type": "knowledge",
-              "id": "clinic_side_entrance"
+              "id": "clinic_side_entrance",
+              "amount": 1,
+              "mode": "unlock"
             },
             {
               "type": "change_relationship",
@@ -5282,7 +5298,9 @@
             },
             {
               "type": "knowledge",
-              "id": "laundry_day_work"
+              "id": "laundry_day_work",
+              "amount": 1,
+              "mode": "unlock"
             },
             {
               "type": "change_relationship",
@@ -5329,7 +5347,9 @@
             },
             {
               "type": "knowledge",
-              "id": "inspection_schedule"
+              "id": "inspection_schedule",
+              "amount": 1,
+              "mode": "unlock"
             }
           ],
           "outcome": "Даты и фамилии. Вы запоминаете и то и другое."
@@ -5417,7 +5437,9 @@
             },
             {
               "type": "knowledge",
-              "id": "supply_disruption_1980"
+              "id": "supply_disruption_1980",
+              "amount": 1,
+              "mode": "unlock"
             }
           ],
           "outcome": "Говорят про задержку поставок. Кто-то добавляет: это надолго."
@@ -5457,7 +5479,9 @@
             },
             {
               "type": "knowledge",
-              "id": "yard_pass_rules"
+              "id": "yard_pass_rules",
+              "amount": 1,
+              "mode": "unlock"
             }
           ],
           "outcome": "Объясняют про пропуска. Половина слов — про то, кому их не дадут."
@@ -5479,7 +5503,9 @@
             },
             {
               "type": "knowledge",
-              "id": "yard_back_path"
+              "id": "yard_back_path",
+              "amount": 1,
+              "mode": "unlock"
             }
           ],
           "outcome": "Со стороны насыпи есть щель. Пока есть."
@@ -5525,7 +5551,9 @@
             },
             {
               "type": "knowledge",
-              "id": "replacement_route"
+              "id": "replacement_route",
+              "amount": 1,
+              "mode": "unlock"
             }
           ],
           "outcome": "Ходит другой, с пересадкой. Дольше, но ходит."
@@ -5589,7 +5617,9 @@
             },
             {
               "type": "knowledge",
-              "id": "cold_wave_coming"
+              "id": "cold_wave_coming",
+              "amount": 1,
+              "mode": "unlock"
             },
             {
               "type": "change_state",
@@ -5654,7 +5684,9 @@
             },
             {
               "type": "knowledge",
-              "id": "shelter_early_hours"
+              "id": "shelter_early_hours",
+              "amount": 1,
+              "mode": "unlock"
             },
             {
               "type": "change_state",
@@ -5730,7 +5762,9 @@
             },
             {
               "type": "knowledge",
-              "id": "yard_after_inspection"
+              "id": "yard_after_inspection",
+              "amount": 1,
+              "mode": "unlock"
             },
             {
               "type": "change_state",
@@ -5757,7 +5791,9 @@
             },
             {
               "type": "knowledge",
-              "id": "market_day_loading"
+              "id": "market_day_loading",
+              "amount": 1,
+              "mode": "unlock"
             }
           ],
           "outcome": "К вечеру у вас есть два адреса и ни одной договорённости."
@@ -5913,7 +5949,9 @@
             },
             {
               "type": "knowledge",
-              "id": "copper_in_the_underpass"
+              "id": "copper_in_the_underpass",
+              "amount": 1,
+              "mode": "unlock"
             }
           ],
           "outcome": "Вы запоминаете место. Никуда оно не денется."
@@ -6299,6 +6337,4252 @@
             }
           ],
           "outcome": "К концу пути на вас нет ни одной сухой нитки."
+        }
+      ]
+    },
+    {
+      "id": "freight_shunting_engine",
+      "title": "По путям подают маневровый",
+      "body": "Тепловоз идёт медленно, но по тому пути, где вы стоите.",
+      "tone": "adverse",
+      "group_id": "place",
+      "base_weight": 12,
+      "luck_bias": -1,
+      "cooldown_minutes": 720,
+      "locations": [
+        "freight_yard"
+      ],
+      "source_kinds": [
+        "location_action",
+        "search"
+      ],
+      "tags": [
+        "hazard",
+        "noise"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "step_well_clear",
+          "label": "Отойти на насыпь",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 6,
+              "reason": "Пропустить состав"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 4
+            }
+          ],
+          "outcome": "Состав проходит в трёх шагах. Земля под ногами дрожит."
+        },
+        {
+          "id": "cross_ahead_of_it",
+          "label": "Успеть перейти",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 2,
+              "reason": "Бегом через пути"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 14
+            },
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": -4
+            }
+          ],
+          "outcome": "Вы успеваете. Машинист долго смотрит вам вслед."
+        }
+      ]
+    },
+    {
+      "id": "freight_watchman_round",
+      "title": "Сторож делает обход",
+      "body": "Фонарь качается вдоль вагонов, шаги слышно раньше, чем видно свет.",
+      "tone": "adverse",
+      "group_id": "place",
+      "base_weight": 12,
+      "luck_bias": -2,
+      "cooldown_minutes": 600,
+      "locations": [
+        "freight_yard"
+      ],
+      "source_kinds": [
+        "search",
+        "location_action"
+      ],
+      "tags": [
+        "risk",
+        "trespass"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "greet_him_first",
+          "label": "Заговорить первым",
+          "conditions": [
+            {
+              "kind": "stat",
+              "id": "charisma",
+              "operator": ">=",
+              "value": 5,
+              "blocked_reason": "Нужно, чтобы вас приняли за своего"
+            }
+          ],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 10,
+              "reason": "Разговор со сторожем"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": -3
+            }
+          ],
+          "outcome": "Он ворчит, но пропускает: свои на дворе бывают."
+        },
+        {
+          "id": "wait_it_out",
+          "label": "Переждать за штабелем",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 18,
+              "reason": "Ожидание"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 8
+            }
+          ],
+          "outcome": "Фонарь уходит дальше. Спина затекла."
+        }
+      ]
+    },
+    {
+      "id": "freight_open_wagon_door",
+      "title": "Дверь вагона не заперта",
+      "body": "Створка отодвинута на ладонь. Внутри темно и пахнет зерном.",
+      "tone": "positive",
+      "group_id": "place",
+      "base_weight": 11,
+      "luck_bias": 1,
+      "cooldown_minutes": 900,
+      "locations": [
+        "freight_yard"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "access",
+        "resource"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "look_inside",
+          "label": "Заглянуть внутрь",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 12,
+              "reason": "Осмотр вагона"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 6
+            },
+            {
+              "type": "knowledge",
+              "id": "freight_wagon_rounds",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Пусто, но теперь вы знаете, какие вагоны оставляют открытыми."
+        },
+        {
+          "id": "close_it",
+          "label": "Прикрыть и уйти",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 4,
+              "reason": "Закрыть дверь"
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "freight_yard",
+              "delta": 3
+            }
+          ],
+          "outcome": "Кто-то заметит, что дверь закрыта, и не станет искать виноватых."
+        }
+      ]
+    },
+    {
+      "id": "courtyard_laundry_line",
+      "title": "Бельё сохнет во дворе",
+      "body": "Верёвки протянуты между тополями, простыни хлопают на ветру.",
+      "tone": "neutral",
+      "group_id": "place",
+      "base_weight": 11,
+      "luck_bias": 0,
+      "cooldown_minutes": 900,
+      "locations": [
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "social",
+        "risk"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "walk_past",
+          "label": "Пройти не оглядываясь",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 3,
+              "reason": "Мимо белья"
+            }
+          ],
+          "outcome": "Вы идёте дальше. На вас смотрят из окна, но без тревоги."
+        },
+        {
+          "id": "help_take_it_in",
+          "label": "Помочь снять перед дождём",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 16,
+              "reason": "Снять бельё"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 8
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "courtyard_blocks",
+              "delta": 6
+            }
+          ],
+          "outcome": "Хозяйка благодарит и запоминает лицо."
+        }
+      ]
+    },
+    {
+      "id": "courtyard_domino_table",
+      "title": "За столом играют в домино",
+      "body": "Четверо стучат костяшками, пятый стоит и комментирует.",
+      "tone": "positive",
+      "group_id": "social",
+      "base_weight": 12,
+      "luck_bias": 1,
+      "cooldown_minutes": 720,
+      "locations": [
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "watch_a_round",
+          "label": "Посмотреть партию",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 20,
+              "reason": "Наблюдение"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 7
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": -5
+            },
+            {
+              "type": "knowledge",
+              "id": "courtyard_word_of_mouth",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Между ходами обсуждают весь район."
+        },
+        {
+          "id": "take_a_seat",
+          "label": "Сесть играть",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 35,
+              "reason": "Партия"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 12
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -4
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "courtyard_blocks",
+              "delta": 4
+            }
+          ],
+          "outcome": "Играете вы средне, но за стол вас теперь зовут."
+        }
+      ]
+    },
+    {
+      "id": "courtyard_locked_cellar",
+      "title": "Подвал открыт для проветривания",
+      "body": "Створка подперта кирпичом, из темноты тянет холодом и керосином.",
+      "tone": "neutral",
+      "group_id": "place",
+      "base_weight": 10,
+      "luck_bias": 0,
+      "cooldown_minutes": 1080,
+      "locations": [
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "access",
+        "knowledge"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "note_the_hours",
+          "label": "Запомнить, когда открывают",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 8,
+              "reason": "Наблюдение"
+            },
+            {
+              "type": "knowledge",
+              "id": "courtyard_cellar_hours",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Проветривают по средам. Это стоит помнить."
+        },
+        {
+          "id": "go_down",
+          "label": "Спуститься",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 20,
+              "reason": "Осмотр подвала"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 10
+            },
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": -2
+            }
+          ],
+          "outcome": "Пахнет плесенью. Ничего, кроме банок и чужих санок."
+        }
+      ]
+    },
+    {
+      "id": "stepan_offers_tools",
+      "title": "Степан предлагает инструмент",
+      "body": "Он раскладывает на газете плоскогубцы и ножовку: «Бери, отдашь как сделаешь».",
+      "tone": "positive",
+      "group_id": "social",
+      "base_weight": 12,
+      "luck_bias": 1,
+      "cooldown_minutes": 1440,
+      "locations": [
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "social",
+        "help"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "borrow_the_saw",
+          "label": "Взять ножовку",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 8,
+              "reason": "Разговор"
+            },
+            {
+              "type": "add_item",
+              "item_id": "hand_saw",
+              "quantity": 1
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_stepan_gulev",
+              "field": "trust",
+              "delta": 4
+            },
+            {
+              "type": "add_npc_memory",
+              "npc_id": "npc_stepan_gulev",
+              "memory": {
+                "memory_id": "lent_a_tool",
+                "type_id": "shared_resource",
+                "valence": 55,
+                "salience": 60
+              }
+            }
+          ],
+          "outcome": "Он записывает что-то на пачке от папирос и машет рукой."
+        },
+        {
+          "id": "decline_the_offer",
+          "label": "Отказаться",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 4,
+              "reason": "Отказ"
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_stepan_gulev",
+              "field": "respect",
+              "delta": 2
+            }
+          ],
+          "outcome": "Степан кивает: «И правильно, чужое отдавать морока»."
+        }
+      ]
+    },
+    {
+      "id": "stepan_asks_a_hand",
+      "title": "Степану нужна вторая пара рук",
+      "body": "Во дворе надо вынести старый диван, а один он его не поднимет.",
+      "tone": "neutral",
+      "group_id": "social",
+      "base_weight": 12,
+      "luck_bias": 0,
+      "cooldown_minutes": 1440,
+      "locations": [
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "work",
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "help_him_lift",
+          "label": "Помочь вынести",
+          "conditions": [
+            {
+              "kind": "stat",
+              "id": "strength",
+              "operator": ">=",
+              "value": 5,
+              "blocked_reason": "Такой вес вдвоём не поднять, если один из двоих — вы"
+            }
+          ],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 30,
+              "reason": "Вынос дивана"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -14
+            },
+            {
+              "type": "change_money",
+              "amount": 50
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_stepan_gulev",
+              "field": "trust",
+              "delta": 6
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_stepan_gulev",
+              "field": "affinity",
+              "delta": 3
+            },
+            {
+              "type": "add_npc_memory",
+              "npc_id": "npc_stepan_gulev",
+              "memory": {
+                "memory_id": "carried_together",
+                "type_id": "helped",
+                "valence": 65,
+                "salience": 60
+              }
+            },
+            {
+              "type": "set_world_fact",
+              "id": "player_helped_stepan",
+              "value": true
+            }
+          ],
+          "outcome": "Диван у контейнера, полтинник в кармане, разговор завязался."
+        },
+        {
+          "id": "say_you_cannot",
+          "label": "Сказать, что не потянете",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 4,
+              "reason": "Отказ"
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_stepan_gulev",
+              "field": "affinity",
+              "delta": -2
+            }
+          ],
+          "outcome": "Он не обижается и идёт искать другого."
+        }
+      ]
+    },
+    {
+      "id": "stepan_knows_a_place",
+      "title": "Степан рассказывает, где брали на работу",
+      "body": "«Ты сходи на товарный, там в среду разгрузка. Только рано, часов в шесть».",
+      "tone": "positive",
+      "group_id": "social",
+      "base_weight": 11,
+      "luck_bias": 1,
+      "cooldown_minutes": 2880,
+      "locations": [
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "knowledge",
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "write_it_down",
+          "label": "Расспросить подробно",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 14,
+              "reason": "Разговор"
+            },
+            {
+              "type": "knowledge",
+              "id": "freight_yard_schedule",
+              "amount": 1,
+              "mode": "unlock"
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_stepan_gulev",
+              "field": "affinity",
+              "delta": 3
+            }
+          ],
+          "outcome": "Он объясняет и время, и к кому подойти."
+        },
+        {
+          "id": "thank_him_briefly",
+          "label": "Поблагодарить и идти",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 4,
+              "reason": "Короткое спасибо"
+            }
+          ],
+          "outcome": "Степан продолжает говорить вам в спину."
+        }
+      ]
+    },
+    {
+      "id": "market_delivery_late",
+      "title": "Машину с товаром не подали",
+      "body": "У ворот пусто, ящики со вчерашнего стоят нераспакованными.",
+      "tone": "adverse",
+      "group_id": "world",
+      "base_weight": 13,
+      "luck_bias": -1,
+      "cooldown_minutes": 2880,
+      "locations": [
+        "market"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "trade",
+        "work"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "ask_tamara",
+          "label": "Спросить Тамару",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 10,
+              "reason": "Разговор"
+            },
+            {
+              "type": "knowledge",
+              "id": "supply_disruption_1980",
+              "amount": 1,
+              "mode": "unlock"
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_tamara_roven",
+              "field": "trust",
+              "delta": 2
+            }
+          ],
+          "outcome": "Она коротко: «Обещали к вечеру. Обещали и вчера»."
+        },
+        {
+          "id": "offer_to_wait",
+          "label": "Предложить дождаться и разгрузить",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 50,
+              "reason": "Ожидание у ворот"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -10
+            },
+            {
+              "type": "change_money",
+              "amount": 60
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_tamara_roven",
+              "field": "trust",
+              "delta": 5
+            }
+          ],
+          "outcome": "Машина приходит затемно. Вас зовут первым."
+        }
+      ]
+    },
+    {
+      "id": "market_empty_shelves",
+      "title": "К полудню полки пустые",
+      "body": "Ряд работает, но брать почти нечего, и очередь стоит без движения.",
+      "tone": "adverse",
+      "group_id": "world",
+      "base_weight": 12,
+      "luck_bias": -1,
+      "cooldown_minutes": 2880,
+      "locations": [
+        "market"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "trade"
+      ],
+      "conditions": [
+        {
+          "kind": "world_process",
+          "id": "process_market_supply_squeeze",
+          "operator": ">=",
+          "value": "scarce"
+        }
+      ],
+      "options": [
+        {
+          "id": "buy_what_is_left",
+          "label": "Взять что осталось",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 15,
+              "reason": "Покупка"
+            },
+            {
+              "type": "change_money",
+              "amount": -70
+            },
+            {
+              "type": "add_item",
+              "item_id": "bread_loaf",
+              "quantity": 1
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 4
+            }
+          ],
+          "outcome": "Дороже обычного и хуже качеством, но сегодня выбора нет."
+        },
+        {
+          "id": "come_back_tomorrow",
+          "label": "Уйти ни с чем",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 4,
+              "reason": "Уход"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -5
+            }
+          ],
+          "outcome": "Завтра будет так же. Или хуже."
+        }
+      ]
+    },
+    {
+      "id": "market_rationing_notice",
+      "title": "На воротах вывесили норму отпуска",
+      "body": "Лист от руки: в одни руки — не больше двух килограммов.",
+      "tone": "adverse",
+      "group_id": "world",
+      "base_weight": 12,
+      "luck_bias": -2,
+      "cooldown_minutes": 4320,
+      "locations": [
+        "market"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "trade",
+        "authority"
+      ],
+      "conditions": [
+        {
+          "kind": "world_process",
+          "id": "process_market_supply_squeeze",
+          "operator": ">=",
+          "value": "rationed"
+        }
+      ],
+      "options": [
+        {
+          "id": "read_and_remember",
+          "label": "Прочитать и запомнить",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 6,
+              "reason": "Чтение"
+            },
+            {
+              "type": "knowledge",
+              "id": "market_rationing_rules",
+              "amount": 1,
+              "mode": "unlock"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 5
+            }
+          ],
+          "outcome": "Нормы, часы и подпись. Всё как положено."
+        },
+        {
+          "id": "ask_who_decided",
+          "label": "Спросить, кто решил",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 12,
+              "reason": "Расспросы"
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "market",
+              "delta": -3
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 8
+            }
+          ],
+          "outcome": "Отвечают неохотно. Смотрят так, будто вы уже что-то нарушили."
+        }
+      ]
+    },
+    {
+      "id": "porter_crate_dropped",
+      "title": "Ящик упал с борта",
+      "body": "Помидоры раскатились по асфальту, половина уже не товар.",
+      "tone": "adverse",
+      "group_id": "work",
+      "base_weight": 11,
+      "luck_bias": -1,
+      "cooldown_minutes": 1080,
+      "locations": [
+        "market"
+      ],
+      "source_kinds": [
+        "location_action",
+        "job"
+      ],
+      "tags": [
+        "work",
+        "trade"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "own_up",
+          "label": "Признать сразу",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 10,
+              "reason": "Разговор"
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_tamara_roven",
+              "field": "trust",
+              "delta": 4
+            },
+            {
+              "type": "change_money",
+              "amount": -40
+            }
+          ],
+          "outcome": "Тамара вычитает из расчёта и больше об этом не говорит."
+        },
+        {
+          "id": "blend_it_in",
+          "label": "Сложить обратно и не заметить",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 8,
+              "reason": "Собрать наспех"
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_tamara_roven",
+              "field": "trust",
+              "delta": -6
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -5
+            }
+          ],
+          "outcome": "К вечеру покупатель находит битые. Тамара молчит, но помнит."
+        }
+      ]
+    },
+    {
+      "id": "porter_extra_hands",
+      "title": "В ряду просят подменить",
+      "body": "Соседний прилавок остался без человека, и Тамара кивает: сходи.",
+      "tone": "neutral",
+      "group_id": "work",
+      "base_weight": 11,
+      "luck_bias": 0,
+      "cooldown_minutes": 1440,
+      "locations": [
+        "market"
+      ],
+      "source_kinds": [
+        "location_action",
+        "job"
+      ],
+      "tags": [
+        "work",
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "cover_the_stall",
+          "label": "Постоять за прилавком",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 70,
+              "reason": "Подмена"
+            },
+            {
+              "type": "change_money",
+              "amount": 80
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -12
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "market",
+              "delta": 5
+            }
+          ],
+          "outcome": "Торговля идёт вяло, но вас теперь знают в двух рядах."
+        },
+        {
+          "id": "stay_on_the_crates",
+          "label": "Остаться на ящиках",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 4,
+              "reason": "Отказ"
+            }
+          ],
+          "outcome": "Разгрузка своё возьмёт и без чужого прилавка."
+        }
+      ]
+    },
+    {
+      "id": "freight_night_pay",
+      "title": "Расчёт после ночной смены",
+      "body": "Бригадир отсчитывает купюры под фонарём и смотрит, пересчитаете ли вы.",
+      "tone": "neutral",
+      "group_id": "work",
+      "base_weight": 11,
+      "luck_bias": 0,
+      "cooldown_minutes": 1440,
+      "locations": [
+        "freight_yard"
+      ],
+      "source_kinds": [
+        "location_action",
+        "job"
+      ],
+      "tags": [
+        "work",
+        "trade"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "count_it_there",
+          "label": "Пересчитать при нём",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 6,
+              "reason": "Пересчёт"
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "freight_yard",
+              "delta": 3
+            }
+          ],
+          "outcome": "Он усмехается: «Правильно. Считать надо при людях»."
+        },
+        {
+          "id": "take_and_go",
+          "label": "Убрать не считая",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 2,
+              "reason": "Уход"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -3
+            }
+          ],
+          "outcome": "Дома выходит на двадцать меньше, чем вы думали."
+        }
+      ]
+    },
+    {
+      "id": "rare_freight_sealed_crate",
+      "title": "Ящик без маркировки",
+      "body": "Стоит отдельно, доски свежие, гвозди не тронуты. Никто рядом не суетится.",
+      "tone": "neutral",
+      "group_id": "rare",
+      "base_weight": 6,
+      "luck_bias": 3,
+      "cooldown_minutes": 5760,
+      "locations": [
+        "freight_yard"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "luck",
+        "choice"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "leave_it_alone",
+          "label": "Не трогать",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 4,
+              "reason": "Отойти"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": -2
+            }
+          ],
+          "outcome": "Целее будете. Любопытство остаётся при вас."
+        },
+        {
+          "id": "prise_it_open",
+          "label": "Вскрыть",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 22,
+              "reason": "Вскрытие ящика"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 16
+            },
+            {
+              "type": "add_item",
+              "item_id": "small_parts",
+              "quantity": 2
+            },
+            {
+              "type": "add_item",
+              "item_id": "brass_fittings",
+              "quantity": 1
+            }
+          ],
+          "outcome": "Запчасти, промасленная бумага и чувство, что зря."
+        }
+      ]
+    },
+    {
+      "id": "rare_courtyard_windfall",
+      "title": "Из окна выбрасывают вещи",
+      "body": "Скандал наверху, во двор летят чужие пожитки. Половина ещё целая.",
+      "tone": "neutral",
+      "group_id": "rare",
+      "base_weight": 6,
+      "luck_bias": 2,
+      "cooldown_minutes": 5760,
+      "locations": [
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "luck",
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "gather_quietly",
+          "label": "Собрать что уцелело",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 12,
+              "reason": "Сбор"
+            },
+            {
+              "type": "add_item",
+              "item_id": "warm_jacket",
+              "quantity": 1
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -6
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "courtyard_blocks",
+              "delta": -4
+            }
+          ],
+          "outcome": "Куртка почти новая. Смотреть в окна не хочется."
+        },
+        {
+          "id": "walk_away",
+          "label": "Уйти со двора",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 5,
+              "reason": "Уход"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 4
+            }
+          ],
+          "outcome": "Чужая беда не товар. Вы сворачиваете за угол."
+        }
+      ]
+    },
+    {
+      "id": "rare_watchman_falls_asleep",
+      "title": "Сторож задремал в будке",
+      "body": "Свет горит, радио бормочет, а самого не слышно уже полчаса.",
+      "tone": "positive",
+      "group_id": "rare",
+      "base_weight": 6,
+      "luck_bias": 3,
+      "cooldown_minutes": 5760,
+      "locations": [
+        "freight_yard"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "luck",
+        "risk"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "work_the_yard",
+          "label": "Пройти по двору спокойно",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 25,
+              "reason": "Свободный обход"
+            },
+            {
+              "type": "add_item",
+              "item_id": "scrap_wire",
+              "quantity": 2
+            },
+            {
+              "type": "add_item",
+              "item_id": "small_parts",
+              "quantity": 1
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 6
+            }
+          ],
+          "outcome": "Двадцать пять минут без оглядки стоят многого."
+        },
+        {
+          "id": "wake_him",
+          "label": "Разбудить",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 8,
+              "reason": "Разговор"
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "freight_yard",
+              "delta": 7
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 6
+            }
+          ],
+          "outcome": "Он вскакивает, смущается и запоминает, кто его не сдал."
+        }
+      ]
+    },
+    {
+      "id": "survival_queue_for_kettle",
+      "title": "У бочки кипятят воду",
+      "body": "Кто-то принёс чайник и греет его на костре из ящиков.",
+      "tone": "positive",
+      "group_id": "survival",
+      "base_weight": 12,
+      "luck_bias": 1,
+      "cooldown_minutes": 720,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "food",
+        "rest"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "drink_hot",
+          "label": "Выпить кипятка",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 12,
+              "reason": "Кипяток"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": 7
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 6
+            }
+          ],
+          "outcome": "Пустой кипяток, а теплее становится сразу."
+        },
+        {
+          "id": "wait_your_turn",
+          "label": "Подождать и уступить",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 20,
+              "reason": "Ожидание"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 4
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "underpass",
+              "delta": 2
+            }
+          ],
+          "outcome": "Вам достаётся последнему, зато без косых взглядов."
+        }
+      ]
+    },
+    {
+      "id": "survival_blister_on_heel",
+      "title": "Стёрта пятка",
+      "body": "Каждый шаг отзывается, и это только начало дня.",
+      "tone": "adverse",
+      "group_id": "survival",
+      "base_weight": 11,
+      "luck_bias": -1,
+      "cooldown_minutes": 900,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "travel",
+        "location_action"
+      ],
+      "tags": [
+        "health"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "patch_it",
+          "label": "Заклеить и переобуться",
+          "conditions": [
+            {
+              "kind": "item",
+              "id": "bandage_roll",
+              "operator": ">=",
+              "value": 1,
+              "blocked_reason": "Нечем заклеить"
+            }
+          ],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 14,
+              "reason": "Перевязка"
+            },
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": 8
+            }
+          ],
+          "outcome": "Идти можно. Не бегом, но можно."
+        },
+        {
+          "id": "keep_walking",
+          "label": "Идти дальше",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 3,
+              "reason": "Дальше"
+            },
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": -6
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -4
+            }
+          ],
+          "outcome": "К вечеру нога отзывается на каждый шаг."
+        }
+      ]
+    },
+    {
+      "id": "survival_shared_bench",
+      "title": "На скамье потеснились",
+      "body": "Двое сдвигаются, освобождая край. Молча, но недвусмысленно.",
+      "tone": "positive",
+      "group_id": "survival",
+      "base_weight": 12,
+      "luck_bias": 1,
+      "cooldown_minutes": 600,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "rest",
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "sit_down",
+          "label": "Сесть",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 30,
+              "reason": "Отдых"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": 12
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 5
+            }
+          ],
+          "outcome": "Полчаса сидя — половина сил обратно."
+        },
+        {
+          "id": "nod_and_pass",
+          "label": "Кивнуть и пройти",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 2,
+              "reason": "Мимо"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 2
+            }
+          ],
+          "outcome": "Место остаётся тем, кому нужнее."
+        }
+      ]
+    },
+    {
+      "id": "survival_cold_rain_start",
+      "title": "Начинается затяжной дождь",
+      "body": "Не ливень, а именно затяжной: такой идёт до ночи.",
+      "tone": "adverse",
+      "group_id": "survival",
+      "base_weight": 12,
+      "luck_bias": -1,
+      "cooldown_minutes": 720,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "weather"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "find_cover",
+          "label": "Найти навес",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 25,
+              "reason": "Под навесом"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": 4
+            },
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": 2
+            }
+          ],
+          "outcome": "Сухо и скучно. Скучно — это хорошо."
+        },
+        {
+          "id": "carry_on",
+          "label": "Заниматься своим",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 6,
+              "reason": "Под дождём"
+            },
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": -6
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -5
+            }
+          ],
+          "outcome": "Промокли до пояса, но день не потерян."
+        }
+      ]
+    },
+    {
+      "id": "survival_stale_bread_gift",
+      "title": "Из окна протягивают свёрток",
+      "body": "Женщина в халате машет рукой: возьми, всё равно выбрасывать.",
+      "tone": "positive",
+      "group_id": "survival",
+      "base_weight": 10,
+      "luck_bias": 2,
+      "cooldown_minutes": 1440,
+      "locations": [
+        "courtyard_blocks",
+        "market"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "food",
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "take_it",
+          "label": "Взять",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 6,
+              "reason": "Разговор"
+            },
+            {
+              "type": "add_item",
+              "item_id": "bread_loaf",
+              "quantity": 1
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 9
+            }
+          ],
+          "outcome": "Хлеб чёрствый по краям и целый внутри."
+        },
+        {
+          "id": "thank_and_refuse",
+          "label": "Поблагодарить и отказаться",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 5,
+              "reason": "Отказ"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 3
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "courtyard_blocks",
+              "delta": 3
+            }
+          ],
+          "outcome": "Она пожимает плечами, но смотрит по-доброму."
+        }
+      ]
+    },
+    {
+      "id": "survival_toothache",
+      "title": "Разболелся зуб",
+      "body": "Тупо и постоянно, с самого утра, и жевать на той стороне нельзя.",
+      "tone": "adverse",
+      "group_id": "survival",
+      "base_weight": 10,
+      "luck_bias": -2,
+      "cooldown_minutes": 2880,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "health"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "take_something",
+          "label": "Принять таблетку",
+          "conditions": [
+            {
+              "kind": "item",
+              "id": "painkiller_strip",
+              "operator": ">=",
+              "value": 1,
+              "blocked_reason": "Нечего принять"
+            }
+          ],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 6,
+              "reason": "Обезболивание"
+            },
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": 5
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 6
+            }
+          ],
+          "outcome": "Отпускает через четверть часа."
+        },
+        {
+          "id": "endure_it",
+          "label": "Терпеть",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 4,
+              "reason": "Через боль"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -9
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -5
+            }
+          ],
+          "outcome": "Боль никуда не девается и съедает внимание."
+        }
+      ]
+    },
+    {
+      "id": "survival_boiler_room_warmth",
+      "title": "У котельной приоткрыта дверь",
+      "body": "Изнутри тянет сухим жаром и запахом угля.",
+      "tone": "positive",
+      "group_id": "survival",
+      "base_weight": 11,
+      "luck_bias": 1,
+      "cooldown_minutes": 900,
+      "locations": [
+        "underpass",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "shelter",
+        "rest"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "warm_up",
+          "label": "Погреться",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 35,
+              "reason": "У котельной"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": 13
+            },
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": 4
+            }
+          ],
+          "outcome": "Одежда наконец просыхает."
+        },
+        {
+          "id": "dont_push_it",
+          "label": "Не наглеть",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 3,
+              "reason": "Мимо"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -2
+            }
+          ],
+          "outcome": "Дверь всё-таки чужая."
+        }
+      ]
+    },
+    {
+      "id": "survival_water_from_colonka",
+      "title": "Колонка во дворе",
+      "body": "Чугунная, с тугой ручкой. Вода идёт ржавая, потом чистая.",
+      "tone": "positive",
+      "group_id": "survival",
+      "base_weight": 12,
+      "luck_bias": 0,
+      "cooldown_minutes": 480,
+      "locations": [
+        "courtyard_blocks",
+        "freight_yard"
+      ],
+      "source_kinds": [
+        "location_action",
+        "search"
+      ],
+      "tags": [
+        "health",
+        "water"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "drink_and_fill",
+          "label": "Напиться и умыться",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 10,
+              "reason": "Колонка"
+            },
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": 4
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 4
+            }
+          ],
+          "outcome": "Ледяная, аж зубы ломит."
+        },
+        {
+          "id": "wash_the_clothes",
+          "label": "Застирать рубаху",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 28,
+              "reason": "Стирка"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 8
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -4
+            }
+          ],
+          "outcome": "Мокрая одежда — но чистая."
+        }
+      ]
+    },
+    {
+      "id": "place_tram_detour",
+      "title": "Трамвай идёт в объезд",
+      "body": "Пути перекопаны, вагон разворачивают за два квартала до нужного.",
+      "tone": "adverse",
+      "group_id": "place",
+      "base_weight": 11,
+      "luck_bias": -1,
+      "cooldown_minutes": 900,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "travel"
+      ],
+      "tags": [
+        "time"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "walk_the_rest",
+          "label": "Дойти пешком",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 22,
+              "reason": "Пешком"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -7
+            }
+          ],
+          "outcome": "Двадцать минут, которых не планировали."
+        },
+        {
+          "id": "wait_for_bus",
+          "label": "Ждать автобус",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 30,
+              "reason": "Ожидание"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -4
+            }
+          ],
+          "outcome": "Автобус приходит полупустой и не туда."
+        }
+      ]
+    },
+    {
+      "id": "place_new_fence",
+      "title": "Проход перегородили забором",
+      "body": "Свежие столбы, сетка натянута наспех. Тропа обрывается.",
+      "tone": "adverse",
+      "group_id": "place",
+      "base_weight": 11,
+      "luck_bias": -1,
+      "cooldown_minutes": 1440,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "travel"
+      ],
+      "tags": [
+        "access"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "find_the_gap",
+          "label": "Поискать дыру",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 16,
+              "reason": "Обход вдоль сетки"
+            },
+            {
+              "type": "knowledge",
+              "id": "district_shortcuts",
+              "amount": 1,
+              "mode": "unlock"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 4
+            }
+          ],
+          "outcome": "Дыра нашлась у самого угла."
+        },
+        {
+          "id": "go_the_long_way",
+          "label": "Идти в обход",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 24,
+              "reason": "Длинный путь"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -8
+            }
+          ],
+          "outcome": "Дольше, зато без разговоров."
+        }
+      ]
+    },
+    {
+      "id": "place_streetlight_out",
+      "title": "Фонарь погас",
+      "body": "Половина улицы в темноте, и это надолго — лампу меняют не сразу.",
+      "tone": "neutral",
+      "group_id": "place",
+      "base_weight": 11,
+      "luck_bias": 0,
+      "cooldown_minutes": 1080,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "travel",
+        "location_action"
+      ],
+      "tags": [
+        "risk"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "use_the_dark",
+          "label": "Пройти по тёмной стороне",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 8,
+              "reason": "В темноте"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 6
+            }
+          ],
+          "outcome": "Никто вас не видел. И вы никого."
+        },
+        {
+          "id": "go_where_lit",
+          "label": "Держаться освещённого",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 14,
+              "reason": "По свету"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": -3
+            }
+          ],
+          "outcome": "Дольше, но спокойнее."
+        }
+      ]
+    },
+    {
+      "id": "place_puddle_crossing",
+      "title": "Двор залило после дождя",
+      "body": "Вода стоит от стены до стены, обойти негде.",
+      "tone": "neutral",
+      "group_id": "place",
+      "base_weight": 11,
+      "luck_bias": 0,
+      "cooldown_minutes": 720,
+      "locations": [
+        "courtyard_blocks",
+        "freight_yard",
+        "recycling_point"
+      ],
+      "source_kinds": [
+        "travel",
+        "location_action"
+      ],
+      "tags": [
+        "weather"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "cross_on_bricks",
+          "label": "Перейти по кирпичам",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 9,
+              "reason": "По кирпичам"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 3
+            }
+          ],
+          "outcome": "Один кирпич качается, но выдерживает."
+        },
+        {
+          "id": "wade_it",
+          "label": "Пройти вброд",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 4,
+              "reason": "Вброд"
+            },
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": -4
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -3
+            }
+          ],
+          "outcome": "Ботинки полны воды."
+        }
+      ]
+    },
+    {
+      "id": "place_market_closing_early",
+      "title": "Ряд закрывается раньше",
+      "body": "Продавцы сворачиваются к четырём, хотя обычно стоят до шести.",
+      "tone": "adverse",
+      "group_id": "place",
+      "base_weight": 11,
+      "luck_bias": -1,
+      "cooldown_minutes": 1440,
+      "locations": [
+        "market"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "time",
+        "trade"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "ask_why_early",
+          "label": "Спросить, почему",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 10,
+              "reason": "Расспросы"
+            },
+            {
+              "type": "knowledge",
+              "id": "market_schedule",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Говорят про привоз, который не пришёл."
+        },
+        {
+          "id": "hurry_to_buy",
+          "label": "Успеть купить",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 12,
+              "reason": "Спешная покупка"
+            },
+            {
+              "type": "change_money",
+              "amount": -50
+            },
+            {
+              "type": "add_item",
+              "item_id": "simple_meal",
+              "quantity": 1
+            }
+          ],
+          "outcome": "Берёте что осталось, не выбирая."
+        }
+      ]
+    },
+    {
+      "id": "social_lidiya_shares_news",
+      "title": "Лидия рассказывает про приём",
+      "body": "Она стоит с талоном и делится, к какому врачу очередь короче.",
+      "tone": "positive",
+      "group_id": "social",
+      "base_weight": 11,
+      "luck_bias": 1,
+      "cooldown_minutes": 1440,
+      "locations": [
+        "clinic_yard"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "social",
+        "knowledge"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "listen_properly",
+          "label": "Выслушать внимательно",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 12,
+              "reason": "Разговор"
+            },
+            {
+              "type": "knowledge",
+              "id": "clinic_hours",
+              "amount": 1,
+              "mode": "unlock"
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_lidiya_maren",
+              "field": "affinity",
+              "delta": 3
+            }
+          ],
+          "outcome": "Она объясняет подробно и дважды."
+        },
+        {
+          "id": "excuse_yourself",
+          "label": "Сослаться на дела",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 4,
+              "reason": "Короткий разговор"
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_lidiya_maren",
+              "field": "affinity",
+              "delta": -2
+            }
+          ],
+          "outcome": "Лидия кивает, но разговор обрывается."
+        }
+      ]
+    },
+    {
+      "id": "social_tamara_needs_change",
+      "title": "Тамаре нужна мелочь",
+      "body": "Она перебирает кассу: «Рубль разменяешь? Сдачи не хватает».",
+      "tone": "neutral",
+      "group_id": "social",
+      "base_weight": 11,
+      "luck_bias": 0,
+      "cooldown_minutes": 1080,
+      "locations": [
+        "market"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "social",
+        "trade"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "break_the_note",
+          "label": "Разменять",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 5,
+              "reason": "Размен"
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_tamara_roven",
+              "field": "trust",
+              "delta": 3
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "market",
+              "delta": 2
+            }
+          ],
+          "outcome": "Мелочь уходит в кассу, вам кивают."
+        },
+        {
+          "id": "say_you_have_none",
+          "label": "Сказать, что нет",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 3,
+              "reason": "Отказ"
+            }
+          ],
+          "outcome": "Она ищет дальше по ряду."
+        }
+      ]
+    },
+    {
+      "id": "social_viktor_after_shift",
+      "title": "Виктор задерживается после смены",
+      "body": "Он сидит на ящике и курит, глядя на пустую площадку.",
+      "tone": "neutral",
+      "group_id": "social",
+      "base_weight": 11,
+      "luck_bias": 0,
+      "cooldown_minutes": 1440,
+      "locations": [
+        "recycling_point"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "sit_with_him",
+          "label": "Посидеть рядом",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 18,
+              "reason": "Молчаливое соседство"
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_viktor_koren",
+              "field": "affinity",
+              "delta": 4
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 6
+            }
+          ],
+          "outcome": "Говорят мало. Но в следующий раз он здоровается первым."
+        },
+        {
+          "id": "leave_him_be",
+          "label": "Не мешать",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 3,
+              "reason": "Уйти"
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_viktor_koren",
+              "field": "respect",
+              "delta": 2
+            }
+          ],
+          "outcome": "Иногда не подойти — тоже уважение."
+        }
+      ]
+    },
+    {
+      "id": "social_stepan_argues",
+      "title": "Степан спорит с соседом",
+      "body": "Разговор на повышенных: что-то про гараж и общий счётчик.",
+      "tone": "adverse",
+      "group_id": "social",
+      "base_weight": 10,
+      "luck_bias": -1,
+      "cooldown_minutes": 1440,
+      "locations": [
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "take_his_side",
+          "label": "Поддержать Степана",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 12,
+              "reason": "Вмешательство"
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_stepan_gulev",
+              "field": "trust",
+              "delta": 5
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "courtyard_blocks",
+              "delta": -3
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 7
+            }
+          ],
+          "outcome": "Степан благодарен. Сосед запомнил и вас."
+        },
+        {
+          "id": "stay_out_of_it",
+          "label": "Не встревать",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 4,
+              "reason": "В стороне"
+            },
+            {
+              "type": "change_relationship",
+              "npc_id": "npc_stepan_gulev",
+              "field": "affinity",
+              "delta": -2
+            }
+          ],
+          "outcome": "Правильно, но Степан заметил, что вы промолчали."
+        }
+      ]
+    },
+    {
+      "id": "social_someone_asks_directions",
+      "title": "У вас спрашивают дорогу",
+      "body": "Приезжий с чемоданом, растерянный, обращается именно к вам.",
+      "tone": "positive",
+      "group_id": "social",
+      "base_weight": 12,
+      "luck_bias": 1,
+      "cooldown_minutes": 720,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "social",
+        "help"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "explain_carefully",
+          "label": "Объяснить подробно",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 9,
+              "reason": "Объяснение"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 7
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "station_square",
+              "delta": 2
+            }
+          ],
+          "outcome": "Он благодарит и уходит уверенно."
+        },
+        {
+          "id": "point_and_go",
+          "label": "Показать рукой",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 2,
+              "reason": "Жест"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 2
+            }
+          ],
+          "outcome": "Он идёт в нужную сторону. Наверное."
+        }
+      ]
+    },
+    {
+      "id": "social_old_debt_reminded",
+      "title": "Вам напоминают о долге",
+      "body": "Знакомый останавливает и без предисловий называет сумму.",
+      "tone": "adverse",
+      "group_id": "social",
+      "base_weight": 10,
+      "luck_bias": -1,
+      "cooldown_minutes": 2880,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "social",
+        "trade"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "pay_it_back",
+          "label": "Отдать",
+          "conditions": [
+            {
+              "kind": "state",
+              "id": "mental_state",
+              "operator": ">=",
+              "value": 20,
+              "blocked_reason": "Сейчас не до чужих счетов"
+            }
+          ],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 6,
+              "reason": "Расчёт"
+            },
+            {
+              "type": "change_money",
+              "amount": -80
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 10
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": -6
+            }
+          ],
+          "outcome": "Он удивлён и доволен. Вы легче на восемьдесят."
+        },
+        {
+          "id": "ask_for_time",
+          "label": "Попросить отсрочку",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 8,
+              "reason": "Разговор"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 8
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -5
+            }
+          ],
+          "outcome": "Соглашается. Смотрит иначе."
+        }
+      ]
+    },
+    {
+      "id": "social_group_by_the_fire",
+      "title": "У костра зовут погреться",
+      "body": "Трое сидят вокруг бочки, один машет рукой: места хватит.",
+      "tone": "positive",
+      "group_id": "social",
+      "base_weight": 12,
+      "luck_bias": 1,
+      "cooldown_minutes": 900,
+      "locations": [
+        "underpass",
+        "freight_yard",
+        "embankment"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "social",
+        "rest"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "join_them",
+          "label": "Подсесть",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 28,
+              "reason": "У костра"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": 9
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 11
+            },
+            {
+              "type": "knowledge",
+              "id": "district_word_of_mouth",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Разговор ни о чём, а расходиться не хочется."
+        },
+        {
+          "id": "warm_and_go",
+          "label": "Погреться и уйти",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 10,
+              "reason": "Короткая остановка"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": 5
+            }
+          ],
+          "outcome": "Тепло взяли, разговор оставили."
+        }
+      ]
+    },
+    {
+      "id": "work_early_call",
+      "title": "Бригадир зовёт с утра",
+      "body": "«Есть работа на два часа. Надо сейчас».",
+      "tone": "positive",
+      "group_id": "work",
+      "base_weight": 12,
+      "luck_bias": 0,
+      "cooldown_minutes": 900,
+      "locations": [
+        "market",
+        "freight_yard",
+        "station_square"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "work"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "take_it",
+          "label": "Взяться",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 120,
+              "reason": "Подработка"
+            },
+            {
+              "type": "change_money",
+              "amount": 110
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -20
+            },
+            {
+              "type": "change_state",
+              "id": "hunger",
+              "delta": 12
+            }
+          ],
+          "outcome": "Два часа как обещали. Деньги сразу."
+        },
+        {
+          "id": "ask_for_later",
+          "label": "Договориться на потом",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 6,
+              "reason": "Договор"
+            },
+            {
+              "type": "knowledge",
+              "id": "market_day_loading",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Записывают на завтра. Обещаниям тут верят через раз."
+        }
+      ]
+    },
+    {
+      "id": "work_tool_breaks",
+      "title": "Инструмент сломался в руках",
+      "body": "Ручка лопнула по трещине, которой вы не заметили.",
+      "tone": "adverse",
+      "group_id": "work",
+      "base_weight": 10,
+      "luck_bias": -1,
+      "cooldown_minutes": 1440,
+      "locations": [
+        "recycling_point",
+        "freight_yard",
+        "market"
+      ],
+      "source_kinds": [
+        "location_action",
+        "job"
+      ],
+      "tags": [
+        "work",
+        "technical"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "fix_it_yourself",
+          "label": "Починить",
+          "conditions": [
+            {
+              "kind": "skill",
+              "id": "repair",
+              "operator": ">=",
+              "value": 1,
+              "blocked_reason": "Нужно понимать, что там внутри"
+            }
+          ],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 25,
+              "reason": "Ремонт"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 6
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "recycling_point",
+              "delta": 4
+            }
+          ],
+          "outcome": "Держится. Не как новая, но держится."
+        },
+        {
+          "id": "report_and_swap",
+          "label": "Сдать и взять другой",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 10,
+              "reason": "Замена"
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "recycling_point",
+              "delta": -2
+            }
+          ],
+          "outcome": "Меняют без разговоров, но записывают."
+        }
+      ]
+    },
+    {
+      "id": "work_pay_in_goods",
+      "title": "Расплатиться предлагают товаром",
+      "body": "«Денег нет до пятницы. Возьми продуктами, не обижу».",
+      "tone": "neutral",
+      "group_id": "work",
+      "base_weight": 11,
+      "luck_bias": 0,
+      "cooldown_minutes": 1440,
+      "locations": [
+        "market",
+        "recycling_point"
+      ],
+      "source_kinds": [
+        "location_action",
+        "job"
+      ],
+      "tags": [
+        "trade",
+        "work"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "take_the_goods",
+          "label": "Взять товаром",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 8,
+              "reason": "Расчёт"
+            },
+            {
+              "type": "add_item",
+              "item_id": "ration_can",
+              "quantity": 1
+            },
+            {
+              "type": "add_item",
+              "item_id": "bread_loaf",
+              "quantity": 1
+            },
+            {
+              "type": "add_item",
+              "item_id": "tea_packet",
+              "quantity": 1
+            }
+          ],
+          "outcome": "Выходит дороже денег, если считать по рынку."
+        },
+        {
+          "id": "insist_on_money",
+          "label": "Настоять на деньгах",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 14,
+              "reason": "Разговор"
+            },
+            {
+              "type": "change_money",
+              "amount": 90
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "market",
+              "delta": -3
+            }
+          ],
+          "outcome": "Деньги дают. Неохотно."
+        }
+      ]
+    },
+    {
+      "id": "work_slow_day",
+      "title": "Работы сегодня нет",
+      "body": "Все ворота закрыты, у бригадира разводят руками.",
+      "tone": "adverse",
+      "group_id": "work",
+      "base_weight": 11,
+      "luck_bias": -1,
+      "cooldown_minutes": 1080,
+      "locations": [
+        "market",
+        "freight_yard",
+        "recycling_point"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "work"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "ask_around",
+          "label": "Обойти соседние",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 45,
+              "reason": "Обход"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -10
+            },
+            {
+              "type": "knowledge",
+              "id": "district_word_of_mouth",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Работы не нашлось, зато узнали, где искать завтра."
+        },
+        {
+          "id": "use_the_day",
+          "label": "Заняться своим",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 5,
+              "reason": "Решение"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 3
+            }
+          ],
+          "outcome": "Свободный день — тоже день."
+        }
+      ]
+    },
+    {
+      "id": "work_helping_hand_paid",
+      "title": "Просят подсобить за наличные",
+      "body": "Мужик у машины: «Помоги занести, дам пятёрку».",
+      "tone": "positive",
+      "group_id": "work",
+      "base_weight": 12,
+      "luck_bias": 1,
+      "cooldown_minutes": 720,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "work",
+        "strength"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "lend_a_hand",
+          "label": "Помочь",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 20,
+              "reason": "Помощь"
+            },
+            {
+              "type": "change_money",
+              "amount": 50
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -8
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 4
+            }
+          ],
+          "outcome": "Заносите вдвоём, платит сразу."
+        },
+        {
+          "id": "name_your_price",
+          "label": "Назвать свою цену",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 10,
+              "reason": "Торг"
+            },
+            {
+              "type": "change_money",
+              "amount": 80
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -8
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "market",
+              "delta": -2
+            }
+          ],
+          "outcome": "Соглашается, но без удовольствия."
+        }
+      ]
+    },
+    {
+      "id": "work_reputation_pays",
+      "title": "Вас зовут по имени",
+      "body": "Бригадир машет из ворот: «Иди сюда, для тебя есть».",
+      "tone": "positive",
+      "group_id": "work",
+      "base_weight": 9,
+      "luck_bias": 2,
+      "cooldown_minutes": 2880,
+      "locations": [
+        "market",
+        "recycling_point",
+        "freight_yard"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "work",
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "take_the_offer",
+          "label": "Пойти",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 80,
+              "reason": "Смена по знакомству"
+            },
+            {
+              "type": "change_money",
+              "amount": 150
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -16
+            }
+          ],
+          "outcome": "Работа лучше обычной, и платят по-человечески."
+        },
+        {
+          "id": "ask_what_it_is",
+          "label": "Уточнить, что за работа",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 8,
+              "reason": "Расспросы"
+            },
+            {
+              "type": "knowledge",
+              "id": "district_word_of_mouth",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Ничего особенного. Но позвали именно вас."
+        }
+      ]
+    },
+    {
+      "id": "work_shift_cancelled",
+      "title": "Смену отменили на месте",
+      "body": "Пришли, а бригады нет. Ворота на замке.",
+      "tone": "adverse",
+      "group_id": "work",
+      "base_weight": 10,
+      "luck_bias": -2,
+      "cooldown_minutes": 1440,
+      "locations": [
+        "recycling_point",
+        "freight_yard"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "work"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "wait_an_hour",
+          "label": "Подождать час",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 60,
+              "reason": "Ожидание у ворот"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -6
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -4
+            }
+          ],
+          "outcome": "Никто не пришёл. Час потрачен."
+        },
+        {
+          "id": "go_elsewhere",
+          "label": "Идти в другое место",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 20,
+              "reason": "Переход"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -6
+            }
+          ],
+          "outcome": "Хотя бы не стояли зря."
+        }
+      ]
+    },
+    {
+      "id": "world_inspection_rumour",
+      "title": "По двору ходит слух о проверке",
+      "body": "Говорят вполголоса и замолкают, когда подходит мастер.",
+      "tone": "neutral",
+      "group_id": "world",
+      "base_weight": 12,
+      "luck_bias": 0,
+      "cooldown_minutes": 2880,
+      "locations": [
+        "recycling_point"
+      ],
+      "source_kinds": [
+        "location_action",
+        "job"
+      ],
+      "tags": [
+        "authority",
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "listen_in",
+          "label": "Прислушаться",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 8,
+              "reason": "Слухи"
+            },
+            {
+              "type": "knowledge",
+              "id": "inspection_schedule",
+              "amount": 1,
+              "mode": "unlock"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 4
+            }
+          ],
+          "outcome": "Половина слуха — правда. Какая половина, неясно."
+        },
+        {
+          "id": "ignore_talk",
+          "label": "Не слушать",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 2,
+              "reason": "Мимо"
+            }
+          ],
+          "outcome": "Меньше знаешь — меньше рассказываешь."
+        }
+      ]
+    },
+    {
+      "id": "world_prices_settle",
+      "title": "Цены пошли обратно",
+      "body": "Ценники снова переписаны, на этот раз вниз.",
+      "tone": "positive",
+      "group_id": "world",
+      "base_weight": 11,
+      "luck_bias": 1,
+      "cooldown_minutes": 2880,
+      "locations": [
+        "market"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "trade"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "stock_up",
+          "label": "Взять с запасом",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 18,
+              "reason": "Закупка"
+            },
+            {
+              "type": "change_money",
+              "amount": -120
+            },
+            {
+              "type": "add_item",
+              "item_id": "ration_can",
+              "quantity": 1
+            },
+            {
+              "type": "add_item",
+              "item_id": "bread_loaf",
+              "quantity": 1
+            }
+          ],
+          "outcome": "Пока дёшево — надо брать."
+        },
+        {
+          "id": "just_note_it",
+          "label": "Просто заметить",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 4,
+              "reason": "Мимо"
+            },
+            {
+              "type": "knowledge",
+              "id": "supply_disruption_1980",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Значит, привоз наладился. Пока."
+        }
+      ]
+    },
+    {
+      "id": "world_yard_hires_again",
+      "title": "На площадке снова набирают",
+      "body": "У ворот список и очередь из троих. Виктор кивает знакомым.",
+      "tone": "positive",
+      "group_id": "world",
+      "base_weight": 11,
+      "luck_bias": 1,
+      "cooldown_minutes": 4320,
+      "locations": [
+        "recycling_point"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "work",
+        "authority"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "get_on_the_list",
+          "label": "Записаться",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 12,
+              "reason": "Запись"
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "recycling_point",
+              "delta": 4
+            },
+            {
+              "type": "knowledge",
+              "id": "yard_pass_rules",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Фамилию вписывают без вопросов."
+        },
+        {
+          "id": "watch_who_gets_in",
+          "label": "Посмотреть, кого берут",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 10,
+              "reason": "Наблюдение"
+            },
+            {
+              "type": "knowledge",
+              "id": "yard_after_inspection",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Берут тех, кого знают. Логично."
+        }
+      ]
+    },
+    {
+      "id": "world_sanitation_drive",
+      "title": "По району ходит санитарная комиссия",
+      "body": "Двое в белых халатах с папками осматривают дворы и подвалы.",
+      "tone": "adverse",
+      "group_id": "world",
+      "base_weight": 11,
+      "luck_bias": -1,
+      "cooldown_minutes": 4320,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "authority",
+        "risk"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "keep_your_distance",
+          "label": "Держаться подальше",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 12,
+              "reason": "Обход стороной"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 5
+            }
+          ],
+          "outcome": "Они вас не заметили. Пока."
+        },
+        {
+          "id": "answer_questions",
+          "label": "Ответить на вопросы",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 20,
+              "reason": "Разговор с комиссией"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 12
+            },
+            {
+              "type": "knowledge",
+              "id": "district_services",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Записали, но не задержали."
+        }
+      ]
+    },
+    {
+      "id": "world_shelter_full",
+      "title": "Ночлежка переполнена",
+      "body": "Мест нет с вечера, у дверей стоят и не расходятся.",
+      "tone": "adverse",
+      "group_id": "world",
+      "base_weight": 12,
+      "luck_bias": -1,
+      "cooldown_minutes": 2880,
+      "locations": [
+        "station_square",
+        "underpass"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "shelter"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "find_another_place",
+          "label": "Искать другое место",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 35,
+              "reason": "Поиск ночлега"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -9
+            },
+            {
+              "type": "knowledge",
+              "id": "district_shelters",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Нашли угол похуже, но свой."
+        },
+        {
+          "id": "wait_for_a_spot",
+          "label": "Дождаться, может освободится",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 50,
+              "reason": "Ожидание"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -7
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -5
+            }
+          ],
+          "outcome": "Не освободилось."
+        }
+      ]
+    },
+    {
+      "id": "world_freight_strike_talk",
+      "title": "На товарном говорят об остановке",
+      "body": "Слухи, что двор закроют на неделю: то ли ремонт, то ли проверка.",
+      "tone": "adverse",
+      "group_id": "world",
+      "base_weight": 11,
+      "luck_bias": -1,
+      "cooldown_minutes": 4320,
+      "locations": [
+        "freight_yard"
+      ],
+      "source_kinds": [
+        "location_action",
+        "job"
+      ],
+      "tags": [
+        "work",
+        "authority"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "find_out_when",
+          "label": "Выяснить сроки",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 14,
+              "reason": "Расспросы"
+            },
+            {
+              "type": "knowledge",
+              "id": "freight_yard_schedule",
+              "amount": 1,
+              "mode": "unlock"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 5
+            }
+          ],
+          "outcome": "Называют разные даты. Сходятся на «скоро»."
+        },
+        {
+          "id": "look_for_other_work",
+          "label": "Искать замену заранее",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 30,
+              "reason": "Обход"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -8
+            },
+            {
+              "type": "knowledge",
+              "id": "market_day_loading",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Есть куда пойти, если двор встанет."
+        }
+      ]
+    },
+    {
+      "id": "world_new_faces_in_district",
+      "title": "В районе новые люди",
+      "body": "У вокзала и в переходе появились те, кого раньше не было.",
+      "tone": "neutral",
+      "group_id": "world",
+      "base_weight": 11,
+      "luck_bias": 0,
+      "cooldown_minutes": 4320,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "get_acquainted",
+          "label": "Познакомиться",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 16,
+              "reason": "Разговор"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 4
+            },
+            {
+              "type": "knowledge",
+              "id": "district_word_of_mouth",
+              "amount": 1,
+              "mode": "unlock"
+            }
+          ],
+          "outcome": "Приехали издалека, ищут то же, что и вы."
+        },
+        {
+          "id": "keep_your_spot",
+          "label": "Держаться своего угла",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 4,
+              "reason": "В сторону"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 4
+            }
+          ],
+          "outcome": "Мест меньше не стало. Пока."
+        }
+      ]
+    },
+    {
+      "id": "rare_ruble_in_the_lining",
+      "title": "В подкладке нашлась купюра",
+      "body": "Прощупывая шов, вы находите сложенную вчетверо бумажку.",
+      "tone": "positive",
+      "group_id": "rare",
+      "base_weight": 6,
+      "luck_bias": 3,
+      "cooldown_minutes": 5760,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "luck",
+        "resource"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "unfold_it",
+          "label": "Развернуть",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 3,
+              "reason": "Находка"
+            },
+            {
+              "type": "change_money",
+              "amount": 100
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 12
+            }
+          ],
+          "outcome": "Сто рублей, о которых вы забыли."
+        },
+        {
+          "id": "leave_it_there",
+          "label": "Оставить на чёрный день",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 2,
+              "reason": "Убрать обратно"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 6
+            }
+          ],
+          "outcome": "Пусть лежит. Чёрный день ещё будет."
+        }
+      ]
+    },
+    {
+      "id": "rare_stray_kitten",
+      "title": "Под лестницей пищит котёнок",
+      "body": "Маленький, мокрый, и никого рядом.",
+      "tone": "neutral",
+      "group_id": "rare",
+      "base_weight": 7,
+      "luck_bias": 2,
+      "cooldown_minutes": 4320,
+      "locations": [
+        "courtyard_blocks",
+        "underpass",
+        "station_square"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "luck",
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "take_it_to_someone",
+          "label": "Отнести к людям",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 18,
+              "reason": "Поиски хозяев"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 14
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "courtyard_blocks",
+              "delta": 5
+            }
+          ],
+          "outcome": "Забирают охотно, вас запоминают."
+        },
+        {
+          "id": "leave_it",
+          "label": "Пройти мимо",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 3,
+              "reason": "Мимо"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -7
+            }
+          ],
+          "outcome": "Писк слышен ещё полквартала."
+        }
+      ]
+    },
+    {
+      "id": "rare_wrong_train",
+      "title": "Сели не в тот вагон",
+      "body": "Электричка трогается, и по табличке видно: направление другое.",
+      "tone": "adverse",
+      "group_id": "rare",
+      "base_weight": 6,
+      "luck_bias": -3,
+      "cooldown_minutes": 5760,
+      "locations": [
+        "station_square"
+      ],
+      "source_kinds": [
+        "travel"
+      ],
+      "tags": [
+        "risk",
+        "time"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "get_off_next",
+          "label": "Выйти на следующей",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 40,
+              "reason": "Обратная дорога"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -10
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -6
+            }
+          ],
+          "outcome": "Час на дорогу туда и обратно."
+        },
+        {
+          "id": "ride_it_out",
+          "label": "Доехать и посмотреть",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 70,
+              "reason": "Поездка"
+            },
+            {
+              "type": "knowledge",
+              "id": "district_services",
+              "amount": 1,
+              "mode": "unlock"
+            },
+            {
+              "type": "change_state",
+              "id": "energy",
+              "delta": -12
+            }
+          ],
+          "outcome": "Чужой район. Зато теперь вы его видели."
+        }
+      ]
+    },
+    {
+      "id": "rare_found_watch",
+      "title": "На земле лежат часы",
+      "body": "Ремешок порван, стекло целое, идут.",
+      "tone": "neutral",
+      "group_id": "rare",
+      "base_weight": 6,
+      "luck_bias": 3,
+      "cooldown_minutes": 5760,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "luck",
+        "choice"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "hand_them_in",
+          "label": "Отнести дежурному",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 22,
+              "reason": "К дежурному"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 13
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "station_square",
+              "delta": 6
+            }
+          ],
+          "outcome": "Записывают вашу фамилию."
+        },
+        {
+          "id": "keep_them",
+          "label": "Оставить себе",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 3,
+              "reason": "Убрать в карман"
+            },
+            {
+              "type": "change_money",
+              "amount": 160
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -8
+            }
+          ],
+          "outcome": "Продали в тот же день. Осадок остался."
+        }
+      ]
+    },
+    {
+      "id": "rare_old_friend_helps",
+      "title": "Старый знакомый узнаёт и помогает",
+      "body": "Он не спрашивает, как вы дошли до такого. Просто протягивает свёрток.",
+      "tone": "positive",
+      "group_id": "rare",
+      "base_weight": 6,
+      "luck_bias": 3,
+      "cooldown_minutes": 5760,
+      "locations": [
+        "underpass",
+        "market",
+        "station_square",
+        "recycling_point",
+        "clinic_yard",
+        "embankment",
+        "freight_yard",
+        "courtyard_blocks"
+      ],
+      "source_kinds": [
+        "location_action",
+        "travel"
+      ],
+      "tags": [
+        "luck",
+        "social"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "accept_help",
+          "label": "Принять",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 14,
+              "reason": "Разговор"
+            },
+            {
+              "type": "add_item",
+              "item_id": "warm_jacket",
+              "quantity": 1
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 16
+            }
+          ],
+          "outcome": "Куртка тёплая и почти новая."
+        },
+        {
+          "id": "refuse_with_thanks",
+          "label": "Отказаться",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 10,
+              "reason": "Разговор"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 8
+            }
+          ],
+          "outcome": "Гордость дороже куртки. Иногда."
+        }
+      ]
+    },
+    {
+      "id": "rare_pipe_burst",
+      "title": "Прорвало трубу",
+      "body": "Кипяток бьёт из-под асфальта, пар стоит стеной, двор перекрыт.",
+      "tone": "adverse",
+      "group_id": "rare",
+      "base_weight": 6,
+      "luck_bias": -3,
+      "cooldown_minutes": 5760,
+      "locations": [
+        "courtyard_blocks",
+        "underpass"
+      ],
+      "source_kinds": [
+        "travel",
+        "location_action"
+      ],
+      "tags": [
+        "hazard"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "help_the_neighbours",
+          "label": "Помочь перекрыть",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 30,
+              "reason": "Помощь"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 12
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "courtyard_blocks",
+              "delta": 8
+            },
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": -3
+            }
+          ],
+          "outcome": "Успели до аварийки. На вас смотрят иначе."
+        },
+        {
+          "id": "get_away_from_it",
+          "label": "Уйти подальше",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 10,
+              "reason": "Обход"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 6
+            }
+          ],
+          "outcome": "Пар и крики остаются за спиной."
+        }
+      ]
+    },
+    {
+      "id": "rare_lucky_queue",
+      "title": "Очередь неожиданно рассосалась",
+      "body": "Только что стояло тридцать человек, и вдруг вы третий.",
+      "tone": "positive",
+      "group_id": "rare",
+      "base_weight": 7,
+      "luck_bias": 3,
+      "cooldown_minutes": 4320,
+      "locations": [
+        "market",
+        "clinic_yard",
+        "station_square"
+      ],
+      "source_kinds": [
+        "location_action"
+      ],
+      "tags": [
+        "luck",
+        "time"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "use_the_moment",
+          "label": "Воспользоваться",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 8,
+              "reason": "Быстро"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 8
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": -5
+            }
+          ],
+          "outcome": "Полчаса сэкономлено на ровном месте."
+        },
+        {
+          "id": "let_someone_ahead",
+          "label": "Пропустить того, кто спешит",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 14,
+              "reason": "Уступить"
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": 12
+            },
+            {
+              "type": "change_reputation",
+              "reputation_id": "clinic_yard",
+              "delta": 4
+            }
+          ],
+          "outcome": "Человек благодарит сбивчиво."
+        }
+      ]
+    },
+    {
+      "id": "rare_dog_bites",
+      "title": "Собака во дворе бросается",
+      "body": "Без лая, сразу. Хозяина не видно.",
+      "tone": "adverse",
+      "group_id": "rare",
+      "base_weight": 6,
+      "luck_bias": -3,
+      "cooldown_minutes": 5760,
+      "locations": [
+        "courtyard_blocks",
+        "freight_yard"
+      ],
+      "source_kinds": [
+        "travel",
+        "location_action"
+      ],
+      "tags": [
+        "hazard",
+        "health"
+      ],
+      "conditions": [],
+      "options": [
+        {
+          "id": "back_away_slowly",
+          "label": "Отступать медленно",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 10,
+              "reason": "Отход"
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 14
+            }
+          ],
+          "outcome": "Обошлось. Руки трясутся ещё квартал."
+        },
+        {
+          "id": "stand_your_ground",
+          "label": "Не отступать",
+          "conditions": [],
+          "effects": [
+            {
+              "type": "advance_time",
+              "minutes": 6,
+              "reason": "Столкновение"
+            },
+            {
+              "type": "change_state",
+              "id": "health",
+              "delta": -12
+            },
+            {
+              "type": "change_state",
+              "id": "tension",
+              "delta": 18
+            },
+            {
+              "type": "change_state",
+              "id": "mental_state",
+              "delta": -6
+            }
+          ],
+          "outcome": "Прокушен рукав и рука под ним."
         }
       ]
     }

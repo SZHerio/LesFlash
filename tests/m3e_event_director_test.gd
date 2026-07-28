@@ -56,8 +56,8 @@ func _test_catalog() -> void:
 	# ninety cards could all be about food — so the spread across the six content
 	# groups is what is actually asserted.
 	_expect(
-		cards.size() >= 80 and cards.size() <= 100,
-		"M3F bank must contain 80–100 cards, has %d" % cards.size()
+		cards.size() >= 80 and cards.size() <= 250,
+		"event bank must hold 80–250 cards, has %d" % cards.size()
 	)
 	var by_group: Dictionary = {}
 	for raw_group_card: Variant in cards:

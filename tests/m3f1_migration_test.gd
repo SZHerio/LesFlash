@@ -274,7 +274,7 @@ func _test_event_catalog_migration() -> void:
 		return
 	var catalog: Dictionary = loaded["catalog"]
 	_expect_equal(catalog.get("schema_version"), 2, "runtime event catalog is v2")
-	_expect(int(catalog.get("cards", []).size()) <= 100, "v2 budget allows at most 100 cards")
+	_expect(int(catalog.get("cards", []).size()) <= 250, "v2 budget allows at most 250 cards")
 	for raw_card: Variant in Array(catalog.get("cards", [])):
 		var card: Dictionary = raw_card
 		_expect(card.has("family_id") and card.has("max_occurrences") and card.has("causal_category"), "v2 card metadata is complete")
