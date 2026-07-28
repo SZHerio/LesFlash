@@ -609,6 +609,56 @@
       "required_world_facts": [],
       "excluded_world_facts": [],
       "replacement_product_ids": []
+    },
+    {
+      "product_id": "product_commission_work_gloves_pair",
+      "item_id": "work_gloves",
+      "title": "Рабочие перчатки",
+      "category_id": "equipment",
+      "base_value_1980": 48,
+      "available_from": 1980,
+      "quality_range": [
+        40,
+        78
+      ],
+      "condition_range": [
+        55,
+        88
+      ],
+      "stock_quantity_range": [
+        1,
+        3
+      ],
+      "selection_weight": 125,
+      "rarity": "common",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
+    },
+    {
+      "product_id": "product_commission_thermos",
+      "item_id": "thermos_flask",
+      "title": "Термос",
+      "category_id": "equipment",
+      "base_value_1980": 150,
+      "available_from": 1980,
+      "quality_range": [
+        40,
+        75
+      ],
+      "condition_range": [
+        50,
+        85
+      ],
+      "stock_quantity_range": [
+        1,
+        2
+      ],
+      "selection_weight": 90,
+      "rarity": "common",
+      "required_world_facts": [],
+      "excluded_world_facts": [],
+      "replacement_product_ids": []
     }
   ]
 }

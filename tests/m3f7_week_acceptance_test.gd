@@ -983,18 +983,27 @@ func _finish_shift_manually(adapter: Object) -> Dictionary:
 	return _shift_outcome(adapter, last, false, true)
 
 
+## The shortcut skips routine, not decisions. A shift whose next step is the
+## decision has no routine to skip yet, so the player answers it and skips what
+## follows — refusing there is the domain being right, not a defect.
 func _finish_shift_quickly(adapter: Object) -> Dictionary:
-	var quick: Dictionary = adapter.quick_resolve_job_shift()
-	if not bool(quick.get("ok", false)):
-		return {"ok": false, "cause": quick}
-	var last := quick
+	var last: Dictionary = {}
 	var decided := false
+	var used_quick := false
 	var guard := 0
-	while adapter.is_job_shift_active() and guard < 12:
+	while adapter.is_job_shift_active() and guard < 16:
 		guard += 1
 		var step := _current_shift_step(adapter)
 		if step.is_empty():
 			break
+		if String(step.get("kind", "task")) != "decision":
+			var quick: Dictionary = adapter.quick_resolve_job_shift()
+			if bool(quick.get("ok", false)):
+				used_quick = true
+				last = quick
+				if bool(quick.get("completed", false)):
+					break
+				continue
 		var choices: Array = Array(step.get("choices", []))
 		if choices.is_empty():
 			return {"ok": false, "reason": "no choices"}
@@ -1004,6 +1013,8 @@ func _finish_shift_quickly(adapter: Object) -> Dictionary:
 			return {"ok": false, "cause": last}
 		if bool(last.get("completed", false)):
 			break
+	if not used_quick:
+		return {"ok": false, "reason": "the shortcut was never available"}
 	return _shift_outcome(adapter, last, true, decided)
 
 
