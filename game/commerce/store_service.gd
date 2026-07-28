@@ -7,6 +7,11 @@ extends RefCounted
 const ProductCatalogScript := preload("res://game/commerce/product_catalog.gd")
 const StoreCatalogScript := preload("res://game/commerce/store_catalog.gd")
 const StockGeneratorScript := preload("res://game/commerce/stock_generator.gd")
+const WorldFactorsScript := preload("res://game/commerce/commerce_world_factors.gd")
+const CommerceSellTransactionScript := preload("res://game/commerce/commerce_sell_transaction.gd")
+const InventoryStateScript := preload("res://core/inventory/inventory_state.gd")
+const ItemCatalogScript := preload("res://core/inventory/item_catalog.gd")
+const EquipmentRulesScript := preload("res://game/equipment/equipment_rules.gd")
 
 
 static func preview(session: Object, store_id: String) -> Dictionary:
@@ -26,7 +31,8 @@ static func preview(session: Object, store_id: String) -> Dictionary:
 		return _failure("wrong_location", "Этот магазин находится в другом месте")
 	var stamp: Dictionary = session.get("run_state").calendar.current_stamp()
 	var availability := availability_model(store_catalog, store, stamp)
-	var snapshot_result := _snapshot_for(session, catalogs, store_id, stamp)
+	var factors := pricing_context(session, store)
+	var snapshot_result := _snapshot_for(session, catalogs, store_id, stamp, factors)
 	if not bool(snapshot_result.get("ok", false)):
 		return snapshot_result
 	var snapshot: Dictionary = snapshot_result["snapshot"]
@@ -44,6 +50,104 @@ static func preview(session: Object, store_id: String) -> Dictionary:
 		"revision": int(snapshot.get("revision", 0)),
 		"offers": Array(snapshot.get("offers", [])).duplicate(true),
 		"money": int(session.get("run_state").money),
+		"buyback": buyback_policy(store_catalog, store_id),
+		"world_causes": Array(factors.get("causes", [])).duplicate(true),
+	}
+
+
+## One shared derivation for the shelf and for what the shop pays back, so a
+## week that made bread dear cannot leave the buy-back price untouched.
+static func pricing_context(session: Object, store: Dictionary) -> Dictionary:
+	return WorldFactorsScript.build(
+		session.get("world_state"),
+		session.get("social_state") if _has_property(session, "social_state") else null,
+		store
+	)
+
+
+static func buyback_policy(store_catalog: Dictionary, store_id: String) -> Dictionary:
+	var profile := StoreCatalogScript.profile_for_store(store_catalog, store_id)
+	if profile.is_empty():
+		return {"enabled": false, "accepted_category_ids": [], "payout_basis_points": 0}
+	var policy: Variant = Dictionary(profile["archetype"]).get("buyback_policy", {})
+	return Dictionary(policy).duplicate(true) if policy is Dictionary else {}
+
+
+## What this particular shop would take off the hero's hands, and for how much.
+## Three shops with three profiles is the whole point: the same jar is money at
+## the market, nothing at the pharmacy and scrap at the collection point.
+static func sell_offers(session: Object, store_id: String) -> Dictionary:
+	var contract := _contract(session)
+	if not bool(contract.get("ok", false)):
+		return contract
+	var catalogs := load_catalogs()
+	if not bool(catalogs.get("ok", false)):
+		return catalogs
+	var store_catalog: Dictionary = catalogs["stores"]
+	var profile := StoreCatalogScript.profile_for_store(store_catalog, store_id)
+	if profile.is_empty():
+		return _failure("unknown_store", "Магазин не найден")
+	var store: Dictionary = profile["store"]
+	if _location_id(session) != String(store.get("location_id", "")):
+		return _failure("wrong_location", "Этот магазин находится в другом месте")
+	var policy := buyback_policy(store_catalog, store_id)
+	if not bool(policy.get("enabled", false)):
+		return {
+			"ok": true,
+			"code": "buyback_disabled",
+			"error": "",
+			"store_id": store_id,
+			"buyback": policy,
+			"offers": [],
+			"message": "Здесь ничего не выкупают",
+		}
+	var run_state: RunState = session.get("run_state")
+	var context := pricing_context(session, store)
+	context["year"] = int(run_state.calendar.current_stamp().get("year", 1980))
+	var offers: Array[Dictionary] = []
+	for raw_stack: Variant in InventoryStateScript.all_stacks(run_state.inventory):
+		if not raw_stack is Dictionary:
+			continue
+		var stack: Dictionary = raw_stack
+		if bool(stack.get("external", false)):
+			continue
+		if EquipmentRulesScript.is_equipped(run_state.inventory, String(stack.get("stack_id", ""))):
+			continue
+		var quality := int(stack.get("condition", 100))
+		var payout := CommerceSellTransactionScript.unit_payout(
+			catalogs["products"],
+			store_catalog,
+			store_id,
+			stack,
+			quality,
+			context
+		)
+		if not bool(payout.get("ok", false)):
+			continue
+		var definition: Variant = ItemCatalogScript.definition(String(stack.get("item_id", "")))
+		var quantity := int(stack.get("quantity", 0))
+		offers.append({
+			"stack_id": String(stack.get("stack_id", "")),
+			"item_id": String(stack.get("item_id", "")),
+			"title": String(definition.title()),
+			"quantity": quantity,
+			"condition": quality,
+			"unit_payout": int(payout["unit_payout"]),
+			"total_payout": int(payout["unit_payout"]) * quantity,
+			"category_id": String(Dictionary(payout["product"]).get("category_id", "")),
+		})
+	offers.sort_custom(func(left: Dictionary, right: Dictionary) -> bool:
+		return String(left.get("stack_id", "")) < String(right.get("stack_id", ""))
+	)
+	return {
+		"ok": true,
+		"code": "ok",
+		"error": "",
+		"store_id": store_id,
+		"buyback": policy,
+		"offers": offers,
+		"world_causes": Array(context.get("causes", [])).duplicate(true),
+		"message": "" if not offers.is_empty() else "Сейчас у вас нет ничего для этой лавки",
 	}
 
 
@@ -104,7 +208,8 @@ static func _snapshot_for(
 	session: Object,
 	catalogs: Dictionary,
 	store_id: String,
-	stamp: Dictionary
+	stamp: Dictionary,
+	factors: Dictionary
 ) -> Dictionary:
 	var world_state: WorldState = session.get("world_state")
 	var existing: Variant = world_state.stock_snapshots.get(store_id, {})
@@ -124,6 +229,22 @@ static func _snapshot_for(
 		"chronology_version": 1,
 		"luck": run_state.get_characteristic("luck"),
 		"world_facts": world_state.facts.duplicate(true),
+		"consumer_price_index_basis_points": int(factors.get(
+			"consumer_price_index_basis_points",
+			WorldFactorsScript.NEUTRAL
+		)),
+		"district_basis_points": int(factors.get(
+			"district_basis_points",
+			WorldFactorsScript.NEUTRAL
+		)),
+		"category_supply_basis_points": Dictionary(
+			factors.get("category_supply_basis_points", {})
+		).duplicate(true),
+		"relationship_basis_points": int(factors.get(
+			"relationship_basis_points",
+			WorldFactorsScript.NEUTRAL
+		)),
+		"supply_offer_delta": int(factors.get("supply_offer_delta", 0)),
 	})
 	if not bool(generated.get("ok", false)):
 		return _failure("stock_generation_failed", "Не удалось подготовить ассортимент", {

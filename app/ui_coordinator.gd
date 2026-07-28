@@ -187,8 +187,6 @@ func _route_session() -> void:
 			_show_legacy("event")
 		"map":
 			_show_location()
-		"job":
-			_show_legacy("job")
 		"completed":
 			_show_legacy("summary")
 		_:
@@ -336,7 +334,7 @@ func _return_from_settings() -> void:
 		"map": _show_map()
 		"inventory": _show_inventory()
 		"shop": _show_store(_shop_store_id)
-		"shelter", "job_result": _show_legacy(_settings_return_route)
+		"shelter": _show_legacy(_settings_return_route)
 		_: _route_session()
 
 
@@ -346,7 +344,6 @@ func _prepare_legacy_flow() -> void:
 		_screens,
 		_preferences.to_model(),
 		_flow_hooks({
-			"job_result": _show_legacy.bind("job_result"),
 			"location": _show_location,
 			"leave": _leave_session_to_menu,
 		})

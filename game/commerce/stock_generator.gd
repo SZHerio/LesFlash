@@ -145,6 +145,9 @@ static func _validate_request(request: Dictionary) -> Dictionary:
 		for value: Variant in supply.values():
 			if not _valid_factor(value):
 				errors.append("category_supply_basis_points contains an invalid factor")
+	var offer_delta: Variant = request.get("supply_offer_delta", 0)
+	if typeof(offer_delta) != TYPE_INT or int(offer_delta) < -4 or int(offer_delta) > 4:
+		errors.append("supply_offer_delta must be an integer from -4 to 4")
 	var world_facts: Variant = request.get("world_facts", {})
 	if not world_facts is Dictionary and not world_facts is Array:
 		errors.append("world_facts must be a dictionary or array")

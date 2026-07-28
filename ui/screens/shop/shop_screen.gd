@@ -9,6 +9,12 @@ signal purchase_requested(
 	target_container_id: String,
 	expected_revision: int
 )
+signal sale_requested(
+	store_id: String,
+	stack_id: String,
+	quantity: int,
+	expected_revision: int
+)
 
 const OfferRowScene := preload("res://ui/components/shop_offer_row.tscn")
 const Palette := preload("res://ui/theme/palette.gd")
@@ -73,7 +79,15 @@ func _apply_current_model() -> void:
 	_state_icon.present(&"action_trade" if open else &"utility_locked", 32, Palette.GOLD if open else Palette.MUTED)
 	_state_title.text = "МОЖНО КУПИТЬ" if open else "ТОРГОВАЯ ТОЧКА ЗАКРЫТА"
 	_availability.text = reason
-	_rebuild_offers(Array(_model.get("offers", [])), open, int(_model.get("money", 0)))
+	var rows := Array(_model.get("offers", [])).duplicate(true)
+	# What the shop sells and what it buys are the same counter, so the sale
+	# rows follow the shelf instead of hiding behind another screen.
+	for raw_sale: Variant in Array(_model.get("sell_offers", [])):
+		if raw_sale is Dictionary:
+			var sale: Dictionary = Dictionary(raw_sale).duplicate(true)
+			sale["mode"] = "sell"
+			rows.append(sale)
+	_rebuild_offers(rows, open, int(_model.get("money", 0)))
 
 
 func _rebuild_offers(offers: Array, open: bool, wallet: int) -> void:
@@ -90,7 +104,10 @@ func _rebuild_offers(offers: Array, open: bool, wallet: int) -> void:
 			_offer_list.add_child(row)
 			row.set_reduced_motion(_reduced_motion)
 			row.present(raw_offer, true, wallet)
-			row.purchase_requested.connect(_on_purchase)
+			if String(Dictionary(raw_offer).get("mode", "buy")) == "sell":
+				row.purchase_requested.connect(_on_sale)
+			else:
+				row.purchase_requested.connect(_on_purchase)
 	_closed_state.visible = not open
 	_empty_state.visible = open and _offer_list.get_child_count() == 0
 	_offer_list.visible = open and _offer_list.get_child_count() > 0
@@ -106,3 +123,9 @@ func _on_purchase(offer_id: String, quantity: int) -> void:
 		_target_container_id,
 		_revision
 	)
+
+
+func _on_sale(stack_id: String, quantity: int) -> void:
+	if _store_id.is_empty() or stack_id.is_empty():
+		return
+	sale_requested.emit(_store_id, stack_id, quantity, _revision)

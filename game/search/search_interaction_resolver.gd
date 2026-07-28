@@ -3,6 +3,12 @@ extends RefCounted
 
 ## Read-only lookup and exact preview of one authored search interaction.
 
+const EquipmentRulesScript := preload("res://game/equipment/equipment_rules.gd")
+
+## A proper tool spares the hands. It never removes the cost entirely, so a
+## searcher with a saw still runs out of strength — just later.
+const REACH_PER_ENERGY_POINT := 6
+
 
 static func preview(
 	run_state: RunState,
@@ -17,7 +23,10 @@ static func preview(
 	var approach := find_approach(object, approach_id)
 	if approach.is_empty():
 		return _failure("unknown_search_approach", "Способ взаимодействия не найден.")
-	var costs := costs_of(approach)
+	var costs := costs_of(
+		approach,
+		EquipmentRulesScript.modifier(run_state.inventory, "search_reach")
+	)
 	var conditions := normalized_conditions(Array(approach.get("conditions", [])))
 	if int(costs["energy"]) > 0:
 		conditions.append({
@@ -76,11 +85,16 @@ static func find_approach(object: Dictionary, approach_id: String) -> Dictionary
 	return {}
 
 
-static func costs_of(approach: Dictionary) -> Dictionary:
+static func costs_of(approach: Dictionary, search_reach: int = 0) -> Dictionary:
 	var risk: Dictionary = approach.get("risk", {})
+	var energy := int(approach.get("energy_cost", 0))
+	if energy > 0 and search_reach > 0:
+		@warning_ignore("integer_division")
+		var relief: int = search_reach / REACH_PER_ENERGY_POINT
+		energy = maxi(energy - relief, 1)
 	return {
 		"minutes": int(approach.get("duration_minutes", 0)),
-		"energy": int(approach.get("energy_cost", 0)),
+		"energy": energy,
 		"noise": int(risk.get("noise", 0)),
 		"trespass": int(risk.get("trespass", 0)),
 	}

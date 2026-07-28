@@ -9,6 +9,14 @@ const ProgressScript := preload("res://game/jobs/job_shift_progress.gd")
 
 const SCORE_FIELDS := ["production", "quality", "safety"]
 
+## Gloves and a proper tool only ever make the shift safer — they never sort
+## faster or better for the hero, so equipment cannot replace competence.
+const SAFETY_PER_EQUIPMENT_POINT := 4
+const MAX_EQUIPMENT_SAFETY := 3
+
+## Below this the shift is graded unsafe whatever the output was.
+const UNSAFE_SAFETY_THRESHOLD := 35
+
 
 static func start(snapshot: Dictionary) -> Dictionary:
 	return SnapshotScript.initial_progress(snapshot)
@@ -36,7 +44,10 @@ static func preview(snapshot: Dictionary, progress: Dictionary, actor_profile: D
 			"title": String(choice["title"]),
 			"description": String(choice["description"]),
 			"projected_score_deltas": _score_deltas(
-				choice, modifier, _affinity_modifier(choice, profile)
+				choice,
+				modifier,
+				_affinity_modifier(choice, profile),
+				_equipment_safety(profile)
 			),
 		})
 	return {
@@ -69,7 +80,8 @@ static func resolve_step(
 	var profile := _normalize_profile(actor_profile)
 	var modifier := _competence_modifier(step, profile)
 	var affinity := _affinity_modifier(choice, profile)
-	var deltas := _score_deltas(choice, modifier, affinity)
+	var equipment_safety := _equipment_safety(profile)
+	var deltas := _score_deltas(choice, modifier, affinity, equipment_safety)
 	var scores: Dictionary = candidate["scores"]
 	for field: String in SCORE_FIELDS:
 		scores[field] = clampi(int(scores[field]) + int(deltas[field]), 0, 100)
@@ -83,6 +95,7 @@ static func resolve_step(
 		"task_class_id": String(step.get("task_class_id", "")),
 		"competence_modifier": modifier,
 		"affinity_modifier": affinity,
+		"equipment_safety_modifier": equipment_safety,
 		"score_deltas": deltas,
 		"scores_after": scores.duplicate(true),
 	}
@@ -112,6 +125,58 @@ static func resolve_step(
 		"receipt": completion.duplicate(true),
 		"completed": String(candidate["status"]) == "completed",
 		"result": Dictionary(candidate["result"]).duplicate(true),
+	}
+
+
+## The routine a hero already knows, resolved the way that hero would actually
+## work it: the same resolver, the same modifiers, and the best of the offered
+## answers rather than an invented average. Choosing the maximum is what makes
+## the shortcut safe to take — no manual sequence of the same steps can beat it.
+static func quick_choice(
+	snapshot: Dictionary,
+	progress: Dictionary,
+	actor_profile: Dictionary = {}
+) -> Dictionary:
+	var guard := _guard(snapshot, progress)
+	if not bool(guard.get("ok", false)):
+		return guard
+	if String(progress.get("status", "")) == "completed":
+		return _failure("shift_completed", "Смена уже завершена")
+	var step: Dictionary = Array(snapshot["steps"])[int(progress["next_step_index"])]
+	if String(step.get("kind", "")) != "task":
+		return _failure("decision_step", "Значимое решение смены не пропускается")
+	var profile := _normalize_profile(actor_profile)
+	var modifier := _competence_modifier(step, profile)
+	var equipment_safety := _equipment_safety(profile)
+	var best: Dictionary = {}
+	var best_rank := Vector2i(-1, -1_000_000)
+	for raw: Variant in Array(step["choices"]):
+		var choice: Dictionary = raw
+		var deltas := _score_deltas(
+			choice,
+			modifier,
+			_affinity_modifier(choice, profile),
+			equipment_safety
+		)
+		var projected: Dictionary = Dictionary(progress["scores"]).duplicate(true)
+		for field: String in SCORE_FIELDS:
+			projected[field] = clampi(int(projected[field]) + int(deltas[field]), 0, 100)
+		var rank := Vector2i(
+			1 if int(projected["safety"]) >= UNSAFE_SAFETY_THRESHOLD else 0,
+			_weighted_overall(projected)
+		)
+		if rank.x > best_rank.x or (rank.x == best_rank.x and rank.y > best_rank.y):
+			best_rank = rank
+			best = choice
+	if best.is_empty():
+		return _failure("no_choice", "У шага смены нет ни одного варианта")
+	return {
+		"ok": true,
+		"code": "ok",
+		"step_id": String(step["step_id"]),
+		"task_class_id": String(step.get("task_class_id", "")),
+		"choice_id": String(best["id"]),
+		"projected_overall": best_rank.y,
 	}
 
 
@@ -151,10 +216,17 @@ static func _normalize_profile(source: Dictionary) -> Dictionary:
 			GameRules.POLARITY_MIN,
 			GameRules.POLARITY_MAX
 		)
+	var normalized_equipment := {}
+	for raw_id: Variant in Dictionary(source.get("equipment", {})):
+		normalized_equipment[String(raw_id)] = maxi(
+			int(Dictionary(source["equipment"])[raw_id]),
+			0
+		)
 	return {
 		"characteristics": normalized_characteristics,
 		"skills": normalized_skills,
 		"polarities": normalized_polarities,
+		"equipment": normalized_equipment,
 	}
 
 
@@ -196,30 +268,47 @@ static func _affinity_modifier(choice: Dictionary, profile: Dictionary) -> int:
 static func _score_deltas(
 	choice: Dictionary,
 	competence_modifier: int,
-	affinity_modifier: int = 0
+	affinity_modifier: int = 0,
+	equipment_safety: int = 0
 ) -> Dictionary:
 	var authored: Dictionary = choice["scores"]
 	var total := competence_modifier + affinity_modifier
 	return {
 		"production": int(authored["production"]) + total,
 		"quality": int(authored["quality"]) + total,
-		"safety": int(authored["safety"]) + total,
+		"safety": int(authored["safety"]) + total + equipment_safety,
 	}
+
+
+static func _equipment_safety(profile: Dictionary) -> int:
+	var equipment: Dictionary = Dictionary(profile.get("equipment", {}))
+	@warning_ignore("integer_division")
+	var points: int = int(equipment.get("work_safety", 0)) / SAFETY_PER_EQUIPMENT_POINT
+	return clampi(points, 0, MAX_EQUIPMENT_SAFETY)
+
+
+static func _weighted_overall(scores: Dictionary) -> int:
+	@warning_ignore("integer_division")
+	var overall: int = (
+		int(scores["production"]) * 40
+		+ int(scores["quality"]) * 35
+		+ int(scores["safety"]) * 25
+	) / 100
+	return overall
 
 
 static func _result(snapshot: Dictionary, progress: Dictionary) -> Dictionary:
 	var scores: Dictionary = progress["scores"]
-	@warning_ignore("integer_division")
-	var overall := (int(scores["production"]) * 40 + int(scores["quality"]) * 35 + int(scores["safety"]) * 25) / 100
+	var overall := _weighted_overall(scores)
 	var payout_basis_points := clampi(7_500 + (overall - 50) * 90, 6_500, 12_500)
-	if int(scores["safety"]) < 35:
+	if int(scores["safety"]) < UNSAFE_SAFETY_THRESHOLD:
 		payout_basis_points = mini(payout_basis_points, 7_000)
-	var grade := "unsafe" if int(scores["safety"]) < 35 else "weak"
-	if int(scores["safety"]) >= 35 and overall >= 75:
+	var grade := "unsafe" if int(scores["safety"]) < UNSAFE_SAFETY_THRESHOLD else "weak"
+	if int(scores["safety"]) >= UNSAFE_SAFETY_THRESHOLD and overall >= 75:
 		grade = "excellent"
-	elif int(scores["safety"]) >= 35 and overall >= 60:
+	elif int(scores["safety"]) >= UNSAFE_SAFETY_THRESHOLD and overall >= 60:
 		grade = "solid"
-	elif int(scores["safety"]) >= 35 and overall >= 45:
+	elif int(scores["safety"]) >= UNSAFE_SAFETY_THRESHOLD and overall >= 45:
 		grade = "acceptable"
 	return {
 		"shift_id": String(progress["shift_id"]),

@@ -9,10 +9,12 @@ const EventCatalogScript := preload("res://game/events/event_catalog.gd")
 const SearchCatalog := preload("res://game/search/search_zone_catalog.gd")
 const SearchGenerator := preload("res://game/search/search_snapshot_generator.gd")
 const InventoryStateScript := preload("res://core/inventory/inventory_state.gd")
+const GameSessionScript := preload("res://app/session/game_session.gd")
 
 const RUN_V2_FIXTURE := "res://tests/fixtures/run_state_envelope_v2.json"
 const SESSION_V4_FIXTURE := "res://tests/fixtures/m3f1_session_v4.json"
 const SESSION_V5_FIXTURE := "res://tests/fixtures/m3f2_session_v5.json"
+const SESSION_V7_FIXTURE := "res://tests/fixtures/m3f4_session_v7.json"
 
 var _failures: Array[String] = []
 var _tests_run := 0
@@ -24,6 +26,7 @@ func _init() -> void:
 	_run("previous RunState envelope migrates without changing 1970", _test_run_state_fixture)
 	_run("previous session envelope migrates every schema level", _test_session_fixture)
 	_run("M3F.2 v5 envelope adds survival without rewriting history", _test_m3f2_session_fixture)
+	_run("v7 save inside the removed job phase still opens", _test_m3f4_session_fixture)
 	_run("ambiguous morale migration fails without mutation", _test_ambiguous_meter)
 	_run("EventContext v1 migrates exactly to v2", _test_event_context_migration)
 	_run("active and archived encounter contexts migrate inside search", _test_nested_context_migration)
@@ -147,6 +150,51 @@ func _test_m3f2_session_fixture() -> void:
 	var rejected := FirstDayMigration.migrate_envelope(invalid)
 	_expect(not bool(rejected.get("ok", true)), "invalid v5 payload is rejected")
 	_expect_equal(invalid, invalid_before, "failed v5 migration leaves source untouched")
+
+
+## The M2 quiz is gone from the runtime, so a save recorded inside it must still
+## open: the hero returns to the yard he was standing in, because that minigame
+## had committed neither time nor effects before its final round.
+func _test_m3f4_session_fixture() -> void:
+	var source := _read_json(SESSION_V7_FIXTURE)
+	_expect_equal(source.get("schema_version"), 7, "fixture is a previous v7 envelope")
+	var source_session: Dictionary = Dictionary(source.get("session", {}))
+	_expect_equal(source_session.get("session_version"), 7, "fixture is a previous v7 session")
+	_expect_equal(source_session.get("phase"), "job", "v7 fixture sits inside the removed job phase")
+	_expect(source_session.has("job_state"), "v7 fixture still carries the legacy job_state")
+	var before := source.duplicate(true)
+	var migration := FirstDayMigration.migrate_envelope(source)
+	_expect(bool(migration.get("ok", false)), "v7 envelope migrates: %s" % str(migration))
+	_expect_equal(source, before, "v7 migration does not mutate its source")
+	_expect_equal(migration.get("source_session_version"), 7, "v7 source session is reported")
+	if bool(migration.get("ok", false)):
+		var migrated_session: Dictionary = Dictionary(migration["data"])["session"]
+		_expect_equal(
+			migrated_session.get("session_version"),
+			FirstDayMigration.CURRENT_VERSION,
+			"v7 session reaches the current version"
+		)
+		_expect_equal(migrated_session.get("phase"), "map", "the interrupted shift returns to the yard")
+		_expect(not migrated_session.has("job_state"), "the legacy quiz bookkeeping is dropped")
+		_expect_equal(
+			Dictionary(migrated_session.get("active_activity", {})).get("kind"),
+			GameSessionScript.NO_ACTIVITY_KIND,
+			"the legacy job activity is cleared"
+		)
+		_expect(migrated_session.has("job_work_state"), "the modern shift state is present")
+
+	var loaded := FirstDaySave.load_session(ProjectSettings.globalize_path(SESSION_V7_FIXTURE))
+	_expect(bool(loaded.get("ok", false)), "v7 fixture loads: %s" % str(loaded))
+	if bool(loaded.get("ok", false)):
+		var session = loaded["session"]
+		_expect_equal(session.phase, "map", "loaded v7 session stands on the map")
+		_expect_equal(session.location, "recycling_point", "loaded v7 session keeps its place")
+		_expect(bool(session.validate().get("ok", false)), "loaded v7 session validates")
+
+	var inconsistent := source.duplicate(true)
+	inconsistent["session"]["job_state"] = {"active": false}
+	var rejected := FirstDayMigration.migrate_envelope(inconsistent)
+	_expect(not bool(rejected.get("ok", true)), "a job phase without an active shift is refused, not guessed")
 
 
 func _test_ambiguous_meter() -> void:

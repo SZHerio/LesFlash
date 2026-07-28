@@ -19,28 +19,69 @@ const MasteryScript := preload("res://game/jobs/job_mastery.gd")
 const SessionTransactionScript := preload("res://game/session/session_command_transaction.gd")
 const SocialMutationScript := preload("res://core/social/social_mutation.gd")
 const WorldMutationScript := preload("res://core/world/world_mutation.gd")
+const EquipmentRulesScript := preload("res://game/equipment/equipment_rules.gd")
+const WorldDefinitionCatalogScript := preload(
+	"res://game/content/catalogs/world_definition_catalog.gd"
+)
 
-const JOB_ID := "job_recycling_sorter"
-const SUPERVISOR_ID := "npc_viktor_koren"
+## Which employer sits at which place, and who runs the shift there.
+const JOBS := {
+	"recycling_point": {
+		"job_id": "job_recycling_sorter",
+		"supervisor": "npc_viktor_koren",
+		"title": "смена на площадке",
+		"description": "Сортировочная площадка. Виктор распределяет участок.",
+	},
+	"market": {
+		"job_id": "job_market_porter",
+		"supervisor": "npc_tamara_roven",
+		"title": "смена в ряду",
+		"description": "Продуктовый ряд. Тамара показывает, что разгружать.",
+	},
+}
+const DEFAULT_JOB_ID := "job_recycling_sorter"
 const PROCESS_ID := "process_recycling_inspection"
 const YARD_LOCATION := "recycling_point"
+
+
+static func job_at(location_id: String) -> Dictionary:
+	return Dictionary(JOBS.get(location_id, {}))
+const YARD_REPUTATION := "rep_recycling_reliability"
+const PRESSURE_METRIC := "metric_riverside_institution_pressure"
 
 ## Six hours spread over the confirmed steps rather than charged at the end, so
 ## leaving a shift half-done still costs the part that was worked.
 const SHIFT_MINUTES := 360
 
+## What Viktor remembers about a shift, in the vocabulary the social state
+## actually stores. A dangerous shift is a loss he had to cover for.
+## The class of shift task that teaches load handling, and the skill it teaches.
+const CARGO_TASK_CLASS := "task_recycling_move_load"
+const CARGO_SKILL := "cargo_handling"
 
-static func begin(target: Object, command_id: String) -> Dictionary:
+const MEMORY_TYPE_BY_GRADE := {
+	"excellent": "worked_well",
+	"solid": "worked_well",
+	"acceptable": "worked_well",
+	"weak": "caused_loss",
+	"unsafe": "caused_loss",
+}
+
+
+static func begin(target: Object, job_id: String, command_id: String) -> Dictionary:
 	var guard := _guard(target, command_id)
 	if not guard.is_empty():
 		return guard
 	if bool(target.get("applied_command_ids").has(command_id)):
 		return {"ok": true, "code": "already_applied", "error": "", "idempotent": true}
 	var work_state: JobWorkState = target.get("job_work_state")
-	if work_state.is_dismissed():
-		return _failure("dismissed", "Виктор больше не ставит вас в смену")
+	if work_state.is_dismissed(job_id):
+		return _failure("dismissed", "Вас больше не ставят в смену")
 	if work_state.is_active():
 		return _failure("shift_active", "Смена уже идёт")
+	# One shift a day. JobWorkState has always known this; nobody asked it.
+	if not work_state.can_work_on_day(job_id, _day_index(target)):
+		return _failure("shift_already_worked_today", "Сегодняшняя смена уже отработана")
 	var loaded := CatalogScript.load_default()
 	if not bool(loaded.get("ok", false)):
 		return _failure("invalid_catalog", "Каталог смен недоступен", {"errors": loaded.get("errors", [])})
@@ -50,9 +91,9 @@ static func begin(target: Object, command_id: String) -> Dictionary:
 	var candidate_work: JobWorkState = candidate.get("job_work_state")
 	var generated := GeneratorScript.generate(
 		Dictionary(loaded["catalog"]),
-		JOB_ID,
+		job_id,
 		int(candidate.get("run_state").rng.seed),
-		candidate_work.next_shift_sequence
+		candidate_work.sequence_for(job_id)
 	)
 	if not bool(generated.get("ok", false)):
 		return _failure("shift_not_generated", "Смену не удалось составить", {"errors": generated.get("errors", [])})
@@ -67,7 +108,7 @@ static func begin(target: Object, command_id: String) -> Dictionary:
 		"source_id": "job_shift_begin",
 		"title": "Выход на смену",
 		"journal_message": "Смена на сортировочной площадке началась",
-		"journal_payload": {"job_id": JOB_ID, "shift_id": String(snapshot.get("shift_id", ""))},
+		"journal_payload": {"job_id": job_id, "shift_id": String(snapshot.get("shift_id", ""))},
 		"conditions": [],
 		"effects": [],
 	})
@@ -101,34 +142,180 @@ static func resolve_step(target: Object, choice_id: String, command_id: String) 
 	)
 	if not bool(resolved.get("ok", false)):
 		return resolved
-	var next_progress: Dictionary = resolved["progress"]
+	return _finish(
+		target,
+		candidate,
+		candidate_work,
+		snapshot,
+		Dictionary(resolved["progress"]),
+		1,
+		step_count,
+		command_id,
+		"job_shift_step"
+	)
+
+
+## The shortcut a hero earns by having actually worked the job several different
+## ways. It resolves only the routine — every remaining task whose class he has
+## already practised — and stops in front of the decision, because the decision
+## is the part of the shift that is not routine.
+static func quick_resolve(target: Object, command_id: String) -> Dictionary:
+	var guard := _guard(target, command_id)
+	if not guard.is_empty():
+		return guard
+	if bool(target.get("applied_command_ids").has(command_id)):
+		return {"ok": true, "code": "already_applied", "error": "", "idempotent": true}
+	var work_state: JobWorkState = target.get("job_work_state")
+	if not work_state.is_active():
+		return _failure("no_active_shift", "Активной смены нет")
+	if not quick_resolve_available(target):
+		return _failure(
+			"quick_resolve_locked",
+			"Быстрый расчёт открывается после разнообразной подтверждённой практики"
+		)
+	var candidate: Object = target.call("clone")
+	if candidate == null:
+		return _failure("clone_failed", "Не удалось подготовить быстрый расчёт")
+	var candidate_work: JobWorkState = candidate.get("job_work_state")
+	var snapshot: Dictionary = candidate_work.snapshot
+	var step_count := maxi(Array(snapshot.get("steps", [])).size(), 1)
+	var profile := _actor_profile(candidate.get("run_state"))
+	var practiced: Array = Array(candidate_work.mastery.get("practiced_task_class_ids", []))
+	var progress: Dictionary = candidate_work.progress.duplicate(true)
+	var resolved_steps := 0
+	var resolved_choices: Array = []
+	while String(progress.get("status", "")) != "completed":
+		var planned := ServiceScript.quick_choice(snapshot, progress, profile)
+		if not bool(planned.get("ok", false)):
+			break
+		if String(planned.get("task_class_id", "")) not in practiced:
+			break
+		var stepped := ServiceScript.resolve_step(
+			snapshot,
+			progress,
+			String(planned["choice_id"]),
+			profile
+		)
+		if not bool(stepped.get("ok", false)):
+			return stepped
+		progress = Dictionary(stepped["progress"])
+		resolved_steps += 1
+		resolved_choices.append({
+			"step_id": String(planned["step_id"]),
+			"choice_id": String(planned["choice_id"]),
+		})
+	if resolved_steps == 0:
+		return _failure(
+			"nothing_to_skip",
+			"Сейчас впереди не рутина, а решение смены"
+		)
+	var finished := _finish(
+		target,
+		candidate,
+		candidate_work,
+		snapshot,
+		progress,
+		resolved_steps,
+		step_count,
+		command_id,
+		"job_shift_quick"
+	)
+	if bool(finished.get("ok", false)):
+		finished["resolved_steps"] = resolved_steps
+		finished["resolved_choices"] = resolved_choices
+	return finished
+
+
+static func _newly_practiced(history: Dictionary) -> Array:
+	var shifts: Array = Array(history.get("completed_shifts", []))
+	if shifts.is_empty() or not shifts[-1] is Dictionary:
+		return []
+	return Array(Dictionary(shifts[-1]).get("new_task_class_ids", []))
+
+
+static func can_begin_today(target: Object, job_id: String = DEFAULT_JOB_ID) -> bool:
+	if target == null:
+		return false
+	var work_state: JobWorkState = target.get("job_work_state")
+	if work_state == null or work_state.is_active():
+		return false
+	return work_state.can_work_on_day(job_id, _day_index(target))
+
+
+static func _day_index(target: Object) -> int:
+	@warning_ignore("integer_division")
+	var day: int = int(target.get("run_state").calendar.elapsed_minutes) / 1440
+	return day
+
+
+static func quick_resolve_available(target: Object) -> bool:
+	if target == null:
+		return false
+	var work_state: JobWorkState = target.get("job_work_state")
+	if work_state == null or not work_state.is_active():
+		return false
+	return MasteryScript.quick_resolve_eligible(
+		work_state.mastery,
+		int(target.get("run_state").get_skill_rank("cargo_handling"))
+	)
+
+
+## One commit for one confirmed decision, whether that decision resolved a
+## single step or the whole remaining routine. Pay, mastery, the supervisor's
+## opinion, the yard's standing and the inspection all move with it.
+static func _finish(
+	target: Object,
+	candidate: Object,
+	candidate_work: JobWorkState,
+	snapshot: Dictionary,
+	next_progress: Dictionary,
+	resolved_steps: int,
+	step_count: int,
+	command_id: String,
+	source_id: String
+) -> Dictionary:
 	var finished := String(next_progress.get("status", "")) == "completed"
 	@warning_ignore("integer_division")
-	var minutes := SHIFT_MINUTES / step_count
+	var per_step: int = SHIFT_MINUTES / step_count
 	var effects: Array = [{
 		"type": "advance_time",
-		"minutes": minutes,
+		"minutes": per_step * resolved_steps,
 		"reason": "Работа на площадке",
 	}]
-	var payload := {"job_id": JOB_ID, "shift_id": String(snapshot.get("shift_id", ""))}
+	var payload := {"job_id": candidate_work.active_job_id(), "shift_id": String(snapshot.get("shift_id", ""))}
 	var result: Dictionary = {}
 	if finished:
 		result = Dictionary(next_progress.get("result", {}))
 		var day_index := int(candidate.get("run_state").calendar.elapsed_minutes / 1440)
 		var next_mastery: Dictionary = MasteryScript.record_completed_shift(
-			candidate_work.mastery,
+			candidate_work.mastery_for(candidate_work.active_job_id()),
 			next_progress,
 			int(candidate.get("run_state").get_skill_rank("cargo_handling"))
 		)
 		if not bool(next_mastery.get("ok", false)):
 			return _failure("mastery_rejected", "Освоение смены не записалось")
-		if not candidate_work.complete_shift(next_progress, Dictionary(next_mastery["mastery"]), day_index):
+		# JobMastery returns the updated record under `history`; reading a
+		# `mastery` key here crashed every shift that reached its last step.
+		if not candidate_work.complete_shift(
+			next_progress,
+			Dictionary(next_mastery["history"]),
+			day_index
+		):
 			return _failure("completion_rejected", "Итог смены не принят состоянием работы")
 		var payout := _payout(result)
 		effects.append({"type": "change_money", "amount": payout, "reason": "Оплата смены"})
 		payload["result"] = result.duplicate(true)
 		payload["payout_ard"] = payout
-		var social := _record_social(candidate, result)
+		# Hauling loads for a whole shift is where a person learns to haul
+		# loads. Without this the yard was the only place the skill was ever
+		# checked and the only place it could never be earned.
+		if (
+			CARGO_TASK_CLASS in _newly_practiced(Dictionary(next_mastery["history"]))
+			and int(candidate.get("run_state").get_skill_rank(CARGO_SKILL)) < 1
+		):
+			effects.append({"type": "unlock_skill", "id": CARGO_SKILL, "rank": 1})
+			payload["unlocked_skill_id"] = CARGO_SKILL
+		var social := _record_social(candidate, result, candidate_work.active_job_id())
 		if not bool(social.get("ok", false)):
 			return social
 		var world := _record_world(candidate, result)
@@ -138,7 +325,7 @@ static func resolve_step(target: Object, choice_id: String, command_id: String) 
 		return _failure("progress_rejected", "Шаг смены не принят состоянием работы")
 	var committed := SessionTransactionScript.execute(candidate, {
 		"command_id": command_id,
-		"source_id": "job_shift_step",
+		"source_id": source_id,
 		"title": "Смена",
 		"journal_message": "Итог смены" if finished else "Шаг смены подтверждён",
 		"journal_payload": payload,
@@ -156,7 +343,7 @@ static func resolve_step(target: Object, choice_id: String, command_id: String) 
 		"idempotent": false,
 		"completed": finished,
 		"result": result,
-		"dismissed": bool(target.get("job_work_state").is_dismissed()),
+		"dismissed": bool(target.get("job_work_state").is_dismissed(String(payload["job_id"]))),
 		"transaction": committed,
 	}
 
@@ -173,25 +360,40 @@ static func _payout(result: Dictionary) -> int:
 
 ## Viktor watched the shift, so his opinion moves with the grade and he
 ## remembers the specific day rather than an average.
-static func _record_social(candidate: Object, result: Dictionary) -> Dictionary:
+static func _record_social(candidate: Object, result: Dictionary, job_id: String) -> Dictionary:
+	var supervisor := "npc_viktor_koren"
+	var yard := YARD_LOCATION
+	for location_id: String in JOBS:
+		if String(Dictionary(JOBS[location_id])["job_id"]) == job_id:
+			supervisor = String(Dictionary(JOBS[location_id])["supervisor"])
+			yard = location_id
 	var grade := String(result.get("grade", "acceptable"))
 	var trust: int = {"excellent": 6, "solid": 3, "acceptable": 0, "weak": -3, "unsafe": -7}.get(grade, 0)
+	# The mutation takes a complete memory record, not a loose summary string:
+	# a flat payload was rejected as invalid_npc_memory and took the whole
+	# shift result down with it.
 	var operations: Array = [{
 		"type": "add_npc_memory",
-		"npc_id": SUPERVISOR_ID,
-		"memory_id": "shift_%s" % String(result.get("shift_id", "")),
-		"summary": "Смена на площадке: %s" % grade,
+		"npc_id": supervisor,
+		"memory": {
+			"memory_id": _memory_id(String(result.get("shift_id", "shift"))),
+			"type_id": MEMORY_TYPE_BY_GRADE.get(grade, "worked_well"),
+			"valence": clampi(trust * 10, -100, 100),
+			"salience": 45 if grade in ["unsafe", "excellent"] else 25,
+		},
 	}]
 	if trust != 0:
+		# The mutation names the axis `field` and the audience `reputation_id`;
+		# the earlier spelling was rejected and rolled the shift result back.
 		operations.push_front({
 			"type": "change_relationship",
-			"npc_id": SUPERVISOR_ID,
-			"axis": "trust",
+			"npc_id": supervisor,
+			"field": "trust",
 			"delta": trust,
 		})
 		operations.append({
 			"type": "change_reputation",
-			"scope_id": YARD_LOCATION,
+			"reputation_id": YARD_REPUTATION,
 			"delta": trust,
 		})
 	var applied := SocialMutationScript.apply(candidate.get("social_state"), {
@@ -205,26 +407,50 @@ static func _record_social(candidate: Object, result: Dictionary) -> Dictionary:
 	return {"ok": true}
 
 
-## An unsafe shift is exactly what the district inspection is looking for, so
-## bad work pushes the process along instead of merely scoring badly.
+## An unsafe shift is exactly what the district inspection is looking for. The
+## stage itself moves on confirmed time through the authored transitions, so a
+## bad shift does what a bad shift actually does: it draws attention. Higher
+## institution pressure is read by the inspection and by the shop counter, so
+## careless work is felt in the district rather than scored in private.
 static func _record_world(candidate: Object, result: Dictionary) -> Dictionary:
 	var grade := String(result.get("grade", "acceptable"))
-	var pressure: int = {"unsafe": 2, "weak": 1}.get(grade, 0)
+	var pressure: int = {"unsafe": 4, "weak": 2}.get(grade, 0)
 	if pressure == 0:
 		return {"ok": true}
-	var applied := WorldMutationScript.apply(candidate.get("world_state"), {
-		"schema_version": WorldMutationScript.SCHEMA_VERSION,
-		"source_id": "job_shift_result",
-		"at": candidate.get("run_state").calendar.current_stamp(),
-		"operations": [{
-			"type": "advance_world_process",
-			"process_id": PROCESS_ID,
-			"steps": pressure,
-		}],
-	})
+	var world_state: WorldState = candidate.get("world_state")
+	var current := world_state.metric_value(PRESSURE_METRIC, 0)
+	var delta := mini(pressure, WorldState.METRIC_MAX - current)
+	if delta <= 0:
+		return {"ok": true}
+	var loaded := WorldDefinitionCatalogScript.load_default()
+	if not bool(loaded.get("ok", false)):
+		return _failure("world_definitions_failed", "Каталог процессов мира недоступен")
+	var applied := WorldMutationScript.apply(
+		world_state,
+		{
+			"schema_version": WorldMutationScript.SCHEMA_VERSION,
+			"source_id": "job_shift_result",
+			"at": candidate.get("run_state").calendar.current_stamp(),
+			"operations": [{
+				"type": "change_world_metric",
+				"id": PRESSURE_METRIC,
+				"delta": delta,
+			}],
+		},
+		Dictionary(loaded.get("catalog", {}))
+	)
 	if not bool(applied.get("ok", false)):
-		return _failure("world_commit_failed", "Не удалось продвинуть проверку", {"cause": applied})
+		return _failure("world_commit_failed", "Не удалось записать внимание района", {"cause": applied})
 	return {"ok": true}
+
+
+## Memory ids are lowercase identifiers, and a generated shift id carries
+## colons and a version suffix, so it is folded down rather than pasted in.
+static func _memory_id(shift_id: String) -> String:
+	var normalized := ""
+	for character: String in shift_id.to_lower():
+		normalized += character if character in "abcdefghijklmnopqrstuvwxyz0123456789" else "_"
+	return "shift_%s" % normalized.lstrip("_")
 
 
 static func _actor_profile(run_state: RunState) -> Dictionary:
@@ -232,6 +458,7 @@ static func _actor_profile(run_state: RunState) -> Dictionary:
 		"characteristics": run_state.characteristics.duplicate(true),
 		"skills": run_state.skills.duplicate(true),
 		"polarities": run_state.stored_polarities.duplicate(true),
+		"equipment": EquipmentRulesScript.modifiers(run_state.inventory),
 	}
 
 

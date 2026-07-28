@@ -25,9 +25,7 @@ func configure(
 func show(route: String) -> void:
 	match route:
 		"event": show_event()
-		"job": show_job()
 		"shelter": show_shelters()
-		"job_result": show_job_result()
 		"summary": show_summary()
 		_:
 			push_error("Unknown legacy activity route: %s" % route)
@@ -39,15 +37,6 @@ func show_event() -> void:
 		_session.get_shell_model(),
 		_preferences,
 		{"action": _on_event_choice, "settings": _hook("settings")}
-	)
-
-
-func show_job() -> void:
-	_presenter.show_job(
-		_session.current_job_prompt(),
-		_session.get_shell_model(),
-		_preferences,
-		{"action": _on_job_answer, "settings": _hook("settings")}
 	)
 
 
@@ -64,15 +53,6 @@ func show_shelters() -> void:
 	)
 
 
-func show_job_result() -> void:
-	_presenter.show_job_result(
-		_session.get_job_result_model(),
-		_session.get_shell_model(),
-		_preferences,
-		_hook("location")
-	)
-
-
 func show_summary() -> void:
 	_presenter.show_summary(
 		_session.get_summary_model(),
@@ -84,24 +64,6 @@ func show_summary() -> void:
 
 func _on_event_choice(choice_id: String) -> void:
 	_hook("run_command").call(_session.resolve_choice.bind(choice_id), true)
-
-
-func _on_job_answer(choice_id: String) -> void:
-	if not bool(_hook("begin_command").call()):
-		return
-	var result: Dictionary = _session.answer_job(choice_id)
-	if not bool(_hook("accept_result").call(result)):
-		_hook("release_command").call()
-		return
-	_hook("capture_transaction").call(result)
-	var save_result: Dictionary = _hook("save").call()
-	if bool(result.get("completed", false)):
-		_hook("job_result").call()
-	else:
-		show_job()
-		if bool(save_result.get("ok", false)):
-			_hook("toast").call("Результат раунда: +%d" % int(result.get("round_score", 0)))
-	_hook("release_command").call()
 
 
 func _on_shelter_selected(shelter_id: String) -> void:

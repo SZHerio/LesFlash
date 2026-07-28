@@ -44,14 +44,27 @@ func _present() -> void:
 		_model(),
 		_session.get_shell_model(),
 		_preferences,
-		{"back": _hook("back"), "choice": _on_choice_requested, "finish": _hook("back")}
+		{
+			"back": _hook("back"),
+			"choice": _on_choice_requested,
+			"quick_resolve": _on_quick_resolve_requested,
+			"finish": _hook("back"),
+		}
 	)
 
 
+func _on_quick_resolve_requested() -> void:
+	_run_step(func() -> Dictionary: return _session.quick_resolve_job_shift())
+
+
 func _on_choice_requested(choice_id: String) -> void:
+	_run_step(func() -> Dictionary: return _session.resolve_job_shift_step(choice_id))
+
+
+func _run_step(command: Callable) -> void:
 	if not bool(_hook("begin_command").call()):
 		return
-	var result := _session.resolve_job_shift_step(choice_id)
+	var result: Dictionary = command.call()
 	if not bool(_hook("accept_result").call(result)):
 		_refresh()
 		_hook("release_command").call()

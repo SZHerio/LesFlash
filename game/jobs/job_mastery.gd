@@ -91,8 +91,8 @@ static func validate(value: Variant) -> Dictionary:
 		errors.append(String(raw))
 	if history.get("schema_version", null) != SCHEMA_VERSION:
 		errors.append("job_mastery.schema_version должен быть равен %d" % SCHEMA_VERSION)
-	if String(history.get("job_id", "")) != "job_recycling_sorter":
-		errors.append("job_mastery.job_id должен быть job_recycling_sorter")
+	if String(history.get("job_id", "")).strip_edges().is_empty():
+		errors.append("job_mastery.job_id не задан")
 	if not history.get("completed_shifts", null) is Array:
 		errors.append("job_mastery.completed_shifts должен быть массивом")
 	if not history.get("practiced_task_class_ids", null) is Array:

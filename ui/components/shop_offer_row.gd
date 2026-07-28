@@ -24,6 +24,7 @@ var _quantity := 1
 var _available := 0
 var _unit_price_value := 0
 var _wallet := 0
+var _mode := "buy"
 var _store_open := false
 var _reduced_motion := false
 var _reveal_tween: Tween
@@ -53,7 +54,11 @@ func set_reduced_motion(enabled: bool) -> void:
 
 
 func offer_id() -> String:
-	return String(_model.get("offer_id", ""))
+	return String(_model.get("offer_id", _model.get("stack_id", "")))
+
+
+func mode() -> String:
+	return _mode
 
 
 func selected_quantity() -> int:
@@ -61,8 +66,9 @@ func selected_quantity() -> int:
 
 
 func _apply_model() -> void:
+	_mode = "sell" if String(_model.get("mode", "buy")) == "sell" else "buy"
 	_available = maxi(int(_model.get("quantity", 0)), 0)
-	_unit_price_value = maxi(int(_model.get("unit_price", 0)), 0)
+	_unit_price_value = maxi(int(_model.get("unit_price", _model.get("unit_payout", 0))), 0)
 	_quantity = clampi(_quantity, 1, maxi(_available, 1))
 	_item_icon.present(StringName(_model.get("icon_id", &"meta_item")), 32, Palette.GOLD)
 	_title.text = String(_model.get("title", "Товар")).strip_edges()
@@ -93,18 +99,21 @@ func _refresh_controls() -> void:
 	_total_price.present({"amount": total})
 	_decrease.disabled = _quantity <= 1 or _available <= 0 or not _store_open
 	_increase.disabled = _quantity >= _available or _available <= 0 or not _store_open
+	var selling := _mode == "sell"
 	var reason := ""
 	if not _store_open:
 		reason = "Торговая точка сейчас закрыта"
 	elif _available <= 0:
-		reason = "Товар закончился"
-	elif total > _wallet:
+		reason = "Товар закончился" if not selling else "У вас этого больше нет"
+	elif not selling and total > _wallet:
 		reason = "Не хватает %d %s" % [total - _wallet, _arden_word(total - _wallet)]
 	_buy.disabled = not reason.is_empty()
+	_buy.text = "Продать" if selling else "Купить"
 	_reason.text = reason
 	_reason.visible = not reason.is_empty()
 	_buy.accessibility_name = (
-		"Купить %s, %d штука, %d %s" % [
+		"%s %s, %d штука, %d %s" % [
+			"Продать" if selling else "Купить",
 			_title.text,
 			_quantity,
 			total,

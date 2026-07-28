@@ -62,6 +62,22 @@ func allowed_actions() -> Array[String]:
 	return result
 
 
+func equip_slot() -> String:
+	return String(action("equip").get("slot", ""))
+
+
+func equip_modifiers() -> Dictionary:
+	var modifiers: Variant = action("equip").get("modifiers", {})
+	return Dictionary(modifiers).duplicate(true) if modifiers is Dictionary else {}
+
+
+## A bag is the only equipment that carries other things, so its container
+## specification travels with the item rather than being hard-coded per bag.
+func equip_container() -> Dictionary:
+	var container: Variant = action("equip").get("container", {})
+	return Dictionary(container).duplicate(true) if container is Dictionary else {}
+
+
 func is_unknown() -> bool:
 	return bool(_data.get("unknown_fallback", false))
 
@@ -77,5 +93,7 @@ func to_view() -> Dictionary:
 		"volume_ml": volume_ml(),
 		"base_value": base_value(),
 		"allowed_actions": allowed_actions(),
+		"equip_slot": equip_slot(),
+		"equip_modifiers": equip_modifiers(),
 		"unknown_fallback": is_unknown(),
 	}

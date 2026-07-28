@@ -16,6 +16,7 @@ const JobLocationActionsScript := preload("res://game/jobs/job_location_actions.
 const JobSessionCommandScript := preload("res://game/jobs/job_session_command.gd")
 const JobShiftViewModelScript := preload("res://app/jobs/job_shift_view_model.gd")
 const NpcInteractionCommandScript := preload("res://game/npc/npc_interaction_command.gd")
+const NpcGiftCommandScript := preload("res://game/npc/npc_gift_command.gd")
 const StoreViewModelScript := preload("res://app/commerce/store_view_model.gd")
 const NpcInteractionViewModelScript := preload("res://app/npc/npc_interaction_view_model.gd")
 const NpcPortraitRegistryScript := preload("res://app/npc/npc_portrait_registry.gd")
@@ -55,7 +56,13 @@ static func store_model(
 	reduced_motion: bool = false
 ) -> Dictionary:
 	var raw := StoreServiceScript.preview(session, store_id)
-	return StoreViewModelScript.build(raw, reduced_motion) if bool(raw.get("ok", false)) else raw
+	if not bool(raw.get("ok", false)):
+		return raw
+	var sale := StoreServiceScript.sell_offers(session, store_id)
+	if bool(sale.get("ok", false)):
+		raw["sell_offers"] = Array(sale.get("offers", [])).duplicate(true)
+		raw["sell_message"] = String(sale.get("message", ""))
+	return StoreViewModelScript.build(raw, reduced_motion)
 
 
 static func buy(
@@ -74,6 +81,28 @@ static func buy(
 		quantity,
 		target_container_id,
 		_command_id(session, "buy:%s:%s" % [store_id, offer_id], flow_revision),
+		expected_revision
+	)
+
+
+static func sell_offers(session: Object, store_id: String) -> Dictionary:
+	return StoreServiceScript.sell_offers(session, store_id)
+
+
+static func sell(
+	session: Object,
+	store_id: String,
+	stack_id: String,
+	quantity: int,
+	expected_revision: int,
+	flow_revision: int
+) -> Dictionary:
+	return CommerceCommandScript.sell(
+		session,
+		store_id,
+		stack_id,
+		quantity,
+		_command_id(session, "sell:%s:%s" % [store_id, stack_id], flow_revision),
 		expected_revision
 	)
 
@@ -98,6 +127,7 @@ static func shelters(session: Object) -> Array:
 			"risk": {"street": 4, "night_shelter": 2, "paid_room": 1}.get(category, 3),
 			"price_arden": int(option.get("price_arden", 0)),
 			"wake_time_text": String(option.get("wake_time_text", "")),
+			"shielded": int(option.get("shielded", 0)),
 		})
 	return result
 
@@ -143,11 +173,70 @@ static func npc_model(
 	source["relationship_value"] = _relationship_text(
 		Dictionary(raw.get("relationship", {}))
 	)
+	# Handing something over is one of the things you can do with a person who is
+	# standing in front of you, so it belongs in the same list as talking.
+	var gifts := NpcGiftCommandScript.offers(session, npc_id)
+	var interactions: Array = Array(source.get("interactions", [])).duplicate(true)
+	for gift: Dictionary in gifts:
+		if not bool(gift.get("accepted", false)) and not include_blocked:
+			continue
+		interactions.append(_gift_interaction(gift))
+	source["interactions"] = interactions
 	var result := NpcInteractionViewModelScript.build(source, reduced_motion)
 	result["ok"] = true
 	result["code"] = String(raw.get("code", "ok"))
 	result["error"] = ""
+	result["gifts"] = NpcGiftCommandScript.offers(session, npc_id)
 	return result
+
+
+const GIFT_INTERACTION_PREFIX := "gift:"
+
+
+static func gift_stack_id(interaction_id: String) -> String:
+	return interaction_id.trim_prefix(GIFT_INTERACTION_PREFIX) if is_gift_interaction(interaction_id) else ""
+
+
+static func is_gift_interaction(interaction_id: String) -> bool:
+	return interaction_id.begins_with(GIFT_INTERACTION_PREFIX)
+
+
+static func _gift_interaction(gift: Dictionary) -> Dictionary:
+	var quantity := int(gift.get("quantity", 1))
+	return {
+		"id": "%s%s" % [GIFT_INTERACTION_PREFIX, String(gift.get("stack_id", ""))],
+		"title": "%s — %s" % [String(gift.get("action_title", "Отдать")), String(gift.get("title", ""))],
+		"description": (
+			"Этот человек ценит такое."
+			if bool(gift.get("valued", false))
+			else "Вещь перейдёт из рук в руки и больше не вернётся."
+		),
+		"available": bool(gift.get("accepted", false)),
+		"reasons": [] if bool(gift.get("accepted", false)) else [{"message": String(gift.get("reason", ""))}],
+		"duration_minutes": int(gift.get("duration_minutes", 0)),
+		"category_icon_id": &"nav_items",
+		"quantity": quantity,
+	}
+
+
+static func gift_offers(session: Object, npc_id: String) -> Array[Dictionary]:
+	return NpcGiftCommandScript.offers(session, npc_id)
+
+
+static func give_to_npc(
+	session: Object,
+	npc_id: String,
+	stack_id: String,
+	quantity: int,
+	flow_revision: int
+) -> Dictionary:
+	return NpcGiftCommandScript.give(
+		session,
+		npc_id,
+		stack_id,
+		quantity,
+		_command_id(session, "gift:%s:%s" % [npc_id, stack_id], flow_revision)
+	)
 
 
 static func preview_npc_interaction(
@@ -209,11 +298,20 @@ static func execute_npc_interaction(
 static func _shelter_description(option: Dictionary) -> String:
 	var price := int(option.get("price_arden", 0))
 	var price_text := "бесплатно" if price <= 0 else "%d арденов" % price
-	return "%s\nПодъём в %s · %s" % [
+	var lines := PackedStringArray([
 		String(option.get("description", "")),
-		String(option.get("wake_time_text", "—")),
-		price_text,
-	]
+		"Подъём в %s · %s" % [String(option.get("wake_time_text", "—")), price_text],
+	])
+	# The hero can feel his own coat, so the night says what it is worth here
+	# instead of leaving the player to compare two identical-looking options.
+	var shielded := int(option.get("shielded", 0))
+	if shielded >= 60:
+		lines.append("Снаряжение держит тепло всю ночь")
+	elif shielded > 0:
+		lines.append("Снаряжение отчасти спасает от холода")
+	elif int(option.get("exposure", 0)) > 0:
+		lines.append("Ночь открыта холоду")
+	return "\n".join(lines)
 
 
 static func _relationship_text(relationship: Dictionary) -> String:
@@ -265,14 +363,27 @@ static func job_shift_model(session: Object, reduced_motion: bool = false) -> Di
 		return {}
 	var work_state: JobWorkState = session.get("job_work_state")
 	var raw := work_state.to_dict()
-	raw["dismissed"] = work_state.is_dismissed()
+	raw["dismissed"] = work_state.is_dismissed(work_state.active_job_id())
+	raw["quick_resolve"] = JobSessionCommandScript.quick_resolve_available(session)
 	return JobShiftViewModelScript.build(raw, reduced_motion)
 
 
+static func quick_resolve_job_shift(session: Object, flow_revision: int) -> Dictionary:
+	return JobSessionCommandScript.quick_resolve(
+		session,
+		_command_id(session, "job_shift_quick", flow_revision)
+	)
+
+
 static func begin_job_shift(session: Object, flow_revision: int) -> Dictionary:
+	var posting := JobSessionCommandScript.job_at(String(session.get("location")))
+	if posting.is_empty():
+		return {"ok": false, "code": "no_job_here", "error": "Здесь не нанимают"}
+	var job_id := String(posting["job_id"])
 	return JobSessionCommandScript.begin(
 		session,
-		_command_id(session, "job_shift_begin", flow_revision)
+		job_id,
+		_command_id(session, "job_shift_begin:%s" % job_id, flow_revision)
 	)
 
 

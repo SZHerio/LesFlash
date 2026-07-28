@@ -68,15 +68,15 @@ func _check_exit_reaches_its_handler() -> void:
 	_unmount(screen)
 
 
-## An event or a job round always keeps one available answer, so leaving one is
-## not the same as leaving a list of shut doors and must stay impossible.
+## An event always keeps one available answer, so leaving one is not the same as
+## leaving a list of shut doors and must stay impossible.
 func _check_a_decision_keeps_no_exit() -> void:
-	var screen := _mount(UiModels.job({
-		"job_title": "Смена",
-		"text": "Что делать",
-		"choices": [{"id": "go", "label": "Работать"}],
+	var screen := _mount(UiModels.event({
+		"title": "Решение",
+		"body": "Что делать",
+		"choices": [{"id": "go", "label": "Действовать"}],
 	}))
-	_expect(not screen.has_exit(), "рабочая смена не должна предлагать выход мимо решения")
+	_expect(not screen.has_exit(), "событие не должно предлагать выход мимо решения")
 	_unmount(screen)
 
 

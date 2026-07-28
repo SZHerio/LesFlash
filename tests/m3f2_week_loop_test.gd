@@ -196,27 +196,36 @@ func _test_daily_job_reset() -> void:
 		return
 	var session = _session(adapter)
 	_place(session, "recycling_point")
-	var started: Dictionary = adapter.begin_job("standard")
-	_expect(bool(started.get("ok", false)), "first shift must start")
+	_expect(_advance_fixture(session, 60), "fixture must reach the opening of the yard")
+	var started: Dictionary = adapter.begin_job_shift()
+	_expect(bool(started.get("ok", false)), "first shift must start: %s" % str(started))
 	if not bool(started.get("ok", false)):
 		return
-	for _round: int in 6:
-		var prompt: Dictionary = adapter.current_job_prompt()
-		var choices: Array = prompt.get("choices", [])
-		_expect(not choices.is_empty(), "each work round must offer an available answer")
+	_expect(_work_shift_to_the_end(adapter), "the whole shift must resolve")
+	var same_day: Dictionary = adapter.begin_job_shift()
+	_expect(not bool(same_day.get("ok", false)), "one shift per day must be enforced")
+	_expect(_advance_fixture(session, 1440), "fixture must reach the next day")
+	var next_day: Dictionary = adapter.begin_job_shift()
+	_expect(bool(next_day.get("ok", false)), "the shift must reopen on the next day: %s" % str(next_day))
+
+
+func _work_shift_to_the_end(adapter: Object) -> bool:
+	for _step: int in 12:
+		var model: Dictionary = adapter.get_job_shift_model()
+		var step: Dictionary = Dictionary(model.get("current_step", {}))
+		if step.is_empty():
+			return true
+		var choices: Array = Array(step.get("choices", []))
 		if choices.is_empty():
-			return
-		var answered: Dictionary = adapter.answer_job(String(
+			return false
+		var resolved: Dictionary = adapter.resolve_job_shift_step(String(
 			Dictionary(choices[0]).get("id", "")
 		))
-		_expect(bool(answered.get("ok", false)), "work round must resolve")
-		if not bool(answered.get("ok", false)):
-			return
-	var same_day: Dictionary = adapter.begin_job("standard")
-	_expect_equal(same_day.get("code"), "job_already_completed", "one shift per day must be enforced")
-	_expect(_advance_fixture(session, 1440), "fixture must reach the next day")
-	var next_day: Dictionary = adapter.begin_job("standard")
-	_expect(bool(next_day.get("ok", false)), "the shift must reopen on the next day")
+		if not bool(resolved.get("ok", false)):
+			return false
+		if bool(resolved.get("completed", false)):
+			return true
+	return false
 
 
 func _test_death_and_restart() -> void:

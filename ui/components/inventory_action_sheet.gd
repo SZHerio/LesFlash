@@ -258,6 +258,10 @@ func _action_title(action_id: String, item_title: String) -> String:
 			return "Разобрать «%s»?" % item_title
 		"drop":
 			return "Оставить «%s» здесь?" % item_title
+		"equip":
+			return "Надеть «%s»?" % item_title
+		"unequip":
+			return "Снять «%s»?" % item_title
 	return "Подтвердить действие"
 
 
@@ -271,6 +275,10 @@ func _action_body(action_id: String) -> String:
 			return "Исходный предмет исчезнет, а указанные материалы займут его место."
 		"drop":
 			return "Вещь останется в текущей локации и перестанет считаться переносимой."
+		"equip":
+			return "Вещь займёт свой слот и начнёт действовать, пока надета."
+		"unequip":
+			return "Вещь вернётся в переносимые и перестанет действовать. Сумку нужно сначала опустошить."
 	return "Это действие изменит состояние попытки."
 
 

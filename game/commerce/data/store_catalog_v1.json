@@ -106,9 +106,13 @@
         "product_market_sealed_food_can"
       ],
       "buyback_policy": {
-        "enabled": false,
-        "accepted_category_ids": [],
-        "payout_basis_points": 0
+        "enabled": true,
+        "accepted_category_ids": [
+          "preserved_food",
+          "household",
+          "print"
+        ],
+        "payout_basis_points": 3800
       }
     },
     {

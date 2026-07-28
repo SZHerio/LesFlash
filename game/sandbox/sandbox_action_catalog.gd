@@ -10,8 +10,31 @@ const CATALOG_VERSION := 1
 const DEFAULT_PATH := "res://game/sandbox/data/sandbox_action_catalog_v1.json"
 
 
+static var _default_cache: Dictionary = {}
+
+
+## Content files are immutable at run time, so the parse and the full
+## validation happen once. Callers still receive their own deep copy, which
+## keeps the previous contract exactly: nobody can mutate a shared catalog.
 static func load_default(reference_ids: Dictionary = {}) -> Dictionary:
-	return load_from_path(DEFAULT_PATH, reference_ids)
+	if _default_cache.is_empty() or not reference_ids.is_empty():
+		var loaded := load_from_path(DEFAULT_PATH, reference_ids)
+		if not reference_ids.is_empty():
+			return loaded
+		_default_cache = loaded
+	return _cached_copy(_default_cache)
+
+
+static func reset_cache_for_tests() -> void:
+	_default_cache = {}
+
+
+static func _cached_copy(source: Dictionary) -> Dictionary:
+	return {
+		"ok": bool(source.get("ok", false)),
+		"catalog": Dictionary(source.get("catalog", {})).duplicate(true),
+		"errors": Array(source.get("errors", [])).duplicate(true),
+	}
 
 
 static func load_from_path(path: String, reference_ids: Dictionary = {}) -> Dictionary:

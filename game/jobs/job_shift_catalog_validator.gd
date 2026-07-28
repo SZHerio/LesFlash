@@ -5,15 +5,10 @@ const Rules := preload("res://game/content/catalogs/catalog_rules.gd")
 
 const SCHEMA_VERSION := 1
 const CATALOG_ID := "job_shift_catalog_v1"
-const CANONICAL_JOB_ID := "job_recycling_sorter"
-const TASK_CLASSES := [
-	"task_recycling_identify_material",
-	"task_recycling_move_load",
-	"task_recycling_prepare_scale",
-	"task_recycling_clear_press",
-	"task_recycling_handle_customer",
-	"task_recycling_safety_check",
-]
+## Each job declares its own six task classes. Nothing is canonical any more:
+## a second profession is a catalog entry, not a code change.
+const CLASSES_PER_JOB := 6
+const SUPERVISORS := ["npc_viktor_koren", "npc_lidiya_maren", "npc_tamara_roven"]
 const ATTRIBUTES := ["strength", "charisma", "intelligence", "luck"]
 const SKILLS := ["city_navigation", "cargo_handling", "cooking", "repair", "first_aid", "trade", "search"]
 const SCORE_FIELDS := ["production", "quality", "safety"]
@@ -39,8 +34,8 @@ static func validate(catalog: Dictionary) -> Dictionary:
 
 
 static func _validate_jobs(jobs: Dictionary, errors: Array[String]) -> void:
-	if jobs.size() != 1 or not jobs.has(CANONICAL_JOB_ID):
-		errors.append("jobs должен содержать единственную каноническую работу %s" % CANONICAL_JOB_ID)
+	if jobs.is_empty():
+		errors.append("jobs должен содержать хотя бы одну работу")
 	for job_id: String in jobs:
 		var job: Dictionary = jobs[job_id]
 		var path := "jobs.%s" % job_id
@@ -51,11 +46,11 @@ static func _validate_jobs(jobs: Dictionary, errors: Array[String]) -> void:
 		], path, errors)
 		for field: String in ["title", "briefing_title", "briefing"]:
 			Rules.validate_text(job.get(field, null), "%s.%s" % [path, field], errors)
-		if String(job.get("supervisor_npc_id", "")) != "npc_viktor_koren":
-			errors.append("%s.supervisor_npc_id должен ссылаться на Виктора Корена" % path)
+		if String(job.get("supervisor_npc_id", "")) not in SUPERVISORS:
+			errors.append("%s.supervisor_npc_id должен ссылаться на существующего NPC" % path)
 		var classes := Rules.validate_id_array(job.get("task_class_ids", null), "%s.task_class_ids" % path, errors, true)
-		if _sorted(classes) != _sorted(TASK_CLASSES):
-			errors.append("%s.task_class_ids должен содержать все шесть канонических классов" % path)
+		if classes.size() != CLASSES_PER_JOB:
+			errors.append("%s.task_class_ids должен содержать %d классов" % [path, CLASSES_PER_JOB])
 		_validate_pair(job.get("tasks_per_shift", null), 2, 3, "%s.tasks_per_shift" % path, errors)
 		Rules.validate_int_range(job.get("decisions_per_shift", null), 1, 1, "%s.decisions_per_shift" % path, errors)
 		Rules.validate_int_range(job.get("duration_minutes", null), 60, 720, "%s.duration_minutes" % path, errors)
@@ -71,8 +66,8 @@ static func _validate_tasks(tasks: Dictionary, errors: Array[String]) -> void:
 			"difficulty", "choices",
 		], path, errors)
 		_validate_step_text(task, path, errors)
-		if String(task.get("task_class_id", "")) not in TASK_CLASSES:
-			errors.append("%s.task_class_id неизвестен" % path)
+		if String(task.get("task_class_id", "")).strip_edges().is_empty():
+			errors.append("%s.task_class_id не задан" % path)
 		if String(task.get("attribute_id", "")) not in ATTRIBUTES:
 			errors.append("%s.attribute_id неизвестен" % path)
 		if String(task.get("skill_id", "")) not in SKILLS:
@@ -123,15 +118,21 @@ static func _validate_choices(value: Variant, path: String, errors: Array[String
 			Rules.validate_int_range(scores.get(score_id, null), -25, 25, "%s.scores.%s" % [choice_path, score_id], errors)
 
 
+## Every class a job promises must have a task written for it, and no job may
+## borrow another job's classes: a shift at the market is not a shift at the yard.
 static func _validate_reachability(jobs: Dictionary, tasks: Dictionary, errors: Array[String]) -> void:
-	if not jobs.has(CANONICAL_JOB_ID):
-		return
 	var reachable: Dictionary = {}
 	for task_id: String in tasks:
 		reachable[String(Dictionary(tasks[task_id]).get("task_class_id", ""))] = true
-	for task_class_id: String in TASK_CLASSES:
-		if not reachable.has(task_class_id):
-			errors.append("Класс %s недостижим: для него нет производственной задачи" % task_class_id)
+	var claimed: Dictionary = {}
+	for job_id: String in jobs:
+		for raw_class: Variant in Array(Dictionary(jobs[job_id]).get("task_class_ids", [])):
+			var class_id := String(raw_class)
+			if not reachable.has(class_id):
+				errors.append("Класс %s недостижим: для него нет производственной задачи" % class_id)
+			if claimed.has(class_id):
+				errors.append("Класс %s заявлен сразу двумя работами" % class_id)
+			claimed[class_id] = job_id
 
 
 static func _validate_pair(value: Variant, minimum: int, maximum: int, path: String, errors: Array[String]) -> void:

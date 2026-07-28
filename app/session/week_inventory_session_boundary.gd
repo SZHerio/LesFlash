@@ -7,6 +7,8 @@ extends RefCounted
 
 const InventoryTransaction := preload("res://core/inventory/inventory_transaction.gd")
 const WeekInventoryCommand := preload("res://game/week/week_inventory_command.gd")
+const EquipmentCommand := preload("res://game/equipment/equipment_command.gd")
+const EquipmentRules := preload("res://game/equipment/equipment_rules.gd")
 
 
 static func model(session: Object, location_model: Dictionary) -> Dictionary:
@@ -17,6 +19,10 @@ static func model(session: Object, location_model: Dictionary) -> Dictionary:
 		"strength": run_state.get_characteristic("strength"),
 		"location_id": location_id,
 		"location_title": String(location_model.get("title", location_id)),
+		"equipment": {
+			"slots": EquipmentRules.slots_model(run_state.inventory),
+			"modifiers": EquipmentRules.modifiers(run_state.inventory),
+		},
 	}
 
 
@@ -53,6 +59,19 @@ static func execute(
 				action_id,
 				_command_id(session, stack_id, action_id),
 				quantity
+			)
+		"equip":
+			result = EquipmentCommand.equip(
+				session,
+				stack_id,
+				_command_id(session, stack_id, action_id)
+			)
+		"unequip":
+			result = EquipmentCommand.unequip(
+				session,
+				stack_id,
+				_command_id(session, stack_id, action_id),
+				target_container_id
 			)
 		"drop":
 			result = InventoryTransaction.drop(

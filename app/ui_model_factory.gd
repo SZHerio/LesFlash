@@ -51,7 +51,7 @@ const CATEGORY_BY_ACTION_KIND := {
 	"event": "observe",
 	"local": "observe",
 	"search": "search",
-	"job": "work",
+	"job_shift": "work",
 	"wait": "rest",
 	"shelter": "shelter",
 }
@@ -120,41 +120,6 @@ static func event(raw_model: Dictionary) -> Dictionary:
 	}
 
 
-static func job(raw_model: Dictionary) -> Dictionary:
-	var options: Array = []
-	for raw_choice in Array(raw_model.get("choices", [])):
-		if not raw_choice is Dictionary:
-			continue
-		var choice: Dictionary = raw_choice
-		var locked := bool(choice.get("locked", false))
-		var category_id := String(choice.get("category_id", "work"))
-		options.append({
-			"id": String(choice.get("id", "")),
-			"category_id": category_id,
-			"category_icon_id": _resolved_category_icon(choice, category_id, &"action_work"),
-			"title": String(choice.get("label", "Действовать")),
-			"meta_tokens": _typed_meta_tokens(choice.get("meta_tokens", [])),
-			"enabled": not locked,
-			"locked_reason": reason_text(choice.get("reasons", [])),
-			"variant": "normal" if locked else "accent",
-		})
-	var round := int(raw_model.get("round", 1))
-	var total := int(raw_model.get("rounds_total", 6))
-	return {
-		"eyebrow": "РАБОЧАЯ МИНИ-ИГРА",
-		"title": String(raw_model.get("job_title", "Рабочая смена")),
-		"context": "Счёт: %d" % int(raw_model.get("score", 0)),
-		"body": String(raw_model.get("text", "Выберите действие")),
-		"section_title": "Ваше решение",
-		"progress": {
-			"label": "Раунд %d из %d" % [round, total],
-			"value": round - 1,
-			"maximum": total,
-		},
-		"options": options,
-	}
-
-
 static func shelters(raw_shelters: Array) -> Dictionary:
 	var options: Array = []
 	for raw_shelter in raw_shelters:
@@ -185,17 +150,6 @@ static func shelters(raw_shelters: Array) -> Dictionary:
 		"section_title": "Доступные места",
 		"leave_text": "Вернуться к месту",
 		"options": options,
-	}
-
-
-static func job_result(raw_model: Dictionary) -> Dictionary:
-	var result: Dictionary = Dictionary(raw_model.get("result", {})).duplicate(true)
-	return {
-		"eyebrow": "СМЕНА ЗАВЕРШЕНА",
-		"title": String(result.get("label", "Работа окончена")),
-		"body": "Итоговый счёт: %d" % int(result.get("score", raw_model.get("score", 0))),
-		"facts": transaction_facts(raw_model.get("transaction", {})),
-		"confirm_text": "Вернуться к месту",
 	}
 
 
@@ -326,7 +280,7 @@ static func _location_action(raw: Dictionary) -> Dictionary:
 				description = "Осмотреть место и разобраться в ситуации."
 			"local":
 				description = "Заняться делом в текущем месте."
-			"job":
+			"job_shift":
 				description = "Короткая рабочая смена с отдельной мини-игрой."
 			"wait":
 				description = "Осознанно пропустить часть дня."
@@ -350,7 +304,7 @@ static func _location_action(raw: Dictionary) -> Dictionary:
 		"confirmation_required": bool(raw.get("confirmation_required", false)),
 		"enabled": enabled,
 		"locked_reason": "Уже завершено" if completed else reason_text(raw.get("reasons", [])),
-		"variant": "accent" if kind in ["local", "job", "shelter", "search"] and enabled else "normal",
+		"variant": "accent" if kind in ["local", "job_shift", "shelter", "search"] and enabled else "normal",
 	}
 
 

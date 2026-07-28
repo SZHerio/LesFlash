@@ -11,6 +11,10 @@ const ConditionScript := preload("res://core/rules/condition.gd")
 const EffectScript := preload("res://core/rules/effect.gd")
 const COMMAND_SCHEMA_VERSION := 1
 
+## Sleep costs no energy — it is what the shelter's own restorative effects are
+## measured against. Hunger keeps running: a person does get hungry asleep.
+const SLEEP_SURVIVAL_PROFILE := {"energy_drain_units_per_minute": 0}
+
 
 static func prepare(
 	catalog: Dictionary,
@@ -73,6 +77,11 @@ static func prepare(
 			"schema_version": COMMAND_SCHEMA_VERSION,
 			"command_id": normalized_command_id,
 			"command_kind": "sleep",
+			# A night is not twelve hours of standing about. Without this the
+			# passage burned energy all night and only handed the rest back at
+			# the end, so going to bed tired was punished as if the hero had
+			# stayed awake — and the deprivation it caused could kill him.
+			"survival_profile": SLEEP_SURVIVAL_PROFILE.duplicate(true),
 			"source_id": shelter_id,
 			"id": "sleep_at_shelter",
 			"option_id": shelter_id,

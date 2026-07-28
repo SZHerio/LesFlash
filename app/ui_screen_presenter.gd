@@ -154,6 +154,7 @@ func show_shop(
 	var screen := _shell.show_screen(ShopScene) as ShopScreen
 	screen.back_requested.connect(_handler(handlers, "back"))
 	screen.purchase_requested.connect(_handler(handlers, "purchase"))
+	screen.sale_requested.connect(_handler(handlers, "sale"))
 	screen.present(model)
 	return screen
 
@@ -171,6 +172,10 @@ func show_job_shift(
 	screen.choice_requested.connect(
 		func(choice_id: String, _revision: int) -> void:
 			_handler(handlers, "choice").call(choice_id)
+	)
+	screen.quick_resolve_requested.connect(
+		func(_revision: int) -> void:
+			_handler(handlers, "quick_resolve").call()
 	)
 	screen.present(model)
 	return screen
@@ -251,19 +256,9 @@ func show_event(raw_model: Dictionary, shell_model: Dictionary, preferences: Dic
 	_show_choice(UiModels.event(raw_model), handlers)
 
 
-func show_job(raw_model: Dictionary, shell_model: Dictionary, preferences: Dictionary, handlers: Dictionary) -> void:
-	_prepare_location_activity(shell_model, preferences)
-	_show_choice(UiModels.job(raw_model), handlers)
-
-
 func show_shelters(raw_shelters: Array, shell_model: Dictionary, preferences: Dictionary, handlers: Dictionary) -> void:
 	_prepare_location_activity(shell_model, preferences)
 	_show_choice(UiModels.shelters(raw_shelters), handlers)
-
-
-func show_job_result(raw_model: Dictionary, shell_model: Dictionary, preferences: Dictionary, on_confirm: Callable) -> void:
-	_prepare_location_activity(shell_model, preferences)
-	show_result(UiModels.job_result(raw_model), on_confirm)
 
 
 func show_summary(raw_model: Dictionary, shell_model: Dictionary, preferences: Dictionary, on_confirm: Callable) -> void:

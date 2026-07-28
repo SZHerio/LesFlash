@@ -657,8 +657,7 @@ static func _event_list() -> Array:
 						Condition.with_reason(Condition.state(&"energy", 30), "Слишком мало сил для смены"),
 						Condition.with_reason(Condition.state(&"hunger", 85, Condition.LESS_OR_EQUAL), "Сильный голод делает смену опасной"),
 					],
-					[Effect.knowledge(&"recycling_job", 1, &"unlock")],
-					{"begin_job": true, "starts_job": true}
+					[Effect.knowledge(&"recycling_job", 1, &"unlock")]
 				),
 				_choice(
 					"recycling_sorting_trial.inspect", "Сначала изучить маркировку",
@@ -969,7 +968,23 @@ static func validate_effect_packet(
 	return {"ok": errors.is_empty(), "errors": errors}
 
 
+static var _validation_cache: Dictionary = {}
+
+
+## The first-day content is a static literal: it cannot change while the game
+## runs, yet every session validation re-derived and re-checked all of it.
+## The answer is computed once and handed out as a copy.
 static func validate_content() -> Dictionary:
+	if _validation_cache.is_empty():
+		_validation_cache = _validate_content_uncached()
+	return _validation_cache.duplicate(true)
+
+
+static func reset_validation_cache_for_tests() -> void:
+	_validation_cache = {}
+
+
+static func _validate_content_uncached() -> Dictionary:
 	var errors: Array = []
 	var place_map := locations()
 	var cards := event_cards()

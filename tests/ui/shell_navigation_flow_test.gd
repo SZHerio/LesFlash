@@ -103,7 +103,7 @@ func _run() -> void:
 	if search.back_calls != 2 or not _expect_calls({"location": 3}):
 		return
 
-	for route: String in ["map", "hero", "npc", "shop", "shelter", "job_result"]:
+	for route: String in ["map", "hero", "npc", "shop", "shelter", "job_shift"]:
 		flow.handle_back(route)
 	if not _expect_calls({"location": 9}):
 		return

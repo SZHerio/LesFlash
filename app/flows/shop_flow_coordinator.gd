@@ -31,8 +31,63 @@ func show(
 		),
 		_session.get_shell_model(),
 		_preferences,
-		{"back": _hook("back"), "purchase": _on_purchase_requested}
+		{
+			"back": _hook("back"),
+			"purchase": _on_purchase_requested,
+			"sale": _on_sale_requested,
+		}
 	)
+
+
+func _on_sale_requested(
+	store_id: String,
+	stack_id: String,
+	quantity: int,
+	expected_revision: int
+) -> void:
+	if not bool(_hook("begin_command").call()):
+		return
+	var result := _session.sell_store_item(
+		store_id,
+		stack_id,
+		quantity,
+		expected_revision
+	)
+	if not bool(_hook("accept_result").call(result)):
+		_hook("release_command").call()
+		return
+	_hook("capture_transaction").call(result)
+	var saved: Dictionary = _hook("save").call()
+	if _session.get_phase() == "completed":
+		_hook("finished").call()
+	else:
+		_refresh()
+	if bool(saved.get("ok", false)):
+		var payout := int(Dictionary(result.get("receipt", {})).get("total_payout", 0))
+		_hook("toast").call("Продано за %d %s." % [payout, _arden_word(payout)])
+	_hook("release_command").call()
+
+
+func _refresh() -> void:
+	if _screen == null or not is_instance_valid(_screen):
+		return
+	_screen.present(_session.get_store_model(
+		_store_id,
+		bool(_preferences.get("reduced_motion", false))
+	))
+
+
+static func _arden_word(value: int) -> String:
+	var last_two := value % 100
+	if last_two >= 11 and last_two <= 14:
+		return "арденов"
+	match value % 10:
+		1:
+			return "арден"
+		2, 3, 4:
+			return "ардена"
+		_:
+			return "арденов"
 
 
 func _on_purchase_requested(

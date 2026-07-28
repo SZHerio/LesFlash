@@ -5,6 +5,13 @@ extends RefCounted
 ## The helper is pure: it mutates neither the live session nor its candidate.
 
 const SurvivalTimeRulesScript := preload("res://game/survival/survival_time_rules.gd")
+const EquipmentRulesScript := preload("res://game/equipment/equipment_rules.gd")
+
+## Boots and a coat do not create energy; they stop the day from taking as much
+## of it. The relief is one fixed-point unit at most, so the drain never reaches
+## zero and no outfit makes the week free.
+const STAMINA_PER_DRAIN_UNIT := 30
+const MAX_DRAIN_RELIEF_UNITS := 1
 
 
 static func prepare(
@@ -52,7 +59,7 @@ static func prepare(
 		run_state.meters,
 		survival_state,
 		minutes,
-		profile
+		_with_equipment(profile, run_state)
 	)
 	if not bool(simulation.get("ok", false)):
 		return simulation
@@ -65,6 +72,25 @@ static func prepare(
 		"consumed_minutes": int(simulation.get("consumed_minutes", 0)),
 		"status": String(simulation.get("status", "active")),
 	}
+
+
+## Worn equipment is passive, so it applies to every confirmed interval rather
+## than to a list of commands somebody remembered to annotate.
+static func _with_equipment(profile: Dictionary, run_state: RunState) -> Dictionary:
+	var result := profile.duplicate(true)
+	var stamina := EquipmentRulesScript.modifier(run_state.inventory, "travel_stamina")
+	if stamina <= 0:
+		return result
+	@warning_ignore("integer_division")
+	var relief: int = mini(stamina / STAMINA_PER_DRAIN_UNIT, MAX_DRAIN_RELIEF_UNITS)
+	if relief <= 0:
+		return result
+	var drain := int(result.get(
+		"energy_drain_units_per_minute",
+		SurvivalTimeRulesScript.DEFAULT_PROFILE["energy_drain_units_per_minute"]
+	))
+	result["energy_drain_units_per_minute"] = maxi(drain - relief, 1)
+	return result
 
 
 static func _replace_time_effect(actor_effects: Array, simulation: Dictionary) -> Array:

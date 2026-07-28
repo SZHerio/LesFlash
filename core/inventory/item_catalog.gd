@@ -13,6 +13,17 @@ const ACTION_IDS := [
 	"sell",
 ]
 
+## One slot holds one item. `bag` is the only slot whose item carries other
+## things, so it is the only slot allowed to declare a container.
+const EQUIP_SLOT_IDS := ["torso", "feet", "gloves", "tool", "bedding", "bag"]
+const EQUIP_MODIFIER_IDS := ["warmth", "travel_stamina", "work_safety", "search_reach"]
+const EQUIP_MODIFIER_MAX := 100
+const EQUIP_CONTAINER_FIELDS := [
+	"base_mass_capacity_grams",
+	"mass_per_strength_grams",
+	"volume_capacity_ml",
+]
+
 static var _definitions: Dictionary = {}
 static var _validation: Dictionary = {}
 
@@ -147,7 +158,46 @@ static func _validate_and_add(raw_value: Variant, index: int, errors: Array[Stri
 			errors.append("%s.actions.%s.consumes должен быть булевым." % [item_id, action_id])
 		if not action.get("conditions", []) is Array or not action.get("effects", []) is Array:
 			errors.append("%s.actions.%s conditions/effects должны быть массивами." % [item_id, action_id])
+		if String(action_id) == "equip":
+			_validate_equip(item_id, action, errors)
 	_definitions[item_id] = ItemDefinitionScript.new(raw)
+
+
+static func _validate_equip(item_id: String, action: Dictionary, errors: Array[String]) -> void:
+	var slot := String(action.get("slot", ""))
+	if slot not in EQUIP_SLOT_IDS:
+		errors.append("%s.actions.equip.slot должен быть одним из %s." % [item_id, str(EQUIP_SLOT_IDS)])
+	var modifiers: Variant = action.get("modifiers", null)
+	if not modifiers is Dictionary:
+		errors.append("%s.actions.equip.modifiers должен быть объектом." % item_id)
+	else:
+		for raw_modifier_id: Variant in Dictionary(modifiers):
+			var modifier_id := String(raw_modifier_id)
+			if modifier_id not in EQUIP_MODIFIER_IDS:
+				errors.append("%s.actions.equip.modifiers содержит неизвестный модификатор %s." % [item_id, modifier_id])
+				continue
+			var value: Variant = Dictionary(modifiers)[raw_modifier_id]
+			if not _is_non_negative_integer(value) or int(value) > EQUIP_MODIFIER_MAX:
+				errors.append("%s.actions.equip.modifiers.%s должен быть целым числом от 0 до %d." % [
+					item_id, modifier_id, EQUIP_MODIFIER_MAX,
+				])
+	var container: Variant = action.get("container", null)
+	if container == null:
+		if slot == "bag":
+			errors.append("%s занимает слот bag и обязан описывать переносимый контейнер." % item_id)
+		return
+	if slot != "bag":
+		errors.append("%s описывает контейнер, но не занимает слот bag." % item_id)
+	if not container is Dictionary:
+		errors.append("%s.actions.equip.container должен быть объектом." % item_id)
+		return
+	var spec: Dictionary = container
+	for field: String in ["title", "kind"]:
+		if typeof(spec.get(field, null)) != TYPE_STRING or String(spec[field]).strip_edges().is_empty():
+			errors.append("%s.actions.equip.container.%s не задан." % [item_id, field])
+	for field: String in EQUIP_CONTAINER_FIELDS:
+		if not _is_non_negative_integer(spec.get(field, null)):
+			errors.append("%s.actions.equip.container.%s должен быть целым неотрицательным числом." % [item_id, field])
 
 
 static func _is_non_negative_integer(value: Variant) -> bool:

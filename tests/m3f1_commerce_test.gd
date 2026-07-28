@@ -317,10 +317,16 @@ func _test_sell_transaction() -> void:
 		_expect_equal(candidate.get_item_count("rusty_tool"), 0, "sold item must leave candidate inventory")
 		_expect_equal(Array(prepared["stock_snapshot_candidate"]["offers"]).size(), Array(snapshot["offers"]).size() + 1, "buyback must become concrete persisted stock")
 		_expect_equal(prepared["stock_snapshot_candidate"].get("revision"), 1, "sale must advance stock revision")
+	# The food row does buy back, but only its own trade: a used tool is not it.
 	var market := StockGeneratorScript.generate(_products, _stores, _request("store_market_food_row"))
 	if bool(market.get("ok", false)):
 		var rejected := Transaction.prepare_sell_snapshot(run, market["snapshot"], _products, _stores, "store_market_food_row", stack_id, 1, {"year": 1980}, "sell:test:market", 0)
-		_expect_equal(rejected.get("code"), "buyback_disabled", "ordinary market must not silently buy used tools")
+		_expect_equal(rejected.get("code"), "item_not_accepted", "the food row must not buy used tools")
+	# The pharmacy window buys nothing at all, and says so as such.
+	var pharmacy := StockGeneratorScript.generate(_products, _stores, _request("store_clinic_pharmacy_window"))
+	if bool(pharmacy.get("ok", false)):
+		var refused := Transaction.prepare_sell_snapshot(run, pharmacy["snapshot"], _products, _stores, "store_clinic_pharmacy_window", stack_id, 1, {"year": 1980}, "sell:test:pharmacy", 0)
+		_expect_equal(refused.get("code"), "buyback_disabled", "a shop without a buy-back profile refuses outright")
 	_expect_equal(run.to_dict(), run_before, "sale preparation must leave live RunState untouched")
 	_expect_equal(snapshot, snapshot_before, "sale preparation must leave live stock untouched")
 

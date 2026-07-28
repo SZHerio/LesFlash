@@ -103,6 +103,32 @@ func buy_store_offer(
 	))
 
 
+func get_store_sell_offers(store_id: String) -> Dictionary:
+	return (
+		WeekFacade.sell_offers(_session, store_id)
+		if _session != null
+		else _missing_sandbox_session()
+	)
+
+
+func sell_store_item(
+	store_id: String,
+	stack_id: String,
+	quantity: int,
+	expected_revision: int
+) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.sell(
+		_session,
+		store_id,
+		stack_id,
+		quantity,
+		expected_revision,
+		_session.flow_revision
+	))
+
+
 func available_shelters() -> Array:
 	return [] if _session == null else WeekFacade.shelters(_session)
 
@@ -156,6 +182,24 @@ func execute_npc_interaction(
 	))
 
 
+func get_npc_gift_offers(npc_id: String) -> Array[Dictionary]:
+	if _session == null:
+		return []
+	return WeekFacade.gift_offers(_session, npc_id)
+
+
+func give_to_npc(npc_id: String, stack_id: String, quantity: int = 0) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.give_to_npc(
+		_session,
+		npc_id,
+		stack_id,
+		quantity,
+		_session.flow_revision
+	))
+
+
 func get_hero_model() -> Dictionary:
 	if _session == null or _session.run_state == null:
 		return {}
@@ -165,7 +209,9 @@ func get_hero_model() -> Dictionary:
 func get_inventory_model() -> Dictionary:
 	if _session == null or _session.run_state == null:
 		return {}
-	return WeekInventoryBoundary.model(_session, get_location_model())
+	# The boundary only needs the name of the place, so the full location
+	# read-model — NPC schedules, shift availability and all — is not built.
+	return WeekInventoryBoundary.model(_session, _session.get_location_summary())
 
 
 func perform_inventory_action(
@@ -202,6 +248,15 @@ func begin_job_shift() -> Dictionary:
 	if _session == null:
 		return _missing_sandbox_session()
 	return _finish_week_command(WeekFacade.begin_job_shift(_session, _session.flow_revision))
+
+
+func quick_resolve_job_shift() -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.quick_resolve_job_shift(
+		_session,
+		_session.flow_revision
+	))
 
 
 func resolve_job_shift_step(choice_id: String) -> Dictionary:

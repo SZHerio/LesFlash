@@ -25,6 +25,28 @@
       "decisions_per_shift": 1,
       "duration_minutes": 360,
       "base_payout_ard": 220
+    },
+    {
+      "id": "job_market_porter",
+      "title": "Грузчик на рынке",
+      "briefing_title": "Смена в продуктовом ряду",
+      "briefing": "Тамара показывает на машину у ворот: разгрузить, разложить, отпустить очередь. Товар живой, к вечеру половина испортится, если лежать будет не так.",
+      "supervisor_npc_id": "npc_tamara_roven",
+      "task_class_ids": [
+        "task_market_receive_delivery",
+        "task_market_stack_produce",
+        "task_market_weigh_order",
+        "task_market_clear_aisle",
+        "task_market_serve_queue",
+        "task_market_close_stall"
+      ],
+      "tasks_per_shift": [
+        2,
+        3
+      ],
+      "decisions_per_shift": 1,
+      "duration_minutes": 300,
+      "base_payout_ard": 190
     }
   ],
   "tasks": [
@@ -339,6 +361,314 @@
           }
         }
       ]
+    },
+    {
+      "id": "shift_task_receive_delivery",
+      "task_class_id": "task_market_receive_delivery",
+      "title": "Принять машину",
+      "description": "Борт откинут, ящики стоят в два ряда. Накладная короче, чем груз.",
+      "attribute_id": "intelligence",
+      "skill_id": "trade",
+      "difficulty": 6,
+      "choices": [
+        {
+          "id": "count_against_the_note",
+          "title": "Пересчитать по накладной",
+          "description": "Медленно, зато потом никто не скажет, что чего-то не хватало.",
+          "scores": {
+            "production": -3,
+            "quality": 13,
+            "safety": 4
+          },
+          "outcome": "Расхождение в один ящик находится сразу и решается на месте.",
+          "polarity_affinity": {
+            "axis": "execution_style",
+            "direction": 1
+          }
+        },
+        {
+          "id": "unload_and_sort_later",
+          "title": "Сгрузить, разобраться потом",
+          "description": "Освободить машину быстро, счёт свести после.",
+          "scores": {
+            "production": 8,
+            "quality": 3,
+            "safety": 1
+          },
+          "outcome": "Машина уходит вовремя. Ящики стоят стеной поперёк прохода."
+        },
+        {
+          "id": "carry_two_at_once",
+          "title": "Таскать по два ящика",
+          "description": "Меньше ходок, больше веса за раз.",
+          "scores": {
+            "production": 12,
+            "quality": -2,
+            "safety": -6
+          },
+          "outcome": "Вы управляетесь вдвое быстрее и один раз чуть не роняете верхний.",
+          "polarity_affinity": {
+            "axis": "physical_specialization",
+            "direction": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "shift_task_stack_produce",
+      "task_class_id": "task_market_stack_produce",
+      "title": "Разложить товар",
+      "description": "Овощ лежит навалом. Как разложишь, так и будут брать.",
+      "attribute_id": "intelligence",
+      "skill_id": "trade",
+      "difficulty": 5,
+      "choices": [
+        {
+          "id": "sort_by_freshness",
+          "title": "Разобрать по свежести",
+          "description": "Порченое вниз и в сторону, крепкое на витрину.",
+          "scores": {
+            "production": -2,
+            "quality": 14,
+            "safety": 3
+          },
+          "outcome": "К вечеру списывать почти нечего.",
+          "polarity_affinity": {
+            "axis": "attention_distribution",
+            "direction": -1
+          }
+        },
+        {
+          "id": "fill_the_front",
+          "title": "Заполнить прилавок",
+          "description": "Главное, чтобы витрина была полной.",
+          "scores": {
+            "production": 9,
+            "quality": 2,
+            "safety": 0
+          },
+          "outcome": "Прилавок выглядит богато. Что под верхним слоем — вопрос завтрашний."
+        },
+        {
+          "id": "dump_and_move_on",
+          "title": "Свалить и идти дальше",
+          "description": "Дел много, товар не убежит.",
+          "scores": {
+            "production": 11,
+            "quality": -7,
+            "safety": -2
+          },
+          "outcome": "Быстро. Тамара смотрит на кучу и молчит."
+        }
+      ]
+    },
+    {
+      "id": "shift_task_weigh_order",
+      "task_class_id": "task_market_weigh_order",
+      "title": "Отвесить заказ",
+      "description": "Женщина просит два килограмма и смотрит на стрелку внимательнее вас.",
+      "attribute_id": "charisma",
+      "skill_id": "trade",
+      "difficulty": 6,
+      "choices": [
+        {
+          "id": "weigh_exactly",
+          "title": "Отвесить точно",
+          "description": "Стрелка на месте, разговор короткий.",
+          "scores": {
+            "production": 0,
+            "quality": 12,
+            "safety": 5
+          },
+          "outcome": "Она благодарит и уходит довольной.",
+          "polarity_affinity": {
+            "axis": "influence_style",
+            "direction": 1
+          }
+        },
+        {
+          "id": "round_in_her_favour",
+          "title": "Округлить в её пользу",
+          "description": "Немного сверху — дешевле, чем спор.",
+          "scores": {
+            "production": -4,
+            "quality": 9,
+            "safety": 6
+          },
+          "outcome": "Она заметно теплеет и обещает зайти завтра."
+        },
+        {
+          "id": "round_in_the_stall_favour",
+          "title": "Округлить в свою",
+          "description": "Мелочь, которой никто не заметит.",
+          "scores": {
+            "production": 10,
+            "quality": -9,
+            "safety": -3
+          },
+          "outcome": "Она замечает. Ничего не говорит, но замечает.",
+          "polarity_affinity": {
+            "axis": "influence_style",
+            "direction": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "shift_task_clear_aisle",
+      "task_class_id": "task_market_clear_aisle",
+      "title": "Освободить проход",
+      "description": "Ящики стоят там, где ходят люди. Кто-то уже споткнулся.",
+      "attribute_id": "strength",
+      "skill_id": "cargo_handling",
+      "difficulty": 6,
+      "choices": [
+        {
+          "id": "stack_them_properly",
+          "title": "Переставить как надо",
+          "description": "Разобрать и сложить вдоль стены.",
+          "scores": {
+            "production": 2,
+            "quality": 6,
+            "safety": 12
+          },
+          "outcome": "Проход чистый, ящики держатся."
+        },
+        {
+          "id": "shove_to_the_side",
+          "title": "Отодвинуть к краю",
+          "description": "Быстро, но не насовсем.",
+          "scores": {
+            "production": 8,
+            "quality": 0,
+            "safety": -4
+          },
+          "outcome": "Пройти можно. К вечеру всё сползёт обратно.",
+          "polarity_affinity": {
+            "axis": "execution_style",
+            "direction": -1
+          }
+        },
+        {
+          "id": "carry_out_in_one_go",
+          "title": "Вынести всё разом",
+          "description": "Взять сколько унесёшь и не возвращаться.",
+          "scores": {
+            "production": 13,
+            "quality": -1,
+            "safety": -8
+          },
+          "outcome": "Спина потом напомнит, но проход свободен сразу.",
+          "polarity_affinity": {
+            "axis": "physical_specialization",
+            "direction": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "shift_task_serve_queue",
+      "task_class_id": "task_market_serve_queue",
+      "title": "Отпустить очередь",
+      "description": "Народу больше, чем рук. Сзади уже начинают подсказывать.",
+      "attribute_id": "charisma",
+      "skill_id": "trade",
+      "difficulty": 7,
+      "choices": [
+        {
+          "id": "keep_the_order",
+          "title": "Держать порядок",
+          "description": "По одному, спокойно, никого не пропуская.",
+          "scores": {
+            "production": 1,
+            "quality": 10,
+            "safety": 7
+          },
+          "outcome": "Очередь ворчит, но движется ровно.",
+          "polarity_affinity": {
+            "axis": "execution_style",
+            "direction": 1
+          }
+        },
+        {
+          "id": "serve_the_loudest",
+          "title": "Обслужить громких первыми",
+          "description": "Кто громче, тот и уходит быстрее.",
+          "scores": {
+            "production": 9,
+            "quality": -5,
+            "safety": -2
+          },
+          "outcome": "Очередь тает. Тихие стоят до последнего.",
+          "polarity_affinity": {
+            "axis": "influence_style",
+            "direction": -1
+          }
+        },
+        {
+          "id": "call_for_help",
+          "title": "Позвать вторую пару рук",
+          "description": "Сам не справишься — попроси.",
+          "scores": {
+            "production": 6,
+            "quality": 7,
+            "safety": 3
+          },
+          "outcome": "Вдвоём выходит быстрее, чем поодиночке вдвое."
+        }
+      ]
+    },
+    {
+      "id": "shift_task_close_stall",
+      "task_class_id": "task_market_close_stall",
+      "title": "Закрыть прилавок",
+      "description": "Товар надо убрать так, чтобы утром он ещё годился.",
+      "attribute_id": "intelligence",
+      "skill_id": "cooking",
+      "difficulty": 6,
+      "choices": [
+        {
+          "id": "cover_and_cool",
+          "title": "Укрыть и вынести в холод",
+          "description": "Лишние двадцать минут ради завтрашнего дня.",
+          "scores": {
+            "production": -3,
+            "quality": 15,
+            "safety": 5
+          },
+          "outcome": "Утром товар как вчера.",
+          "polarity_affinity": {
+            "axis": "decision_priority",
+            "direction": 1
+          }
+        },
+        {
+          "id": "cover_the_top_only",
+          "title": "Прикрыть верхнее",
+          "description": "Того, что снизу, всё равно не видно.",
+          "scores": {
+            "production": 6,
+            "quality": 1,
+            "safety": 0
+          },
+          "outcome": "Половина доживёт до утра."
+        },
+        {
+          "id": "leave_as_is",
+          "title": "Оставить как есть",
+          "description": "Ночь короткая.",
+          "scores": {
+            "production": 10,
+            "quality": -10,
+            "safety": -4
+          },
+          "outcome": "Утром запах скажет всё за вас.",
+          "polarity_affinity": {
+            "axis": "decision_priority",
+            "direction": -1
+          }
+        }
+      ]
     }
   ],
   "decisions": [
@@ -435,6 +765,98 @@
             "axis": "execution_style",
             "direction": -1
           }
+        }
+      ]
+    },
+    {
+      "id": "shift_decision_spoiled_crate",
+      "title": "Ящик с гнилью",
+      "description": "Нижний слой в ящике поплыл. Верхний ещё товарный, и Тамара занята с покупателем.",
+      "choices": [
+        {
+          "id": "pull_the_crate",
+          "title": "Снять ящик с продажи",
+          "description": "Убрать целиком, потерять выручку.",
+          "scores": {
+            "production": -14,
+            "quality": 19,
+            "safety": 8
+          },
+          "outcome": "Тамара морщится на убыток и кивает."
+        },
+        {
+          "id": "sort_the_good_out",
+          "title": "Разобрать и вынуть годное",
+          "description": "Долго, но спасает половину.",
+          "scores": {
+            "production": -5,
+            "quality": 12,
+            "safety": 6
+          },
+          "outcome": "Половина ящика уходит в продажу честно.",
+          "polarity_affinity": {
+            "axis": "execution_style",
+            "direction": 1
+          }
+        },
+        {
+          "id": "sell_the_top_layer",
+          "title": "Продать верхний слой",
+          "description": "Никто не полезет на дно.",
+          "scores": {
+            "production": 15,
+            "quality": -16,
+            "safety": -6
+          },
+          "outcome": "Выручка есть. Завтра кто-то вернётся с претензией.",
+          "polarity_affinity": {
+            "axis": "decision_priority",
+            "direction": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "shift_decision_short_change",
+      "title": "Покупателю недодали сдачу",
+      "description": "Вы видите, как человек отходит от прилавка, не пересчитав. Сдачи там меньше положенного.",
+      "choices": [
+        {
+          "id": "call_him_back",
+          "title": "Окликнуть и вернуть",
+          "description": "Догнать и отдать разницу.",
+          "scores": {
+            "production": -6,
+            "quality": 16,
+            "safety": 7
+          },
+          "outcome": "Он удивляется больше, чем радуется.",
+          "polarity_affinity": {
+            "axis": "influence_style",
+            "direction": 1
+          }
+        },
+        {
+          "id": "tell_tamara",
+          "title": "Сказать Тамаре",
+          "description": "Пусть решает хозяйка прилавка.",
+          "scores": {
+            "production": -2,
+            "quality": 9,
+            "safety": 9
+          },
+          "outcome": "Тамара молча кладёт монеты в отдельную кружку."
+        },
+        {
+          "id": "say_nothing_about_it",
+          "title": "Промолчать",
+          "description": "Не ваши деньги и не ваш разговор.",
+          "scores": {
+            "production": 8,
+            "quality": -12,
+            "safety": -2
+          },
+          "outcome": "День идёт дальше. Осадок остаётся."
         }
       ]
     }

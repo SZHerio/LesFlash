@@ -10,6 +10,16 @@ const Catalog := preload("res://game/shelter/shelter_catalog.gd")
 const Validator := preload("res://game/shelter/shelter_catalog_validator.gd")
 const CalendarScript := preload("res://core/time/game_calendar.gd")
 
+## How much of the night the place itself leaves to the weather. A paid room
+## shields completely, so equipment changes nothing there; a niche under the
+## underpass shields nothing, which is where a coat is worth its price.
+const EXPOSURE_BY_CATEGORY := {
+	"street": 100,
+	"night_shelter": 40,
+	"paid_room": 0,
+}
+const SHIELDED_ENERGY_BONUS := 12
+
 
 static func resolve_for_location(catalog: Dictionary, context: Dictionary) -> Dictionary:
 	var prepared := _prepare(catalog, context)
@@ -107,6 +117,15 @@ static func _resolve_definition(
 	)
 	var wake_at := calendar.future_stamp(duration)
 	var result := definition.duplicate(true)
+	var exposure := int(EXPOSURE_BY_CATEGORY.get(String(definition.get("category_id", "street")), 100))
+	var shielded := clampi(mini(int(context.get("warmth", 0)), exposure), 0, 100)
+	result["exposure"] = exposure
+	result["warmth"] = clampi(int(context.get("warmth", 0)), 0, 100)
+	result["shielded"] = shielded
+	result["meter_effects"] = _shielded_meter_effects(
+		Dictionary(definition.get("meter_effects", {})),
+		shielded
+	)
 	result["available"] = reasons.is_empty()
 	result["blocked_reasons"] = reasons
 	result["duration_minutes"] = duration
@@ -115,6 +134,32 @@ static func _resolve_definition(
 	result["crosses_date"] = _date_changed(current_stamp, wake_at)
 	result["currency_code"] = "ARD"
 	return result
+
+
+## Worn warmth does not invent a better bed; it only takes back the part of the
+## night the place left to the cold, and adds the rest a person sleeps through.
+static func _shielded_meter_effects(authored: Dictionary, shielded: int) -> Dictionary:
+	var result := authored.duplicate(true)
+	if shielded <= 0:
+		return result
+	for meter_id: String in ["health", "mental_state"]:
+		var value := int(result.get(meter_id, 0))
+		if value < 0:
+			result[meter_id] = -_scaled_down(-value, shielded)
+	var tension := int(result.get("tension", 0))
+	if tension > 0:
+		result["tension"] = _scaled_down(tension, shielded)
+	if result.has("energy") and int(result["energy"]) > 0:
+		@warning_ignore("integer_division")
+		var bonus: int = SHIELDED_ENERGY_BONUS * shielded / 100
+		result["energy"] = int(result["energy"]) + bonus
+	return result
+
+
+static func _scaled_down(value: int, shielded: int) -> int:
+	@warning_ignore("integer_division")
+	var remaining: int = value * (100 - shielded) / 100
+	return remaining
 
 
 static func _inside_check_in_window(minute: int, windows: Array) -> bool:

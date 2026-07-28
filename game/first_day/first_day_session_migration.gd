@@ -18,15 +18,26 @@ const INVENTORY_VERSION := 3
 const SEARCH_VERSION := 4
 const SYSTEMS_VERSION := 5
 const WEEK_VERSION := 6
-const PREVIOUS_VERSION := WEEK_VERSION
-const CURRENT_VERSION := 7
+const EMPLOYMENT_VERSION := 7
+const PREVIOUS_VERSION := EMPLOYMENT_VERSION
+const CURRENT_VERSION := 8
+const SUPPORTED_VERSIONS := [
+	LEGACY_VERSION,
+	2,
+	INVENTORY_VERSION,
+	SEARCH_VERSION,
+	SYSTEMS_VERSION,
+	WEEK_VERSION,
+	EMPLOYMENT_VERSION,
+	CURRENT_VERSION,
+]
 
 
 static func migrate_envelope(raw: Dictionary) -> Dictionary:
 	var source_version: Variant = _integral(raw.get("schema_version", null))
 	if source_version == null:
 		return _failure("invalid_schema_version", "Envelope schema_version must be an integer.")
-	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, SEARCH_VERSION, SYSTEMS_VERSION, WEEK_VERSION, CURRENT_VERSION]:
+	if int(source_version) not in SUPPORTED_VERSIONS:
 		return _failure(
 			"unsupported_schema_version",
 			"Envelope schema version is unsupported.",
@@ -59,7 +70,7 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 	var source_version: Variant = _integral(raw.get("session_version", null))
 	if source_version == null:
 		return _failure("invalid_session_version", "session_version must be an integer.")
-	if int(source_version) not in [LEGACY_VERSION, 2, INVENTORY_VERSION, SEARCH_VERSION, SYSTEMS_VERSION, WEEK_VERSION, CURRENT_VERSION]:
+	if int(source_version) not in SUPPORTED_VERSIONS:
 		return _failure(
 			"unsupported_session_version",
 			"FirstDaySession version is unsupported.",
@@ -133,6 +144,13 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 		# Session 6 had no standing employment. A save from it starts with a
 		# clean record rather than strikes invented from shifts nobody graded.
 		migrated["job_work_state"] = JobWorkStateScript.fresh().to_dict()
+		migrated["session_version"] = EMPLOYMENT_VERSION
+		current_version = EMPLOYMENT_VERSION
+	if current_version == EMPLOYMENT_VERSION:
+		var folded := _fold_legacy_job(migrated)
+		if not bool(folded.get("ok", false)):
+			return folded
+		migrated = Dictionary(folded["data"])
 		migrated["session_version"] = CURRENT_VERSION
 		current_version = CURRENT_VERSION
 	if current_version != CURRENT_VERSION:
@@ -153,6 +171,38 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 			state_result.get("source_version", GameRules.SAVE_VERSION)
 		),
 	})
+
+
+## Session 8 dropped the M2 six-round quiz. Nothing is lost by doing so: that
+## minigame charged neither time nor effects until its final round, so a save
+## interrupted inside it holds a screen position and nothing else. A finished
+## one had already committed its pay and its journal entry through the ordinary
+## transaction, so only the bookkeeping dictionary goes away.
+static func _fold_legacy_job(data: Dictionary) -> Dictionary:
+	var migrated := data.duplicate(true)
+	var legacy_job: Variant = migrated.get("job_state", {})
+	if legacy_job != null and not legacy_job is Dictionary:
+		return _failure("invalid_legacy_job_state", "Legacy job_state must be a dictionary.")
+	var was_active := legacy_job is Dictionary and bool(Dictionary(legacy_job).get("active", false))
+	migrated.erase("job_state")
+	if String(migrated.get("phase", "")) == "job":
+		if not was_active:
+			return _failure(
+				"inconsistent_legacy_job_phase",
+				"A legacy job phase without an active shift cannot be interpreted."
+			)
+		# The hero goes back to standing in the yard, which is exactly where the
+		# old minigame had left him as far as the committed state was concerned.
+		migrated["phase"] = "map"
+	migrated["active_activity"] = _cleared_job_activity(migrated.get("active_activity", null))
+	return _success({"data": migrated})
+
+
+static func _cleared_job_activity(value: Variant) -> Dictionary:
+	if value is Dictionary and String(Dictionary(value).get("kind", "")) == "job":
+		return SearchSessionStateScript.empty_activity()
+	var normalized := SearchSessionStateScript.normalize_activity(value)
+	return normalized if not normalized.is_empty() else SearchSessionStateScript.empty_activity()
 
 
 static func validate_contract_fields(data: Dictionary) -> Dictionary:

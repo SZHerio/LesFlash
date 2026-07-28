@@ -29,8 +29,7 @@ static func validate(value: Variant) -> Dictionary:
 	for field: String in ["shift_id", "job_id"]:
 		if typeof(snapshot.get(field, null)) != TYPE_STRING or String(snapshot.get(field, "")).is_empty():
 			errors.append("snapshot.%s не задан" % field)
-	if String(snapshot.get("job_id", "")) != "job_recycling_sorter":
-		errors.append("snapshot.job_id должен быть job_recycling_sorter")
+
 	_integer(snapshot.get("sequence", null), 1, 1_000_000, "snapshot.sequence", errors)
 	_validate_seed(snapshot.get("seed", null), errors)
 	_validate_identity(snapshot, errors)

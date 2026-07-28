@@ -93,7 +93,8 @@ static func _validate_completed(value: Variant, errors: Array[String]) -> void:
 		var step_id := String(raw.get("step_id", ""))
 		_expect_keys(raw, [
 			"step_id", "kind", "content_id", "choice_id", "choice_title", "outcome",
-			"task_class_id", "competence_modifier", "affinity_modifier", "score_deltas", "scores_after",
+			"task_class_id", "competence_modifier", "affinity_modifier",
+			"equipment_safety_modifier", "score_deltas", "scores_after",
 		], path, errors)
 		if step_id.is_empty() or ids.has(step_id):
 			errors.append("%s.step_id пуст или повторяется" % path)
@@ -109,6 +110,14 @@ static func _validate_completed(value: Variant, errors: Array[String]) -> void:
 			errors.append("%s.competence_modifier должен быть целым числом -3..3" % path)
 		if typeof(raw.get("affinity_modifier", null)) != TYPE_INT or absi(int(raw.get("affinity_modifier", 0))) > 3:
 			errors.append("%s.affinity_modifier должен быть целым числом -3..3" % path)
+		# Older saves recorded no equipment, so the field is optional; a present
+		# one is still bounded like every other modifier of a step.
+		if raw.has("equipment_safety_modifier") and (
+			typeof(raw["equipment_safety_modifier"]) != TYPE_INT
+			or int(raw["equipment_safety_modifier"]) < 0
+			or int(raw["equipment_safety_modifier"]) > 3
+		):
+			errors.append("%s.equipment_safety_modifier должен быть целым числом 0..3" % path)
 
 
 static func _validate_practice(value: Variant, errors: Array[String]) -> void:

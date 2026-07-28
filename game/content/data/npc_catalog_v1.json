@@ -50,6 +50,12 @@
       "goal": "Сохранить работу пункта и добиться безопасной, надёжной смены.",
       "schedule_id": "schedule_viktor_recycling",
       "speech_profile_id": "speech_profile_viktor_koren",
+      "gift_preferences": {
+        "valued_tags": ["tool", "work", "trade"],
+        "refused_tags": ["medicine"],
+        "accepted_note": "Виктор взвешивает вещь в руке и коротко кивает.",
+        "refused_note": "Виктор отводит руку: лекарства не его дело."
+      },
       "appearance_refs": [
         {"kind": "location", "id": "recycling_point"},
         {"kind": "job", "id": "job_recycling_sorter"},
@@ -63,6 +69,12 @@
       "goal": "Оказать доступную помощь в пределах времени, запасов и правил учреждения.",
       "schedule_id": "schedule_lidia_clinic",
       "speech_profile_id": "speech_profile_lidia_maren",
+      "gift_preferences": {
+        "valued_tags": ["medicine", "medical"],
+        "refused_tags": ["trade"],
+        "accepted_note": "Лидия убирает переданное в шкаф и благодарит.",
+        "refused_note": "Лидия качает головой: на работе она такого не берёт."
+      },
       "appearance_refs": [
         {"kind": "location", "id": "clinic_yard"},
         {"kind": "knowledge", "id": "clinic_support"},
@@ -76,6 +88,12 @@
       "goal": "Сохранить товар, постоянных покупателей и устойчивую торговую точку.",
       "schedule_id": "schedule_tamara_market",
       "speech_profile_id": "speech_profile_tamara_roven",
+      "gift_preferences": {
+        "valued_tags": ["trade", "food"],
+        "refused_tags": ["recyclable"],
+        "accepted_note": "Тамара убирает вещь под прилавок и запоминает, кто принёс.",
+        "refused_note": "Тамара усмехается: вторсырьё несут в пункт приёма, не к ней."
+      },
       "appearance_refs": [
         {"kind": "location", "id": "market"},
         {"kind": "world_metric", "id": "metric_riverside_goods_supply"},

@@ -52,15 +52,26 @@ func _bootstrap() -> void:
 func _test_catalog_schema() -> void:
 	_expect_equal(_catalog.get("schema_version"), 1, "catalog schema")
 	_expect_equal(_catalog.get("catalog_id"), "job_shift_catalog_v1", "catalog ID")
-	_expect_equal(Array(_catalog.get("jobs", [])).size(), 1, "one canonical job")
-	_expect_equal(Array(_catalog.get("tasks", [])).size(), 6, "one authored task per canonical class")
-	var classes: Array = []
+	# M4 asks for two professions, so the rule is structural rather than a
+	# single canonical job: every class a job promises has a task written for
+	# it, and no two jobs share a class.
+	var jobs: Array = Array(_catalog.get("jobs", []))
+	_expect(jobs.size() >= 2, "the catalog must carry at least two professions")
+	var reachable: Dictionary = {}
 	for raw: Variant in Array(_catalog.get("tasks", [])):
-		classes.append(String(Dictionary(raw).get("task_class_id", "")))
-	classes.sort()
-	var expected := TASK_CLASSES.duplicate()
-	expected.sort()
-	_expect_equal(classes, expected, "all canonical task classes are reachable")
+		reachable[String(Dictionary(raw).get("task_class_id", ""))] = true
+	var claimed: Dictionary = {}
+	for raw_job: Variant in jobs:
+		var job: Dictionary = raw_job
+		var promised: Array = Array(job.get("task_class_ids", []))
+		_expect_equal(promised.size(), 6, "%s must promise six classes" % String(job.get("id", "")))
+		for raw_class: Variant in promised:
+			var class_id := String(raw_class)
+			_expect(reachable.has(class_id), "class %s has no authored task" % class_id)
+			_expect(not claimed.has(class_id), "class %s is claimed by two jobs" % class_id)
+			claimed[class_id] = true
+	for class_id: String in TASK_CLASSES:
+		_expect(reachable.has(class_id), "the sorter still needs %s" % class_id)
 	_expect(bool(CatalogScript.validate(_catalog).get("ok", false)), "catalog passes validator")
 
 
@@ -283,36 +294,39 @@ func _test_polarity_affinity_makes_the_shift_personal() -> void:
 ## shift repairs standing, so it is a slope rather than a trapdoor.
 func _test_repeated_bad_shifts_cost_the_job() -> void:
 	var state: JobWorkState = WorkState.fresh()
-	_expect(not state.is_dismissed(), "a fresh sorter is already dismissed")
+	_expect(not state.is_dismissed(JOB_ID), "a fresh sorter is already dismissed")
 
-	state._record_standing("weak")
-	state._record_standing("weak")
-	_expect(not state.is_dismissed(), "two weak shifts already cost the job")
-	state._record_standing("solid")
+	state._record_standing(JOB_ID, "weak")
+	state._record_standing(JOB_ID, "weak")
+	_expect(not state.is_dismissed(JOB_ID), "two weak shifts already cost the job")
+	state._record_standing(JOB_ID, "solid")
 	_expect(
-		int(state.standing["strikes"]) == 1,
-		"a good shift repaired nothing: %d strikes" % int(state.standing["strikes"])
+		int(state.standing_for(JOB_ID)["strikes"]) == 1,
+		"a good shift repaired nothing: %d strikes" % int(state.standing_for(JOB_ID)["strikes"])
 	)
 
-	state._record_standing("unsafe")
+	state._record_standing(JOB_ID, "unsafe")
 	_expect(
-		state.is_dismissed(),
+		state.is_dismissed(JOB_ID),
 		"an unsafe shift on top of a warning did not end the job: %d strikes"
-			% int(state.standing["strikes"])
+			% int(state.standing_for(JOB_ID)["strikes"])
 	)
-	state._record_standing("excellent")
-	_expect(state.is_dismissed(), "a dismissal was undone by working well afterwards")
+	state._record_standing(JOB_ID, "excellent")
+	_expect(state.is_dismissed(JOB_ID), "a dismissal was undone by working well afterwards")
 
 	# A save written before standing existed starts clean: inventing strikes from
 	# a history the game never judged would punish the player retroactively.
 	var legacy: Dictionary = WorkState.fresh().to_dict()
 	legacy["schema_version"] = 1
 	legacy.erase("standing")
+	legacy["mastery"] = Mastery.fresh(JOB_ID)
+	legacy["next_shift_sequence"] = 1
+	legacy["last_completed_day_index"] = -1
 	var migrated: JobWorkState = WorkState.from_dict(legacy)
 	_expect(migrated != null, "a version 1 work state no longer loads")
 	if migrated != null:
-		_expect(not migrated.is_dismissed(), "migration invented a dismissal")
-		_expect(int(migrated.standing["strikes"]) == 0, "migration invented strikes")
+		_expect(not migrated.is_dismissed(JOB_ID), "migration invented a dismissal")
+		_expect(int(migrated.standing_for(JOB_ID)["strikes"]) == 0, "migration invented strikes")
 		_expect(
 			int(migrated.to_dict()["schema_version"]) == WorkState.SCHEMA_VERSION,
 			"migration did not raise the schema version"

@@ -8,6 +8,7 @@ const ResolverScript := preload("res://game/shelter/shelter_resolver.gd")
 const CommandBuilderScript := preload("res://game/shelter/shelter_command_builder.gd")
 const SessionTransactionScript := preload("res://game/session/session_command_transaction.gd")
 const WorldCatalogScript := preload("res://game/content/catalogs/world_definition_catalog.gd")
+const EquipmentRulesScript := preload("res://game/equipment/equipment_rules.gd")
 
 
 static func options(session: Object) -> Dictionary:
@@ -96,6 +97,7 @@ static func _context(session: Object) -> Dictionary:
 			"location_id": _location_id(session),
 			"money": run_state.money,
 			"calendar": run_state.calendar.to_dict(),
+			"warmth": EquipmentRulesScript.modifier(run_state.inventory, "warmth"),
 		},
 	}
 

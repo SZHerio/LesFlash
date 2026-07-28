@@ -5,12 +5,20 @@ const InventoryState := preload("res://core/inventory/inventory_state.gd")
 const ItemCatalog := preload("res://core/inventory/item_catalog.gd")
 const ActionView := preload("res://app/inventory/inventory_action_view.gd")
 const UiModels := preload("res://app/ui_model_factory.gd")
+const EquipmentRules := preload("res://game/equipment/equipment_rules.gd")
 
 const CONTAINER_ORDER := ["pockets", "backpack", "hands"]
 const CONTAINER_ICONS := {
 	"pockets": "К",
 	"backpack": "Р",
 	"hands": "РК",
+	"equipped": "Н",
+}
+const MODIFIER_TITLES := {
+	"warmth": "Тепло",
+	"travel_stamina": "Выносливость",
+	"work_safety": "Безопасность",
+	"search_reach": "Инструмент",
 }
 const TAG_TITLES := {
 	"food": "Еда",
@@ -68,6 +76,7 @@ static func build(
 		},
 		"location_title": String(raw_model.get("location_title", "Текущее место")),
 		"summary": summary,
+		"equipment": _equipment(Dictionary(raw_model.get("equipment", {}))),
 		"containers": containers,
 		"items": items,
 		"selected_stack_id": String(inventory.get("selected_stack_id", "")),
@@ -79,7 +88,7 @@ static func build(
 static func _containers(inventory: Dictionary, strength: int) -> Array:
 	var result: Array = []
 	var raw_containers: Dictionary = inventory.get("containers", {})
-	for container_id in CONTAINER_ORDER:
+	for container_id in _container_order(raw_containers):
 		if not raw_containers.has(container_id):
 			continue
 		var source: Dictionary = raw_containers[container_id]
@@ -103,6 +112,8 @@ static func _containers(inventory: Dictionary, strength: int) -> Array:
 			),
 			"overloaded": bool(limits.get("mass_overloaded", false))
 				or bool(limits.get("volume_overloaded", false)),
+			"managed": EquipmentRules.is_managed_container_id(container_id),
+			"worn": container_id == EquipmentRules.EQUIPPED_CONTAINER_ID,
 		})
 	var external: Dictionary = inventory.get("external_containers", {})
 	for container_id in external:
@@ -117,7 +128,24 @@ static func _containers(inventory: Dictionary, strength: int) -> Array:
 			"mass": _dimension(0, -1, "mass"),
 			"volume": _dimension(0, -1, "volume"),
 			"overloaded": false,
+			"managed": false,
+			"worn": false,
 		})
+	return result
+
+
+## Pockets, the pack and the hands keep their fixed order because the player
+## learns it; anything a worn bag adds follows, sorted so the list never jumps.
+static func _container_order(raw_containers: Dictionary) -> Array[String]:
+	var result: Array[String] = []
+	result.assign(CONTAINER_ORDER)
+	var extra: Array[String] = []
+	for raw_id: Variant in raw_containers:
+		var container_id := String(raw_id)
+		if container_id not in CONTAINER_ORDER:
+			extra.append(container_id)
+	extra.sort()
+	result.append_array(extra)
 	return result
 
 
@@ -133,7 +161,13 @@ static func _items(
 			continue
 		var container: Dictionary = raw_container
 		container_titles[String(container.get("id", ""))] = String(container.get("title", ""))
-		if bool(container.get("active", false)) and not bool(container.get("external", false)):
+		# What is worn is put on and taken off, never dragged like cargo, so the
+		# worn container is not offered as a destination.
+		if (
+			bool(container.get("active", false))
+			and not bool(container.get("external", false))
+			and not bool(container.get("worn", false))
+		):
 			movable_targets.append({
 				"id": String(container.get("id", "")),
 				"title": String(container.get("title", "")),
@@ -147,11 +181,23 @@ static func _items(
 		var quantity := int(stack.get("quantity", 0))
 		var actions: Array = []
 		var external := bool(stack.get("external", false))
+		var worn := String(stack.get("container_id", "")) == EquipmentRules.EQUIPPED_CONTAINER_ID
 		if external:
 			actions.append(ActionView.build("pick_up", "Забрать", {}, quantity, "accent"))
+		elif worn:
+			actions.append(ActionView.build("unequip", "Снять", {}, 1, "normal"))
 		else:
 			if movable_targets.size() > 1:
 				actions.append(ActionView.build("move", "Переложить", {}, quantity, "move"))
+			if not String(definition.equip_slot()).is_empty():
+				var equip_action: Dictionary = definition.action("equip")
+				actions.append(ActionView.build(
+					"equip",
+					String(equip_action.get("title", "Надеть")),
+					equip_action,
+					1,
+					"accent"
+				))
 			for action_id in definition.allowed_actions():
 				if action_id in ["use", "disassemble", "drop"]:
 					var action: Dictionary = definition.action(action_id)
@@ -191,11 +237,51 @@ static func _items(
 			"move_targets": movable_targets.duplicate(true),
 			"unknown_fallback": definition.is_unknown(),
 			"external": external,
+			"worn": worn,
 		})
 	result.sort_custom(func(left: Dictionary, right: Dictionary) -> bool:
 		return String(left.get("title", "")).naturalnocasecmp_to(String(right.get("title", ""))) < 0
 	)
 	return result
+
+
+## What the outfit is doing right now, in the hero's words rather than in the
+## keys the domain uses. An empty slot says nothing at all.
+static func _equipment(source: Dictionary) -> Dictionary:
+	var slots: Array = []
+	for raw_slot: Variant in Array(source.get("slots", [])):
+		if not raw_slot is Dictionary:
+			continue
+		var slot: Dictionary = raw_slot
+		slots.append({
+			"slot_id": String(slot.get("slot_id", "")),
+			"title": String(slot.get("title", "")),
+			"occupied": bool(slot.get("occupied", false)),
+			"stack_id": String(slot.get("stack_id", "")),
+			"item_title": String(slot.get("item_title", "")),
+			"value_text": String(slot.get("item_title", "")) if bool(slot.get("occupied", false)) else "Пусто",
+		})
+	var effects: Array = []
+	var modifiers: Dictionary = Dictionary(source.get("modifiers", {}))
+	for modifier_id: String in MODIFIER_TITLES:
+		var value := int(modifiers.get(modifier_id, 0))
+		if value <= 0:
+			continue
+		effects.append({
+			"id": modifier_id,
+			"title": String(MODIFIER_TITLES[modifier_id]),
+			"value": value,
+			"value_text": "+%d" % value,
+		})
+	return {
+		"slots": slots,
+		"effects": effects,
+		"message": (
+			"Снаряжение работает, пока надето."
+			if not effects.is_empty()
+			else "Ничего не надето: холод, работа и поиск обходятся дороже."
+		),
+	}
 
 
 static func _summary(containers: Array) -> Dictionary:

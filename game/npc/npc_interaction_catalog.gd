@@ -15,8 +15,25 @@ const CATALOG_ID := "npc_interaction_catalog_v1"
 const DEFAULT_PATH := "res://game/npc/data/npc_interaction_catalog_v1.json"
 
 
+static var _default_cache: Dictionary = {}
+
+
+## Content files are immutable at run time, so the parse and the full
+## validation happen once. Callers still receive their own deep copy, which
+## keeps the previous contract exactly: nobody can mutate a shared catalog.
 static func load_default() -> Dictionary:
-	return load_path(DEFAULT_PATH)
+	if _default_cache.is_empty():
+		_default_cache = load_path(DEFAULT_PATH)
+	return _cached_copy(_default_cache)
+
+
+static func reset_cache_for_tests() -> void:
+	_default_cache = {}
+
+
+static func _cached_copy(source: Dictionary) -> Dictionary:
+	var result := source.duplicate(true)
+	return result
 
 
 static func load_path(path: String) -> Dictionary:

@@ -4,6 +4,8 @@ extends RefCounted
 ## Owns one recurring-NPC visit. Opening and refreshing are pure reads; only a
 ## confirmed interaction crosses the command gate, saves, and changes time.
 
+const WeekFacade := preload("res://app/session/week_session_facade.gd")
+
 var _session: SandboxSessionAdapter
 var _presenter: UiScreenPresenter
 var _preferences: Dictionary = {}
@@ -52,10 +54,10 @@ func _on_interaction_requested(
 	if not bool(_hook("begin_command").call()):
 		_refresh()
 		return
-	var result := _session.execute_npc_interaction(
-		_npc_id,
-		interaction_id,
-		expected_revision
+	var result := (
+		_session.give_to_npc(_npc_id, WeekFacade.gift_stack_id(interaction_id), 1)
+		if WeekFacade.is_gift_interaction(interaction_id)
+		else _session.execute_npc_interaction(_npc_id, interaction_id, expected_revision)
 	)
 	if not bool(_hook("accept_result").call(result)):
 		_refresh()
@@ -67,7 +69,7 @@ func _on_interaction_requested(
 		_hook("finished").call()
 		_hook("release_command").call()
 		return
-	var outcome := String(result.get("outcome", ""))
+	var outcome := String(result.get("outcome", result.get("note", "")))
 	if not _refresh(outcome) and bool(saved.get("ok", false)) and not outcome.is_empty():
 		_hook("toast").call(outcome)
 	_hook("release_command").call()

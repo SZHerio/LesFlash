@@ -106,6 +106,43 @@ static func prepare_snapshot(
 	})
 
 
+## Shared by the confirmed sale and by the list that shows what a shop would
+## pay, so the row the player reads and the arden he receives are one number.
+static func unit_payout(
+	product_catalog: Dictionary,
+	store_catalog: Dictionary,
+	store_id: String,
+	stack: Dictionary,
+	quality: int,
+	pricing_context: Dictionary
+) -> Dictionary:
+	var profile := StoreCatalogScript.profile_for_store(store_catalog, store_id)
+	if profile.is_empty():
+		return Support.failure("unknown_store", "unknown store %s" % store_id)
+	var buyback: Dictionary = Dictionary(profile["archetype"]).get("buyback_policy", {})
+	if not bool(buyback.get("enabled", false)):
+		return Support.failure("buyback_disabled", "this store does not buy items")
+	var product := _sale_product(product_catalog, stack, buyback, {}, pricing_context)
+	if product.is_empty():
+		return Support.failure("item_not_accepted", "the store does not accept this item")
+	var retail_result := _sale_retail_price(product, profile, stack, quality, pricing_context)
+	if not bool(retail_result.get("ok", false)):
+		return retail_result
+	var payout_result := PriceResolverScript.apply_basis_points(
+		int(retail_result["unit_price"]),
+		buyback["payout_basis_points"]
+	)
+	if not bool(payout_result.get("ok", false)):
+		return payout_result
+	return {
+		"ok": true,
+		"code": "ok",
+		"unit_payout": int(payout_result["value"]),
+		"unit_retail": int(retail_result["unit_price"]),
+		"product": product.duplicate(true),
+	}
+
+
 static func _sale_product(
 	product_catalog: Dictionary,
 	stack: Dictionary,
@@ -113,7 +150,8 @@ static func _sale_product(
 	snapshot: Dictionary,
 	context: Dictionary
 ) -> Dictionary:
-	var year := int(context.get("year", Dictionary(snapshot["generated_at"])["year"]))
+	var default_year := int(Dictionary(snapshot.get("generated_at", {})).get("year", 1980))
+	var year := int(context.get("year", default_year))
 	var accepted: Array = buyback.get("accepted_category_ids", [])
 	var matches := ProductCatalogScript.find_by_item(product_catalog, String(stack["item_id"]))
 	matches.sort_custom(func(left: Dictionary, right: Dictionary) -> bool:

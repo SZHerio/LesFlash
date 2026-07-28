@@ -1,0 +1,387 @@
+{
+  "flow_revision": 1,
+  "saved_at_unix": 1784790000,
+  "schema_version": 7,
+  "session": {
+    "active_activity": {
+      "id": "recycling_sorter",
+      "kind": "job",
+      "snapshot": {
+        "active": true,
+        "answers": [
+          {
+            "choice_id": "ask_owner",
+            "prompt_id": "cart_at_gate",
+            "round": 1,
+            "score": 1
+          },
+          {
+            "choice_id": "read_markings",
+            "prompt_id": "mixed_plastic",
+            "round": 2,
+            "score": 3
+          }
+        ],
+        "approach": "standard",
+        "job_id": "recycling_sorter",
+        "prompt_ids": [
+          "cart_at_gate",
+          "mixed_plastic",
+          "jammed_press",
+          "glass_crate",
+          "weight_argument",
+          "last_bundle"
+        ],
+        "result": {},
+        "round_index": 2,
+        "rounds_total": 6,
+        "score": 4
+      }
+    },
+    "applied_command_ids": {},
+    "base_location": "recycling_point",
+    "biography": [],
+    "completed": [],
+    "current_event": "",
+    "day_completed": false,
+    "flow_revision": 1,
+    "job_state": {
+      "active": true,
+      "answers": [
+        {
+          "choice_id": "ask_owner",
+          "prompt_id": "cart_at_gate",
+          "round": 1,
+          "score": 1
+        },
+        {
+          "choice_id": "read_markings",
+          "prompt_id": "mixed_plastic",
+          "round": 2,
+          "score": 3
+        }
+      ],
+      "approach": "standard",
+      "job_id": "recycling_sorter",
+      "prompt_ids": [
+        "cart_at_gate",
+        "mixed_plastic",
+        "jammed_press",
+        "glass_crate",
+        "weight_argument",
+        "last_bundle"
+      ],
+      "result": {},
+      "round_index": 2,
+      "rounds_total": 6,
+      "score": 4
+    },
+    "job_work_state": {
+      "last_completed_day_index": -1,
+      "mastery": {
+        "completed_shifts": [],
+        "job_id": "job_recycling_sorter",
+        "mastery_points": 0,
+        "practiced_task_class_ids": [],
+        "schema_version": 1
+      },
+      "next_shift_sequence": 1,
+      "progress": {},
+      "schema_version": 2,
+      "snapshot": {},
+      "standing": {
+        "dismissed": false,
+        "strikes": 0
+      }
+    },
+    "location": "recycling_point",
+    "phase": "job",
+    "run_state": {
+      "birth_date": {
+        "day": 1,
+        "month": 9,
+        "year": 1962
+      },
+      "calendar": {
+        "config": {
+          "leap_every": 4,
+          "leap_except_every": 100,
+          "leap_include_every": 400,
+          "leap_month": 2,
+          "leap_years_enabled": true,
+          "minutes_per_day": 1440,
+          "month_lengths": [
+            31,
+            28,
+            31,
+            30,
+            31,
+            30,
+            31,
+            31,
+            30,
+            31,
+            30,
+            31
+          ]
+        },
+        "stamp": {
+          "day": 1,
+          "elapsed_minutes": 0,
+          "minute_of_day": 480,
+          "month": 9,
+          "year": 1980
+        }
+      },
+      "characteristics": {
+        "charisma": 4,
+        "intelligence": 4,
+        "luck": 4,
+        "strength": 6
+      },
+      "computed_profiles": {
+        "knowledge_profile": {
+          "evidence": 0,
+          "formed": false,
+          "value": 0
+        },
+        "relationship_investment": {
+          "evidence": 0,
+          "formed": false,
+          "value": 0
+        }
+      },
+      "deferred_consequences": [],
+      "inventory": {
+        "containers": {
+          "backpack": {
+            "active": false,
+            "base_mass_capacity_grams": 3000,
+            "id": "backpack",
+            "kind": "backpack",
+            "mass_per_strength_grams": 700,
+            "stacks": [],
+            "title": "Рюкзак",
+            "volume_capacity_ml": 24000
+          },
+          "hands": {
+            "active": true,
+            "base_mass_capacity_grams": 1500,
+            "id": "hands",
+            "kind": "hands",
+            "mass_per_strength_grams": 850,
+            "stacks": [],
+            "title": "В руках",
+            "volume_capacity_ml": 9000
+          },
+          "pockets": {
+            "active": true,
+            "base_mass_capacity_grams": 1000,
+            "id": "pockets",
+            "kind": "pockets",
+            "mass_per_strength_grams": 180,
+            "stacks": [],
+            "title": "Карманы",
+            "volume_capacity_ml": 3200
+          }
+        },
+        "external_containers": {},
+        "next_stack_sequence": 1,
+        "schema_version": 1,
+        "selected_stack_id": ""
+      },
+      "journal": [
+        {
+          "at": {
+            "day": 1,
+            "elapsed_minutes": 0,
+            "minute_of_day": 480,
+            "month": 9,
+            "year": 1980
+          },
+          "id": "action:first_day_start:start_underpass_bench::0:0",
+          "message": "Первое утро прошло на скамье в переходе.",
+          "payload": {
+            "action_id": "first_day_start:start_underpass_bench",
+            "changes": [
+              {
+                "after": 92,
+                "before": 100,
+                "delta": -8,
+                "description": "energy: 100 → 92",
+                "effect": {
+                  "delta": -8,
+                  "id": "energy",
+                  "type": "change_state"
+                },
+                "effect_type": "change_state",
+                "target_id": "energy",
+                "target_kind": "state"
+              },
+              {
+                "after": 42,
+                "before": 50,
+                "delta": -8,
+                "description": "mental_state: 50 → 42",
+                "effect": {
+                  "delta": -8,
+                  "id": "mental_state",
+                  "type": "change_state"
+                },
+                "effect_type": "change_state",
+                "target_id": "mental_state",
+                "target_kind": "state"
+              }
+            ],
+            "option_id": "",
+            "start_id": "start_underpass_bench",
+            "time": {
+              "advanced_minutes": 0,
+              "after": {
+                "day": 1,
+                "elapsed_minutes": 0,
+                "minute_of_day": 480,
+                "month": 9,
+                "year": 1980
+              },
+              "before": {
+                "day": 1,
+                "elapsed_minutes": 0,
+                "minute_of_day": 480,
+                "month": 9,
+                "year": 1980
+              }
+            }
+          },
+          "sequence": 0,
+          "type": "action"
+        }
+      ],
+      "knowledge": {},
+      "mastery_points": 0,
+      "meters": {
+        "energy": 92,
+        "health": 100,
+        "hunger": 0,
+        "mental_state": 42,
+        "tension": 0
+      },
+      "money": 0,
+      "next_journal_sequence": 1,
+      "rng": {
+        "seed": "77007",
+        "state": "57797686085348085"
+      },
+      "save_version": 4,
+      "skills": {
+        "cargo_handling": 0,
+        "city_navigation": 0,
+        "cooking": 0,
+        "first_aid": 0,
+        "repair": 0,
+        "search": 0,
+        "trade": 0
+      },
+      "stored_polarities": {
+        "attention_distribution": 0,
+        "decision_priority": 0,
+        "execution_style": 0,
+        "influence_style": 0,
+        "physical_specialization": 0,
+        "uncertainty_behavior": 0
+      }
+    },
+    "search_zone_states": {},
+    "seen": [],
+    "session_version": 7,
+    "settings": {
+      "font_scale": 1.0,
+      "psyche_effect_mode": "full",
+      "show_locked_options": false
+    },
+    "social_state": {
+      "commitments": {},
+      "memories": {},
+      "relationships": {},
+      "reputations": {},
+      "revision": 0,
+      "schema_version": 1
+    },
+    "start": "start_underpass_bench",
+    "survival_state": {
+      "applied_passage_ids": {},
+      "death_reason": "",
+      "processed_elapsed_minutes": 0,
+      "remainders": {
+        "energy": 0,
+        "health": 0,
+        "hunger": 0,
+        "mental_state": 0
+      },
+      "schema_version": 1,
+      "start_elapsed_minutes": 0,
+      "status": "active"
+    },
+    "world_state": {
+      "facts": {
+        "fact_recycling_press_safe": {
+          "changed_at": {
+            "day": 1,
+            "elapsed_minutes": 0,
+            "minute_of_day": 480,
+            "month": 9,
+            "year": 1980
+          },
+          "source_id": "world_bootstrap",
+          "value": false
+        },
+        "fact_recycling_scale_calibrated": {
+          "changed_at": {
+            "day": 1,
+            "elapsed_minutes": 0,
+            "minute_of_day": 480,
+            "month": 9,
+            "year": 1980
+          },
+          "source_id": "world_bootstrap",
+          "value": false
+        },
+        "fact_recycling_yard_cleared": {
+          "changed_at": {
+            "day": 1,
+            "elapsed_minutes": 0,
+            "minute_of_day": 480,
+            "month": 9,
+            "year": 1980
+          },
+          "source_id": "world_bootstrap",
+          "value": false
+        }
+      },
+      "metrics": {
+        "metric_riverside_goods_supply": 52,
+        "metric_riverside_institution_pressure": 35,
+        "metric_riverside_job_availability": 45,
+        "metric_riverside_safety": 48,
+        "metric_riverside_sanitation": 42
+      },
+      "processes": {
+        "process_recycling_inspection": {
+          "changed_at": {
+            "day": 1,
+            "elapsed_minutes": 0,
+            "minute_of_day": 480,
+            "month": 9,
+            "year": 1980
+          },
+          "source_id": "world_bootstrap",
+          "stage": "latent"
+        }
+      },
+      "revision": 0,
+      "scheduled_mutations": [],
+      "schema_version": 1,
+      "stock_snapshots": {}
+    }
+  }
+}

@@ -18,7 +18,11 @@ static func build(
 		return String(left["product_id"]) < String(right["product_id"])
 	)
 	var count_range: Array = archetype["offer_count_range"]
-	var target_count := mini(rng.next_int(int(count_range[0]), int(count_range[1])), eligible.size())
+	# The draw stays on the seed; the district only shifts the result, so a
+	# shortage is reproducible and never turns the shelf into a lottery.
+	var drawn: int = rng.next_int(int(count_range[0]), int(count_range[1]))
+	var shifted := maxi(drawn + int(request.get("supply_offer_delta", 0)), 1)
+	var target_count := mini(shifted, eligible.size())
 	var selected := _select_products(eligible, archetype, target_count, int(request.get("luck", 5)), rng)
 	return _build_offers(selected, store, archetype, request, rng)
 

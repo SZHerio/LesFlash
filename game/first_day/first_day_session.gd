@@ -5,9 +5,8 @@ extends RefCounted
 ## RunState changes are committed only through ActionTransaction. Flow changes
 ## are applied after a successful transaction and carry their own revision.
 
-const SESSION_VERSION := 7
-const JOB_ROUNDS := 6
-const VALID_PHASES := ["uninitialized", "start", "map", "event", "job", "shelter", "completed"]
+const SESSION_VERSION := 8
+const VALID_PHASES := ["uninitialized", "start", "map", "event", "shelter", "completed"]
 const VALID_PSYCHE_MODES := ["off", "reduced", "full"]
 const FIRST_DAY_DURATION_MINUTES := 24 * 60
 const SHELTER_EVENING_MINUTE := 18 * 60
@@ -49,7 +48,6 @@ var start: String = ""
 var seen: Array = []
 var completed: Array = []
 var settings: Dictionary = _default_settings()
-var job_state: Dictionary = _default_job_state()
 var day_completed: bool = false
 var biography: Array = []
 var flow_revision: int = 0
@@ -145,7 +143,6 @@ func start_new_run(
 	if not opening_card.is_empty():
 		seen.append(opening_card)
 	settings = _default_settings()
-	job_state = _default_job_state()
 	day_completed = false
 	biography = []
 	flow_revision = 1
@@ -168,7 +165,6 @@ func get_active_activity() -> Dictionary:
 		"location": location,
 		"current_event": current_event,
 		"start": start,
-		"job_state": job_state,
 	})
 
 
@@ -282,7 +278,6 @@ func get_map_model() -> Dictionary:
 		"locations": location_models,
 		"routes": routes,
 		"events": local_events,
-		"job_available": _job_is_here(),
 		"shelter_available": not available_shelters().is_empty(),
 		"wait_until_evening": get_wait_until_evening_model(),
 		"calendar": run_state.calendar.current_stamp(),
@@ -427,11 +422,8 @@ func resolve_choice(choice_id: String) -> Dictionary:
 		return _failure("unknown_choice", "Вариант ответа не найден")
 	var card_id := String(card.get("id", start))
 	var next_card := String(choice.get("next_card_id", choice.get("next_event_id", "")))
-	var starts_job := bool(choice.get("begin_job", choice.get("starts_job", false)))
 	if not next_card.is_empty() and _event_card(next_card).is_empty():
 		return _failure("invalid_next_event", "Продолжение события отсутствует")
-	if starts_job and not next_card.is_empty():
-		return _failure("invalid_choice_flow", "Выбор не может одновременно продолжать событие и начинать работу")
 	var action := {
 		"id": "event:%s" % card_id,
 		"option_id": choice_id,
@@ -441,18 +433,9 @@ func resolve_choice(choice_id: String) -> Dictionary:
 		"effects": _array_copy(choice.get("effects", [])),
 		"journal_payload": {"event_id": card_id, "choice_id": choice_id},
 	}
-	var state_before: Dictionary = run_state.to_dict() if starts_job else {}
 	var transaction := _execute_action_with_due(action, {"phase": phase, "location": location})
 	if not transaction.success:
 		return _transaction_failure(transaction)
-	var prepared_job: Dictionary = {}
-	if starts_job:
-		prepared_job = _prepare_job_state(String(choice.get("job_approach", "standard")))
-		if not bool(prepared_job.get("ok", false)):
-			if not run_state.load_from_dict(state_before):
-				return _failure("state_restore_failed", "Не удалось откатить выбор после ошибки запуска работы")
-			return prepared_job
-
 	if phase == "event" and card_id not in completed:
 		completed.append(card_id)
 	if not next_card.is_empty():
@@ -460,165 +443,15 @@ func resolve_choice(choice_id: String) -> Dictionary:
 		phase = "event"
 		if next_card not in seen:
 			seen.append(next_card)
-	elif starts_job:
-		current_event = ""
-		job_state = Dictionary(prepared_job["job_state"]).duplicate(true)
-		phase = "job"
 	else:
 		current_event = ""
 		phase = "map"
 	_touch()
-	var result := _success({
+	return _success({
 		"transaction": transaction.to_dict(),
 		"phase": phase,
 		"next_event_id": current_event,
 		"outcome": String(choice.get("outcome", "")),
-	})
-	if starts_job:
-		result["job"] = current_job_prompt()
-	return result
-
-
-func begin_job(approach: String = "standard") -> Dictionary:
-	var activity_guard := standard_action_guard()
-	if not bool(activity_guard.get("ok", false)):
-		return activity_guard
-	if day_completed or phase != "map":
-		return _failure("invalid_phase", "Работу можно начать только с карты")
-	var prepared := _prepare_job_state(approach)
-	if not bool(prepared.get("ok", false)):
-		return prepared
-	job_state = Dictionary(prepared["job_state"]).duplicate(true)
-	phase = "job"
-	_touch()
-	return _success({"job": current_job_prompt()})
-
-
-func current_job_prompt() -> Dictionary:
-	if phase != "job" or not bool(job_state.get("active", false)):
-		return {}
-	var prompt_ids: Array = job_state.get("prompt_ids", [])
-	var round_index := int(job_state.get("round_index", 0))
-	if round_index < 0 or round_index >= prompt_ids.size():
-		return {}
-	var job := _job()
-	var prompt := _find_by_id(_job_prompts(job), String(prompt_ids[round_index]))
-	if prompt.is_empty():
-		return {}
-	var choices: Array = []
-	for raw_choice in _dictionary_array(prompt.get("choices", prompt.get("categories", []))):
-		var choice_id := String(raw_choice.get("id", raw_choice.get("category", "")))
-		var check := CheckResolver.evaluate_all(
-			run_state,
-			_array_copy(raw_choice.get("conditions", [])),
-			{"job_id": String(job.get("id", "")), "prompt_id": String(prompt.get("id", ""))}
-		)
-		var locked := not bool(check["allowed"])
-		if locked and not bool(settings.get("show_locked_options", false)):
-			continue
-		choices.append({
-			"id": choice_id,
-			"label": String(raw_choice.get("label", raw_choice.get("text", choice_id))),
-			"locked": locked,
-			"reasons": _array_copy(check["reasons"]) if locked else [],
-		})
-	return {
-		"job_id": String(job.get("id", "")),
-		"job_title": String(job.get("title", "Работа")),
-		"approach": String(job_state.get("approach", "standard")),
-		"round": round_index + 1,
-		"rounds_total": JOB_ROUNDS,
-		"score": int(job_state.get("score", 0)),
-		"prompt_id": String(prompt.get("id", "")),
-		"text": String(prompt.get("text", prompt.get("title", "Выберите действие"))),
-		"choices": choices,
-	}
-
-
-func answer_job(category: String) -> Dictionary:
-	var activity_guard := standard_action_guard()
-	if not bool(activity_guard.get("ok", false)):
-		return activity_guard
-	if phase != "job" or not bool(job_state.get("active", false)):
-		return _failure("job_not_active", "Сейчас нет активной рабочей смены")
-	var prompt_model := current_job_prompt()
-	if prompt_model.is_empty():
-		return _failure("job_prompt_missing", "Текущий рабочий раунд повреждён")
-	var job := _job()
-	var prompt := _find_by_id(_job_prompts(job), String(prompt_model["prompt_id"]))
-	var choice := _find_by_id(_dictionary_array(prompt.get("choices", prompt.get("categories", []))), category)
-	if choice.is_empty():
-		# Compatibility with content that calls the answer id `category`.
-		for candidate in _dictionary_array(prompt.get("choices", prompt.get("categories", []))):
-			if String(candidate.get("category", "")) == category:
-				choice = candidate
-				break
-	if choice.is_empty():
-		return _failure("unknown_job_answer", "Такого ответа нет в текущем раунде")
-	var check := CheckResolver.evaluate_all(
-		run_state,
-		_array_copy(choice.get("conditions", [])),
-		{"job_id": String(job.get("id", "")), "prompt_id": String(prompt.get("id", ""))}
-	)
-	if not bool(check["allowed"]):
-		return _failure("job_answer_blocked", "Этот ответ сейчас недоступен", {"reasons": _array_copy(check["reasons"])})
-
-	var candidate := job_state.duplicate(true)
-	var gained_score := int(choice.get("score", 1 if bool(choice.get("correct", false)) else 0))
-	candidate["score"] = int(candidate.get("score", 0)) + gained_score
-	var answers: Array = candidate.get("answers", [])
-	answers.append({
-		"round": int(candidate.get("round_index", 0)) + 1,
-		"prompt_id": String(prompt.get("id", "")),
-		"choice_id": String(choice.get("id", category)),
-		"score": gained_score,
-	})
-	candidate["answers"] = answers
-	candidate["round_index"] = int(candidate.get("round_index", 0)) + 1
-	if int(candidate["round_index"]) < JOB_ROUNDS:
-		job_state = candidate
-		_touch()
-		return _success({
-			"round_score": gained_score,
-			"job": current_job_prompt(),
-		})
-
-	var tier := _job_result_tier(job, int(candidate["score"]))
-	if tier.is_empty():
-		return _failure("job_result_missing", "Не найден итог для полученного результата")
-	var effects := _job_completion_effects(job, tier, String(candidate.get("approach", "standard")), int(candidate["score"]))
-	var action := {
-		"id": "job:%s" % String(job.get("id", "first_day_job")),
-		"option_id": String(tier.get("id", "result")),
-		"title": String(job.get("title", "Рабочая смена")),
-		"option_title": String(tier.get("label", tier.get("title", "Смена завершена"))),
-		"conditions": [],
-		"effects": effects,
-		"journal_payload": {
-			"job_id": String(job.get("id", "")),
-			"approach": String(candidate.get("approach", "standard")),
-			"score": int(candidate["score"]),
-			"answers": answers.duplicate(true),
-		},
-	}
-	var transaction := _execute_action_with_due(action, {"phase": phase, "location": location})
-	if not transaction.success:
-		return _transaction_failure(transaction)
-	candidate["active"] = false
-	candidate["result"] = {
-		"tier_id": String(tier.get("id", "")),
-		"label": String(tier.get("label", tier.get("title", ""))),
-		"score": int(candidate["score"]),
-		"completed_day_index": int(run_state.calendar.elapsed_minutes / 1440),
-		"transaction": transaction.to_dict(),
-	}
-	job_state = candidate
-	phase = "map"
-	_touch()
-	return _success({
-		"completed": true,
-		"result": candidate["result"].duplicate(true),
-		"transaction": transaction.to_dict(),
 	})
 
 
@@ -665,12 +498,7 @@ func get_wait_until_evening_model() -> Dictionary:
 	var target_elapsed := SHELTER_EVENING_MINUTE - SHELTER_WAKE_MINUTE
 	var elapsed := int(run_state.calendar.elapsed_minutes) if run_state != null and run_state.calendar != null else 0
 	var visible := not day_completed and phase == "map" and elapsed < target_elapsed
-	var job_finished := (
-		job_state.get("result", {}) is Dictionary
-		and not Dictionary(job_state.get("result", {})).is_empty()
-	)
-	var enough_lived_events := completed.size() >= 3
-	var available := visible and (job_finished or enough_lived_events)
+	var available := visible and completed.size() >= 3
 	var reason := ""
 	if visible and not available:
 		reason = "Сначала завершите дело или проведите время за другими занятиями"
@@ -815,7 +643,6 @@ func to_dict() -> Dictionary:
 		"seen": seen.duplicate(true),
 		"completed": completed.duplicate(true),
 		"settings": settings.duplicate(true),
-		"job_state": job_state.duplicate(true),
 		"day_completed": day_completed,
 		"biography": biography.duplicate(true),
 		"flow_revision": flow_revision,
@@ -829,7 +656,9 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 	var source: Dictionary = migration["data"]
 	var version: Variant = _integral(source.get("session_version", null))
 	var revision: Variant = _integral(source.get("flow_revision", null))
-	if version == null or int(version) < 6 or int(version) > SESSION_VERSION or revision == null or int(revision) < 0:
+	# Every older shape has already been migrated above, so anything that is not
+	# the current version here is a save the migrator refused to understand.
+	if version == null or int(version) != SESSION_VERSION or revision == null or int(revision) < 0:
 		return null
 	if typeof(source.get("run_state", null)) != TYPE_DICTIONARY:
 		return null
@@ -840,8 +669,7 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 		return null
 	var parsed_world := WorldStateScript.from_dict(source["world_state"])
 	var parsed_social := SocialStateScript.from_dict(source["social_state"])
-	# Session 6 knew no standing employment, so a save from it starts clean.
-	if int(version) < 7 or not source.has("job_work_state"):
+	if not source.has("job_work_state"):
 		source["job_work_state"] = JobWorkStateScript.fresh().to_dict()
 	var parsed_job: JobWorkState = JobWorkStateScript.from_dict(source["job_work_state"])
 	if parsed_job == null:
@@ -856,7 +684,7 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 		return null
 	if typeof(source.get("seen", null)) != TYPE_ARRAY or typeof(source.get("completed", null)) != TYPE_ARRAY:
 		return null
-	if typeof(source.get("settings", null)) != TYPE_DICTIONARY or typeof(source.get("job_state", null)) != TYPE_DICTIONARY:
+	if typeof(source.get("settings", null)) != TYPE_DICTIONARY:
 		return null
 	if typeof(source.get("biography", null)) != TYPE_ARRAY:
 		return null
@@ -888,7 +716,6 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 	result.seen = parsed_seen
 	result.completed = parsed_completed
 	result.settings = Dictionary(source["settings"]).duplicate(true)
-	result.job_state = _normalize_json_numbers(Dictionary(source["job_state"]).duplicate(true))
 	result.day_completed = bool(source["day_completed"])
 	result.biography = _normalize_json_numbers(Array(source["biography"]).duplicate(true))
 	result.flow_revision = int(revision)
@@ -921,7 +748,6 @@ func replace_from(other: FirstDaySession) -> bool:
 	seen = candidate.seen
 	completed = candidate.completed
 	settings = candidate.settings
-	job_state = candidate.job_state
 	day_completed = candidate.day_completed
 	biography = candidate.biography
 	flow_revision = candidate.flow_revision
@@ -999,7 +825,6 @@ func validate() -> Dictionary:
 			errors.append("completed event %s was never seen" % String(event_id))
 	if not _settings_valid(settings):
 		errors.append("settings are invalid")
-	_validate_job_state(errors)
 	if day_completed != (phase == "completed"):
 		errors.append("day_completed and completed phase disagree")
 	if run_state != null and phase != "uninitialized":
@@ -1022,7 +847,6 @@ func validate() -> Dictionary:
 		"base_location": location,
 		"current_event": current_event,
 		"start": start,
-		"job_state": job_state,
 		"world_state": world_state.to_dict() if world_state != null else {},
 		"social_state": social_state.to_dict() if social_state != null else {},
 		"survival_state": survival_state.to_dict() if survival_state != null else {},
@@ -1050,126 +874,6 @@ func _validate_applied_commands(errors: Array[String]) -> void:
 			errors.append("applied_command_ids.%s.source_id must be a string" % command_id)
 		if not Dictionary(record).get("applied_at", null) is Dictionary:
 			errors.append("applied_command_ids.%s.applied_at must be a dictionary" % command_id)
-
-
-func _validate_job_state(errors: Array[String]) -> void:
-	var required := ["active", "job_id", "approach", "round_index", "rounds_total", "score", "prompt_ids", "answers", "result"]
-	for key in required:
-		if not job_state.has(key):
-			errors.append("job_state.%s is missing" % key)
-	if typeof(job_state.get("active", null)) != TYPE_BOOL:
-		errors.append("job_state.active must be boolean")
-	for key in ["job_id", "approach"]:
-		if typeof(job_state.get(key, null)) != TYPE_STRING:
-			errors.append("job_state.%s must be a string" % key)
-	for key in ["round_index", "rounds_total", "score"]:
-		if typeof(job_state.get(key, null)) != TYPE_INT:
-			errors.append("job_state.%s must be an integer" % key)
-	var active := bool(job_state.get("active", false))
-	var job_id := String(job_state.get("job_id", ""))
-	var approach := String(job_state.get("approach", ""))
-	var round_index := int(job_state.get("round_index", 0))
-	var rounds_total := int(job_state.get("rounds_total", JOB_ROUNDS))
-	if round_index < 0 or round_index > JOB_ROUNDS or rounds_total != JOB_ROUNDS:
-		errors.append("job_state round counters are outside the six-round contract")
-	if int(job_state.get("score", 0)) < 0:
-		errors.append("job_state.score cannot be negative")
-	var prompt_ids: Array = []
-	if typeof(job_state.get("prompt_ids", null)) != TYPE_ARRAY:
-		errors.append("job_state.prompt_ids must be an array")
-	else:
-		prompt_ids = job_state["prompt_ids"]
-		for prompt_id in prompt_ids:
-			if typeof(prompt_id) != TYPE_STRING or String(prompt_id).is_empty():
-				errors.append("job_state.prompt_ids contains an invalid id")
-		_validate_unique_strings(prompt_ids, "job_state.prompt_ids", errors)
-	var answers: Array = []
-	if typeof(job_state.get("answers", null)) != TYPE_ARRAY:
-		errors.append("job_state.answers must be an array")
-	else:
-		answers = job_state["answers"]
-		if answers.size() != round_index:
-			errors.append("job_state answers count must equal round_index")
-		for answer in answers:
-			if not answer is Dictionary:
-				errors.append("job_state.answers contains a non-dictionary value")
-	var result: Dictionary = {}
-	if typeof(job_state.get("result", null)) != TYPE_DICTIONARY:
-		errors.append("job_state.result must be a dictionary")
-	else:
-		result = job_state["result"]
-	var has_result := not result.is_empty()
-	var configured_job := _job()
-	var configured_job_id := String(configured_job.get("id", ""))
-	if not job_id.is_empty() and job_id != configured_job_id:
-		errors.append("job_state references an unknown job")
-	if active and phase != "job":
-		errors.append("active job requires job phase")
-	if phase == "job" and not active:
-		errors.append("job phase requires an active job")
-	if active:
-		if job_id != configured_job_id:
-			errors.append("active job must reference the configured job")
-		if String(configured_job.get("location_id", "")) != location:
-			errors.append("active job must remain in its configured location")
-		if round_index >= JOB_ROUNDS:
-			errors.append("active job must have at least one unresolved round")
-		if has_result:
-			errors.append("active job cannot already have a result")
-	elif has_result:
-		if job_id != configured_job_id or round_index != JOB_ROUNDS:
-			errors.append("completed job must preserve its id and all six rounds")
-		if int(result.get("score", -1)) != int(job_state.get("score", 0)):
-			errors.append("completed job result score disagrees with job_state.score")
-		var known_tiers: Dictionary = {}
-		for tier in _dictionary_array(configured_job.get("result_tiers", configured_job.get("outcomes", []))):
-			known_tiers[String(tier.get("id", ""))] = true
-		if not known_tiers.has(String(result.get("tier_id", ""))):
-			errors.append("completed job references an unknown result tier")
-	else:
-		if not job_id.is_empty() or not approach.is_empty() or round_index != 0 or int(job_state.get("score", 0)) != 0 or not prompt_ids.is_empty() or not answers.is_empty():
-			errors.append("inactive unfinished job must use the pristine default state")
-	if active or has_result:
-		if prompt_ids.size() != JOB_ROUNDS:
-			errors.append("started job must preserve exactly six prompt ids")
-		var approaches := _dictionary_array(configured_job.get("approaches", []))
-		if (approaches.is_empty() and approach != "standard") or (
-			not approaches.is_empty() and _find_by_id(approaches, approach).is_empty()
-		):
-			errors.append("job_state references an unknown approach")
-		var known_prompts: Dictionary = {}
-		for prompt in _job_prompts(configured_job):
-			known_prompts[String(prompt.get("id", ""))] = true
-		for prompt_id in prompt_ids:
-			if not known_prompts.has(String(prompt_id)):
-				errors.append("job_state references an unknown prompt %s" % String(prompt_id))
-		var reconstructed_score := 0
-		for answer_index in range(answers.size()):
-			if not answers[answer_index] is Dictionary:
-				continue
-			var answer: Dictionary = answers[answer_index]
-			if int(answer.get("round", -1)) != answer_index + 1:
-				errors.append("job_state answer round sequence is inconsistent")
-			if answer_index >= prompt_ids.size():
-				continue
-			var expected_prompt_id := String(prompt_ids[answer_index])
-			if String(answer.get("prompt_id", "")) != expected_prompt_id:
-				errors.append("job_state answer does not match its prompt order")
-			var prompt := _find_by_id(_job_prompts(configured_job), expected_prompt_id)
-			var choice := _find_by_id(
-				_dictionary_array(prompt.get("choices", prompt.get("categories", []))),
-				String(answer.get("choice_id", ""))
-			)
-			if choice.is_empty():
-				errors.append("job_state answer references an unknown choice")
-				continue
-			var expected_score := int(choice.get("score", 1 if bool(choice.get("correct", false)) else 0))
-			if int(answer.get("score", -1)) != expected_score:
-				errors.append("job_state answer score disagrees with content")
-			reconstructed_score += expected_score
-		if reconstructed_score != int(job_state.get("score", 0)):
-			errors.append("job_state.score disagrees with recorded answers")
-	_validate_json_value(job_state, "job_state", errors)
 
 
 func _execute_action_with_due(
@@ -1264,65 +968,6 @@ func _deferred_effects(consequence: Dictionary) -> Dictionary:
 		else:
 			return _failure("invalid_deferred_payload", "Неподдерживаемое поле payload: %s" % key)
 	return _success({"effects": effects})
-
-
-func _prepare_job_state(approach: String) -> Dictionary:
-	var job := _job()
-	if job.is_empty():
-		return _failure("job_missing", "Работа первого дня не настроена")
-	if String(job.get("location_id", "")) != location:
-		return _failure("job_not_here", "Эта работа находится в другой локации")
-	if bool(job_state.get("active", false)):
-		return _failure("job_already_active", "Смена уже началась")
-	var previous_result: Dictionary = Dictionary(job_state.get("result", {}))
-	if not previous_result.is_empty():
-		var current_day := int(run_state.calendar.elapsed_minutes / 1440)
-		var completed_day := int(previous_result.get("completed_day_index", current_day))
-		if completed_day >= current_day:
-			return _failure("job_already_completed", "Сегодняшняя смена уже завершена")
-	var entry_check := CheckResolver.evaluate_all(
-		run_state,
-		_array_copy(job.get("entry_conditions", job.get("conditions", []))),
-		{"job_id": String(job.get("id", ""))}
-	)
-	if not bool(entry_check["allowed"]):
-		return _failure("job_blocked", "Сейчас герой не может начать работу", {"reasons": _array_copy(entry_check["reasons"])})
-
-	var approaches := _dictionary_array(job.get("approaches", []))
-	if approaches.is_empty():
-		if approach.is_empty():
-			approach = "standard"
-		if approach != "standard":
-			return _failure("unknown_job_approach", "Неизвестный подход к работе")
-	else:
-		var approach_data := _find_by_id(approaches, approach)
-		if approach_data.is_empty():
-			return _failure("unknown_job_approach", "Неизвестный подход к работе")
-		var approach_check := CheckResolver.evaluate_all(
-			run_state,
-			_array_copy(approach_data.get("conditions", [])),
-			{"job_id": String(job.get("id", "")), "approach": approach}
-		)
-		if not bool(approach_check["allowed"]):
-			return _failure("job_approach_blocked", "Этот подход сейчас недоступен", {"reasons": _array_copy(approach_check["reasons"])})
-
-	var prompts := _job_prompts(job)
-	if prompts.is_empty():
-		return _failure("job_prompts_missing", "Для мини-игры не настроены задания")
-	var prompt_ids := _job_prompt_order(prompts, String(job.get("id", "job")), approach)
-	if prompt_ids.size() != JOB_ROUNDS:
-		return _failure("job_rounds_invalid", "Мини-игра не смогла подготовить шесть раундов")
-	return _success({"job_state": {
-		"active": true,
-		"job_id": String(job.get("id", "")),
-		"approach": approach,
-		"round_index": 0,
-		"rounds_total": JOB_ROUNDS,
-		"score": 0,
-		"prompt_ids": prompt_ids,
-		"answers": [],
-		"result": {},
-	}})
 
 
 func _shelter_window_open() -> bool:
@@ -1421,89 +1066,8 @@ func _combined_effects(first: Dictionary, second: Dictionary) -> Array:
 	return result
 
 
-func _job_prompt_order(prompts: Array, job_id: String, approach: String) -> Array:
-	var available := prompts.duplicate(true)
-	var result: Array = []
-	var cycle := 0
-	while result.size() < JOB_ROUNDS:
-		if available.is_empty():
-			available = prompts.duplicate(true)
-			cycle += 1
-		if available.is_empty():
-			break
-		var pick_index := _stable_index(
-			"job:%s:%s:%d:%d" % [job_id, approach, cycle, result.size()],
-			available.size()
-		)
-		var prompt: Dictionary = available[pick_index]
-		result.append(String(prompt.get("id", "prompt_%d" % result.size())))
-		available.remove_at(pick_index)
-	return result
-
-
-func _job_result_tier(job: Dictionary, score: int) -> Dictionary:
-	var tiers := _dictionary_array(job.get("result_tiers", job.get("outcomes", [])))
-	var best: Dictionary = {}
-	var best_min := -2_147_483_648
-	for tier in tiers:
-		var minimum := int(tier.get("min_score", -2_147_483_648))
-		var maximum := int(tier.get("max_score", 2_147_483_647))
-		if score >= minimum and score <= maximum:
-			return tier
-		if minimum <= score and minimum > best_min:
-			best = tier
-			best_min = minimum
-	return best
-
-
-func _job_completion_effects(job: Dictionary, tier: Dictionary, approach_id: String, score: int) -> Array:
-	var effects: Array = []
-	var approach := _find_by_id(_dictionary_array(job.get("approaches", [])), approach_id)
-	if not approach.is_empty():
-		effects.append_array(_array_copy(approach.get("effects", approach.get("completion_effects", []))))
-	effects.append_array(_array_copy(tier.get("effects", [])))
-	effects.append_array(_array_copy(job.get("completion_effects", [])))
-	if not _has_effect(effects, "advance_time"):
-		effects.append({
-			"type": "advance_time",
-			"minutes": int(job.get("duration_minutes", 360)),
-			"reason": String(job.get("title", "Рабочая смена")),
-		})
-	if not _has_target_effect(effects, "change_state", "energy"):
-		effects.append({"type": "change_state", "id": "energy", "delta": int(job.get("energy_delta", -30))})
-	if not _has_target_effect(effects, "change_state", "hunger"):
-		effects.append({"type": "change_state", "id": "hunger", "delta": int(job.get("hunger_delta", 25))})
-	if not _has_effect(effects, "change_money"):
-		var pay := int(job.get("base_pay", 80)) + score * int(job.get("pay_per_score", 10))
-		effects.append({"type": "change_money", "delta": maxi(pay, 0)})
-	if not _has_effect(effects, "unlock_skill") and not _has_effect(effects, "advance_skill"):
-		effects.append({
-			"type": "unlock_skill",
-			"id": String(job.get("skill_id", "cargo_handling")),
-			"rank": 1,
-		})
-	if not _has_effect(effects, "mastery"):
-		effects.append({"type": "mastery", "delta": maxi(1, int(score / 2))})
-	return effects
-
-
-func _job_prompts(job: Dictionary) -> Array:
-	var minigame: Variant = job.get("minigame", {})
-	if minigame is Dictionary:
-		return _dictionary_array(minigame.get("prompts", []))
-	return _dictionary_array(job.get("prompts", []))
-
-
-func _job_is_here() -> bool:
-	var job := _job()
-	if job.is_empty() or String(job.get("location_id", "")) != location:
-		return false
-	return bool(CheckResolver.evaluate_all(run_state, _array_copy(job.get("entry_conditions", [])))["allowed"])
-
-
 func _build_biography_entry(shelter: Dictionary, transaction: ActionResult) -> Dictionary:
 	var start_data := _find_by_id(_start_situations(), start)
-	var job_result: Dictionary = job_state.get("result", {}).duplicate(true) if job_state.get("result", {}) is Dictionary else {}
 	return {
 		"id": "day_one",
 		"title": "Первый день",
@@ -1515,7 +1079,6 @@ func _build_biography_entry(shelter: Dictionary, transaction: ActionResult) -> D
 		"shelter_id": String(shelter.get("id", "")),
 		"seen_events": seen.duplicate(true),
 		"completed_events": completed.duplicate(true),
-		"job_result": job_result,
 		"final_state": {
 			"calendar": run_state.calendar.current_stamp(),
 			"money": run_state.money,
@@ -1650,6 +1213,17 @@ static func _locations() -> Array:
 	return _dictionary_array(FirstDayContent.locations())
 
 
+## Just the place: its id, its name and its background. Readers that need only
+## a caption must not pay for the whole location read-model.
+func get_location_summary() -> Dictionary:
+	var place := _location(location)
+	return {
+		"id": location,
+		"title": String(place.get("title", location)),
+		"background_key": String(place.get("background_key", "")),
+	}
+
+
 static func _location(location_id: String) -> Dictionary:
 	var value: Variant = FirstDayContent.location(location_id)
 	return value.duplicate(true) if value is Dictionary else {}
@@ -1676,11 +1250,6 @@ static func _event_card(event_id: String) -> Dictionary:
 
 static func _events_for_location(location_id: String) -> Array:
 	return _dictionary_array(FirstDayContent.events_for_location(location_id))
-
-
-static func _job() -> Dictionary:
-	var value: Variant = FirstDayContent.job()
-	return value.duplicate(true) if value is Dictionary else {}
 
 
 static func _shelters() -> Array:
@@ -1780,20 +1349,6 @@ static func _default_settings() -> Dictionary:
 		"show_locked_options": false,
 		"psyche_effect_mode": "full",
 		"font_scale": 1.0,
-	}
-
-
-static func _default_job_state() -> Dictionary:
-	return {
-		"active": false,
-		"job_id": "",
-		"approach": "",
-		"round_index": 0,
-		"rounds_total": JOB_ROUNDS,
-		"score": 0,
-		"prompt_ids": [],
-		"answers": [],
-		"result": {},
 	}
 
 

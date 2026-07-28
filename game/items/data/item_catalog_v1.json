@@ -408,6 +408,10 @@
         "equip": {
           "title": "Закрепить на снаряжении",
           "duration_minutes": 5,
+          "slot": "bedding",
+          "modifiers": {
+            "warmth": 26
+          },
           "conditions": [],
           "effects": []
         },
@@ -448,6 +452,11 @@
         "equip": {
           "title": "Держать наготове",
           "duration_minutes": 1,
+          "slot": "tool",
+          "modifiers": {
+            "search_reach": 12,
+            "work_safety": 2
+          },
           "conditions": [],
           "effects": []
         },
@@ -652,6 +661,11 @@
         "equip": {
           "title": "Надеть",
           "duration_minutes": 1,
+          "slot": "gloves",
+          "modifiers": {
+            "search_reach": 4,
+            "work_safety": 8
+          },
           "conditions": [],
           "effects": []
         },
@@ -691,6 +705,15 @@
         "equip": {
           "title": "Взять на плечо",
           "duration_minutes": 2,
+          "slot": "bag",
+          "modifiers": {},
+          "container": {
+            "title": "Холщовая сумка",
+            "kind": "bag",
+            "base_mass_capacity_grams": 2600,
+            "mass_per_strength_grams": 260,
+            "volume_capacity_ml": 9000
+          },
           "conditions": [],
           "effects": []
         },
@@ -731,6 +754,15 @@
         "equip": {
           "title": "Надеть",
           "duration_minutes": 3,
+          "slot": "bag",
+          "modifiers": {},
+          "container": {
+            "title": "Большая сумка через плечо",
+            "kind": "bag",
+            "base_mass_capacity_grams": 5200,
+            "mass_per_strength_grams": 420,
+            "volume_capacity_ml": 22000
+          },
           "conditions": [],
           "effects": []
         },
@@ -822,6 +854,11 @@
         "equip": {
           "title": "Надеть",
           "duration_minutes": 4,
+          "slot": "torso",
+          "modifiers": {
+            "travel_stamina": 4,
+            "warmth": 34
+          },
           "conditions": [],
           "effects": []
         },
@@ -861,6 +898,11 @@
         "equip": {
           "title": "Обуть",
           "duration_minutes": 5,
+          "slot": "feet",
+          "modifiers": {
+            "travel_stamina": 30,
+            "warmth": 6
+          },
           "conditions": [],
           "effects": []
         },
@@ -1146,6 +1188,10 @@
         "equip": {
           "title": "Взять в руки",
           "duration_minutes": 2,
+          "slot": "tool",
+          "modifiers": {
+            "search_reach": 18
+          },
           "conditions": [],
           "effects": []
         },
@@ -1185,6 +1231,11 @@
         "equip": {
           "title": "Взять в руки",
           "duration_minutes": 1,
+          "slot": "tool",
+          "modifiers": {
+            "search_reach": 14,
+            "work_safety": 3
+          },
           "conditions": [],
           "effects": []
         },

@@ -165,17 +165,6 @@ func _test_legacy_phases() -> void:
 			_expect_equal(restored_event.active_activity, GameSession.empty_activity(), "event is not explicit")
 			_expect_equal(restored_event.get_active_activity(), expected_event, "event meaning survives")
 
-	var job_session := SessionScript.create_location_first(_build(), 53_005)
-	_expect(job_session != null, "legacy job fixture must start")
-	if job_session != null:
-		job_session.location = "recycling_point"
-		_expect(bool(job_session.begin_job("standard").get("ok", false)), "legacy job must begin")
-		var expected_job := job_session.get_active_activity()
-		var restored_job := SessionScript.from_dict(_as_v3(job_session))
-		_expect(restored_job != null, "legacy job session must migrate")
-		if restored_job != null:
-			_expect_equal(restored_job.get_active_activity(), expected_job, "job meaning survives")
-
 	var shelter_session := SessionScript.create_location_first(_build(), 53_006)
 	_expect(shelter_session != null, "legacy shelter fixture must start")
 	if shelter_session != null:
@@ -193,7 +182,6 @@ func _test_standard_action_guard() -> void:
 		return
 	_expect_equal(session.select_event().get("code"), "search_active", "events are blocked")
 	_expect_equal(session.travel("market", "walk").get("code"), "search_active", "travel is blocked")
-	_expect_equal(session.begin_job().get("code"), "search_active", "jobs are blocked")
 	_expect_equal(session.wait_until_evening().get("code"), "search_active", "waiting is blocked")
 	_expect_equal(session.choose_shelter("underpass_niche").get("code"), "search_active", "shelter is blocked")
 	var actions := LocationActionService.get_actions(

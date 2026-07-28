@@ -19,14 +19,12 @@ func _init() -> void:
 	_run_test("hidden and shown locked policy", _test_locked_option_policy)
 	_run_test("reading is timeless and travel advances time", _test_discrete_time)
 	_run_test("due consequences resolve atomically", _test_due_consequences)
-	_run_test("event choice starts job", _test_event_choice_starts_job)
 	_run_test("shelter window and nearest 08:00", _test_shelter_window)
 	_run_test("Luck biases event adversity", _test_luck_event_weights)
 	_run_test("session semantic validation", _test_session_semantic_validation)
-	_run_test("six-round job resumes after two rounds", _test_job_resume)
 	_run_test("temporary and backup recovery", _test_recovery_candidates)
 	_run_test("three complete first days", _test_three_complete_runs)
-	_run_test("save round-trip at map event and job", _test_phase_round_trips)
+	_run_test("save round-trip at map and event", _test_phase_round_trips)
 	_run_test("psyche setting is presentation-only", _test_psyche_setting)
 	_cleanup_all_test_saves()
 
@@ -309,21 +307,6 @@ func _test_due_consequences() -> void:
 	_expect_equal(broken.flow_revision, broken_revision_before, "failed due resolution must not touch flow revision")
 
 
-func _test_event_choice_starts_job() -> void:
-	var session = _new_map_session(_build_for_luck(5), 4_207)
-	_expect(session != null, "event-to-job run must reach map")
-	if session == null:
-		return
-	var job: Dictionary = FirstDayContentScript.job()
-	_expect(_travel_to(session, String(job.get("location_id", ""))), "event-to-job run must reach the workplace")
-	_expect(bool(session.enter_event("recycling_sorting_trial").get("ok", false)), "job offer event must open")
-	var resolved: Dictionary = session.resolve_choice("recycling_sorting_trial.accept")
-	_expect(bool(resolved.get("ok", false)), "accepting the offer must resolve")
-	_expect_equal(session.phase, "job", "accepting the offer must enter job phase directly")
-	_expect(bool(session.job_state.get("active", false)), "accepting the offer must activate the job")
-	_expect(not session.current_job_prompt().is_empty(), "first job prompt must be immediately available")
-
-
 func _test_shelter_window() -> void:
 	var evening = _new_map_session(_build_for_luck(5), 4_208)
 	_expect(evening != null, "shelter window run must reach map")
@@ -437,52 +420,12 @@ func _test_session_semantic_validation() -> void:
 	unknown_history.completed.append("unknown_event")
 	_expect(not bool(unknown_history.validate().get("ok", true)), "unknown history ids must fail validation")
 
-	var job_session = _new_map_session(_build_for_luck(5), 4_211)
-	_expect(job_session != null, "semantic validation job run must reach map")
-	if job_session == null:
-		return
-	var job: Dictionary = FirstDayContentScript.job()
-	_expect(_travel_to(job_session, String(job.get("location_id", ""))), "semantic validation job run must reach work")
-	_expect(bool(job_session.begin_job("standard").get("ok", false)), "semantic validation job must begin")
-	job_session.phase = "map"
-	_expect(not bool(job_session.validate().get("ok", true)), "active job outside job phase must fail validation")
-
-
-func _test_job_resume() -> void:
-	var path := _test_save_path("job_resume")
-	_cleanup_save(path)
-	var session = _new_map_session(_build_for_luck(5), 6_060)
-	_expect(session != null, "job resume run must reach map")
-	if session == null:
-		return
-	var job: Dictionary = FirstDayContentScript.job()
-	_expect(_travel_to(session, String(job.get("location_id", ""))), "job resume run must reach work")
-	_expect(bool(session.begin_job("standard").get("ok", false)), "job must begin")
-	_expect(_answer_job_round(session), "first job round must resolve")
-	_expect(_answer_job_round(session), "second job round must resolve")
-	_expect_equal(int(session.job_state.get("round_index", -1)), 2, "session must pause after two rounds")
-	var expected: Dictionary = session.to_dict()
-	var saved: Dictionary = FirstDaySaveScript.save_session(session, path)
-	_expect(bool(saved.get("ok", false)), "active job session must save: %s" % str(saved))
-	var loaded: Dictionary = FirstDaySaveScript.load_session(path)
-	_expect(bool(loaded.get("ok", false)), "active job session must load: %s" % str(loaded))
-	var resumed = loaded.get("session")
-	_expect(resumed != null, "loaded result must contain a session")
-	if resumed == null:
-		_cleanup_save(path)
-		return
-	_expect_equal(resumed.to_dict(), expected, "resume must preserve every job field")
-	_expect_equal(int(resumed.job_state.get("round_index", -1)), 2, "resume must continue at round three")
-	while resumed.phase == "job":
-		_expect(_answer_job_round(resumed), "resumed job round must resolve")
-		if int(resumed.job_state.get("round_index", 0)) > 6:
-			break
-	_expect_equal(int(resumed.job_state.get("round_index", -1)), 6, "job must contain exactly six resolved rounds")
-	_expect(not bool(resumed.job_state.get("active", true)), "job must be inactive after round six")
-	_expect(resumed.run_state.money > 0, "job must pay money")
-	_expect(resumed.run_state.get_skill_rank("cargo_handling") >= 1, "job must acquire cargo skill")
-	_expect(resumed.run_state.mastery_points > 0, "job must grant mastery points")
-	_cleanup_save(path)
+	var unknown_phase = event_session.clone()
+	unknown_phase.phase = "job"
+	_expect(
+		not bool(unknown_phase.validate().get("ok", true)),
+		"the removed job phase must fail validation instead of loading silently"
+	)
 
 
 func _test_recovery_candidates() -> void:
@@ -542,14 +485,6 @@ func _test_phase_round_trips() -> void:
 	_expect(map_session != null and map_session.phase == "map", "prepared run must expose map phase")
 	if map_session != null:
 		_expect(_assert_session_round_trip(map_session, "map"), "map phase must survive save round-trip")
-
-	var job_session = _new_map_session(_build_for_luck(5), 90_003)
-	if job_session != null:
-		var job: Dictionary = FirstDayContentScript.job()
-		_expect(_travel_to(job_session, String(job.get("location_id", ""))), "round-trip run must reach job")
-		_expect(bool(job_session.begin_job("standard").get("ok", false)), "round-trip job must begin")
-		_expect(_answer_job_round(job_session), "round-trip job must store one answer")
-		_expect(_assert_session_round_trip(job_session, "job"), "job phase must survive save round-trip")
 
 
 func _test_psyche_setting() -> void:
@@ -679,35 +614,53 @@ func _location_path(origin: String, destination: String) -> Array:
 	return []
 
 
-func _answer_job_round(session: Variant) -> bool:
-	if session == null or session.phase != "job":
-		return false
-	var prompt: Dictionary = session.current_job_prompt()
-	var choice_id := ""
-	for choice_value in Array(prompt.get("choices", [])):
-		if choice_value is Dictionary and not bool(choice_value.get("locked", false)):
-			choice_id = String(choice_value.get("id", ""))
+## Lives out `wanted` ordinary events wherever they can be found, so a test can
+## reach the evening the way a player does instead of through a shortcut.
+func _resolve_local_events(session: Variant, wanted: int) -> bool:
+	var guard := 0
+	while session.completed.size() < wanted and guard < 40:
+		guard += 1
+		var map_model: Dictionary = session.get_map_model()
+		var opened := false
+		for raw_event: Variant in Array(map_model.get("events", [])):
+			if not raw_event is Dictionary:
+				continue
+			var event: Dictionary = raw_event
+			if not bool(event.get("available", false)) or bool(event.get("completed", false)):
+				continue
+			if not bool(session.enter_event(String(event.get("id", ""))).get("ok", false)):
+				continue
+			opened = true
 			break
-	if choice_id.is_empty():
-		return false
-	return bool(session.answer_job(choice_id).get("ok", false))
+		if not opened:
+			var route := _first_available_route(session.get_map_model())
+			if route.is_empty():
+				return false
+			if not bool(session.travel(
+				String(route["destination_id"]),
+				String(route["mode"])
+			).get("ok", false)):
+				return false
+			continue
+		var choice_id := _first_available_option(session.get_current_event_model())
+		if choice_id.is_empty():
+			return false
+		if not bool(session.resolve_choice(choice_id).get("ok", false)):
+			return false
+		while session.phase == "event":
+			var next_choice := _first_available_option(session.get_current_event_model())
+			if next_choice.is_empty() or not bool(session.resolve_choice(next_choice).get("ok", false)):
+				return false
+	return session.completed.size() >= wanted
 
 
 func _complete_first_day(luck: int, seed: int) -> Variant:
 	var session = _new_map_session(_build_for_luck(luck), seed)
 	if session == null:
 		return null
-	var job: Dictionary = FirstDayContentScript.job()
-	if not _travel_to(session, String(job.get("location_id", ""))):
-		return null
-	if not bool(session.begin_job("standard").get("ok", false)):
-		return null
-	var job_guard := 0
-	while session.phase == "job" and job_guard < 7:
-		if not _answer_job_round(session):
-			return null
-		job_guard += 1
-	if session.phase != "map" or int(session.job_state.get("round_index", 0)) != 6:
+	# Waiting out the afternoon is earned by living the day, so the run has to
+	# resolve real events before the evening opens up.
+	if not _resolve_local_events(session, 3):
 		return null
 	if not _travel_to(session, "underpass"):
 		return null
@@ -789,11 +742,9 @@ func _cleanup_save(path: String) -> void:
 
 func _cleanup_all_test_saves() -> void:
 	for label in [
-		"job_resume",
 		"temporary_recovery",
 		"backup_recovery",
 		"phase_event",
 		"phase_map",
-		"phase_job",
 	]:
 		_cleanup_save(_test_save_path(label))

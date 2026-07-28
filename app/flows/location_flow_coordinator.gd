@@ -43,8 +43,6 @@ func _on_action_requested(_action_id: String, action_model: Dictionary) -> void:
 			_hook("run_command").call(_session.perform_location_action.bind(action_id), true)
 		"event":
 			_hook("run_command").call(_session.enter_event.bind(action_id), false)
-		"job":
-			_hook("run_command").call(_session.begin_job.bind("standard"), false)
 		"search":
 			_hook("run_command").call(_session.begin_search, false)
 		"store":

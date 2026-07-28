@@ -16,8 +16,25 @@ const KNOWN_LOCATION_IDS := [
 ]
 
 
+static var _default_cache: Dictionary = {}
+
+
+## Content files are immutable at run time, so the parse and the full
+## validation happen once. Callers still receive their own deep copy, which
+## keeps the previous contract exactly: nobody can mutate a shared catalog.
 static func load_default() -> Dictionary:
-	return load_path(DEFAULT_PATH)
+	if _default_cache.is_empty():
+		_default_cache = load_path(DEFAULT_PATH)
+	return _cached_copy(_default_cache)
+
+
+static func reset_cache_for_tests() -> void:
+	_default_cache = {}
+
+
+static func _cached_copy(source: Dictionary) -> Dictionary:
+	var result := source.duplicate(true)
+	return result
 
 
 static func load_path(path: String) -> Dictionary:
@@ -148,7 +165,39 @@ static func _validate_npcs(
 		var speech_profile_id := String(npc.get("speech_profile_id", ""))
 		if not profiles.has(speech_profile_id):
 			errors.append("%s.speech_profile_id ссылается на неизвестный профиль" % path)
+		_validate_gift_preferences(npc.get("gift_preferences", null), path, errors)
 		_validate_appearance_refs(npc.get("appearance_refs", null), path, errors)
+
+
+## Who takes what is a fact about the person, not about the item, so it is
+## authored here. A tag cannot be both valued and refused by the same NPC.
+static func _validate_gift_preferences(
+	raw_preferences: Variant,
+	path: String,
+	errors: Array[String]
+) -> void:
+	if raw_preferences == null:
+		return
+	var preference_path := "%s.gift_preferences" % path
+	if not raw_preferences is Dictionary:
+		errors.append("%s должен быть объектом" % preference_path)
+		return
+	var preferences: Dictionary = raw_preferences
+	var valued: Array = Array(preferences.get("valued_tags", []))
+	var refused: Array = Array(preferences.get("refused_tags", []))
+	for field: String in ["valued_tags", "refused_tags"]:
+		if not preferences.get(field, []) is Array:
+			errors.append("%s.%s должен быть массивом" % [preference_path, field])
+			continue
+		for raw_tag: Variant in Array(preferences.get(field, [])):
+			if typeof(raw_tag) != TYPE_STRING or String(raw_tag).strip_edges().is_empty():
+				errors.append("%s.%s содержит пустой тег" % [preference_path, field])
+	for raw_tag: Variant in valued:
+		if String(raw_tag) in refused:
+			errors.append("%s не может ценить и отвергать тег %s" % [preference_path, String(raw_tag)])
+	for field: String in ["accepted_note", "refused_note"]:
+		if preferences.has(field):
+			Rules.validate_text(preferences[field], "%s.%s" % [preference_path, field], errors)
 
 
 static func _validate_appearance_refs(

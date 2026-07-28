@@ -150,7 +150,6 @@ func _test_read_models_are_pure() -> void:
 	var location: Dictionary = adapter.get_location_model()
 	adapter.get_flow_model()
 	adapter.get_current_event_model()
-	adapter.get_job_result_model()
 	adapter.get_summary_model()
 	_expect_equal(legacy.to_dict(), before, "read models must not mutate legacy session or RNG")
 	_expect_equal(shell.get("base_location_id"), legacy.location, "shell must expose base location")
@@ -200,12 +199,12 @@ func _test_location_action_reasons() -> void:
 	_expect(not wait_action.is_empty(), "early map state must expose wait action")
 	_expect(not String(wait_action.get("description", "")).is_empty(), "locked wait must expose description")
 	_expect(not Array(wait_action.get("reasons", [])).is_empty(), "locked wait must expose structured reasons")
-	legacy.job_state["result"] = {"tier_id": "finished", "transaction": {}}
-	var job_action := _find_action(adapter.get_location_model(), "recycling_shift")
-	_expect(not job_action.is_empty(), "workplace must expose job action")
-	_expect(not bool(job_action.get("available", true)), "completed shift must be unavailable")
-	_expect(bool(job_action.get("completed", false)), "completed shift must be marked completed")
-	_expect_equal(job_action.get("description"), "Сегодняшняя смена завершена", "completed shift reason must be explicit")
+	# The M2 quiz is gone, so the legacy adapter must no longer offer it. The
+	# modern shift is surfaced by the week facade instead.
+	_expect(
+		_find_action(adapter.get_location_model(), "recycling_shift").is_empty(),
+		"the removed legacy shift must not appear as an action"
+	)
 
 
 func _test_run_state_v1_migration() -> void:

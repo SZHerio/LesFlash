@@ -75,7 +75,7 @@ func handle_back(current_route: String) -> void:
 		"search":
 			if not _search_flow.handle_back():
 				_hook("location").call()
-		"map", "hero", "npc", "shop", "shelter", "job_result", "job_shift":
+		"map", "hero", "npc", "shop", "shelter", "job_shift":
 			_hook("location").call()
 		_:
 			_shell.show_toast("Сначала завершите текущее решение.")

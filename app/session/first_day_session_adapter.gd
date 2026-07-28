@@ -70,26 +70,19 @@ func get_current_event_model() -> Dictionary:
 	return {} if _session == null else _session.get_current_event_model()
 
 
-func get_job_result_model() -> Dictionary:
-	if _session == null:
-		return {}
-	var result: Dictionary = Dictionary(_session.job_state.get("result", {})).duplicate(true)
-	return {
-		"available": not result.is_empty(),
-		"active": bool(_session.job_state.get("active", false)),
-		"job_id": String(_session.job_state.get("job_id", "")),
-		"score": int(_session.job_state.get("score", 0)),
-		"round": int(_session.job_state.get("round_index", 0)),
-		"rounds_total": int(_session.job_state.get("rounds_total", 0)),
-		"result": result,
-		"transaction": Dictionary(result.get("transaction", {})).duplicate(true),
-	}
-
-
+## The summary is needs, money and the clock. Building the whole shell for it
+## also built the location's action list — NPC schedules, shift availability —
+## which the summary never shows.
 func get_summary_model() -> Dictionary:
 	if _session == null:
 		return {}
-	var shell_status: Dictionary = Dictionary(get_shell_model().get("status", {})).duplicate(true)
+	var run_state: RunState = _session.run_state
+	var shell_status := {
+		"meters": run_state.meters.duplicate(true),
+		"money": run_state.money,
+		"age_years": run_state.get_age_years(),
+		"calendar": run_state.calendar.current_stamp(),
+	}
 	return {
 		"day_completed": _session.day_completed,
 		"phase": _session.phase,
@@ -140,24 +133,6 @@ func get_location_model() -> Dictionary:
 			"seen": bool(event.get("seen", false)),
 			"completed": bool(event.get("completed", false)),
 			})
-	if bool(map_model.get("job_available", false)):
-		var job_completed := (
-			_session.job_state.get("result", {}) is Dictionary
-			and not Dictionary(_session.job_state.get("result", {})).is_empty()
-		)
-		var job_reason := "Сегодняшняя смена завершена" if job_completed else ""
-		actions.append({
-			"id": "recycling_shift",
-			"kind": "job",
-			"title": "Подработка на сортировке",
-			"description": job_reason,
-			"available": not job_completed,
-			"completed": job_completed,
-			"reasons": [] if not job_completed else [{
-				"code": "job_completed_today",
-				"message": job_reason,
-			}],
-		})
 	var wait_model: Variant = map_model.get("wait_until_evening", {})
 	if wait_model is Dictionary and bool(wait_model.get("visible", false)):
 		var wait_reason := String(wait_model.get("reason", ""))
@@ -212,18 +187,6 @@ func resolve_choice(choice_id: String) -> Dictionary:
 	return _missing_session() if _session == null else _session.resolve_choice(choice_id)
 
 
-func begin_job(approach: String = "standard") -> Dictionary:
-	return _missing_session() if _session == null else _session.begin_job(approach)
-
-
-func current_job_prompt() -> Dictionary:
-	return {} if _session == null else _session.current_job_prompt()
-
-
-func answer_job(category: String) -> Dictionary:
-	return _missing_session() if _session == null else _session.answer_job(category)
-
-
 func available_shelters() -> Array:
 	return [] if _session == null else _session.available_shelters()
 
@@ -251,15 +214,20 @@ func save(path: String = FirstDaySave.DEFAULT_SAVE_PATH) -> Dictionary:
 static func activity_from_legacy(session: Object) -> Dictionary:
 	if session == null:
 		return GameSessionScript.empty_activity()
+	# A live session no longer owns the M2 quiz, so it can never be in the job
+	# phase. The serialized reader below still is: it reads old save files.
 	return activity_from_fields(
 		String(session.get("phase")),
 		String(session.get("location")),
 		String(session.get("current_event")),
 		String(session.get("start")),
-		Dictionary(session.get("job_state"))
+		{}
 	)
 
 
+## Reads the raw fields of a save file, including versions that still carry the
+## legacy `job` phase. This is part of the migration path and stays after the
+## legacy runtime is gone.
 static func activity_from_serialized(data: Dictionary) -> Dictionary:
 	return activity_from_fields(
 		String(data.get("phase", "")),
