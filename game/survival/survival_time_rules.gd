@@ -12,8 +12,13 @@ const PROFILE_KEYS := [
 	"health_extra_damage_units_per_minute",
 	"mental_extra_damage_units_per_minute",
 ]
+## Three units a minute is seventy-two hunger a day, and the most filling thing
+## the district sells removes thirty-eight. A hero eating twice daily still lost
+## ground and starved by the sixth day — the week was unsurvivable by
+## arithmetic. Two units is forty-eight a day: two meals cover it, a bad day
+## still hurts, and hunger stays a decision rather than a countdown.
 const DEFAULT_PROFILE := {
-	"hunger_units_per_minute": 3,
+	"hunger_units_per_minute": 2,
 	"energy_drain_units_per_minute": 2,
 	"health_extra_damage_units_per_minute": 0,
 	"mental_extra_damage_units_per_minute": 0,

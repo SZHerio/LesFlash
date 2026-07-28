@@ -6,6 +6,7 @@ const SearchInteraction := preload("res://game/search/search_interaction_transac
 const WeekInventory := preload("res://game/week/week_inventory_command.gd")
 const GameSessionScript := preload("res://app/session/game_session.gd")
 const InventoryStateScript := preload("res://core/inventory/inventory_state.gd")
+const SurvivalTimeRules = preload("res://game/survival/survival_time_rules.gd")
 
 var _failures: Array[String] = []
 var _tests_run := 0
@@ -113,7 +114,13 @@ func _test_search_gateway() -> void:
 	_expect(session.run_state != old_state, "fixture must replace RunState identity")
 	_expect_equal(session.run_state.calendar.elapsed_minutes, 12, "authored search time must advance once")
 	_expect_equal(session.survival_state.processed_elapsed_minutes, 12, "survival time must follow search time")
-	_expect_equal(session.survival_state.remainders.get("hunger"), 36, "search must accumulate fixed-point hunger")
+	# Twelve minutes at the authored hunger rate, bound to the rule rather than
+	# to a literal so a balance change does not read as a broken gateway.
+	_expect_equal(
+		session.survival_state.remainders.get("hunger"),
+		12 * int(SurvivalTimeRules.DEFAULT_PROFILE["hunger_units_per_minute"]),
+		"search must accumulate fixed-point hunger"
+	)
 	_expect(bool(Dictionary(result.get("transaction", {})).get("success", false)), "legacy actor transaction result contract must remain")
 	_expect(session.applied_command_ids.has("search:gateway:1"), "shared command ledger must record interaction")
 	var ground_items: Array = result["ground_items"]
