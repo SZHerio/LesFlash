@@ -21,6 +21,9 @@ var skills: Dictionary = GameRules.default_skills()
 ## skill_id -> distinct practice source ids. The rank above is derived from
 ## this, never set directly by content.
 var skill_practice: Dictionary = GameRules.default_skill_practice()
+## qualification_id -> elapsed minute it was granted. A skill says what the hero
+## can do; this says what he is allowed to do, and the two are not the same.
+var qualifications: Dictionary = {}
 var mastery_points: int = 0
 var knowledge: Dictionary = {}
 
@@ -209,6 +212,19 @@ func set_computed_profile(
 ##
 ## Repetition is deliberately worthless: a source already recorded changes
 ## nothing. What raises a rank is having done different things with the skill.
+## Records a granted qualification. Papers are never taken back here: losing one
+## is an event with its own consequences, not bookkeeping.
+func grant_qualification(qualification_id: String) -> bool:
+	if qualification_id.strip_edges().is_empty() or qualifications.has(qualification_id):
+		return false
+	qualifications[qualification_id] = int(calendar.elapsed_minutes)
+	return true
+
+
+func holds_qualification(qualification_id: String) -> bool:
+	return qualifications.has(qualification_id)
+
+
 func record_practice(skill_id: String, source_id: String) -> int:
 	if not GameRules.is_known_skill(skill_id) or source_id.strip_edges().is_empty():
 		return get_skill_rank(skill_id)
@@ -402,6 +418,7 @@ func to_dict() -> Dictionary:
 		"computed_profiles": computed_profiles.duplicate(true),
 		"skills": skills.duplicate(true),
 		"skill_practice": skill_practice.duplicate(true),
+		"qualifications": qualifications.duplicate(true),
 		"mastery_points": mastery_points,
 		"knowledge": knowledge.duplicate(true),
 		"calendar": calendar.to_dict(),
@@ -427,6 +444,7 @@ static func migrate_serialized(data: Dictionary) -> Dictionary:
 		GameRules.RUN_STATE_VERSION_V3,
 		GameRules.RUN_STATE_VERSION_V4,
 		GameRules.RUN_STATE_VERSION_V5,
+		GameRules.RUN_STATE_VERSION_V6,
 	]:
 		return {
 			"ok": false,
@@ -517,6 +535,11 @@ static func migrate_serialized(data: Dictionary) -> Dictionary:
 		migrated["skill_practice"] = GameRules.default_skill_practice()
 		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V5
 		current_version = GameRules.RUN_STATE_VERSION_V5
+	if current_version == GameRules.RUN_STATE_VERSION_V5:
+		# Nobody held papers before they existed.
+		migrated["qualifications"] = {}
+		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V6
+		current_version = GameRules.RUN_STATE_VERSION_V6
 	if current_version != GameRules.SAVE_VERSION:
 		return {
 			"ok": false,
@@ -590,6 +613,9 @@ static func from_dict(data: Dictionary) -> RunState:
 		GameRules.METER_MIN,
 		GameRules.METER_MAX
 	)
+	var parsed_qualifications: Variant = _parse_qualifications(source.get("qualifications", null))
+	if parsed_qualifications == null:
+		return null
 	var parsed_practice: Variant = _parse_practice(data.get("skill_practice", null))
 	if parsed_practice == null:
 		return null
@@ -661,6 +687,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	result.computed_profiles = parsed_profiles
 	result.skills = parsed_skills
 	result.skill_practice = Dictionary(parsed_practice)
+	result.qualifications = Dictionary(parsed_qualifications)
 	result.mastery_points = int(parsed_mastery)
 	result.knowledge = parsed_knowledge
 	result.calendar = parsed_calendar
@@ -700,6 +727,7 @@ func replace_from(other: RunState) -> bool:
 	computed_profiles = other.computed_profiles.duplicate(true)
 	skills = other.skills.duplicate(true)
 	skill_practice = other.skill_practice.duplicate(true)
+	qualifications = other.qualifications.duplicate(true)
 	mastery_points = other.mastery_points
 	knowledge = other.knowledge.duplicate(true)
 	calendar = other.calendar.clone()
@@ -971,6 +999,24 @@ static func _parse_computed_profiles(raw: Variant) -> Variant:
 
 
 ## skill_id -> array of unique, non-empty source ids.
+## qualification_id -> elapsed minute, non-negative.
+static func _parse_qualifications(value: Variant) -> Variant:
+	if value == null:
+		return {}
+	if not value is Dictionary:
+		return null
+	var result: Dictionary = {}
+	for raw_key: Variant in Dictionary(value):
+		var qualification_id := String(raw_key).strip_edges()
+		if qualification_id.is_empty() or not qualification_id.begins_with("qual_"):
+			return null
+		var granted: Variant = _parse_integral(Dictionary(value)[raw_key])
+		if granted == null or int(granted) < 0:
+			return null
+		result[qualification_id] = int(granted)
+	return result
+
+
 static func _parse_practice(value: Variant) -> Variant:
 	if value == null:
 		return GameRules.default_skill_practice()

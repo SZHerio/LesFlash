@@ -125,9 +125,11 @@ func _test_three_builds_live_the_week() -> void:
 		var counters: Dictionary = lived["counters"]
 		_expect(
 			bool(lived.get("survived", false)),
-			"%s must reach the end of the week alive (status=%s, rounds=%d, elapsed=%d, %s)" % [
+			"%s must reach the end of the week alive (status=%s%s, meters=%s, rounds=%d, elapsed=%d, %s)" % [
 				build_id,
 				String(lived.get("status", "")),
+				_death_note(adapter),
+				_meter_note(adapter),
 				int(lived.get("days", 0)),
 				int(lived.get("elapsed", 0)),
 				_activity_signature(counters),
@@ -1047,6 +1049,21 @@ func _current_shift_step(adapter: Object) -> Dictionary:
 
 ## Built only from public read models, so the digest can never see a value the
 ## player could not.
+## Why a run ended and what state it ended in. A dead build that only says it
+## died tells you nothing about which need killed it.
+func _death_note(adapter: Object) -> String:
+	var lifecycle: Dictionary = Dictionary(adapter.get_summary_model().get("lifecycle", {}))
+	var reason := String(lifecycle.get("death_reason", ""))
+	return "" if reason.is_empty() else " reason=%s" % reason
+
+
+func _meter_note(adapter: Object) -> String:
+	var parts: Array[String] = []
+	for key: String in ["health", "hunger", "energy", "tension", "mental_state"]:
+		parts.append("%s=%d" % [key, _meter(adapter, key)])
+	return "/".join(PackedStringArray(parts))
+
+
 func _digest(adapter: Object) -> String:
 	var summary: Dictionary = adapter.get_summary_model()
 	var status: Dictionary = Dictionary(summary.get("status", {}))

@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "catalog_id": "qualification_catalog_v1",
+  "qualifications": [
+    {
+      "id": "qual_residence_slip",
+      "title": "Справка о временной регистрации",
+      "description": "Бумага с печатью районного отдела. Без неё на официальную работу не берут, а с ней перестают спрашивать, где вы ночуете.",
+      "kind": "document",
+      "issuer_id": "org_riverside_market",
+      "location_id": "station_square",
+      "duration_minutes": 90,
+      "fee_ard": 60,
+      "required_skill_ranks": {},
+      "required_knowledge_ids": ["district_services"],
+      "required_qualification_ids": []
+    },
+    {
+      "id": "qual_sanitary_book",
+      "title": "Санитарная книжка",
+      "description": "Тонкая книжечка с отметками. Нужна всем, кто подходит к продуктам ближе, чем на шаг.",
+      "kind": "document",
+      "issuer_id": "org_riverside_market",
+      "location_id": "clinic_yard",
+      "duration_minutes": 150,
+      "fee_ard": 90,
+      "required_skill_ranks": {},
+      "required_knowledge_ids": ["clinic_hours"],
+      "required_qualification_ids": ["qual_residence_slip"]
+    },
+    {
+      "id": "qual_loader_clearance",
+      "title": "Допуск к погрузочным работам",
+      "description": "Инструктаж по технике безопасности под роспись. Без него на товарный двор пускают только подсобником.",
+      "kind": "clearance",
+      "issuer_id": "org_riverside_recycling",
+      "location_id": "freight_yard",
+      "duration_minutes": 120,
+      "fee_ard": 0,
+      "required_skill_ranks": {"cargo_handling": 1},
+      "required_knowledge_ids": [],
+      "required_qualification_ids": ["qual_residence_slip"]
+    },
+    {
+      "id": "qual_repair_certificate",
+      "title": "Свидетельство слесаря третьего разряда",
+      "description": "Курсы при комбинате, шесть занятий и зачёт. Разряд низкий, зато настоящий.",
+      "kind": "course",
+      "issuer_id": "org_riverside_recycling",
+      "location_id": "recycling_point",
+      "duration_minutes": 240,
+      "fee_ard": 150,
+      "required_skill_ranks": {"repair": 2},
+      "required_knowledge_ids": [],
+      "required_qualification_ids": ["qual_residence_slip"]
+    },
+    {
+      "id": "qual_trade_licence",
+      "title": "Разрешение на торговлю с рук",
+      "description": "Талон на место в ряду. Выдают неохотно и только тем, кого в ряду уже знают.",
+      "kind": "licence",
+      "issuer_id": "org_riverside_market",
+      "location_id": "market",
+      "duration_minutes": 180,
+      "fee_ard": 200,
+      "required_skill_ranks": {"trade": 2},
+      "required_knowledge_ids": ["market_schedule"],
+      "required_qualification_ids": ["qual_residence_slip", "qual_sanitary_book"]
+    }
+  ]
+}
