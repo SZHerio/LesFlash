@@ -103,14 +103,19 @@ static func _normalize_json_numbers(value: Variant, depth: int = 0) -> Variant:
 	return value
 
 
+## Every authored zone, so a save made in one yard reopens even while the hero
+## stands in another.
 static func _load_templates(errors: Array[String]) -> Dictionary:
-	var loaded := ZoneCatalog.load_default()
-	if not bool(loaded.get("ok", false)):
-		for raw_error: Variant in Array(loaded.get("errors", [])):
-			errors.append("search template catalog: %s" % String(raw_error))
-		return {}
-	var template: Dictionary = loaded["template"]
-	return {String(template.get("id", "")): template}
+	var templates: Dictionary = {}
+	for path: String in ZoneCatalog.ZONE_PATHS:
+		var loaded := ZoneCatalog.load_path(path)
+		if not bool(loaded.get("ok", false)):
+			for raw_error: Variant in Array(loaded.get("errors", [])):
+				errors.append("search template catalog: %s" % String(raw_error))
+			continue
+		var template: Dictionary = loaded["template"]
+		templates[String(template.get("id", ""))] = template
+	return templates
 
 
 static func _validate_snapshot(

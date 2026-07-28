@@ -29,13 +29,8 @@ const PREFERRED_CONTAINERS := ["pockets", "backpack", "hands"]
 ## Returns the authored zone that belongs to a location, or {} when that place
 ## has nothing to search.
 static func zone_for_location(location_id: String) -> Dictionary:
-	var loaded := ZoneCatalog.load_default()
-	if not bool(loaded.get("ok", false)):
-		return {}
-	var template: Dictionary = loaded["template"]
-	if String(template.get("location_id", "")) != location_id:
-		return {}
-	return template
+	var loaded := ZoneCatalog.load_for_location(location_id)
+	return Dictionary(loaded["template"]) if bool(loaded.get("ok", false)) else {}
 
 
 static func build(session: Object) -> Dictionary:
@@ -43,7 +38,8 @@ static func build(session: Object) -> Dictionary:
 	if not bool(active.get("ok", false)):
 		return {}
 	var snapshot: Dictionary = active["snapshot"]
-	var loaded := ZoneCatalog.load_default()
+	# The zone follows the hero: the same screen serves whichever yard he is in.
+	var loaded := ZoneCatalog.load_for_location(String(session.get("location")))
 	var template: Dictionary = loaded.get("template", {}) if bool(
 		loaded.get("ok", false)
 	) else {}

@@ -3,7 +3,34 @@ extends RefCounted
 
 const TemplateValidator := preload("res://game/search/search_template_validator.gd")
 
+## Every authored search map. M4 adds the second one, so the catalog stops being
+## a single file with a default and becomes a set keyed by the place it belongs
+## to.
+const ZONE_PATHS := [
+	"res://game/search/data/underpass_service_yard_v1.json",
+	"res://game/search/data/freight_yard_sidings_v1.json",
+]
 const DEFAULT_PATH := "res://game/search/data/underpass_service_yard_v1.json"
+
+
+## The zone that belongs to a place, or an empty result when nothing is
+## searchable there.
+static func load_for_location(location_id: String) -> Dictionary:
+	for path: String in ZONE_PATHS:
+		var loaded := load_path(path)
+		if not bool(loaded.get("ok", false)):
+			continue
+		if String(Dictionary(loaded["template"]).get("location_id", "")) == location_id:
+			return loaded
+	return {"ok": false, "template": {}, "errors": []}
+
+
+static func load_by_id(zone_id: String) -> Dictionary:
+	for path: String in ZONE_PATHS:
+		var loaded := load_path(path)
+		if bool(loaded.get("ok", false)) and String(Dictionary(loaded["template"]).get("id", "")) == zone_id:
+			return loaded
+	return {"ok": false, "template": {}, "errors": []}
 
 
 static func load_default() -> Dictionary:

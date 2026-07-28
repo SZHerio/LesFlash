@@ -35,7 +35,8 @@ static func begin_search(
 			"activity_in_progress",
 			"Сначала завершите текущее занятие."
 		)
-	var loaded := ZoneCatalog.load_default()
+	# Which yard is searched depends on where the hero is standing.
+	var loaded := ZoneCatalog.load_for_location(String(session.get("location")))
 	if not bool(loaded.get("ok", false)):
 		return SessionTransaction.failure(
 			"search_template_failed",

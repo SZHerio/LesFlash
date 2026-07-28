@@ -1,0 +1,1090 @@
+{
+  "schema_version": 1,
+  "id": "freight_yard_sidings",
+  "template_version": 1,
+  "location_id": "freight_yard",
+  "title": "Тупиковые пути товарного двора",
+  "description": "Три забытых пути, штабеля поддонов и вагон без дверей. Днём здесь ходит сторож, вечером двор остаётся сам по себе.",
+  "map": {
+    "asset": "res://assets/search/freight_yard_sidings_v1.png",
+    "size": [
+      1648,
+      960
+    ],
+    "spawn_node": "gate_south"
+  },
+  "walk_graph": {
+    "nodes": [
+      {
+        "id": "gate_south",
+        "position": [
+          823,
+          912
+        ]
+      },
+      {
+        "id": "track_middle",
+        "position": [
+          823,
+          728
+        ]
+      },
+      {
+        "id": "pallet_stacks",
+        "position": [
+          560,
+          640
+        ]
+      },
+      {
+        "id": "open_wagon",
+        "position": [
+          1090,
+          616
+        ]
+      },
+      {
+        "id": "weigh_hut",
+        "position": [
+          1240,
+          780
+        ]
+      },
+      {
+        "id": "sleeper_pile",
+        "position": [
+          430,
+          830
+        ]
+      },
+      {
+        "id": "track_north",
+        "position": [
+          823,
+          470
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from": "gate_south",
+        "to": "track_middle",
+        "bidirectional": true
+      },
+      {
+        "from": "track_middle",
+        "to": "pallet_stacks",
+        "bidirectional": true
+      },
+      {
+        "from": "track_middle",
+        "to": "open_wagon",
+        "bidirectional": true
+      },
+      {
+        "from": "track_middle",
+        "to": "track_north",
+        "bidirectional": true
+      },
+      {
+        "from": "gate_south",
+        "to": "sleeper_pile",
+        "bidirectional": true
+      },
+      {
+        "from": "sleeper_pile",
+        "to": "pallet_stacks",
+        "bidirectional": true
+      },
+      {
+        "from": "open_wagon",
+        "to": "weigh_hut",
+        "bidirectional": true
+      },
+      {
+        "from": "gate_south",
+        "to": "weigh_hut",
+        "bidirectional": true
+      }
+    ],
+    "obstacles": [
+      {
+        "id": "west_retaining_wall",
+        "polygon": [
+          [
+            0,
+            466
+          ],
+          [
+            222,
+            374
+          ],
+          [
+            467,
+            572
+          ],
+          [
+            467,
+            648
+          ],
+          [
+            0,
+            843
+          ]
+        ]
+      },
+      {
+        "id": "utility_shed",
+        "polygon": [
+          [
+            560,
+            84
+          ],
+          [
+            898,
+            23
+          ],
+          [
+            905,
+            307
+          ],
+          [
+            584,
+            323
+          ]
+        ]
+      },
+      {
+        "id": "market_fence",
+        "polygon": [
+          [
+            900,
+            112
+          ],
+          [
+            1648,
+            116
+          ],
+          [
+            1648,
+            331
+          ],
+          [
+            1031,
+            301
+          ]
+        ]
+      },
+      {
+        "id": "dumpster_body",
+        "polygon": [
+          [
+            661,
+            419
+          ],
+          [
+            802,
+            382
+          ],
+          [
+            906,
+            500
+          ],
+          [
+            753,
+            573
+          ]
+        ]
+      },
+      {
+        "id": "guard_booth",
+        "polygon": [
+          [
+            1267,
+            458
+          ],
+          [
+            1466,
+            427
+          ],
+          [
+            1516,
+            679
+          ],
+          [
+            1284,
+            735
+          ]
+        ]
+      },
+      {
+        "id": "bench_shelter",
+        "polygon": [
+          [
+            374,
+            591
+          ],
+          [
+            638,
+            568
+          ],
+          [
+            665,
+            727
+          ],
+          [
+            412,
+            771
+          ]
+        ]
+      }
+    ]
+  },
+  "loot_tables": {
+    "pallet_timber": {
+      "rolls": [
+        1,
+        2
+      ],
+      "entries": [
+        {
+          "item_id": "cardboard_sheet",
+          "weight": 34,
+          "quantity": [
+            1,
+            2
+          ],
+          "condition": [
+            45,
+            85
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "scrap_wire",
+          "weight": 30,
+          "quantity": [
+            1,
+            2
+          ],
+          "condition": [
+            40,
+            80
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "small_parts",
+          "weight": 22,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            50,
+            88
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "rusty_tool",
+          "weight": 8,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            35,
+            70
+          ],
+          "luck_bias": 1
+        },
+        {
+          "item_id": "pliers",
+          "weight": 4,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            45,
+            78
+          ],
+          "luck_bias": 2
+        }
+      ]
+    },
+    "wagon_floor": {
+      "rolls": [
+        1,
+        3
+      ],
+      "entries": [
+        {
+          "item_id": "cloth_rag",
+          "weight": 32,
+          "quantity": [
+            1,
+            2
+          ],
+          "condition": [
+            30,
+            70
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "newspaper_bundle",
+          "weight": 26,
+          "quantity": [
+            1,
+            2
+          ],
+          "condition": [
+            40,
+            78
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "glass_jar",
+          "weight": 20,
+          "quantity": [
+            1,
+            2
+          ],
+          "condition": [
+            55,
+            90
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "sealed_food_can",
+          "weight": 12,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            70,
+            95
+          ],
+          "luck_bias": 1
+        },
+        {
+          "item_id": "brass_fittings",
+          "weight": 6,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            50,
+            85
+          ],
+          "luck_bias": 3
+        }
+      ]
+    },
+    "hut_shelf": {
+      "rolls": [
+        1,
+        1
+      ],
+      "entries": [
+        {
+          "item_id": "tea_packet",
+          "weight": 30,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            60,
+            92
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "bandage_roll",
+          "weight": 22,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            65,
+            95
+          ],
+          "luck_bias": 1
+        },
+        {
+          "item_id": "work_gloves",
+          "weight": 18,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            40,
+            78
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "thermos_flask",
+          "weight": 8,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            45,
+            80
+          ],
+          "luck_bias": 2
+        }
+      ]
+    },
+    "sleeper_gap": {
+      "rolls": [
+        1,
+        2
+      ],
+      "entries": [
+        {
+          "item_id": "scrap_wire",
+          "weight": 38,
+          "quantity": [
+            1,
+            2
+          ],
+          "condition": [
+            35,
+            72
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "plastic_bottle",
+          "weight": 30,
+          "quantity": [
+            1,
+            3
+          ],
+          "condition": [
+            40,
+            80
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "copper_scrap",
+          "weight": 8,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            45,
+            82
+          ],
+          "luck_bias": 3
+        }
+      ]
+    },
+    "oil_drum": {
+      "rolls": [
+        1,
+        1
+      ],
+      "entries": [
+        {
+          "item_id": "cloth_rag",
+          "weight": 40,
+          "quantity": [
+            1,
+            2
+          ],
+          "condition": [
+            25,
+            60
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "scrap_wire",
+          "weight": 30,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            35,
+            70
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "small_parts",
+          "weight": 20,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            45,
+            80
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "hand_saw",
+          "weight": 5,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            40,
+            72
+          ],
+          "luck_bias": 2
+        }
+      ]
+    },
+    "track_verge": {
+      "rolls": [
+        1,
+        2
+      ],
+      "entries": [
+        {
+          "item_id": "plastic_bottle",
+          "weight": 40,
+          "quantity": [
+            1,
+            3
+          ],
+          "condition": [
+            40,
+            82
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "aluminum_can",
+          "weight": 34,
+          "quantity": [
+            1,
+            3
+          ],
+          "condition": [
+            45,
+            85
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "glass_jar",
+          "weight": 18,
+          "quantity": [
+            1,
+            2
+          ],
+          "condition": [
+            50,
+            88
+          ],
+          "luck_bias": 0
+        }
+      ]
+    },
+    "watchman_favour": {
+      "rolls": [
+        1,
+        1
+      ],
+      "entries": [
+        {
+          "item_id": "tea_packet",
+          "weight": 40,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            60,
+            92
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "cigarette_pack",
+          "weight": 30,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            70,
+            95
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "bread_loaf",
+          "weight": 20,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            55,
+            85
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "thermos_flask",
+          "weight": 6,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            45,
+            78
+          ],
+          "luck_bias": 2
+        }
+      ]
+    },
+    "signal_box": {
+      "rolls": [
+        1,
+        2
+      ],
+      "entries": [
+        {
+          "item_id": "scrap_wire",
+          "weight": 36,
+          "quantity": [
+            1,
+            2
+          ],
+          "condition": [
+            40,
+            78
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "small_parts",
+          "weight": 30,
+          "quantity": [
+            1,
+            2
+          ],
+          "condition": [
+            50,
+            86
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "copper_scrap",
+          "weight": 14,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            45,
+            80
+          ],
+          "luck_bias": 2
+        },
+        {
+          "item_id": "broken_radio",
+          "weight": 8,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            30,
+            65
+          ],
+          "luck_bias": 1
+        }
+      ]
+    },
+    "spill_ground": {
+      "rolls": [
+        1,
+        1
+      ],
+      "entries": [
+        {
+          "item_id": "cloth_rag",
+          "weight": 45,
+          "quantity": [
+            1,
+            2
+          ],
+          "condition": [
+            20,
+            55
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "plastic_bottle",
+          "weight": 33,
+          "quantity": [
+            1,
+            2
+          ],
+          "condition": [
+            35,
+            70
+          ],
+          "luck_bias": 0
+        },
+        {
+          "item_id": "brass_fittings",
+          "weight": 8,
+          "quantity": [
+            1,
+            1
+          ],
+          "condition": [
+            45,
+            80
+          ],
+          "luck_bias": 2
+        }
+      ]
+    }
+  },
+  "objects": [
+    {
+      "id": "pallet_stack",
+      "title": "Штабель поддонов",
+      "type": "open",
+      "position": [
+        560,
+        600
+      ],
+      "approach_node": "pallet_stacks",
+      "loot_table_id": "pallet_timber",
+      "approaches": [
+        {
+          "id": "pull_boards",
+          "title": "Отломать доски",
+          "duration_minutes": 14,
+          "energy_cost": 3,
+          "conditions": [],
+          "risk": {
+            "noise": 2,
+            "trespass": 0
+          }
+        },
+        {
+          "id": "work_quietly",
+          "title": "Разбирать без шума",
+          "duration_minutes": 22,
+          "energy_cost": 4,
+          "conditions": [],
+          "risk": {
+            "noise": 0,
+            "trespass": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "sleeper_gap_nest",
+      "title": "Зазор между шпалами",
+      "type": "hidden",
+      "position": [
+        430,
+        790
+      ],
+      "approach_node": "sleeper_pile",
+      "loot_table_id": "sleeper_gap",
+      "approaches": [
+        {
+          "id": "read_the_ground",
+          "title": "Посмотреть, где утоптано",
+          "duration_minutes": 9,
+          "energy_cost": 1,
+          "conditions": [
+            {
+              "type": "characteristic",
+              "id": "intelligence",
+              "minimum": 4
+            }
+          ],
+          "risk": {
+            "noise": 0,
+            "trespass": 0
+          }
+        },
+        {
+          "id": "feel_along",
+          "title": "Прощупать зазоры",
+          "duration_minutes": 16,
+          "energy_cost": 3,
+          "conditions": [],
+          "risk": {
+            "noise": 0,
+            "trespass": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "weigh_hut_shelf",
+      "title": "Полка в весовой",
+      "type": "locked",
+      "position": [
+        1240,
+        736
+      ],
+      "approach_node": "weigh_hut",
+      "loot_table_id": "hut_shelf",
+      "approaches": [
+        {
+          "id": "force_the_latch",
+          "title": "Отжать щеколду",
+          "duration_minutes": 11,
+          "energy_cost": 3,
+          "conditions": [
+            {
+              "type": "characteristic",
+              "id": "strength",
+              "minimum": 5
+            }
+          ],
+          "risk": {
+            "noise": 3,
+            "trespass": 3
+          }
+        },
+        {
+          "id": "pick_it_open",
+          "title": "Подобрать к замку",
+          "duration_minutes": 18,
+          "energy_cost": 2,
+          "conditions": [
+            {
+              "type": "skill",
+              "id": "repair",
+              "minimum": 1
+            }
+          ],
+          "risk": {
+            "noise": 1,
+            "trespass": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "loaded_pallet",
+      "title": "Гружёный поддон",
+      "type": "heavy",
+      "position": [
+        700,
+        690
+      ],
+      "approach_node": "pallet_stacks",
+      "loot_table_id": "pallet_timber",
+      "approaches": [
+        {
+          "id": "heave_it_aside",
+          "title": "Сдвинуть в сторону",
+          "duration_minutes": 15,
+          "energy_cost": 7,
+          "conditions": [
+            {
+              "type": "characteristic",
+              "id": "strength",
+              "minimum": 6
+            }
+          ],
+          "risk": {
+            "noise": 3,
+            "trespass": 0
+          }
+        },
+        {
+          "id": "lever_with_board",
+          "title": "Поддеть доской",
+          "duration_minutes": 21,
+          "energy_cost": 4,
+          "conditions": [],
+          "risk": {
+            "noise": 2,
+            "trespass": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "night_watchman",
+      "title": "Сторож у шлагбаума",
+      "type": "social",
+      "position": [
+        990,
+        880
+      ],
+      "approach_node": "gate_south",
+      "loot_table_id": "watchman_favour",
+      "approaches": [
+        {
+          "id": "talk_your_way_in",
+          "title": "Разговориться",
+          "duration_minutes": 12,
+          "energy_cost": 1,
+          "conditions": [
+            {
+              "type": "characteristic",
+              "id": "charisma",
+              "minimum": 5
+            }
+          ],
+          "risk": {
+            "noise": 0,
+            "trespass": 0
+          }
+        },
+        {
+          "id": "share_a_smoke",
+          "title": "Угостить сигаретой",
+          "duration_minutes": 9,
+          "energy_cost": 1,
+          "conditions": [],
+          "risk": {
+            "noise": 0,
+            "trespass": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "empty_wagon",
+      "title": "Вагон без дверей",
+      "type": "trespass",
+      "position": [
+        1090,
+        570
+      ],
+      "approach_node": "open_wagon",
+      "loot_table_id": "wagon_floor",
+      "approaches": [
+        {
+          "id": "climb_inside",
+          "title": "Забраться внутрь",
+          "duration_minutes": 16,
+          "energy_cost": 3,
+          "conditions": [],
+          "risk": {
+            "noise": 1,
+            "trespass": 4
+          }
+        },
+        {
+          "id": "check_from_step",
+          "title": "Осмотреть с подножки",
+          "duration_minutes": 10,
+          "energy_cost": 2,
+          "conditions": [],
+          "risk": {
+            "noise": 0,
+            "trespass": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "signal_cabinet",
+      "title": "Релейный шкаф",
+      "type": "technical",
+      "position": [
+        940,
+        452
+      ],
+      "approach_node": "track_north",
+      "loot_table_id": "signal_box",
+      "approaches": [
+        {
+          "id": "open_the_panel",
+          "title": "Снять панель",
+          "duration_minutes": 17,
+          "energy_cost": 2,
+          "conditions": [
+            {
+              "type": "skill",
+              "id": "repair",
+              "minimum": 1
+            }
+          ],
+          "risk": {
+            "noise": 1,
+            "trespass": 2
+          }
+        },
+        {
+          "id": "look_behind",
+          "title": "Заглянуть за шкаф",
+          "duration_minutes": 8,
+          "energy_cost": 1,
+          "conditions": [],
+          "risk": {
+            "noise": 0,
+            "trespass": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "oil_spill",
+      "title": "Разлитое масло у бочки",
+      "type": "hazardous",
+      "position": [
+        690,
+        500
+      ],
+      "approach_node": "track_north",
+      "loot_table_id": "spill_ground",
+      "approaches": [
+        {
+          "id": "step_around",
+          "title": "Обойти по краю",
+          "duration_minutes": 12,
+          "energy_cost": 2,
+          "conditions": [],
+          "risk": {
+            "noise": 0,
+            "trespass": 0
+          }
+        },
+        {
+          "id": "wade_through",
+          "title": "Пройти напрямик",
+          "duration_minutes": 7,
+          "energy_cost": 3,
+          "conditions": [],
+          "risk": {
+            "noise": 1,
+            "trespass": 0
+          }
+        }
+      ]
+    }
+  ]
+}
