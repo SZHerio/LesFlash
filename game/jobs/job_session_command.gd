@@ -32,7 +32,7 @@ const JOBS := {
 		"opens_minute": 420,
 		"last_start_minute": 990,
 		"title": "смена на площадке",
-		"description": "Сортировочная площадка. Виктор распределяет участок.",
+		"description": "Сортировочная площадка. Мартин распределяет участок.",
 	},
 	"market": {
 		"job_id": "job_market_porter",
@@ -40,7 +40,7 @@ const JOBS := {
 		"opens_minute": 330,
 		"last_start_minute": 900,
 		"title": "смена в ряду",
-		"description": "Продуктовый ряд. Тамара показывает, что разгружать.",
+		"description": "Продуктовый ряд. Клара показывает, что разгружать.",
 	},
 }
 const DEFAULT_JOB_ID := "job_recycling_sorter"

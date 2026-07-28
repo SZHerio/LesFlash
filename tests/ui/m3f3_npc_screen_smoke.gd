@@ -56,7 +56,7 @@ func _test_view_model() -> void:
 	_require(not bool(Dictionary(interactions[2]).get("enabled", true)), "blocked interaction became available")
 	_require(
 		String(Dictionary(interactions[2]).get("locked_reason", "")).contains(
-			"Доверие Лидии пока недостаточно"
+			"Доверие Эммы пока недостаточно"
 		),
 		"typed blocked reason message was lost"
 	)
@@ -161,18 +161,18 @@ func _spawn(size: Vector2i, scale: float) -> Array:
 func _model(reduced_motion: bool) -> Dictionary:
 	var source := {
 		"npc_id": "npc_lidia_maren",
-		"name": "Лидия Соколова с очень длинным уточнением для проверки переноса",
+		"name": "Эмма Соколова с очень длинным уточнением для проверки переноса",
 		"role": "Медсестра Приречной муниципальной поликлиники",
 		"portrait_key": "npc_lidia_maren_neutral",
 		"presence_text": "Сейчас во дворе поликлиники, но вскоре вернётся на приём",
 		"relationship": {"label": "Отношение к герою", "value": "Осторожное доверие · +12"},
-		"outcome": "Лидия внимательно выслушала героя и не обещала того, чего не сможет сделать.",
+		"outcome": "Эмма внимательно выслушала героя и не обещала того, чего не сможет сделать.",
 		"reactions": ["Она запомнила спокойную просьбу.", "Доверие немного выросло."],
 		"revision": 12,
 		"interactions": [
 			{"interaction_id": "ask_help", "title": "Спросить, где сегодня можно получить безопасную помощь", "description": "Уточнить известные условия и часы работы службы.", "available": true, "duration_minutes": 6, "icon_id": &"action_talk"},
 			{"interaction_id": "offer_help", "title": "Предложить помощь с коробками перевязочных материалов", "description": "Небольшое дело вместо просьбы о награде.", "available": true, "duration": 18, "icon_id": &"action_work", "variant": &"accent"},
-			{"interaction_id": "discuss_records", "title": "Попросить проверить запись в старом журнале регистрации", "description": "Разговор требует конкретного знания и сложившегося доверия.", "available": false, "reasons": ["Нужно знание: порядок регистрации", {"code": "relationship_min", "message": "Доверие Лидии пока недостаточно"}], "duration_minutes": 12, "icon_id": &"meta_knowledge"},
+			{"interaction_id": "discuss_records", "title": "Попросить проверить запись в старом журнале регистрации", "description": "Разговор требует конкретного знания и сложившегося доверия.", "available": false, "reasons": ["Нужно знание: порядок регистрации", {"code": "relationship_min", "message": "Доверие Эммы пока недостаточно"}], "duration_minutes": 12, "icon_id": &"meta_knowledge"},
 		],
 	}
 	source.merge(PortraitRegistry.entry("npc_lidia_maren"), true)

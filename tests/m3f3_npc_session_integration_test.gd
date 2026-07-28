@@ -61,7 +61,7 @@ func _test_presence_and_pure_reads() -> void:
 
 	var npc_model := adapter.get_npc_model("npc_viktor_koren")
 	_expect(bool(npc_model.get("ok", false)), "present NPC must expose an interaction model")
-	_expect_equal(String(npc_model.get("name", "")), "Виктор Гордеев", "domain name must be adapted for the screen")
+	_expect_equal(String(npc_model.get("name", "")), "Мартин Гордеев", "domain name must be adapted for the screen")
 	_expect(
 		not String(npc_model.get("role", "")).is_empty(),
 		"domain role must be adapted for the screen"

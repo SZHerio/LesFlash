@@ -7,13 +7,13 @@
       "npc_id": "npc_viktor_koren",
       "title": "Спросить о порядке смены",
       "description": "Уточнить, как здесь принимают груз, сортируют материал и сдают рабочее место.",
-      "outcome": "Виктор коротко объяснил порядок смены и отдельно напомнил не лезть к прессу без разрешения.",
-      "repeat_outcome": "Виктор ещё раз назвал главное: свободный проход, исправные весы и никакой спешки у пресса.",
+      "outcome": "Мартин коротко объяснил порядок смены и отдельно напомнил не лезть к прессу без разрешения.",
+      "repeat_outcome": "Мартин ещё раз назвал главное: свободный проход, исправные весы и никакой спешки у пресса.",
       "duration_minutes": 8,
       "repeat_policy": {"kind": "once_per_civil_day"},
       "conditions": [],
       "effects": [
-        {"type": "advance_time", "minutes": 8, "reason": "Разговор с Виктором о смене"}
+        {"type": "advance_time", "minutes": 8, "reason": "Разговор с Мартином о смене"}
       ],
       "first_time_effects": [
         {"type": "knowledge", "id": "recycling_shift_routine", "amount": 1, "mode": "unlock"},
@@ -25,13 +25,13 @@
       "npc_id": "npc_viktor_koren",
       "title": "Освободить проход во дворе",
       "description": "Перенести мешающие тюки под навес и оставить безопасный проход к весам.",
-      "outcome": "Проход освободился. Виктор проверил укладку и запомнил, что на героя можно положиться в тяжёлой работе.",
+      "outcome": "Проход освободился. Мартин проверил укладку и запомнил, что на героя можно положиться в тяжёлой работе.",
       "duration_minutes": 20,
       "repeat_policy": {"kind": "once_per_life"},
       "conditions": [
         {"kind": "stat", "id": "strength", "operator": ">=", "value": 6, "blocked_reason": "Сила 6: тюки нужно переносить без риска уронить их в проходе"},
         {"kind": "state", "id": "energy", "operator": ">=", "value": 35, "blocked_reason": "Энергия 35: для переноски сейчас недостаточно сил"},
-        {"kind": "npc_memory", "id": "memory_viktor_cleared_yard", "npc_id": "npc_viktor_koren", "operator": "==", "value": false, "blocked_reason": "Проход уже был освобождён вместе с Виктором"}
+        {"kind": "npc_memory", "id": "memory_viktor_cleared_yard", "npc_id": "npc_viktor_koren", "operator": "==", "value": false, "blocked_reason": "Проход уже был освобождён вместе с Мартином"}
       ],
       "effects": [
         {"type": "advance_time", "minutes": 20, "reason": "Расчистка двора пункта вторсырья"},
@@ -47,17 +47,17 @@
       "id": "npc_interaction_viktor_inspection_followup",
       "npc_id": "npc_viktor_koren",
       "title": "Вернуться к разговору о проверке",
-      "description": "Сопоставить порядок смены с тем, что Виктор опасается увидеть во время районной проверки.",
-      "outcome": "Помня помощь во дворе, Виктор без лишних слов показал требования проверки и слабые места пункта.",
+      "description": "Сопоставить порядок смены с тем, что Мартин опасается увидеть во время районной проверки.",
+      "outcome": "Помня помощь во дворе, Мартин без лишних слов показал требования проверки и слабые места пункта.",
       "duration_minutes": 10,
       "repeat_policy": {"kind": "once_per_life"},
       "conditions": [
         {"kind": "knowledge", "id": "recycling_shift_routine", "operator": ">=", "value": 1, "blocked_reason": "Сначала нужно разобраться в обычном порядке смены"},
-        {"kind": "npc_memory", "id": "memory_viktor_cleared_yard", "npc_id": "npc_viktor_koren", "operator": "==", "value": true, "blocked_reason": "Виктор пока не видел героя в деле"},
-        {"kind": "relationship", "id": "npc_viktor_koren", "field": "trust", "operator": ">=", "value": 2, "blocked_reason": "Доверие Виктора 2: он пока не готов обсуждать внутренние проблемы пункта"}
+        {"kind": "npc_memory", "id": "memory_viktor_cleared_yard", "npc_id": "npc_viktor_koren", "operator": "==", "value": true, "blocked_reason": "Мартин пока не видел героя в деле"},
+        {"kind": "relationship", "id": "npc_viktor_koren", "field": "trust", "operator": ">=", "value": 2, "blocked_reason": "Доверие Мартина 2: он пока не готов обсуждать внутренние проблемы пункта"}
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 10, "reason": "Разговор с Виктором о проверке"},
+        {"type": "advance_time", "minutes": 10, "reason": "Разговор с Мартином о проверке"},
         {"type": "knowledge", "id": "recycling_inspection_rules", "amount": 1, "mode": "unlock"},
         {"type": "change_relationship", "npc_id": "npc_viktor_koren", "field": "trust", "delta": 1}
       ]
@@ -67,13 +67,13 @@
       "npc_id": "npc_lidia_maren",
       "title": "Спросить о доступной помощи",
       "description": "Уточнить, с чем можно обратиться без направления и где начинается обычная процедура.",
-      "outcome": "Лидия спокойно разделила срочную помощь и плановое обращение, назвав нужные окна и часы.",
-      "repeat_outcome": "Лидия повторила порядок без раздражения и уточнила, какое окно сегодня загружено меньше.",
+      "outcome": "Эмма спокойно разделила срочную помощь и плановое обращение, назвав нужные окна и часы.",
+      "repeat_outcome": "Эмма повторила порядок без раздражения и уточнила, какое окно сегодня загружено меньше.",
       "duration_minutes": 8,
       "repeat_policy": {"kind": "cooldown", "minutes": 180},
       "conditions": [],
       "effects": [
-        {"type": "advance_time", "minutes": 8, "reason": "Разговор с Лидией о помощи"}
+        {"type": "advance_time", "minutes": 8, "reason": "Разговор с Эммой о помощи"}
       ],
       "first_time_effects": [
         {"type": "knowledge", "id": "clinic_support", "amount": 1, "mode": "unlock"},
@@ -85,13 +85,13 @@
       "npc_id": "npc_lidia_maren",
       "title": "Помочь разобрать коробки",
       "description": "Сверить подписи на простых расходных материалах и разнести закрытые коробки по полкам.",
-      "outcome": "Коробки оказались на своих местах. Лидия отметила аккуратность и запомнила практическую помощь.",
+      "outcome": "Коробки оказались на своих местах. Эмма отметила аккуратность и запомнила практическую помощь.",
       "duration_minutes": 15,
       "repeat_policy": {"kind": "once_per_life"},
       "conditions": [
         {"kind": "stat", "id": "intelligence", "operator": ">=", "value": 5, "blocked_reason": "Интеллект 5: нужно без ошибок сопоставить подписи и назначение материалов"},
         {"kind": "state", "id": "energy", "operator": ">=", "value": 25, "blocked_reason": "Энергия 25: сейчас не хватит сил закончить разбор аккуратно"},
-        {"kind": "npc_memory", "id": "memory_lidia_sorted_supplies", "npc_id": "npc_lidia_maren", "operator": "==", "value": false, "blocked_reason": "Коробки уже были разобраны вместе с Лидией"}
+        {"kind": "npc_memory", "id": "memory_lidia_sorted_supplies", "npc_id": "npc_lidia_maren", "operator": "==", "value": false, "blocked_reason": "Коробки уже были разобраны вместе с Эммой"}
       ],
       "effects": [
         {"type": "advance_time", "minutes": 15, "reason": "Разбор коробок во дворе поликлиники"},
@@ -106,16 +106,16 @@
       "npc_id": "npc_lidia_maren",
       "title": "Уточнить правила первой помощи на работе",
       "description": "Связать порядок обращения в поликлинику с рисками тяжёлой работы на пункте вторсырья.",
-      "outcome": "Лидия объяснила безопасный порядок действий при рабочей травме и границы самостоятельной помощи.",
+      "outcome": "Эмма объяснила безопасный порядок действий при рабочей травме и границы самостоятельной помощи.",
       "duration_minutes": 10,
       "repeat_policy": {"kind": "once_per_life"},
       "conditions": [
         {"kind": "knowledge", "id": "clinic_support", "operator": ">=", "value": 1, "blocked_reason": "Сначала нужно понять, какая помощь доступна в поликлинике"},
-        {"kind": "npc_memory", "id": "memory_lidia_sorted_supplies", "npc_id": "npc_lidia_maren", "operator": "==", "value": true, "blocked_reason": "Лидия пока не знает, насколько аккуратно герой обращается с материалами"},
-        {"kind": "relationship", "id": "npc_lidia_maren", "field": "trust", "operator": ">=", "value": 2, "blocked_reason": "Доверие Лидии 2: для подробного совета пока не хватает знакомства"}
+        {"kind": "npc_memory", "id": "memory_lidia_sorted_supplies", "npc_id": "npc_lidia_maren", "operator": "==", "value": true, "blocked_reason": "Эмма пока не знает, насколько аккуратно герой обращается с материалами"},
+        {"kind": "relationship", "id": "npc_lidia_maren", "field": "trust", "operator": ">=", "value": 2, "blocked_reason": "Доверие Эммы 2: для подробного совета пока не хватает знакомства"}
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 10, "reason": "Разговор с Лидией о рабочей травме"},
+        {"type": "advance_time", "minutes": 10, "reason": "Разговор с Эммой о рабочей травме"},
         {"type": "knowledge", "id": "recycling_safety", "amount": 1, "mode": "unlock"},
         {"type": "change_relationship", "npc_id": "npc_lidia_maren", "field": "trust", "delta": 1}
       ]
@@ -125,13 +125,13 @@
       "npc_id": "npc_tamara_roven",
       "title": "Спросить о сегодняшнем товаре",
       "description": "Уточнить, когда лучше смотреть свежий товар и что сейчас приходит нерегулярно.",
-      "outcome": "Тамара назвала часы поставок и предупредила, какие продукты сегодня разбирают быстрее обычного.",
-      "repeat_outcome": "Тамара быстро перечислила, что изменилось с прошлого разговора, не обещая сохранить товар без причины.",
+      "outcome": "Клара назвала часы поставок и предупредила, какие продукты сегодня разбирают быстрее обычного.",
+      "repeat_outcome": "Клара быстро перечислила, что изменилось с прошлого разговора, не обещая сохранить товар без причины.",
       "duration_minutes": 7,
       "repeat_policy": {"kind": "once_per_civil_day"},
       "conditions": [],
       "effects": [
-        {"type": "advance_time", "minutes": 7, "reason": "Разговор с Тамарой о товаре"}
+        {"type": "advance_time", "minutes": 7, "reason": "Разговор с Кларой о товаре"}
       ],
       "first_time_effects": [
         {"type": "knowledge", "id": "market_schedule", "amount": 1, "mode": "unlock"},
@@ -143,13 +143,13 @@
       "npc_id": "npc_tamara_roven",
       "title": "Помочь с разгрузкой",
       "description": "Перенести несколько ящиков к прилавку, не перекрывая проход и не повредив товар.",
-      "outcome": "Ящики дошли целыми. Тамара запомнила помощь и стала говорить с героем как с надёжным знакомым.",
+      "outcome": "Ящики дошли целыми. Клара запомнила помощь и стала говорить с героем как с надёжным знакомым.",
       "duration_minutes": 18,
       "repeat_policy": {"kind": "once_per_life"},
       "conditions": [
         {"kind": "stat", "id": "strength", "operator": ">=", "value": 5, "blocked_reason": "Сила 5: ящики нужно донести без риска повредить товар"},
         {"kind": "state", "id": "energy", "operator": ">=", "value": 35, "blocked_reason": "Энергия 35: сейчас разгрузку безопасно не закончить"},
-        {"kind": "npc_memory", "id": "memory_tamara_helped_unload", "npc_id": "npc_tamara_roven", "operator": "==", "value": false, "blocked_reason": "Эта поставка уже была разгружена вместе с Тамарой"}
+        {"kind": "npc_memory", "id": "memory_tamara_helped_unload", "npc_id": "npc_tamara_roven", "operator": "==", "value": false, "blocked_reason": "Эта поставка уже была разгружена вместе с Кларой"}
       ],
       "effects": [
         {"type": "advance_time", "minutes": 18, "reason": "Разгрузка товара на рынке"},
@@ -165,17 +165,17 @@
       "id": "npc_interaction_tamara_regular_customer",
       "npc_id": "npc_tamara_roven",
       "title": "Договориться о коротком предупреждении",
-      "description": "Попросить Тамару прямо говорить, когда нужный товар заканчивается, без обещания скидки или бесплатной вещи.",
-      "outcome": "Тамара согласилась предупреждать о заканчивающемся товаре, но цену и очередь оставила общими для всех.",
+      "description": "Попросить Клару прямо говорить, когда нужный товар заканчивается, без обещания скидки или бесплатной вещи.",
+      "outcome": "Клара согласилась предупреждать о заканчивающемся товаре, но цену и очередь оставила общими для всех.",
       "duration_minutes": 8,
       "repeat_policy": {"kind": "once_per_life"},
       "conditions": [
-        {"kind": "npc_memory", "id": "memory_tamara_helped_unload", "npc_id": "npc_tamara_roven", "operator": "==", "value": true, "blocked_reason": "Тамара ещё не видела от героя практической помощи"},
-        {"kind": "relationship", "id": "npc_tamara_roven", "field": "trust", "operator": ">=", "value": 2, "blocked_reason": "Доверие Тамары 2: она пока не считает героя постоянным знакомым"},
+        {"kind": "npc_memory", "id": "memory_tamara_helped_unload", "npc_id": "npc_tamara_roven", "operator": "==", "value": true, "blocked_reason": "Клара ещё не видела от героя практической помощи"},
+        {"kind": "relationship", "id": "npc_tamara_roven", "field": "trust", "operator": ">=", "value": 2, "blocked_reason": "Доверие Клары 2: она пока не считает героя постоянным знакомым"},
         {"kind": "reputation", "id": "rep_market_fair_dealing", "operator": ">=", "value": 1, "blocked_reason": "Нужна хотя бы начальная репутация честного человека среди продавцов"}
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 8, "reason": "Договорённость с Тамарой"},
+        {"type": "advance_time", "minutes": 8, "reason": "Договорённость с Кларой"},
         {"type": "change_relationship", "npc_id": "npc_tamara_roven", "field": "affinity", "delta": 1}
       ]
     }

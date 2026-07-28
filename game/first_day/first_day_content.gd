@@ -88,6 +88,7 @@ static func locations() -> Dictionary:
 			"tags": ["работа", "вторсырьё", "склад"],
 			"routes": [
 				_route("market", 24),
+				_route("freight_yard", 16),
 				_route("clinic_yard", 20),
 				_route("embankment", 22),
 			],
@@ -105,6 +106,7 @@ static func locations() -> Dictionary:
 				_route("station_square", 32, 8, 10),
 				_route("recycling_point", 20),
 				_route("embankment", 18),
+				_route("courtyard_blocks", 11),
 			],
 		},
 		"embankment": {
@@ -120,6 +122,7 @@ static func locations() -> Dictionary:
 				_route("station_square", 26),
 				_route("recycling_point", 22),
 				_route("clinic_yard", 18),
+				_route("courtyard_blocks", 22),
 			],
 		},
 		"freight_yard": {

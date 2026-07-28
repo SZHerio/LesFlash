@@ -12,9 +12,9 @@
 
 | NPC | Ассет | Контекст |
 |---|---|---|
-| Виктор Гордеев | `assets/portraits/npc_viktor_koren.png` | пункт вторсырья |
-| Лидия Соколова | `assets/portraits/npc_lidia_maren.png` | двор поликлиники |
-| Тамара Белова | `assets/portraits/npc_tamara_roven.png` | Центральный рынок |
+| Мартин Гордеев | `assets/portraits/npc_viktor_koren.png` | пункт вторсырья |
+| Эмма Соколова | `assets/portraits/npc_lidia_maren.png` | двор поликлиники |
+| Клара Белова | `assets/portraits/npc_tamara_roven.png` | Центральный рынок |
 
 ## Художественный язык
 

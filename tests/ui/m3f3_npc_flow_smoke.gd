@@ -105,7 +105,7 @@ func _run() -> void:
 		_finish()
 		return
 	var initial_model: Dictionary = npc_screen.get("_model")
-	_require(String(initial_model.get("name", "")) == "Виктор Гордеев", "screen received the wrong NPC")
+	_require(String(initial_model.get("name", "")) == "Мартин Гордеев", "screen received the wrong NPC")
 	_require(
 		String(initial_model.get("portrait_key", "")).begins_with("npc_viktor_koren"),
 		"screen did not receive Viktor's stable portrait key"
@@ -132,7 +132,7 @@ func _run() -> void:
 		"refreshed screen kept a stale revision"
 	)
 	_require(
-		String(refreshed_model.get("outcome", "")).contains("Виктор"),
+		String(refreshed_model.get("outcome", "")).contains("Мартин"),
 		"interaction outcome is not visible on the refreshed screen"
 	)
 	_require(

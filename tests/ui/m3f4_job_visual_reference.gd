@@ -88,7 +88,7 @@ func _build_models() -> bool:
 	var settlement := Dictionary(progress.get("result", {})).duplicate(true)
 	settlement["payout_ard"] = 224
 	settlement["mastery_awarded"] = 2
-	settlement["summary"] = "Виктор принял работу и отметил аккуратное обращение с площадкой."
+	settlement["summary"] = "Мартин принял работу и отметил аккуратное обращение с площадкой."
 	_result_model = JobViewModel.build({
 		"snapshot": snapshot,
 		"progress": progress,

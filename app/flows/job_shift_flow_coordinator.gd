@@ -81,9 +81,9 @@ func _run_step(command: Callable) -> void:
 	if bool(result.get("completed", false)) and bool(saved.get("ok", false)):
 		var grade := String(Dictionary(result.get("result", {})).get("grade", ""))
 		if bool(result.get("dismissed", false)):
-			_hook("toast").call("Виктор больше не ставит вас в смену.", true)
+			_hook("toast").call("Мартин больше не ставит вас в смену.", true)
 		elif grade == "unsafe":
-			_hook("toast").call("Виктор молча смотрит, как вы уходите.", true)
+			_hook("toast").call("Мартин молча смотрит, как вы уходите.", true)
 	_hook("release_command").call()
 
 

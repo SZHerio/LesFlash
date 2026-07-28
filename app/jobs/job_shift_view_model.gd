@@ -47,7 +47,7 @@ static func build(raw: Dictionary, reduced_motion: bool = false) -> Dictionary:
 		"title": _text(raw.get("title", "Сортировщик вторсырья"), "Сортировщик вторсырья"),
 		"briefing_title": _text(briefing.get("title", "Рабочая смена"), "Рабочая смена"),
 		"briefing_text": _text(briefing.get("text", "Подготовьтесь к задачам смены."), "Подготовьтесь к задачам смены."),
-		"supervisor_text": _text(raw.get("supervisor_text", "Мастер смены · Виктор Гордеев")),
+		"supervisor_text": _text(raw.get("supervisor_text", "Мастер смены · Мартин Гордеев")),
 		"shift_meta_tokens": _shift_meta(snapshot),
 		"progress": _progress_model(completed_count, steps.size(), completed),
 		"metrics": _metrics(scores),
