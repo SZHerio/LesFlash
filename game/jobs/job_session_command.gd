@@ -29,12 +29,16 @@ const JOBS := {
 	"recycling_point": {
 		"job_id": "job_recycling_sorter",
 		"supervisor": "npc_viktor_koren",
+		"opens_minute": 420,
+		"last_start_minute": 990,
 		"title": "смена на площадке",
 		"description": "Сортировочная площадка. Виктор распределяет участок.",
 	},
 	"market": {
 		"job_id": "job_market_porter",
 		"supervisor": "npc_tamara_roven",
+		"opens_minute": 330,
+		"last_start_minute": 900,
 		"title": "смена в ряду",
 		"description": "Продуктовый ряд. Тамара показывает, что разгружать.",
 	},
@@ -101,7 +105,9 @@ static func begin(target: Object, job_id: String, command_id: String) -> Diction
 	var started := ServiceScript.start(snapshot)
 	if not bool(started.get("ok", false)):
 		return started
-	if not candidate_work.begin_shift(snapshot, Dictionary(started["progress"])):
+	if not candidate_work.begin_shift(
+		snapshot, Dictionary(started["progress"]), _day_index(target)
+	):
 		return _failure("shift_rejected", "Смена не принята состоянием работы")
 	var committed := SessionTransactionScript.execute(candidate, {
 		"command_id": command_id,
@@ -180,7 +186,9 @@ static func quick_resolve(target: Object, command_id: String) -> Dictionary:
 	var snapshot: Dictionary = candidate_work.snapshot
 	var step_count := maxi(Array(snapshot.get("steps", [])).size(), 1)
 	var profile := _actor_profile(candidate.get("run_state"))
-	var practiced: Array = Array(candidate_work.mastery.get("practiced_task_class_ids", []))
+	var practiced: Array = Array(
+		candidate_work.mastery_for(candidate_work.active_job_id()).get("practiced_task_class_ids", [])
+	)
 	var progress: Dictionary = candidate_work.progress.duplicate(true)
 	var resolved_steps := 0
 	var resolved_choices: Array = []
@@ -255,7 +263,7 @@ static func quick_resolve_available(target: Object) -> bool:
 	if work_state == null or not work_state.is_active():
 		return false
 	return MasteryScript.quick_resolve_eligible(
-		work_state.mastery,
+		work_state.mastery_for(work_state.active_job_id()),
 		int(target.get("run_state").get_skill_rank("cargo_handling"))
 	)
 

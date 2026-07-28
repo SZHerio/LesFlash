@@ -11,6 +11,7 @@ const CommandScript := preload("res://game/jobs/job_session_command.gd")
 const ScheduleResolver := preload("res://game/npc/npc_schedule_resolver.gd")
 
 const JOBS := JobSessionCommand.JOBS
+## Fallback hours for a posting that does not declare its own.
 const SHIFT_START_MINUTE := 450
 const SHIFT_LAST_START_MINUTE := 900
 
@@ -42,9 +43,11 @@ static func location_actions(
 
 	var reasons: Array[String] = []
 	if not active:
-		if minute < SHIFT_START_MINUTE:
-			reasons.append("Площадка ещё закрыта")
-		elif minute > SHIFT_LAST_START_MINUTE:
+		var opens := int(posting.get("opens_minute", SHIFT_START_MINUTE))
+		var last_start := int(posting.get("last_start_minute", SHIFT_LAST_START_MINUTE))
+		if minute < opens:
+			reasons.append("Ещё закрыто")
+		elif minute > last_start:
 			reasons.append("На сегодня смены разобраны")
 		elif not CommandScript.can_begin_today(session, job_id):
 			reasons.append("Сегодняшняя смена уже отработана")

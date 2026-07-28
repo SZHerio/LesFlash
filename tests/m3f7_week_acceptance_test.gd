@@ -1147,36 +1147,66 @@ func _find_action_by_id(adapter: Object, action_id: String) -> Dictionary:
 
 ## Walks to a place using only the routes the map offers from where the hero
 ## actually stands.
+## Walks the map graph properly. The greedy version stepped onto whichever
+## route came first and could wander between two neighbours for a whole day,
+## which cost the hero the shift he set out for.
 func _go_to(adapter: Object, destination: String) -> bool:
-	if String(adapter.get_location_id()) == destination:
-		return true
-	for _hop: int in 4:
-		var routes: Array = Array(adapter.get_city_map_model().get("routes", []))
-		var direct: Dictionary = {}
-		for raw_route: Variant in routes:
-			if raw_route is Dictionary and String(Dictionary(raw_route).get("destination_id", "")) == destination:
-				direct = Dictionary(raw_route)
-				break
-		if not direct.is_empty():
-			return bool(
-				adapter.travel(destination, String(direct.get("mode", "walk"))).get("ok", false)
-			)
-		var stepped := false
-		for raw_route: Variant in routes:
-			if not raw_route is Dictionary:
-				continue
-			var route: Dictionary = raw_route
-			if bool(adapter.travel(
-				String(route.get("destination_id", "")),
-				String(route.get("mode", "walk"))
-			).get("ok", false)):
-				stepped = true
-				break
-		if not stepped:
-			return false
-		if String(adapter.get_location_id()) == destination:
+	for _hop: int in 6:
+		var here := String(adapter.get_location_id())
+		if here == destination:
 			return true
-	return false
+		var next_stop := _first_step_towards(adapter, here, destination)
+		if next_stop.is_empty():
+			return false
+		var mode := "walk"
+		for raw_route: Variant in Array(adapter.get_city_map_model().get("routes", [])):
+			var route: Dictionary = raw_route
+			if String(route.get("destination_id", "")) == next_stop:
+				mode = String(route.get("mode", "walk"))
+				break
+		if not bool(adapter.travel(next_stop, mode).get("ok", false)):
+			return false
+	return String(adapter.get_location_id()) == destination
+
+
+## Breadth-first over the district, returning the neighbour to leave by.
+func _first_step_towards(adapter: Object, origin: String, destination: String) -> String:
+	var neighbours := _district_graph(adapter)
+	if not neighbours.has(origin):
+		return ""
+	var queue: Array[String] = [origin]
+	var came_from: Dictionary = {origin: ""}
+	while not queue.is_empty():
+		var current: String = queue.pop_front()
+		if current == destination:
+			var step := current
+			while String(came_from[step]) != origin and not String(came_from[step]).is_empty():
+				step = String(came_from[step])
+			return step
+		for raw_next: Variant in Array(neighbours.get(current, [])):
+			var next_id := String(raw_next)
+			if came_from.has(next_id):
+				continue
+			came_from[next_id] = current
+			queue.append(next_id)
+	return ""
+
+
+func _district_graph(adapter: Object) -> Dictionary:
+	var graph: Dictionary = {}
+	var model: Dictionary = adapter.get_city_map_model()
+	for raw_location: Variant in Array(model.get("locations", [])):
+		graph[String(Dictionary(raw_location).get("id", ""))] = []
+	# The map read-model only exposes routes out of the current place, so the
+	# graph is completed from the authored district instead.
+	var content = load("res://game/first_day/first_day_content.gd")
+	for location_id: String in Dictionary(content.locations()):
+		var place: Dictionary = Dictionary(content.locations())[location_id]
+		var exits: Array[String] = []
+		for raw_route: Variant in Array(place.get("routes", [])):
+			exits.append(String(Dictionary(raw_route).get("destination_id", "")))
+		graph[location_id] = exits
+	return graph
 
 
 func _fresh_counters() -> Dictionary:

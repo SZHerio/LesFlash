@@ -131,7 +131,7 @@ func _check_touch_targets(node: Node, test_size: Vector2i, scale: float) -> void
 func _open_model() -> Dictionary:
 	return {
 		"store_id": "store_market_food_row",
-		"title": "Рыночный продовольственный ряд Тамары Ровен",
+		"title": "Рыночный продовольственный ряд Тамары Беловой",
 		"money": 190,
 		"open": true,
 		"availability": {"reason": "Открыто до 18:00"},

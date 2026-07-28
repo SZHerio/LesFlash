@@ -67,7 +67,7 @@ func _capture(size: Vector2i) -> Error:
 func _model() -> Dictionary:
 	var source := {
 		"npc_id": "npc_lidia_maren",
-		"name": "Лидия Марен",
+		"name": "Лидия Соколова",
 		"role": "Медсестра Приречной поликлиники",
 		"presence_text": "Сейчас во дворе поликлиники · до 17:30",
 		"relationship": {

@@ -135,7 +135,7 @@
   "npcs": [
     {
       "id": "npc_viktor_koren",
-      "display_name": "Виктор Корен",
+      "display_name": "Виктор Гордеев",
       "role_title": "Мастер Приречного пункта вторсырья",
       "goal": "Сохранить работу пункта и добиться безопасной, надёжной смены.",
       "schedule_id": "schedule_viktor_recycling",
@@ -169,7 +169,7 @@
     },
     {
       "id": "npc_lidia_maren",
-      "display_name": "Лидия Марен",
+      "display_name": "Лидия Соколова",
       "role_title": "Медсестра Приречной поликлиники",
       "goal": "Оказать доступную помощь в пределах времени, запасов и правил учреждения.",
       "schedule_id": "schedule_lidia_clinic",
@@ -202,7 +202,7 @@
     },
     {
       "id": "npc_tamara_roven",
-      "display_name": "Тамара Ровен",
+      "display_name": "Тамара Белова",
       "role_title": "Продавщица Центрального рынка",
       "goal": "Сохранить товар, постоянных покупателей и устойчивую торговую точку.",
       "schedule_id": "schedule_tamara_market",
@@ -235,7 +235,7 @@
     },
     {
       "id": "npc_stepan_gulev",
-      "display_name": "Степан Гулев",
+      "display_name": "Степан Кравцов",
       "role_title": "Дворовый мастер на все руки",
       "goal": "Держаться при деле и знать про район раньше остальных.",
       "schedule_id": "schedule_stepan_courtyards",

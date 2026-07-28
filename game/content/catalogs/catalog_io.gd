@@ -23,7 +23,7 @@ static func load_json(path: String) -> Dictionary:
 			]
 		)
 	if not parser.data is Dictionary:
-		return _failure("Корень каталога должен быть JSON-объектом: %s" % path)
+		return _failure("Гордеевь каталога должен быть JSON-объектом: %s" % path)
 	var catalog: Dictionary = JsonValidator.normalize_numbers(parser.data)
 	var json_validation := JsonValidator.validate(catalog, path)
 	if not bool(json_validation.get("ok", false)):

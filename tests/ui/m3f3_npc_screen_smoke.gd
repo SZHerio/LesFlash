@@ -161,7 +161,7 @@ func _spawn(size: Vector2i, scale: float) -> Array:
 func _model(reduced_motion: bool) -> Dictionary:
 	var source := {
 		"npc_id": "npc_lidia_maren",
-		"name": "Лидия Марен с очень длинным уточнением для проверки переноса",
+		"name": "Лидия Соколова с очень длинным уточнением для проверки переноса",
 		"role": "Медсестра Приречной муниципальной поликлиники",
 		"portrait_key": "npc_lidia_maren_neutral",
 		"presence_text": "Сейчас во дворе поликлиники, но вскоре вернётся на приём",

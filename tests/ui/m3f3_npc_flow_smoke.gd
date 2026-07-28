@@ -105,7 +105,7 @@ func _run() -> void:
 		_finish()
 		return
 	var initial_model: Dictionary = npc_screen.get("_model")
-	_require(String(initial_model.get("name", "")) == "Виктор Корен", "screen received the wrong NPC")
+	_require(String(initial_model.get("name", "")) == "Виктор Гордеев", "screen received the wrong NPC")
 	_require(
 		String(initial_model.get("portrait_key", "")).begins_with("npc_viktor_koren"),
 		"screen did not receive Viktor's stable portrait key"

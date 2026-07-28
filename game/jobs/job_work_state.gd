@@ -208,7 +208,10 @@ func can_work_on_day(job_id: String, day_index: int) -> bool:
 	return int(record_for(job_id)["last_completed_day_index"]) != day_index
 
 
-func begin_shift(next_snapshot: Dictionary, next_progress: Dictionary) -> bool:
+## A shift is credited to the day it starts. Crediting completion instead meant
+## an evening shift that ran past midnight burned the following day as well,
+## and the hero woke up already unable to work.
+func begin_shift(next_snapshot: Dictionary, next_progress: Dictionary, day_index: int = -1) -> bool:
 	var job_id := String(next_snapshot.get("job_id", ""))
 	if job_id.is_empty() or is_active() or is_dismissed(job_id):
 		return false
@@ -222,7 +225,10 @@ func begin_shift(next_snapshot: Dictionary, next_progress: Dictionary) -> bool:
 		return false
 	snapshot = next_snapshot.duplicate(true)
 	progress = next_progress.duplicate(true)
-	_ensure_record(job_id)["next_shift_sequence"] = sequence_for(job_id) + 1
+	var record := _ensure_record(job_id)
+	record["next_shift_sequence"] = sequence_for(job_id) + 1
+	if day_index >= 0:
+		record["last_completed_day_index"] = day_index
 	return bool(validate().get("ok", false))
 
 
@@ -264,7 +270,7 @@ func complete_shift(
 	progress = next_progress.duplicate(true)
 	var record := _ensure_record(job_id)
 	record["mastery"] = next_mastery.duplicate(true)
-	record["last_completed_day_index"] = day_index
+	record["last_completed_day_index"] = maxi(int(record["last_completed_day_index"]), 0)
 	_record_standing(job_id, String(Dictionary(next_progress.get("result", {})).get("grade", "acceptable")))
 	return bool(validate().get("ok", false))
 
