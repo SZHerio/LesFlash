@@ -15,6 +15,8 @@ const REQUIRED_LOCATION_IDS := [
 	"recycling_point",
 	"clinic_yard",
 	"embankment",
+	"freight_yard",
+	"courtyard_blocks",
 ]
 
 
@@ -55,6 +57,8 @@ static func locations() -> Dictionary:
 				_route("underpass", 18),
 				_route("station_square", 16),
 				_route("recycling_point", 24),
+				_route("freight_yard", 26, 9, 10),
+				_route("courtyard_blocks", 19),
 				_route("embankment", 34, 10, 12),
 			],
 		},
@@ -68,6 +72,7 @@ static func locations() -> Dictionary:
 			"tags": ["транспорт", "людно", "подработка"],
 			"routes": [
 				_route("underpass", 12),
+				_route("freight_yard", 14),
 				_route("market", 16),
 				_route("clinic_yard", 32, 8, 10),
 				_route("embankment", 26),
@@ -117,7 +122,34 @@ static func locations() -> Dictionary:
 				_route("clinic_yard", 18),
 			],
 		},
-	}
+		"freight_yard": {
+			"id": "freight_yard",
+			"district_id": DISTRICT_ID,
+			"title": "Товарный двор",
+			"description": "Тупиковые пути, поддоны и сторожка. Днём здесь разгружают, ночью двор пустеет и становится тише вокзала.",
+			"background_id": "riverside_freight_yard_day",
+			"background_key": "riverside_freight_yard_day",
+			"tags": ["работа", "поиск", "риск"],
+			"routes": [
+				_route("station_square", 14),
+				_route("recycling_point", 16),
+				_route("market", 26, 9, 10),
+			],
+		},
+		"courtyard_blocks": {
+			"id": "courtyard_blocks",
+			"district_id": DISTRICT_ID,
+			"title": "Жилые дворы",
+			"description": "Пятиэтажки, бельевые верёвки и лавки у подъездов. Здесь живут, а не проходят мимо, и чужого замечают сразу.",
+			"background_id": "riverside_courtyard_blocks_day",
+			"background_key": "riverside_courtyard_blocks_day",
+			"tags": ["жильё", "люди", "тихо"],
+			"routes": [
+				_route("clinic_yard", 11),
+				_route("market", 19),
+				_route("embankment", 22),
+			],
+		},	}
 
 
 static func location(location_id: String) -> Dictionary:
@@ -1002,8 +1034,10 @@ static func _validate_content_uncached() -> Dictionary:
 		errors.append("Район имеет неверный id")
 	_validate_display_text(String(district_data.get("title", "")), "название района", errors)
 	_validate_display_text(String(district_data.get("description", "")), "описание района", errors)
-	if place_map.size() != 6:
-		errors.append("В первом районе должно быть ровно 6 локаций")
+	# M4 grows the district to eight and allows twelve. The floor is what the
+	# week needs; the ceiling is what one district can stay legible at.
+	if place_map.size() < 6 or place_map.size() > 12:
+		errors.append("В районе должно быть от 6 до 12 локаций")
 	for required_id in REQUIRED_LOCATION_IDS:
 		if not place_map.has(required_id):
 			errors.append("Отсутствует обязательная локация: %s" % required_id)

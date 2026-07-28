@@ -13,6 +13,7 @@ const APPEARANCE_KINDS := [
 ]
 const KNOWN_LOCATION_IDS := [
 	"underpass", "market", "station_square", "recycling_point", "clinic_yard", "embankment",
+	"freight_yard", "courtyard_blocks",
 ]
 
 

@@ -15,6 +15,7 @@ const DEFAULT_PATH := "res://game/content/data/world_definition_catalog_v2.json"
 const KNOWN_SCOPE_KINDS := ["location", "district", "organization"]
 const KNOWN_LOCATION_IDS := [
 	"underpass", "market", "station_square", "recycling_point", "clinic_yard", "embankment",
+	"freight_yard", "courtyard_blocks",
 ]
 const OBSERVABLE_KINDS := [
 	"location", "npc", "job", "fact", "metric", "reputation",

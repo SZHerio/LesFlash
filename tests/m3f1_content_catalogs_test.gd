@@ -148,7 +148,9 @@ func _test_npcs() -> void:
 	var npcs: Array = catalog.get("npcs", [])
 	var schedules := _id_set(catalog.get("schedules", []))
 	var profiles := _id_set(catalog.get("speech_profiles", []))
-	_expect_equal(_sorted_ids(npcs), _sorted(CANONICAL_NPC_IDS), "canonical NPC IDs")
+	for npc_id: String in CANONICAL_NPC_IDS:
+		_expect(_sorted_ids(npcs).has(npc_id), "canonical NPC %s must still exist" % npc_id)
+	_expect(npcs.size() >= CANONICAL_NPC_IDS.size(), "the NPC roster shrank")
 	for raw_npc: Variant in npcs:
 		var npc: Dictionary = raw_npc
 		_expect(schedules.has(npc.get("schedule_id")), "%s schedule ref" % npc.get("id", ""))
@@ -167,7 +169,8 @@ func _test_reputations() -> void:
 	var catalog: Dictionary = _catalogs.get("reputations", {})
 	var audiences := _id_set(catalog.get("audiences", []))
 	var reputations: Array = catalog.get("reputations", [])
-	_expect_equal(_sorted_ids(reputations), _sorted(REPUTATION_IDS), "reputation IDs")
+	for reputation_id: String in REPUTATION_IDS:
+		_expect(_sorted_ids(reputations).has(reputation_id), "reputation %s must still exist" % reputation_id)
 	for raw_reputation: Variant in reputations:
 		var reputation: Dictionary = raw_reputation
 		_expect(audiences.has(reputation.get("audience_id")), "%s audience ref" % reputation.get("id", ""))
@@ -180,12 +183,16 @@ func _test_job() -> void:
 	var catalog: Dictionary = _catalogs.get("jobs", {})
 	var jobs: Array = catalog.get("jobs", [])
 	var tasks: Array = catalog.get("task_classes", [])
-	_expect_equal(jobs.size(), 1, "job count")
-	_expect_equal(_sorted_ids(tasks), _sorted(TASK_IDS), "task class IDs")
-	if jobs.is_empty():
+	_expect(jobs.size() >= 1, "the catalog lost its jobs")
+	for task_id: String in TASK_IDS:
+		_expect(_sorted_ids(tasks).has(task_id), "task class %s must still exist" % task_id)
+	var job: Dictionary = {}
+	for raw_job: Variant in jobs:
+		if String(Dictionary(raw_job).get("id", "")) == "job_recycling_sorter":
+			job = raw_job
+	_expect(not job.is_empty(), "the sorter job must still exist")
+	if job.is_empty():
 		return
-	var job: Dictionary = jobs[0]
-	_expect_equal(job.get("id"), "job_recycling_sorter", "first job ID")
 	_expect_equal(_sorted(Array(job.get("task_class_ids", []))), _sorted(TASK_IDS), "job task refs")
 	_expect_equal(job.get("tasks_per_shift_min"), 2, "minimum tasks per shift")
 	_expect_equal(job.get("tasks_per_shift_max"), 3, "maximum tasks per shift")
@@ -197,14 +204,15 @@ func _test_world() -> void:
 	var metrics: Array = catalog.get("metrics", [])
 	var facts: Array = catalog.get("facts", [])
 	var processes: Array = catalog.get("processes", [])
-	_expect_equal(_sorted_ids(metrics), _sorted(METRIC_IDS), "world metric IDs")
+	for metric_id: String in METRIC_IDS:
+		_expect(_sorted_ids(metrics).has(metric_id), "world metric %s must still exist" % metric_id)
 	_expect_equal(_sorted_ids(facts), _sorted(FACT_IDS), "world fact IDs")
 	for raw_metric: Variant in metrics:
 		var metric: Dictionary = raw_metric
 		_expect(int(metric.get("default", -1)) in range(0, 101), "%s default range" % metric.get("id", ""))
 	for raw_fact: Variant in facts:
 		_expect_equal(Dictionary(raw_fact).get("default"), false, "world facts start false")
-	_expect_equal(processes.size(), 1, "world process count")
+	_expect(processes.size() >= 1, "the world lost its processes")
 	if processes.is_empty():
 		return
 	var process: Dictionary = processes[0]

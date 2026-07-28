@@ -7,54 +7,188 @@
       "title": "Определить материал",
       "description": "Распознать материал, загрязнение и подходящую категорию сортировки.",
       "primary_skill_id": "search",
-      "knowledge_ids": ["recycling_basics", "metal_grades"],
+      "knowledge_ids": [
+        "recycling_basics",
+        "metal_grades"
+      ],
       "world_fact_ids": [],
-      "tags": ["identification", "materials", "recycling"]
+      "tags": [
+        "identification",
+        "materials",
+        "recycling"
+      ]
     },
     {
       "id": "task_recycling_move_load",
       "title": "Переместить груз",
       "description": "Перенести или переместить партию с учётом массы, прохода и устойчивости груза.",
       "primary_skill_id": "cargo_handling",
-      "knowledge_ids": ["recycling_shift_routine"],
-      "world_fact_ids": ["fact_recycling_yard_cleared"],
-      "tags": ["cargo", "physical_work", "recycling"]
+      "knowledge_ids": [
+        "recycling_shift_routine"
+      ],
+      "world_fact_ids": [
+        "fact_recycling_yard_cleared"
+      ],
+      "tags": [
+        "cargo",
+        "physical_work",
+        "recycling"
+      ]
     },
     {
       "id": "task_recycling_prepare_scale",
       "title": "Подготовить весы",
       "description": "Проверить площадку, нулевую отметку и готовность механических весов.",
       "primary_skill_id": "repair",
-      "knowledge_ids": ["recycling_scale", "recycling_shift_routine"],
-      "world_fact_ids": ["fact_recycling_scale_calibrated"],
-      "tags": ["equipment", "measurement", "recycling"]
+      "knowledge_ids": [
+        "recycling_scale",
+        "recycling_shift_routine"
+      ],
+      "world_fact_ids": [
+        "fact_recycling_scale_calibrated"
+      ],
+      "tags": [
+        "equipment",
+        "measurement",
+        "recycling"
+      ]
     },
     {
       "id": "task_recycling_clear_press",
       "title": "Освободить пресс",
       "description": "Безопасно остановить оборудование и устранить доступное заклинивание пресса.",
       "primary_skill_id": "repair",
-      "knowledge_ids": ["recycling_safety"],
-      "world_fact_ids": ["fact_recycling_press_safe"],
-      "tags": ["equipment", "recycling", "safety"]
+      "knowledge_ids": [
+        "recycling_safety"
+      ],
+      "world_fact_ids": [
+        "fact_recycling_press_safe"
+      ],
+      "tags": [
+        "equipment",
+        "recycling",
+        "safety"
+      ]
     },
     {
       "id": "task_recycling_handle_customer",
       "title": "Принять партию",
       "description": "Объяснить категорию, взвесить материал и провести понятную сделку с посетителем.",
       "primary_skill_id": "trade",
-      "knowledge_ids": ["recycling_rates", "recycling_basics"],
+      "knowledge_ids": [
+        "recycling_rates",
+        "recycling_basics"
+      ],
       "world_fact_ids": [],
-      "tags": ["customer", "recycling", "trade"]
+      "tags": [
+        "customer",
+        "recycling",
+        "trade"
+      ]
     },
     {
       "id": "task_recycling_safety_check",
       "title": "Проверить безопасность",
       "description": "Осмотреть проходы, ограждения, рабочую площадку и готовность оборудования.",
       "primary_skill_id": "search",
-      "knowledge_ids": ["recycling_safety", "recycling_inspection_rules"],
-      "world_fact_ids": ["fact_recycling_yard_cleared", "fact_recycling_press_safe"],
-      "tags": ["inspection", "recycling", "safety"]
+      "knowledge_ids": [
+        "recycling_safety",
+        "recycling_inspection_rules"
+      ],
+      "world_fact_ids": [
+        "fact_recycling_yard_cleared",
+        "fact_recycling_press_safe"
+      ],
+      "tags": [
+        "inspection",
+        "recycling",
+        "safety"
+      ]
+    },
+    {
+      "id": "task_market_receive_delivery",
+      "title": "Принять поставку",
+      "description": "Сверить привезённое с накладной и освободить машину.",
+      "primary_skill_id": "trade",
+      "knowledge_ids": [
+        "market_schedule"
+      ],
+      "world_fact_ids": [],
+      "tags": [
+        "trade",
+        "market",
+        "logistics"
+      ]
+    },
+    {
+      "id": "task_market_stack_produce",
+      "title": "Разложить товар",
+      "description": "Разобрать привезённое по свежести и выставить на прилавок.",
+      "primary_skill_id": "trade",
+      "knowledge_ids": [
+        "market_schedule"
+      ],
+      "world_fact_ids": [],
+      "tags": [
+        "market",
+        "handling"
+      ]
+    },
+    {
+      "id": "task_market_weigh_order",
+      "title": "Отвесить заказ",
+      "description": "Отмерить покупателю запрошенный вес и назвать цену.",
+      "primary_skill_id": "trade",
+      "knowledge_ids": [
+        "market_schedule"
+      ],
+      "world_fact_ids": [],
+      "tags": [
+        "trade",
+        "market"
+      ]
+    },
+    {
+      "id": "task_market_clear_aisle",
+      "title": "Освободить проход",
+      "description": "Убрать тару с прохода, чтобы по ряду можно было ходить.",
+      "primary_skill_id": "cargo_handling",
+      "knowledge_ids": [],
+      "world_fact_ids": [],
+      "tags": [
+        "market",
+        "safety",
+        "handling"
+      ]
+    },
+    {
+      "id": "task_market_serve_queue",
+      "title": "Отпустить очередь",
+      "description": "Обслужить собравшихся, удерживая порядок в ряду.",
+      "primary_skill_id": "trade",
+      "knowledge_ids": [
+        "market_schedule"
+      ],
+      "world_fact_ids": [],
+      "tags": [
+        "market",
+        "social",
+        "trade"
+      ]
+    },
+    {
+      "id": "task_market_close_stall",
+      "title": "Закрыть прилавок",
+      "description": "Убрать товар так, чтобы к утру он не потерял вид.",
+      "primary_skill_id": "cooking",
+      "knowledge_ids": [
+        "market_schedule"
+      ],
+      "world_fact_ids": [],
+      "tags": [
+        "market",
+        "storage"
+      ]
     }
   ],
   "jobs": [
@@ -77,7 +211,32 @@
       "tasks_per_shift_min": 2,
       "tasks_per_shift_max": 3,
       "decisions_per_shift": 1,
-      "process_ids": ["process_recycling_inspection"]
+      "process_ids": [
+        "process_recycling_inspection"
+      ]
+    },
+    {
+      "id": "job_market_porter",
+      "title": "Грузчик продуктового ряда",
+      "description": "Смена на рынке: приём машины, раскладка, весы, очередь и закрытие прилавка.",
+      "organization_id": "org_riverside_market",
+      "location_id": "market",
+      "supervisor_npc_id": "npc_tamara_roven",
+      "qualification_ids": [],
+      "task_class_ids": [
+        "task_market_receive_delivery",
+        "task_market_stack_produce",
+        "task_market_weigh_order",
+        "task_market_clear_aisle",
+        "task_market_serve_queue",
+        "task_market_close_stall"
+      ],
+      "tasks_per_shift_min": 2,
+      "tasks_per_shift_max": 3,
+      "decisions_per_shift": 1,
+      "process_ids": [
+        "process_market_supply_squeeze"
+      ]
     }
   ]
 }

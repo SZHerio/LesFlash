@@ -5,40 +5,130 @@
     {
       "id": "speech_profile_viktor_koren",
       "sentence_length": "short",
-      "vocabulary_ids": ["equipment", "recycling_operations", "work_safety"],
+      "vocabulary_ids": [
+        "equipment",
+        "recycling_operations",
+        "work_safety"
+      ],
       "style_notes": "Говорит прямо и по делу, уточняет порядок работы и называет конкретную опасность без унижения собеседника."
     },
     {
       "id": "speech_profile_lidia_maren",
       "sentence_length": "mixed",
-      "vocabulary_ids": ["clinic_procedure", "first_aid", "public_services"],
+      "vocabulary_ids": [
+        "clinic_procedure",
+        "first_aid",
+        "public_services"
+      ],
       "style_notes": "Объясняет спокойно и точно, отделяет срочную помощь от плановой процедуры и не ставит диагноз по одному признаку."
     },
     {
       "id": "speech_profile_tamara_roven",
       "sentence_length": "mixed",
-      "vocabulary_ids": ["food_supply", "market_trade", "regular_customers"],
+      "vocabulary_ids": [
+        "food_supply",
+        "market_trade",
+        "regular_customers"
+      ],
       "style_notes": "Говорит практично, быстро называет товар и условие сделки, а доверие выражает делом, а не фамильярностью."
+    },
+    {
+      "id": "speech_profile_stepan_gulev",
+      "sentence_length": "long",
+      "vocabulary_ids": [
+        "courtyard_life",
+        "repair_trades",
+        "district_rumour"
+      ],
+      "style_notes": "Говорит с отступлениями и присказками, начинает издалека, но к концу разговора всегда сообщает что-то полезное о районе."
     }
   ],
   "schedules": [
     {
       "id": "schedule_viktor_recycling",
       "entries": [
-        {"days": [1, 2, 3, 4, 5, 6], "start_minute": 450, "end_minute": 1050, "location_id": "recycling_point"}
+        {
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "start_minute": 450,
+          "end_minute": 1050,
+          "location_id": "recycling_point"
+        }
       ]
     },
     {
       "id": "schedule_lidia_clinic",
       "entries": [
-        {"days": [1, 2, 3, 4, 5], "start_minute": 480, "end_minute": 960, "location_id": "clinic_yard"},
-        {"days": [6], "start_minute": 480, "end_minute": 720, "location_id": "clinic_yard"}
+        {
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "start_minute": 480,
+          "end_minute": 960,
+          "location_id": "clinic_yard"
+        },
+        {
+          "days": [
+            6
+          ],
+          "start_minute": 480,
+          "end_minute": 720,
+          "location_id": "clinic_yard"
+        }
       ]
     },
     {
       "id": "schedule_tamara_market",
       "entries": [
-        {"days": [2, 3, 4, 5, 6, 7], "start_minute": 360, "end_minute": 900, "location_id": "market"}
+        {
+          "days": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "start_minute": 360,
+          "end_minute": 900,
+          "location_id": "market"
+        }
+      ]
+    },
+    {
+      "id": "schedule_stepan_courtyards",
+      "entries": [
+        {
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "start_minute": 540,
+          "end_minute": 1140,
+          "location_id": "courtyard_blocks"
+        },
+        {
+          "days": [
+            6,
+            7
+          ],
+          "start_minute": 600,
+          "end_minute": 960,
+          "location_id": "freight_yard"
+        }
       ]
     }
   ],
@@ -51,15 +141,30 @@
       "schedule_id": "schedule_viktor_recycling",
       "speech_profile_id": "speech_profile_viktor_koren",
       "gift_preferences": {
-        "valued_tags": ["tool", "work", "trade"],
-        "refused_tags": ["medicine"],
+        "valued_tags": [
+          "tool",
+          "work",
+          "trade"
+        ],
+        "refused_tags": [
+          "medicine"
+        ],
         "accepted_note": "Виктор взвешивает вещь в руке и коротко кивает.",
         "refused_note": "Виктор отводит руку: лекарства не его дело."
       },
       "appearance_refs": [
-        {"kind": "location", "id": "recycling_point"},
-        {"kind": "job", "id": "job_recycling_sorter"},
-        {"kind": "world_process", "id": "process_recycling_inspection"}
+        {
+          "kind": "location",
+          "id": "recycling_point"
+        },
+        {
+          "kind": "job",
+          "id": "job_recycling_sorter"
+        },
+        {
+          "kind": "world_process",
+          "id": "process_recycling_inspection"
+        }
       ]
     },
     {
@@ -70,15 +175,29 @@
       "schedule_id": "schedule_lidia_clinic",
       "speech_profile_id": "speech_profile_lidia_maren",
       "gift_preferences": {
-        "valued_tags": ["medicine", "medical"],
-        "refused_tags": ["trade"],
+        "valued_tags": [
+          "medicine",
+          "medical"
+        ],
+        "refused_tags": [
+          "trade"
+        ],
         "accepted_note": "Лидия убирает переданное в шкаф и благодарит.",
         "refused_note": "Лидия качает головой: на работе она такого не берёт."
       },
       "appearance_refs": [
-        {"kind": "location", "id": "clinic_yard"},
-        {"kind": "knowledge", "id": "clinic_support"},
-        {"kind": "knowledge", "id": "recycling_safety"}
+        {
+          "kind": "location",
+          "id": "clinic_yard"
+        },
+        {
+          "kind": "knowledge",
+          "id": "clinic_support"
+        },
+        {
+          "kind": "knowledge",
+          "id": "recycling_safety"
+        }
       ]
     },
     {
@@ -89,15 +208,63 @@
       "schedule_id": "schedule_tamara_market",
       "speech_profile_id": "speech_profile_tamara_roven",
       "gift_preferences": {
-        "valued_tags": ["trade", "food"],
-        "refused_tags": ["recyclable"],
+        "valued_tags": [
+          "trade",
+          "food"
+        ],
+        "refused_tags": [
+          "recyclable"
+        ],
         "accepted_note": "Тамара убирает вещь под прилавок и запоминает, кто принёс.",
         "refused_note": "Тамара усмехается: вторсырьё несут в пункт приёма, не к ней."
       },
       "appearance_refs": [
-        {"kind": "location", "id": "market"},
-        {"kind": "world_metric", "id": "metric_riverside_goods_supply"},
-        {"kind": "reputation", "id": "rep_market_fair_dealing"}
+        {
+          "kind": "location",
+          "id": "market"
+        },
+        {
+          "kind": "world_metric",
+          "id": "metric_riverside_goods_supply"
+        },
+        {
+          "kind": "reputation",
+          "id": "rep_market_fair_dealing"
+        }
+      ]
+    },
+    {
+      "id": "npc_stepan_gulev",
+      "display_name": "Степан Гулев",
+      "role_title": "Дворовый мастер на все руки",
+      "goal": "Держаться при деле и знать про район раньше остальных.",
+      "schedule_id": "schedule_stepan_courtyards",
+      "speech_profile_id": "speech_profile_stepan_gulev",
+      "gift_preferences": {
+        "valued_tags": [
+          "tool",
+          "trade",
+          "comfort"
+        ],
+        "refused_tags": [
+          "medicine"
+        ],
+        "accepted_note": "Степан вертит вещь в руках и находит, к чему её приспособить.",
+        "refused_note": "Степан отмахивается: с болячками не к нему."
+      },
+      "appearance_refs": [
+        {
+          "kind": "location",
+          "id": "courtyard_blocks"
+        },
+        {
+          "kind": "location",
+          "id": "freight_yard"
+        },
+        {
+          "kind": "job",
+          "id": "job_market_porter"
+        }
       ]
     }
   ]

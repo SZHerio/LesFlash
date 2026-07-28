@@ -7,7 +7,9 @@
     "station_square",
     "recycling_point",
     "clinic_yard",
-    "embankment"
+    "embankment",
+    "freight_yard",
+    "courtyard_blocks"
   ],
   "actions": [
     {
@@ -19,15 +21,45 @@
       "duration_minutes": 8,
       "risk": "нет",
       "repeatable": false,
-      "time_windows": [{"start_minute": 360, "end_minute": 1320}],
+      "time_windows": [
+        {
+          "start_minute": 360,
+          "end_minute": 1320
+        }
+      ],
       "conditions": [
-        {"kind": "stat", "id": "intelligence", "operator": ">=", "value": 4, "blocked_reason": "Нужно внимательнее сопоставлять ориентиры"},
-        {"kind": "knowledge", "id": "underpass_layout", "operator": "==", "value": 0, "blocked_reason": "Схема перехода уже изучена"}
+        {
+          "kind": "stat",
+          "id": "intelligence",
+          "operator": ">=",
+          "value": 4,
+          "blocked_reason": "Нужно внимательнее сопоставлять ориентиры"
+        },
+        {
+          "kind": "knowledge",
+          "id": "underpass_layout",
+          "operator": "==",
+          "value": 0,
+          "blocked_reason": "Схема перехода уже изучена"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 8, "reason": "Изучение подземного перехода"},
-        {"type": "knowledge", "id": "underpass_layout", "amount": 1, "mode": "unlock"},
-        {"type": "shift_polarity", "id": "attention_distribution", "delta": -1}
+        {
+          "type": "advance_time",
+          "minutes": 8,
+          "reason": "Изучение подземного перехода"
+        },
+        {
+          "type": "knowledge",
+          "id": "underpass_layout",
+          "amount": 1,
+          "mode": "unlock"
+        },
+        {
+          "type": "shift_polarity",
+          "id": "attention_distribution",
+          "delta": -1
+        }
       ],
       "outcome": "Вы запомнили выходы и больше не будете кружить по переходу."
     },
@@ -41,14 +73,42 @@
       "risk": "низкий",
       "repeatable": true,
       "conditions": [
-        {"kind": "state", "id": "energy", "operator": "<=", "value": 95, "blocked_reason": "Сейчас отдых не даст заметного восстановления"},
-        {"kind": "state", "id": "hunger", "operator": "<=", "value": 90, "blocked_reason": "Сильный голод не позволит спокойно отдохнуть"}
+        {
+          "kind": "state",
+          "id": "energy",
+          "operator": "<=",
+          "value": 95,
+          "blocked_reason": "Сейчас отдых не даст заметного восстановления"
+        },
+        {
+          "kind": "state",
+          "id": "hunger",
+          "operator": "<=",
+          "value": 90,
+          "blocked_reason": "Сильный голод не позволит спокойно отдохнуть"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 15, "reason": "Короткий отдых в переходе"},
-        {"type": "change_state", "id": "energy", "delta": 5},
-        {"type": "change_state", "id": "hunger", "delta": 3},
-        {"type": "change_state", "id": "tension", "delta": -4}
+        {
+          "type": "advance_time",
+          "minutes": 15,
+          "reason": "Короткий отдых в переходе"
+        },
+        {
+          "type": "change_state",
+          "id": "energy",
+          "delta": 5
+        },
+        {
+          "type": "change_state",
+          "id": "hunger",
+          "delta": 3
+        },
+        {
+          "type": "change_state",
+          "id": "tension",
+          "delta": -4
+        }
       ],
       "outcome": "Тепло от труб немного вернуло силы, хотя время и голод дали о себе знать."
     },
@@ -61,15 +121,45 @@
       "duration_minutes": 10,
       "risk": "нет",
       "repeatable": false,
-      "time_windows": [{"start_minute": 420, "end_minute": 1080}],
+      "time_windows": [
+        {
+          "start_minute": 420,
+          "end_minute": 1080
+        }
+      ],
       "conditions": [
-        {"kind": "stat", "id": "intelligence", "operator": ">=", "value": 4, "blocked_reason": "Нужно отделить актуальные объявления от старых"},
-        {"kind": "knowledge", "id": "market_schedule", "operator": "==", "value": 0, "blocked_reason": "Расписание рынка уже записано"}
+        {
+          "kind": "stat",
+          "id": "intelligence",
+          "operator": ">=",
+          "value": 4,
+          "blocked_reason": "Нужно отделить актуальные объявления от старых"
+        },
+        {
+          "kind": "knowledge",
+          "id": "market_schedule",
+          "operator": "==",
+          "value": 0,
+          "blocked_reason": "Расписание рынка уже записано"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 10, "reason": "Чтение объявлений на рынке"},
-        {"type": "knowledge", "id": "market_schedule", "amount": 1, "mode": "unlock"},
-        {"type": "shift_polarity", "id": "attention_distribution", "delta": -1}
+        {
+          "type": "advance_time",
+          "minutes": 10,
+          "reason": "Чтение объявлений на рынке"
+        },
+        {
+          "type": "knowledge",
+          "id": "market_schedule",
+          "amount": 1,
+          "mode": "unlock"
+        },
+        {
+          "type": "shift_polarity",
+          "id": "attention_distribution",
+          "delta": -1
+        }
       ],
       "outcome": "Вы запомнили часы разгрузки и время, когда рынок начинает пустеть."
     },
@@ -82,17 +172,54 @@
       "duration_minutes": 18,
       "risk": "низкий",
       "repeatable": true,
-      "time_windows": [{"start_minute": 420, "end_minute": 960}],
+      "time_windows": [
+        {
+          "start_minute": 420,
+          "end_minute": 960
+        }
+      ],
       "conditions": [
-        {"kind": "stat", "id": "strength", "operator": ">=", "value": 6, "blocked_reason": "Не хватает силы безопасно сдвинуть нагруженную тележку"},
-        {"kind": "state", "id": "energy", "operator": ">=", "value": 35, "blocked_reason": "Слишком мало сил для тяжёлой нагрузки"}
+        {
+          "kind": "stat",
+          "id": "strength",
+          "operator": ">=",
+          "value": 6,
+          "blocked_reason": "Не хватает силы безопасно сдвинуть нагруженную тележку"
+        },
+        {
+          "kind": "state",
+          "id": "energy",
+          "operator": ">=",
+          "value": 35,
+          "blocked_reason": "Слишком мало сил для тяжёлой нагрузки"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 18, "reason": "Помощь с тележкой на рынке"},
-        {"type": "change_state", "id": "energy", "delta": -7},
-        {"type": "change_state", "id": "hunger", "delta": 3},
-        {"type": "change_state", "id": "mental_state", "delta": 2},
-        {"type": "shift_polarity", "id": "physical_specialization", "delta": -1}
+        {
+          "type": "advance_time",
+          "minutes": 18,
+          "reason": "Помощь с тележкой на рынке"
+        },
+        {
+          "type": "change_state",
+          "id": "energy",
+          "delta": -7
+        },
+        {
+          "type": "change_state",
+          "id": "hunger",
+          "delta": 3
+        },
+        {
+          "type": "change_state",
+          "id": "mental_state",
+          "delta": 2
+        },
+        {
+          "type": "shift_polarity",
+          "id": "physical_specialization",
+          "delta": -1
+        }
       ],
       "outcome": "Тележка снова на ходу; короткая нагрузка утомила, но помощь заметили."
     },
@@ -105,15 +232,45 @@
       "duration_minutes": 12,
       "risk": "нет",
       "repeatable": false,
-      "time_windows": [{"start_minute": 360, "end_minute": 1320}],
+      "time_windows": [
+        {
+          "start_minute": 360,
+          "end_minute": 1320
+        }
+      ],
       "conditions": [
-        {"kind": "stat", "id": "intelligence", "operator": ">=", "value": 5, "blocked_reason": "Схема запутана и частично закрыта объявлениями"},
-        {"kind": "knowledge", "id": "station_layout", "operator": "==", "value": 0, "blocked_reason": "Схема вокзала уже изучена"}
+        {
+          "kind": "stat",
+          "id": "intelligence",
+          "operator": ">=",
+          "value": 5,
+          "blocked_reason": "Схема запутана и частично закрыта объявлениями"
+        },
+        {
+          "kind": "knowledge",
+          "id": "station_layout",
+          "operator": "==",
+          "value": 0,
+          "blocked_reason": "Схема вокзала уже изучена"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 12, "reason": "Изучение схемы вокзала"},
-        {"type": "knowledge", "id": "station_layout", "amount": 1, "mode": "unlock"},
-        {"type": "shift_polarity", "id": "attention_distribution", "delta": -1}
+        {
+          "type": "advance_time",
+          "minutes": 12,
+          "reason": "Изучение схемы вокзала"
+        },
+        {
+          "type": "knowledge",
+          "id": "station_layout",
+          "amount": 1,
+          "mode": "unlock"
+        },
+        {
+          "type": "shift_polarity",
+          "id": "attention_distribution",
+          "delta": -1
+        }
       ],
       "outcome": "Вы разобрались в схеме и запомнили несколько полезных проходов."
     },
@@ -126,15 +283,45 @@
       "duration_minutes": 8,
       "risk": "нет",
       "repeatable": false,
-      "time_windows": [{"start_minute": 360, "end_minute": 1320}],
+      "time_windows": [
+        {
+          "start_minute": 360,
+          "end_minute": 1320
+        }
+      ],
       "conditions": [
-        {"kind": "stat", "id": "charisma", "operator": ">=", "value": 4, "blocked_reason": "Нужно обратиться так, чтобы человек захотел остановиться"},
-        {"kind": "knowledge", "id": "district_services", "operator": "==", "value": 0, "blocked_reason": "Основные службы района уже известны"}
+        {
+          "kind": "stat",
+          "id": "charisma",
+          "operator": ">=",
+          "value": 4,
+          "blocked_reason": "Нужно обратиться так, чтобы человек захотел остановиться"
+        },
+        {
+          "kind": "knowledge",
+          "id": "district_services",
+          "operator": "==",
+          "value": 0,
+          "blocked_reason": "Основные службы района уже известны"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 8, "reason": "Разговор на вокзальной площади"},
-        {"type": "knowledge", "id": "district_services", "amount": 1, "mode": "unlock"},
-        {"type": "shift_polarity", "id": "influence_style", "delta": 1}
+        {
+          "type": "advance_time",
+          "minutes": 8,
+          "reason": "Разговор на вокзальной площади"
+        },
+        {
+          "type": "knowledge",
+          "id": "district_services",
+          "amount": 1,
+          "mode": "unlock"
+        },
+        {
+          "type": "shift_polarity",
+          "id": "influence_style",
+          "delta": 1
+        }
       ],
       "outcome": "Прохожий назвал несколько служб и объяснил, как их найти."
     },
@@ -147,12 +334,29 @@
       "duration_minutes": 6,
       "risk": "нет",
       "repeatable": true,
-      "time_windows": [{"start_minute": 360, "end_minute": 1320}],
+      "time_windows": [
+        {
+          "start_minute": 360,
+          "end_minute": 1320
+        }
+      ],
       "conditions": [],
       "effects": [
-        {"type": "advance_time", "minutes": 6, "reason": "Наблюдение за вокзальной площадью"},
-        {"type": "change_state", "id": "energy", "delta": -1},
-        {"type": "shift_polarity", "id": "attention_distribution", "delta": 1}
+        {
+          "type": "advance_time",
+          "minutes": 6,
+          "reason": "Наблюдение за вокзальной площадью"
+        },
+        {
+          "type": "change_state",
+          "id": "energy",
+          "delta": -1
+        },
+        {
+          "type": "shift_polarity",
+          "id": "attention_distribution",
+          "delta": 1
+        }
       ],
       "outcome": "Вы заметили спокойные края площади и места, где чаще останавливаются люди."
     },
@@ -165,13 +369,33 @@
       "duration_minutes": 7,
       "risk": "нет",
       "repeatable": false,
-      "time_windows": [{"start_minute": 480, "end_minute": 1080}],
+      "time_windows": [
+        {
+          "start_minute": 480,
+          "end_minute": 1080
+        }
+      ],
       "conditions": [
-        {"kind": "knowledge", "id": "recycling_rates", "operator": "==", "value": 0, "blocked_reason": "Расценки пункта уже известны"}
+        {
+          "kind": "knowledge",
+          "id": "recycling_rates",
+          "operator": "==",
+          "value": 0,
+          "blocked_reason": "Расценки пункта уже известны"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 7, "reason": "Изучение расценок пункта вторсырья"},
-        {"type": "knowledge", "id": "recycling_rates", "amount": 1, "mode": "unlock"}
+        {
+          "type": "advance_time",
+          "minutes": 7,
+          "reason": "Изучение расценок пункта вторсырья"
+        },
+        {
+          "type": "knowledge",
+          "id": "recycling_rates",
+          "amount": 1,
+          "mode": "unlock"
+        }
       ],
       "outcome": "Теперь вы знаете, какие виды вторсырья здесь принимают и в какие часы."
     },
@@ -184,15 +408,45 @@
       "duration_minutes": 12,
       "risk": "нет",
       "repeatable": false,
-      "time_windows": [{"start_minute": 480, "end_minute": 1080}],
+      "time_windows": [
+        {
+          "start_minute": 480,
+          "end_minute": 1080
+        }
+      ],
       "conditions": [
-        {"kind": "stat", "id": "intelligence", "operator": ">=", "value": 5, "blocked_reason": "Нужно лучше понимать маркировку материалов"},
-        {"kind": "knowledge", "id": "recycling_basics", "operator": "==", "value": 0, "blocked_reason": "Основы сортировки уже понятны"}
+        {
+          "kind": "stat",
+          "id": "intelligence",
+          "operator": ">=",
+          "value": 5,
+          "blocked_reason": "Нужно лучше понимать маркировку материалов"
+        },
+        {
+          "kind": "knowledge",
+          "id": "recycling_basics",
+          "operator": "==",
+          "value": 0,
+          "blocked_reason": "Основы сортировки уже понятны"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 12, "reason": "Наблюдение за сортировкой вторсырья"},
-        {"type": "knowledge", "id": "recycling_basics", "amount": 1, "mode": "unlock"},
-        {"type": "shift_polarity", "id": "attention_distribution", "delta": -1}
+        {
+          "type": "advance_time",
+          "minutes": 12,
+          "reason": "Наблюдение за сортировкой вторсырья"
+        },
+        {
+          "type": "knowledge",
+          "id": "recycling_basics",
+          "amount": 1,
+          "mode": "unlock"
+        },
+        {
+          "type": "shift_polarity",
+          "id": "attention_distribution",
+          "delta": -1
+        }
       ],
       "outcome": "Вы уловили базовый порядок сортировки и запомнили промышленную маркировку."
     },
@@ -205,16 +459,49 @@
       "duration_minutes": 15,
       "risk": "средний",
       "repeatable": true,
-      "time_windows": [{"start_minute": 480, "end_minute": 1020}],
+      "time_windows": [
+        {
+          "start_minute": 480,
+          "end_minute": 1020
+        }
+      ],
       "conditions": [
-        {"kind": "stat", "id": "strength", "operator": ">=", "value": 6, "blocked_reason": "Тюк слишком тяжёлый для безопасного переноса"},
-        {"kind": "state", "id": "energy", "operator": ">=", "value": 40, "blocked_reason": "Слишком мало сил для переноса"}
+        {
+          "kind": "stat",
+          "id": "strength",
+          "operator": ">=",
+          "value": 6,
+          "blocked_reason": "Тюк слишком тяжёлый для безопасного переноса"
+        },
+        {
+          "kind": "state",
+          "id": "energy",
+          "operator": ">=",
+          "value": 40,
+          "blocked_reason": "Слишком мало сил для переноса"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 15, "reason": "Перенос тюка на пункте вторсырья"},
-        {"type": "change_state", "id": "energy", "delta": -8},
-        {"type": "change_state", "id": "hunger", "delta": 4},
-        {"type": "shift_polarity", "id": "physical_specialization", "delta": -1}
+        {
+          "type": "advance_time",
+          "minutes": 15,
+          "reason": "Перенос тюка на пункте вторсырья"
+        },
+        {
+          "type": "change_state",
+          "id": "energy",
+          "delta": -8
+        },
+        {
+          "type": "change_state",
+          "id": "hunger",
+          "delta": 4
+        },
+        {
+          "type": "shift_polarity",
+          "id": "physical_specialization",
+          "delta": -1
+        }
       ],
       "outcome": "Проход свободен, а короткая тяжёлая работа заметно забрала силы."
     },
@@ -227,15 +514,45 @@
       "duration_minutes": 9,
       "risk": "нет",
       "repeatable": false,
-      "time_windows": [{"start_minute": 420, "end_minute": 1140}],
+      "time_windows": [
+        {
+          "start_minute": 420,
+          "end_minute": 1140
+        }
+      ],
       "conditions": [
-        {"kind": "stat", "id": "intelligence", "operator": ">=", "value": 4, "blocked_reason": "Нужно сопоставить несколько разрозненных объявлений"},
-        {"kind": "knowledge", "id": "clinic_hours", "operator": "==", "value": 0, "blocked_reason": "Расписание поликлиники уже известно"}
+        {
+          "kind": "stat",
+          "id": "intelligence",
+          "operator": ">=",
+          "value": 4,
+          "blocked_reason": "Нужно сопоставить несколько разрозненных объявлений"
+        },
+        {
+          "kind": "knowledge",
+          "id": "clinic_hours",
+          "operator": "==",
+          "value": 0,
+          "blocked_reason": "Расписание поликлиники уже известно"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 9, "reason": "Чтение объявлений во дворе поликлиники"},
-        {"type": "knowledge", "id": "clinic_hours", "amount": 1, "mode": "unlock"},
-        {"type": "shift_polarity", "id": "attention_distribution", "delta": -1}
+        {
+          "type": "advance_time",
+          "minutes": 9,
+          "reason": "Чтение объявлений во дворе поликлиники"
+        },
+        {
+          "type": "knowledge",
+          "id": "clinic_hours",
+          "amount": 1,
+          "mode": "unlock"
+        },
+        {
+          "type": "shift_polarity",
+          "id": "attention_distribution",
+          "delta": -1
+        }
       ],
       "outcome": "Вы запомнили часы работы окна и время, когда двор почти пуст."
     },
@@ -248,15 +565,42 @@
       "duration_minutes": 15,
       "risk": "нет",
       "repeatable": true,
-      "time_windows": [{"start_minute": 420, "end_minute": 1200}],
+      "time_windows": [
+        {
+          "start_minute": 420,
+          "end_minute": 1200
+        }
+      ],
       "conditions": [
-        {"kind": "state", "id": "energy", "operator": "<=", "value": 99, "blocked_reason": "Сейчас отдых почти не восстановит силы"}
+        {
+          "kind": "state",
+          "id": "energy",
+          "operator": "<=",
+          "value": 99,
+          "blocked_reason": "Сейчас отдых почти не восстановит силы"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 15, "reason": "Отдых во дворе поликлиники"},
-        {"type": "change_state", "id": "energy", "delta": 5},
-        {"type": "change_state", "id": "hunger", "delta": 2},
-        {"type": "change_state", "id": "tension", "delta": -4}
+        {
+          "type": "advance_time",
+          "minutes": 15,
+          "reason": "Отдых во дворе поликлиники"
+        },
+        {
+          "type": "change_state",
+          "id": "energy",
+          "delta": 5
+        },
+        {
+          "type": "change_state",
+          "id": "hunger",
+          "delta": 2
+        },
+        {
+          "type": "change_state",
+          "id": "tension",
+          "delta": -4
+        }
       ],
       "outcome": "Тихий двор позволил немного восстановиться и перевести дыхание."
     },
@@ -269,15 +613,45 @@
       "duration_minutes": 10,
       "risk": "нет",
       "repeatable": false,
-      "time_windows": [{"start_minute": 480, "end_minute": 1020}],
+      "time_windows": [
+        {
+          "start_minute": 480,
+          "end_minute": 1020
+        }
+      ],
       "conditions": [
-        {"kind": "stat", "id": "charisma", "operator": ">=", "value": 5, "blocked_reason": "Нужно спокойно и ясно объяснить свою ситуацию"},
-        {"kind": "knowledge", "id": "clinic_support", "operator": "==", "value": 0, "blocked_reason": "О доступной помощи уже рассказали"}
+        {
+          "kind": "stat",
+          "id": "charisma",
+          "operator": ">=",
+          "value": 5,
+          "blocked_reason": "Нужно спокойно и ясно объяснить свою ситуацию"
+        },
+        {
+          "kind": "knowledge",
+          "id": "clinic_support",
+          "operator": "==",
+          "value": 0,
+          "blocked_reason": "О доступной помощи уже рассказали"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 10, "reason": "Разговор у служебного окна"},
-        {"type": "knowledge", "id": "clinic_support", "amount": 1, "mode": "unlock"},
-        {"type": "shift_polarity", "id": "influence_style", "delta": 1}
+        {
+          "type": "advance_time",
+          "minutes": 10,
+          "reason": "Разговор у служебного окна"
+        },
+        {
+          "type": "knowledge",
+          "id": "clinic_support",
+          "amount": 1,
+          "mode": "unlock"
+        },
+        {
+          "type": "shift_polarity",
+          "id": "influence_style",
+          "delta": 1
+        }
       ],
       "outcome": "Сотрудница объяснила, куда обратиться и в какие часы принимают без записи."
     },
@@ -290,16 +664,47 @@
       "duration_minutes": 14,
       "risk": "низкий",
       "repeatable": true,
-      "time_windows": [{"start_minute": 360, "end_minute": 1260}],
+      "time_windows": [
+        {
+          "start_minute": 360,
+          "end_minute": 1260
+        }
+      ],
       "conditions": [
-        {"kind": "state", "id": "energy", "operator": ">=", "value": 15, "blocked_reason": "Сейчас даже короткая прогулка будет слишком тяжёлой"}
+        {
+          "kind": "state",
+          "id": "energy",
+          "operator": ">=",
+          "value": 15,
+          "blocked_reason": "Сейчас даже короткая прогулка будет слишком тяжёлой"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 14, "reason": "Прогулка по набережной"},
-        {"type": "change_state", "id": "energy", "delta": -3},
-        {"type": "change_state", "id": "hunger", "delta": 2},
-        {"type": "change_state", "id": "tension", "delta": -4},
-        {"type": "shift_polarity", "id": "physical_specialization", "delta": 1}
+        {
+          "type": "advance_time",
+          "minutes": 14,
+          "reason": "Прогулка по набережной"
+        },
+        {
+          "type": "change_state",
+          "id": "energy",
+          "delta": -3
+        },
+        {
+          "type": "change_state",
+          "id": "hunger",
+          "delta": 2
+        },
+        {
+          "type": "change_state",
+          "id": "tension",
+          "delta": -4
+        },
+        {
+          "type": "shift_polarity",
+          "id": "physical_specialization",
+          "delta": 1
+        }
       ],
       "outcome": "Ровный шаг и шум воды немного снизили напряжение."
     },
@@ -312,16 +717,323 @@
       "duration_minutes": 10,
       "risk": "низкий",
       "repeatable": true,
-      "time_windows": [{"start_minute": 1080, "end_minute": 1440}],
+      "time_windows": [
+        {
+          "start_minute": 1080,
+          "end_minute": 1440
+        }
+      ],
       "conditions": [
-        {"kind": "state", "id": "tension", "operator": ">=", "value": 15, "blocked_reason": "Сейчас остановка не даст заметного облегчения"}
+        {
+          "kind": "state",
+          "id": "tension",
+          "operator": ">=",
+          "value": 15,
+          "blocked_reason": "Сейчас остановка не даст заметного облегчения"
+        }
       ],
       "effects": [
-        {"type": "advance_time", "minutes": 10, "reason": "Вечер у воды"},
-        {"type": "change_state", "id": "tension", "delta": -5},
-        {"type": "change_state", "id": "mental_state", "delta": 2}
+        {
+          "type": "advance_time",
+          "minutes": 10,
+          "reason": "Вечер у воды"
+        },
+        {
+          "type": "change_state",
+          "id": "tension",
+          "delta": -5
+        },
+        {
+          "type": "change_state",
+          "id": "mental_state",
+          "delta": 2
+        }
       ],
       "outcome": "Несколько спокойных минут у воды помогли отстраниться от дневной суеты."
+    },
+    {
+      "id": "freight_yard_learn_schedule",
+      "location_id": "freight_yard",
+      "category_id": "observe",
+      "title": "Запомнить, когда подают вагоны",
+      "description": "Посидеть у сторожки и проследить, в какие часы двор оживает.",
+      "duration_minutes": 14,
+      "risk": "нет",
+      "repeatable": false,
+      "time_windows": [
+        {
+          "start_minute": 360,
+          "end_minute": 1200
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "knowledge",
+          "id": "freight_yard_schedule",
+          "operator": "==",
+          "value": 0,
+          "blocked_reason": "Расписание двора уже понятно"
+        }
+      ],
+      "effects": [
+        {
+          "type": "advance_time",
+          "minutes": 14,
+          "reason": "Наблюдение за двором"
+        },
+        {
+          "type": "knowledge",
+          "id": "freight_yard_schedule",
+          "amount": 1,
+          "mode": "unlock"
+        },
+        {
+          "type": "shift_polarity",
+          "id": "attention_distribution",
+          "delta": 3
+        }
+      ],
+      "outcome": "Теперь вы знаете, в какие часы двор оживает, а когда пустеет."
+    },
+    {
+      "id": "freight_yard_night_unload",
+      "location_id": "freight_yard",
+      "category_id": "work",
+      "title": "Разгрузить вагон",
+      "description": "Бригадиру всегда не хватает рук, и платят в тот же вечер.",
+      "duration_minutes": 95,
+      "risk": "средний",
+      "repeatable": true,
+      "time_windows": [
+        {
+          "start_minute": 1020,
+          "end_minute": 1380
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "stat",
+          "id": "strength",
+          "operator": ">=",
+          "value": 5,
+          "blocked_reason": "Такой вес в одиночку не берут"
+        },
+        {
+          "kind": "state",
+          "id": "energy",
+          "operator": ">=",
+          "value": 30,
+          "blocked_reason": "На это нужны силы"
+        }
+      ],
+      "effects": [
+        {
+          "type": "advance_time",
+          "minutes": 95,
+          "reason": "Разгрузка вагона"
+        },
+        {
+          "type": "change_state",
+          "id": "energy",
+          "delta": -22
+        },
+        {
+          "type": "change_state",
+          "id": "hunger",
+          "delta": 14
+        },
+        {
+          "type": "change_money",
+          "delta": 140
+        },
+        {
+          "type": "shift_polarity",
+          "id": "physical_specialization",
+          "delta": -4
+        }
+      ],
+      "outcome": "Вагон разгружен к рассвету, деньги отданы на месте."
+    },
+    {
+      "id": "freight_yard_collect_pallets",
+      "location_id": "freight_yard",
+      "category_id": "search",
+      "title": "Разобрать битые поддоны",
+      "description": "Ломаные доски никому не нужны, а гвозди и скобы идут в приём.",
+      "duration_minutes": 40,
+      "risk": "низкий",
+      "repeatable": true,
+      "time_windows": [
+        {
+          "start_minute": 420,
+          "end_minute": 1140
+        }
+      ],
+      "conditions": [],
+      "effects": [
+        {
+          "type": "advance_time",
+          "minutes": 40,
+          "reason": "Разбор поддонов"
+        },
+        {
+          "type": "change_state",
+          "id": "energy",
+          "delta": -11
+        },
+        {
+          "type": "add_item",
+          "id": "scrap_wire",
+          "quantity": 1
+        },
+        {
+          "type": "shift_polarity",
+          "id": "execution_style",
+          "delta": -2
+        }
+      ],
+      "outcome": "Из битых поддонов набралась горсть скоб и проволоки."
+    },
+    {
+      "id": "courtyard_blocks_ask_around",
+      "location_id": "courtyard_blocks",
+      "category_id": "talk",
+      "title": "Расспросить у подъезда",
+      "description": "Старушки на лавке знают о районе больше, чем любая доска объявлений.",
+      "duration_minutes": 18,
+      "risk": "нет",
+      "repeatable": true,
+      "time_windows": [
+        {
+          "start_minute": 480,
+          "end_minute": 1260
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "stat",
+          "id": "charisma",
+          "operator": ">=",
+          "value": 4,
+          "blocked_reason": "С вами не станут разговаривать просто так"
+        }
+      ],
+      "effects": [
+        {
+          "type": "advance_time",
+          "minutes": 18,
+          "reason": "Разговор у подъезда"
+        },
+        {
+          "type": "change_state",
+          "id": "mental_state",
+          "delta": 5
+        },
+        {
+          "type": "knowledge",
+          "id": "courtyard_word_of_mouth",
+          "amount": 1,
+          "mode": "unlock"
+        },
+        {
+          "type": "shift_polarity",
+          "id": "influence_style",
+          "delta": 3
+        }
+      ],
+      "outcome": "У подъезда вам рассказали половину дворовых новостей."
+    },
+    {
+      "id": "courtyard_blocks_beat_carpets",
+      "location_id": "courtyard_blocks",
+      "category_id": "work",
+      "title": "Выбить ковры за плату",
+      "description": "Во дворе стоит рама, а желающих махать выбивалкой немного.",
+      "duration_minutes": 55,
+      "risk": "нет",
+      "repeatable": true,
+      "time_windows": [
+        {
+          "start_minute": 540,
+          "end_minute": 1140
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "state",
+          "id": "energy",
+          "operator": ">=",
+          "value": 25,
+          "blocked_reason": "Работа несложная, но силы нужны"
+        }
+      ],
+      "effects": [
+        {
+          "type": "advance_time",
+          "minutes": 55,
+          "reason": "Выбивание ковров"
+        },
+        {
+          "type": "change_state",
+          "id": "energy",
+          "delta": -14
+        },
+        {
+          "type": "change_money",
+          "delta": 75
+        },
+        {
+          "type": "change_state",
+          "id": "mental_state",
+          "delta": 3
+        }
+      ],
+      "outcome": "Ковры выбиты, хозяйка расплатилась не торгуясь."
+    },
+    {
+      "id": "courtyard_blocks_check_bins",
+      "location_id": "courtyard_blocks",
+      "category_id": "search",
+      "title": "Осмотреть баки во дворе",
+      "description": "Дворовые баки выносят реже вокзальных, и выбрасывают сюда другое.",
+      "duration_minutes": 25,
+      "risk": "низкий",
+      "repeatable": true,
+      "time_windows": [
+        {
+          "start_minute": 360,
+          "end_minute": 1320
+        }
+      ],
+      "conditions": [],
+      "effects": [
+        {
+          "type": "advance_time",
+          "minutes": 25,
+          "reason": "Осмотр баков"
+        },
+        {
+          "type": "change_state",
+          "id": "energy",
+          "delta": -7
+        },
+        {
+          "type": "change_state",
+          "id": "mental_state",
+          "delta": -3
+        },
+        {
+          "type": "add_item",
+          "id": "cardboard_sheet",
+          "quantity": 1
+        },
+        {
+          "type": "shift_polarity",
+          "id": "uncertainty_behavior",
+          "delta": -2
+        }
+      ],
+      "outcome": "В дворовых баках нашёлся целый лист картона."
     }
   ]
 }

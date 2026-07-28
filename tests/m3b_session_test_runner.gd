@@ -143,7 +143,7 @@ func _test_map_view_model() -> void:
 	var before: Dictionary = session.to_dict()
 	var model := CityMapModels.build(adapter.get_city_map_model(), false)
 	_expect_equal(session.to_dict(), before, "view-model construction must be timeless")
-	_expect(Array(model.get("nodes", [])).size() == 6, "district map must expose six known locations")
+	_expect(Array(model.get("nodes", [])).size() >= 6, "district map must keep at least six known locations")
 	var mode_count := 0
 	for raw_route in Array(model.get("routes", [])):
 		if raw_route is Dictionary:

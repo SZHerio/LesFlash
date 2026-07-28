@@ -2,8 +2,21 @@
   "schema_version": 1,
   "catalog_id": "reputation_catalog_v1",
   "audiences": [
-    {"id": "org_riverside_recycling", "kind": "organization", "title": "Работники Приречного пункта вторсырья"},
-    {"id": "group_riverside_market_vendors", "kind": "group", "title": "Продавцы Центрального рынка"}
+    {
+      "id": "org_riverside_recycling",
+      "kind": "organization",
+      "title": "Работники Приречного пункта вторсырья"
+    },
+    {
+      "id": "group_riverside_market_vendors",
+      "kind": "group",
+      "title": "Продавцы Центрального рынка"
+    },
+    {
+      "id": "org_riverside_market",
+      "kind": "organization",
+      "title": "Администрация Центрального рынка"
+    }
   ],
   "reputations": [
     {
@@ -31,6 +44,16 @@
       "title": "Честность сделок",
       "description": "Считают ли продавцы рынка сделки героя понятными и честными.",
       "audience_id": "group_riverside_market_vendors",
+      "minimum": -100,
+      "maximum": 100,
+      "default": 0,
+      "requires_observed_source": true
+    },
+    {
+      "id": "rep_market_administration",
+      "title": "Репутация у администрации рынка",
+      "description": "Как на рынке относятся к вашей работе в ряду.",
+      "audience_id": "org_riverside_market",
       "minimum": -100,
       "maximum": 100,
       "default": 0,

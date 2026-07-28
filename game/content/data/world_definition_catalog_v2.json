@@ -2,16 +2,85 @@
   "schema_version": 2,
   "catalog_id": "world_definition_catalog_v2",
   "metrics": [
-    {"id": "metric_riverside_goods_supply", "title": "Снабжение товарами", "description": "Доступность обычных товаров и устойчивость районных поставок.", "scope_kind": "district", "scope_id": "riverside_central", "minimum": 0, "maximum": 100, "default": 52},
-    {"id": "metric_riverside_job_availability", "title": "Доступность работы", "description": "Количество доступных смен, поручений и начальных вакансий в районе.", "scope_kind": "district", "scope_id": "riverside_central", "minimum": 0, "maximum": 100, "default": 45},
-    {"id": "metric_riverside_sanitation", "title": "Санитарное состояние", "description": "Чистота общественных мест, вывоз отходов и доступность санитарных мер.", "scope_kind": "district", "scope_id": "riverside_central", "minimum": 0, "maximum": 100, "default": 42},
-    {"id": "metric_riverside_safety", "title": "Безопасность района", "description": "Наблюдаемая безопасность улиц, рабочих площадок и ночных маршрутов.", "scope_kind": "district", "scope_id": "riverside_central", "minimum": 0, "maximum": 100, "default": 48},
-    {"id": "metric_riverside_institution_pressure", "title": "Давление учреждений", "description": "Интенсивность проверок, ограничений и административного внимания к району.", "scope_kind": "district", "scope_id": "riverside_central", "minimum": 0, "maximum": 100, "default": 35}
+    {
+      "id": "metric_riverside_goods_supply",
+      "title": "Снабжение товарами",
+      "description": "Доступность обычных товаров и устойчивость районных поставок.",
+      "scope_kind": "district",
+      "scope_id": "riverside_central",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 52
+    },
+    {
+      "id": "metric_riverside_job_availability",
+      "title": "Доступность работы",
+      "description": "Количество доступных смен, поручений и начальных вакансий в районе.",
+      "scope_kind": "district",
+      "scope_id": "riverside_central",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 45
+    },
+    {
+      "id": "metric_riverside_sanitation",
+      "title": "Санитарное состояние",
+      "description": "Чистота общественных мест, вывоз отходов и доступность санитарных мер.",
+      "scope_kind": "district",
+      "scope_id": "riverside_central",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 42
+    },
+    {
+      "id": "metric_riverside_safety",
+      "title": "Безопасность района",
+      "description": "Наблюдаемая безопасность улиц, рабочих площадок и ночных маршрутов.",
+      "scope_kind": "district",
+      "scope_id": "riverside_central",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 48
+    },
+    {
+      "id": "metric_riverside_institution_pressure",
+      "title": "Давление учреждений",
+      "description": "Интенсивность проверок, ограничений и административного внимания к району.",
+      "scope_kind": "district",
+      "scope_id": "riverside_central",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 35
+    }
   ],
   "facts": [
-    {"id": "fact_recycling_scale_calibrated", "title": "Весы откалиброваны", "description": "Механические весы пункта проверены и дают допустимую погрешность.", "scope_kind": "location", "scope_id": "recycling_point", "value_type": "boolean", "default": false},
-    {"id": "fact_recycling_yard_cleared", "title": "Двор расчищен", "description": "Основные проходы и рабочие зоны пункта освобождены от опасного хлама.", "scope_kind": "location", "scope_id": "recycling_point", "value_type": "boolean", "default": false},
-    {"id": "fact_recycling_press_safe", "title": "Пресс безопасен", "description": "Пресс остановлен, ограждён и признан безопасным для штатной работы.", "scope_kind": "location", "scope_id": "recycling_point", "value_type": "boolean", "default": false}
+    {
+      "id": "fact_recycling_scale_calibrated",
+      "title": "Весы откалиброваны",
+      "description": "Механические весы пункта проверены и дают допустимую погрешность.",
+      "scope_kind": "location",
+      "scope_id": "recycling_point",
+      "value_type": "boolean",
+      "default": false
+    },
+    {
+      "id": "fact_recycling_yard_cleared",
+      "title": "Двор расчищен",
+      "description": "Основные проходы и рабочие зоны пункта освобождены от опасного хлама.",
+      "scope_kind": "location",
+      "scope_id": "recycling_point",
+      "value_type": "boolean",
+      "default": false
+    },
+    {
+      "id": "fact_recycling_press_safe",
+      "title": "Пресс безопасен",
+      "description": "Пресс остановлен, ограждён и признан безопасным для штатной работы.",
+      "scope_kind": "location",
+      "scope_id": "recycling_point",
+      "value_type": "boolean",
+      "default": false
+    }
   ],
   "processes": [
     {
@@ -22,100 +91,577 @@
       "scope_id": "recycling_point",
       "advance_mode": "confirmed_time",
       "initial_stage_id": "latent",
-      "terminal_stage_ids": ["approved", "restricted", "closed_temporarily"],
+      "terminal_stage_ids": [
+        "approved",
+        "restricted",
+        "closed_temporarily"
+      ],
       "stages": [
         {
           "id": "latent",
           "title": "О проверке ещё не объявлено",
           "terminal": false,
-          "observable_refs": [{"kind": "location", "id": "recycling_point"}, {"kind": "npc", "id": "npc_viktor_koren"}],
+          "observable_refs": [
+            {
+              "kind": "location",
+              "id": "recycling_point"
+            },
+            {
+              "kind": "npc",
+              "id": "npc_viktor_koren"
+            }
+          ],
           "projection": {
-            "job": {"job_id": "job_recycling_sorter", "available": true, "pay_basis_points": 10000},
-            "recycling": {"organization_id": "org_riverside_recycling", "accepting_materials": true, "price_basis_points": 10000},
-            "location": {"location_id": "recycling_point", "status_id": "operating_normally"},
-            "event_tags": ["recycling_inspection_latent"]
+            "job": {
+              "job_id": "job_recycling_sorter",
+              "available": true,
+              "pay_basis_points": 10000
+            },
+            "recycling": {
+              "organization_id": "org_riverside_recycling",
+              "accepting_materials": true,
+              "price_basis_points": 10000
+            },
+            "location": {
+              "location_id": "recycling_point",
+              "status_id": "operating_normally"
+            },
+            "event_tags": [
+              "recycling_inspection_latent"
+            ]
           }
         },
         {
           "id": "warning",
           "title": "Получено предупреждение",
           "terminal": false,
-          "observable_refs": [{"kind": "npc", "id": "npc_viktor_koren"}, {"kind": "job", "id": "job_recycling_sorter"}],
+          "observable_refs": [
+            {
+              "kind": "npc",
+              "id": "npc_viktor_koren"
+            },
+            {
+              "kind": "job",
+              "id": "job_recycling_sorter"
+            }
+          ],
           "projection": {
-            "job": {"job_id": "job_recycling_sorter", "available": true, "pay_basis_points": 10200},
-            "recycling": {"organization_id": "org_riverside_recycling", "accepting_materials": true, "price_basis_points": 10000},
-            "location": {"location_id": "recycling_point", "status_id": "inspection_notice_posted"},
-            "event_tags": ["recycling_inspection_warning"]
+            "job": {
+              "job_id": "job_recycling_sorter",
+              "available": true,
+              "pay_basis_points": 10200
+            },
+            "recycling": {
+              "organization_id": "org_riverside_recycling",
+              "accepting_materials": true,
+              "price_basis_points": 10000
+            },
+            "location": {
+              "location_id": "recycling_point",
+              "status_id": "inspection_notice_posted"
+            },
+            "event_tags": [
+              "recycling_inspection_warning"
+            ]
           }
         },
         {
           "id": "preparation",
           "title": "Пункт готовится",
           "terminal": false,
-          "observable_refs": [{"kind": "fact", "id": "fact_recycling_scale_calibrated"}, {"kind": "fact", "id": "fact_recycling_yard_cleared"}, {"kind": "fact", "id": "fact_recycling_press_safe"}],
+          "observable_refs": [
+            {
+              "kind": "fact",
+              "id": "fact_recycling_scale_calibrated"
+            },
+            {
+              "kind": "fact",
+              "id": "fact_recycling_yard_cleared"
+            },
+            {
+              "kind": "fact",
+              "id": "fact_recycling_press_safe"
+            }
+          ],
           "projection": {
-            "job": {"job_id": "job_recycling_sorter", "available": true, "pay_basis_points": 10800},
-            "recycling": {"organization_id": "org_riverside_recycling", "accepting_materials": true, "price_basis_points": 10500},
-            "location": {"location_id": "recycling_point", "status_id": "inspection_preparation"},
-            "event_tags": ["recycling_inspection_preparation"]
+            "job": {
+              "job_id": "job_recycling_sorter",
+              "available": true,
+              "pay_basis_points": 10800
+            },
+            "recycling": {
+              "organization_id": "org_riverside_recycling",
+              "accepting_materials": true,
+              "price_basis_points": 10500
+            },
+            "location": {
+              "location_id": "recycling_point",
+              "status_id": "inspection_preparation"
+            },
+            "event_tags": [
+              "recycling_inspection_preparation"
+            ]
           }
         },
         {
           "id": "inspection",
           "title": "Идёт проверка",
           "terminal": false,
-          "observable_refs": [{"kind": "location", "id": "recycling_point"}, {"kind": "npc", "id": "npc_viktor_koren"}],
+          "observable_refs": [
+            {
+              "kind": "location",
+              "id": "recycling_point"
+            },
+            {
+              "kind": "npc",
+              "id": "npc_viktor_koren"
+            }
+          ],
           "projection": {
-            "job": {"job_id": "job_recycling_sorter", "available": false, "pay_basis_points": 0},
-            "recycling": {"organization_id": "org_riverside_recycling", "accepting_materials": false, "price_basis_points": 0},
-            "location": {"location_id": "recycling_point", "status_id": "inspection_in_progress"},
-            "event_tags": ["recycling_inspection_active"]
+            "job": {
+              "job_id": "job_recycling_sorter",
+              "available": false,
+              "pay_basis_points": 0
+            },
+            "recycling": {
+              "organization_id": "org_riverside_recycling",
+              "accepting_materials": false,
+              "price_basis_points": 0
+            },
+            "location": {
+              "location_id": "recycling_point",
+              "status_id": "inspection_in_progress"
+            },
+            "event_tags": [
+              "recycling_inspection_active"
+            ]
           }
         },
         {
           "id": "approved",
           "title": "Работа разрешена",
           "terminal": true,
-          "observable_refs": [{"kind": "job", "id": "job_recycling_sorter"}, {"kind": "reputation", "id": "rep_recycling_reliability"}],
+          "observable_refs": [
+            {
+              "kind": "job",
+              "id": "job_recycling_sorter"
+            },
+            {
+              "kind": "reputation",
+              "id": "rep_recycling_reliability"
+            }
+          ],
           "projection": {
-            "job": {"job_id": "job_recycling_sorter", "available": true, "pay_basis_points": 11000},
-            "recycling": {"organization_id": "org_riverside_recycling", "accepting_materials": true, "price_basis_points": 10300},
-            "location": {"location_id": "recycling_point", "status_id": "inspection_approved"},
-            "event_tags": ["recycling_inspection_approved"]
+            "job": {
+              "job_id": "job_recycling_sorter",
+              "available": true,
+              "pay_basis_points": 11000
+            },
+            "recycling": {
+              "organization_id": "org_riverside_recycling",
+              "accepting_materials": true,
+              "price_basis_points": 10300
+            },
+            "location": {
+              "location_id": "recycling_point",
+              "status_id": "inspection_approved"
+            },
+            "event_tags": [
+              "recycling_inspection_approved"
+            ]
           }
         },
         {
           "id": "restricted",
           "title": "Работа ограничена",
           "terminal": true,
-          "observable_refs": [{"kind": "job", "id": "job_recycling_sorter"}, {"kind": "metric", "id": "metric_riverside_institution_pressure"}],
+          "observable_refs": [
+            {
+              "kind": "job",
+              "id": "job_recycling_sorter"
+            },
+            {
+              "kind": "metric",
+              "id": "metric_riverside_institution_pressure"
+            }
+          ],
           "projection": {
-            "job": {"job_id": "job_recycling_sorter", "available": true, "pay_basis_points": 8000},
-            "recycling": {"organization_id": "org_riverside_recycling", "accepting_materials": true, "price_basis_points": 8500},
-            "location": {"location_id": "recycling_point", "status_id": "operation_restricted"},
-            "event_tags": ["recycling_inspection_restricted"]
+            "job": {
+              "job_id": "job_recycling_sorter",
+              "available": true,
+              "pay_basis_points": 8000
+            },
+            "recycling": {
+              "organization_id": "org_riverside_recycling",
+              "accepting_materials": true,
+              "price_basis_points": 8500
+            },
+            "location": {
+              "location_id": "recycling_point",
+              "status_id": "operation_restricted"
+            },
+            "event_tags": [
+              "recycling_inspection_restricted"
+            ]
           }
         },
         {
           "id": "closed_temporarily",
           "title": "Пункт временно закрыт",
           "terminal": true,
-          "observable_refs": [{"kind": "location", "id": "recycling_point"}, {"kind": "metric", "id": "metric_riverside_job_availability"}],
+          "observable_refs": [
+            {
+              "kind": "location",
+              "id": "recycling_point"
+            },
+            {
+              "kind": "metric",
+              "id": "metric_riverside_job_availability"
+            }
+          ],
           "projection": {
-            "job": {"job_id": "job_recycling_sorter", "available": false, "pay_basis_points": 0},
-            "recycling": {"organization_id": "org_riverside_recycling", "accepting_materials": false, "price_basis_points": 0},
-            "location": {"location_id": "recycling_point", "status_id": "closed_temporarily"},
-            "event_tags": ["recycling_inspection_closed"]
+            "job": {
+              "job_id": "job_recycling_sorter",
+              "available": false,
+              "pay_basis_points": 0
+            },
+            "recycling": {
+              "organization_id": "org_riverside_recycling",
+              "accepting_materials": false,
+              "price_basis_points": 0
+            },
+            "location": {
+              "location_id": "recycling_point",
+              "status_id": "closed_temporarily"
+            },
+            "event_tags": [
+              "recycling_inspection_closed"
+            ]
           }
         }
       ],
       "transitions": [
-        {"id": "transition_recycling_inspection_warning", "from_stage_id": "latent", "to_stage_id": "warning", "trigger_id": "inspection_notice_received", "priority": 100, "eligible_after_elapsed_minutes": 1440, "required_fact_ids": [], "excluded_fact_ids": []},
-        {"id": "transition_recycling_inspection_preparation", "from_stage_id": "warning", "to_stage_id": "preparation", "trigger_id": "preparation_started", "priority": 100, "eligible_after_elapsed_minutes": 2880, "required_fact_ids": [], "excluded_fact_ids": []},
-        {"id": "transition_recycling_inspection_arrival", "from_stage_id": "preparation", "to_stage_id": "inspection", "trigger_id": "inspection_time_reached", "priority": 100, "eligible_after_elapsed_minutes": 4320, "required_fact_ids": [], "excluded_fact_ids": []},
-        {"id": "transition_recycling_inspection_approved", "from_stage_id": "inspection", "to_stage_id": "approved", "trigger_id": "requirements_met", "priority": 300, "eligible_after_elapsed_minutes": 5760, "required_fact_ids": ["fact_recycling_scale_calibrated", "fact_recycling_yard_cleared", "fact_recycling_press_safe"], "excluded_fact_ids": []},
-        {"id": "transition_recycling_inspection_restricted", "from_stage_id": "inspection", "to_stage_id": "restricted", "trigger_id": "correctable_violations_found", "priority": 200, "eligible_after_elapsed_minutes": 5760, "mutual_exclusion_group_id": "recycling_operational_limit", "required_fact_ids": ["fact_recycling_press_safe"], "excluded_fact_ids": []},
-        {"id": "transition_recycling_inspection_closed", "from_stage_id": "inspection", "to_stage_id": "closed_temporarily", "trigger_id": "critical_hazard_confirmed", "priority": 100, "eligible_after_elapsed_minutes": 5760, "mutual_exclusion_group_id": "recycling_operational_limit", "required_fact_ids": [], "excluded_fact_ids": ["fact_recycling_press_safe"]}
+        {
+          "id": "transition_recycling_inspection_warning",
+          "from_stage_id": "latent",
+          "to_stage_id": "warning",
+          "trigger_id": "inspection_notice_received",
+          "priority": 100,
+          "eligible_after_elapsed_minutes": 1440,
+          "required_fact_ids": [],
+          "excluded_fact_ids": []
+        },
+        {
+          "id": "transition_recycling_inspection_preparation",
+          "from_stage_id": "warning",
+          "to_stage_id": "preparation",
+          "trigger_id": "preparation_started",
+          "priority": 100,
+          "eligible_after_elapsed_minutes": 2880,
+          "required_fact_ids": [],
+          "excluded_fact_ids": []
+        },
+        {
+          "id": "transition_recycling_inspection_arrival",
+          "from_stage_id": "preparation",
+          "to_stage_id": "inspection",
+          "trigger_id": "inspection_time_reached",
+          "priority": 100,
+          "eligible_after_elapsed_minutes": 4320,
+          "required_fact_ids": [],
+          "excluded_fact_ids": []
+        },
+        {
+          "id": "transition_recycling_inspection_approved",
+          "from_stage_id": "inspection",
+          "to_stage_id": "approved",
+          "trigger_id": "requirements_met",
+          "priority": 300,
+          "eligible_after_elapsed_minutes": 5760,
+          "required_fact_ids": [
+            "fact_recycling_scale_calibrated",
+            "fact_recycling_yard_cleared",
+            "fact_recycling_press_safe"
+          ],
+          "excluded_fact_ids": []
+        },
+        {
+          "id": "transition_recycling_inspection_restricted",
+          "from_stage_id": "inspection",
+          "to_stage_id": "restricted",
+          "trigger_id": "correctable_violations_found",
+          "priority": 200,
+          "eligible_after_elapsed_minutes": 5760,
+          "mutual_exclusion_group_id": "recycling_operational_limit",
+          "required_fact_ids": [
+            "fact_recycling_press_safe"
+          ],
+          "excluded_fact_ids": []
+        },
+        {
+          "id": "transition_recycling_inspection_closed",
+          "from_stage_id": "inspection",
+          "to_stage_id": "closed_temporarily",
+          "trigger_id": "critical_hazard_confirmed",
+          "priority": 100,
+          "eligible_after_elapsed_minutes": 5760,
+          "mutual_exclusion_group_id": "recycling_operational_limit",
+          "required_fact_ids": [],
+          "excluded_fact_ids": [
+            "fact_recycling_press_safe"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "process_market_supply_squeeze",
+      "title": "Перебои с поставками на рынок",
+      "description": "Задержка привоза: сначала пустеют полки, потом растут цены, потом ряд начинает работать вполсилы.",
+      "scope_kind": "location",
+      "scope_id": "market",
+      "advance_mode": "confirmed_time",
+      "initial_stage_id": "steady",
+      "terminal_stage_ids": [
+        "restored",
+        "rationed"
+      ],
+      "stages": [
+        {
+          "id": "steady",
+          "title": "Привоз идёт как обычно",
+          "terminal": false,
+          "observable_refs": [
+            {
+              "kind": "location",
+              "id": "market"
+            },
+            {
+              "kind": "npc",
+              "id": "npc_tamara_roven"
+            }
+          ],
+          "projection": {
+            "job": {
+              "job_id": "job_market_porter",
+              "available": true,
+              "pay_basis_points": 10000
+            },
+            "commerce": {
+              "store_id": "store_market_food_row",
+              "price_basis_points": 10000
+            },
+            "location": {
+              "location_id": "market",
+              "status_id": "operating_normally"
+            },
+            "event_tags": [
+              "market_supply_steady"
+            ],
+            "recycling": {
+              "organization_id": "org_riverside_recycling",
+              "accepting_materials": true,
+              "price_basis_points": 10000
+            }
+          }
+        },
+        {
+          "id": "delayed",
+          "title": "Машины приходят с опозданием",
+          "terminal": false,
+          "observable_refs": [
+            {
+              "kind": "npc",
+              "id": "npc_tamara_roven"
+            },
+            {
+              "kind": "job",
+              "id": "job_market_porter"
+            }
+          ],
+          "projection": {
+            "job": {
+              "job_id": "job_market_porter",
+              "available": true,
+              "pay_basis_points": 10500
+            },
+            "commerce": {
+              "store_id": "store_market_food_row",
+              "price_basis_points": 10800
+            },
+            "location": {
+              "location_id": "market",
+              "status_id": "operating_strained"
+            },
+            "event_tags": [
+              "market_supply_delayed"
+            ],
+            "recycling": {
+              "organization_id": "org_riverside_recycling",
+              "accepting_materials": true,
+              "price_basis_points": 10000
+            }
+          }
+        },
+        {
+          "id": "scarce",
+          "title": "Полки пустеют к полудню",
+          "terminal": false,
+          "observable_refs": [
+            {
+              "kind": "location",
+              "id": "market"
+            },
+            {
+              "kind": "npc",
+              "id": "npc_tamara_roven"
+            },
+            {
+              "kind": "job",
+              "id": "job_market_porter"
+            }
+          ],
+          "projection": {
+            "job": {
+              "job_id": "job_market_porter",
+              "available": true,
+              "pay_basis_points": 11000
+            },
+            "commerce": {
+              "store_id": "store_market_food_row",
+              "price_basis_points": 12000
+            },
+            "location": {
+              "location_id": "market",
+              "status_id": "operating_strained"
+            },
+            "event_tags": [
+              "market_supply_scarce"
+            ],
+            "recycling": {
+              "organization_id": "org_riverside_recycling",
+              "accepting_materials": true,
+              "price_basis_points": 10000
+            }
+          }
+        },
+        {
+          "id": "restored",
+          "title": "Поставки выровнялись",
+          "terminal": true,
+          "observable_refs": [
+            {
+              "kind": "location",
+              "id": "market"
+            },
+            {
+              "kind": "npc",
+              "id": "npc_tamara_roven"
+            }
+          ],
+          "projection": {
+            "job": {
+              "job_id": "job_market_porter",
+              "available": true,
+              "pay_basis_points": 10000
+            },
+            "commerce": {
+              "store_id": "store_market_food_row",
+              "price_basis_points": 9800
+            },
+            "location": {
+              "location_id": "market",
+              "status_id": "operating_normally"
+            },
+            "event_tags": [
+              "market_supply_restored"
+            ],
+            "recycling": {
+              "organization_id": "org_riverside_recycling",
+              "accepting_materials": true,
+              "price_basis_points": 10000
+            }
+          }
+        },
+        {
+          "id": "rationed",
+          "title": "Ряд работает вполсилы",
+          "terminal": true,
+          "observable_refs": [
+            {
+              "kind": "location",
+              "id": "market"
+            },
+            {
+              "kind": "job",
+              "id": "job_market_porter"
+            }
+          ],
+          "projection": {
+            "job": {
+              "job_id": "job_market_porter",
+              "available": false,
+              "pay_basis_points": 0
+            },
+            "commerce": {
+              "store_id": "store_market_food_row",
+              "price_basis_points": 13000
+            },
+            "location": {
+              "location_id": "market",
+              "status_id": "operating_limited"
+            },
+            "event_tags": [
+              "market_supply_rationed"
+            ],
+            "recycling": {
+              "organization_id": "org_riverside_recycling",
+              "accepting_materials": true,
+              "price_basis_points": 10000
+            }
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "id": "transition_market_supply_delayed",
+          "from_stage_id": "steady",
+          "to_stage_id": "delayed",
+          "trigger_id": "delivery_missed",
+          "priority": 100,
+          "eligible_after_elapsed_minutes": 1440,
+          "required_fact_ids": [],
+          "excluded_fact_ids": []
+        },
+        {
+          "id": "transition_market_supply_scarce",
+          "from_stage_id": "delayed",
+          "to_stage_id": "scarce",
+          "trigger_id": "shelves_emptied",
+          "priority": 100,
+          "eligible_after_elapsed_minutes": 2880,
+          "required_fact_ids": [],
+          "excluded_fact_ids": []
+        },
+        {
+          "id": "transition_market_supply_restored",
+          "from_stage_id": "scarce",
+          "to_stage_id": "restored",
+          "trigger_id": "convoy_arrived",
+          "priority": 90,
+          "eligible_after_elapsed_minutes": 4320,
+          "required_fact_ids": [],
+          "excluded_fact_ids": []
+        },
+        {
+          "id": "transition_market_supply_rationed",
+          "from_stage_id": "scarce",
+          "to_stage_id": "rationed",
+          "trigger_id": "rationing_declared",
+          "priority": 110,
+          "eligible_after_elapsed_minutes": 4320,
+          "required_fact_ids": [],
+          "excluded_fact_ids": []
+        }
       ]
     }
   ]

@@ -13,6 +13,7 @@ const WorldCatalog := preload("res://game/content/catalogs/world_definition_cata
 
 const KNOWN_LOCATION_IDS := [
 	"underpass", "market", "station_square", "recycling_point", "clinic_yard", "embankment",
+	"freight_yard", "courtyard_blocks",
 ]
 
 
