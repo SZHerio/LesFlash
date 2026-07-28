@@ -13,7 +13,7 @@ func _init(shell: AppShell, persistence: SessionPersistence) -> void:
 	_persistence = persistence
 
 
-func save(session: FirstDaySessionAdapter, show_success: bool = false) -> Dictionary:
+func save(session: RunSessionAdapter, show_success: bool = false) -> Dictionary:
 	if session == null:
 		_save_barrier_active = false
 		return {
@@ -31,16 +31,16 @@ func save(session: FirstDaySessionAdapter, show_success: bool = false) -> Dictio
 	return result
 
 
-func ensure_durable(session: FirstDaySessionAdapter) -> bool:
+func ensure_durable(session: RunSessionAdapter) -> bool:
 	return not _save_barrier_active or bool(save(session).get("ok", false))
 
 
-func leave_to_menu(session: FirstDaySessionAdapter, on_saved: Callable) -> void:
+func leave_to_menu(session: RunSessionAdapter, on_saved: Callable) -> void:
 	if bool(save(session).get("ok", false)):
 		on_saved.call()
 
 
-func close_application(session: FirstDaySessionAdapter, tree: SceneTree) -> void:
+func close_application(session: RunSessionAdapter, tree: SceneTree) -> void:
 	if bool(save(session).get("ok", false)):
 		tree.quit()
 

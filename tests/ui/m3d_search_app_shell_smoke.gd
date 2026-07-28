@@ -4,20 +4,20 @@ extends SceneTree
 ## location → search → find → encounter → answer → back to the location.
 
 const AppShellScene := preload("res://app/app_shell.tscn")
-const LegacySession := preload("res://game/first_day/first_day_session.gd")
+const LegacySession := preload("res://game/run/run_session.gd")
 const SandboxAdapterScript := preload("res://app/session/sandbox_session_adapter.gd")
 const TEST_SIZES: Array[Vector2i] = [Vector2i(360, 640), Vector2i(540, 960)]
 const OUTPUT_DIR := "res://docs/qa/m3d"
 const ZONE_LOCATION_ID := "underpass"
 
 class MemoryPersistence extends SessionPersistence:
-	var session: FirstDaySession
+	var session: RunSession
 	var saves := 0
 
 	func has_candidates() -> bool:
 		return false
 
-	func create_session(characteristics: Dictionary, _seed: int) -> FirstDaySessionAdapter:
+	func create_session(characteristics: Dictionary, _seed: int) -> RunSessionAdapter:
 		session = LegacySession.create_location_first(characteristics, 74_112)
 		# Luck decides where a run starts; the authored zone lives here.
 		session.location = ZONE_LOCATION_ID
@@ -26,7 +26,7 @@ class MemoryPersistence extends SessionPersistence:
 	func load_session() -> Dictionary:
 		return {"ok": false, "code": "save_not_found"}
 
-	func save_session(_session: FirstDaySessionAdapter) -> Dictionary:
+	func save_session(_session: RunSessionAdapter) -> Dictionary:
 		saves += 1
 		return {"ok": true}
 
@@ -232,7 +232,7 @@ func _walk_to(
 	await _settle()
 
 
-func _find_search_action(session: FirstDaySession) -> Dictionary:
+func _find_search_action(session: RunSession) -> Dictionary:
 	var adapter := SandboxAdapterScript.new(session)
 	for raw_action: Variant in Array(adapter.get_location_model().get("actions", [])):
 		if raw_action is Dictionary and String(raw_action.get("kind", "")) == "search":
@@ -240,7 +240,7 @@ func _find_search_action(session: FirstDaySession) -> Dictionary:
 	return {}
 
 
-func _first_available_option(session: FirstDaySession) -> String:
+func _first_available_option(session: RunSession) -> String:
 	var pending: Dictionary = preload(
 		"res://game/events/search_encounter_command.gd"
 	).pending(session)

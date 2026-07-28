@@ -1,8 +1,8 @@
 extends SceneTree
 
-const FirstDayContentScript = preload("res://game/first_day/first_day_content.gd")
-const FirstDaySessionScript = preload("res://game/first_day/first_day_session.gd")
-const FirstDaySaveScript = preload("res://game/first_day/first_day_save.gd")
+const DistrictContentScript = preload("res://game/district/district_content.gd")
+const RunSessionScript = preload("res://game/run/run_session.gd")
+const RunSaveScript = preload("res://game/run/run_save.gd")
 const SessionCommandTransactionScript = preload("res://game/session/session_command_transaction.gd")
 
 var _failures: Array[String] = []
@@ -88,7 +88,7 @@ func _values_equal(actual: Variant, expected: Variant) -> bool:
 
 
 func _test_catalog_counts_and_unconditional_exits() -> void:
-	var validation: Dictionary = FirstDayContentScript.validate_content()
+	var validation: Dictionary = DistrictContentValidator.validate_content()
 	_expect(bool(validation.get("ok", false)), "catalog validation must pass: %s" % str(validation.get("errors", [])))
 	var counts: Dictionary = validation.get("counts", {})
 	_expect(int(counts.get("locations", -1)) >= 6, "catalog must keep at least six locations")
@@ -100,7 +100,7 @@ func _test_catalog_counts_and_unconditional_exits() -> void:
 	_expect_equal(int(counts.get("job_prompts", -1)), 6, "job must contain six prompts")
 	_expect_equal(int(counts.get("shelters", -1)), 4, "catalog must contain four shelters")
 
-	var cards: Dictionary = FirstDayContentScript.event_cards()
+	var cards: Dictionary = DistrictContentScript.event_cards()
 	for card_id in cards:
 		var card: Dictionary = cards[card_id]
 		var choices: Array = card.get("choices", [])
@@ -114,8 +114,8 @@ func _test_catalog_counts_and_unconditional_exits() -> void:
 
 func _test_deterministic_seed() -> void:
 	var build := _build_for_luck(5)
-	var first = FirstDaySessionScript.create(build, 77_777)
-	var second = FirstDaySessionScript.create(build, 77_777)
+	var first = RunSessionScript.create(build, 77_777)
+	var second = RunSessionScript.create(build, 77_777)
 	_expect(first != null and second != null, "same-seed sessions must be created")
 	if first == null or second == null:
 		return
@@ -134,15 +134,15 @@ func _test_deterministic_seed() -> void:
 
 func _test_luck_start_distribution() -> void:
 	var severities: Dictionary = {}
-	for start_value in FirstDayContentScript.start_situations():
+	for start_value in DistrictContentScript.start_situations():
 		if start_value is Dictionary:
 			severities[String(start_value.get("id", ""))] = int(start_value.get("severity", 0))
 	var low_total := 0
 	var high_total := 0
 	var sample_count := 240
 	for seed in range(1, sample_count + 1):
-		var low = FirstDaySessionScript.create(_build_for_luck(1), seed)
-		var high = FirstDaySessionScript.create(_build_for_luck(10), seed)
+		var low = RunSessionScript.create(_build_for_luck(1), seed)
+		var high = RunSessionScript.create(_build_for_luck(10), seed)
 		_expect(low != null and high != null, "sampled Luck runs must be valid")
 		if low != null:
 			low_total += int(severities.get(low.start, 0))
@@ -151,7 +151,7 @@ func _test_luck_start_distribution() -> void:
 	_expect(low_total > high_total, "low Luck must produce statistically harsher starts")
 	_expect(float(low_total) / sample_count > float(high_total) / sample_count + 0.75, "Luck severity gap must be material")
 	for luck in [1, 5, 10]:
-		var session = FirstDaySessionScript.create(_build_for_luck(luck), 9000 + luck)
+		var session = RunSessionScript.create(_build_for_luck(luck), 9000 + luck)
 		_expect(session != null, "Luck %d must create a run" % luck)
 		if session != null:
 			_expect(bool(session.validate().get("ok", false)), "Luck %d run must validate" % luck)
@@ -337,8 +337,8 @@ func _test_shelter_window() -> void:
 	_expect_equal(evening.run_state.get_meter("health"), maxi(health_before_wait - 5, 0), "waiting must resolve due consequences")
 	_expect(not evening.available_shelters().is_empty(), "18:00 must expose a local shelter")
 	_expect(bool(evening.choose_shelter("underpass_niche").get("ok", false)), "evening shelter must complete the day")
-	_expect_equal(evening.run_state.calendar.elapsed_minutes, FirstDaySessionScript.FIRST_DAY_DURATION_MINUTES, "evening sleep must end at the first next 08:00")
-	_expect_equal(evening.run_state.calendar.minute_of_day, FirstDaySessionScript.SHELTER_WAKE_MINUTE, "evening sleep must wake at 08:00")
+	_expect_equal(evening.run_state.calendar.elapsed_minutes, RunSessionScript.FIRST_DAY_DURATION_MINUTES, "evening sleep must end at the first next 08:00")
+	_expect_equal(evening.run_state.calendar.minute_of_day, RunSessionScript.SHELTER_WAKE_MINUTE, "evening sleep must wake at 08:00")
 
 	var after_midnight = _new_map_session(_build_for_luck(5), 4_209)
 	_expect(after_midnight != null, "after-midnight shelter run must reach map")
@@ -371,7 +371,7 @@ func _test_shelter_window() -> void:
 		7 * 60,
 		"01:00 sleep must advance seven hours, not thirty-one"
 	)
-	_expect_equal(after_midnight.run_state.calendar.elapsed_minutes, FirstDaySessionScript.FIRST_DAY_DURATION_MINUTES, "after-midnight sleep must not create a multi-day M2 run")
+	_expect_equal(after_midnight.run_state.calendar.elapsed_minutes, RunSessionScript.FIRST_DAY_DURATION_MINUTES, "after-midnight sleep must not create a multi-day M2 run")
 
 
 func _test_luck_event_weights() -> void:
@@ -383,8 +383,8 @@ func _test_luck_event_weights() -> void:
 	var high_adverse := 0
 	var sample_count := 320
 	for seed in range(20_000, 20_000 + sample_count):
-		var low = FirstDaySessionScript.new()
-		var high = FirstDaySessionScript.new()
+		var low = RunSessionScript.new()
+		var high = RunSessionScript.new()
 		low.run_state = RunState.new(_build_for_luck(1), seed)
 		high.run_state = RunState.new(_build_for_luck(10), seed)
 		for session in [low, high]:
@@ -405,7 +405,7 @@ func _test_luck_event_weights() -> void:
 
 
 func _test_session_semantic_validation() -> void:
-	var event_session = FirstDaySessionScript.create(_build_for_luck(5), 4_210)
+	var event_session = RunSessionScript.create(_build_for_luck(5), 4_210)
 	_expect(event_session != null, "semantic validation event run must exist")
 	if event_session == null:
 		return
@@ -434,10 +434,10 @@ func _test_recovery_candidates() -> void:
 	var temporary_session = _new_map_session(_build_for_luck(5), 7_001)
 	_expect(temporary_session != null, "temporary recovery session must exist")
 	if temporary_session != null:
-		var saved: Dictionary = FirstDaySaveScript.save_session(temporary_session, temporary_path)
+		var saved: Dictionary = RunSaveScript.save_session(temporary_session, temporary_path)
 		_expect(bool(saved.get("ok", false)), "temporary recovery source must save")
 		_expect(_copy_file(temporary_path, temporary_path + ".tmp"), "test must create an interrupted valid temporary")
-		var recovered: Dictionary = FirstDaySaveScript.load_session(temporary_path)
+		var recovered: Dictionary = RunSaveScript.load_session(temporary_path)
 		_expect(bool(recovered.get("ok", false)), "valid temporary must recover")
 		_expect(bool(recovered.get("recovered_from_temporary", false)), "temporary recovery flag must be true")
 		var restored = recovered.get("session")
@@ -449,12 +449,12 @@ func _test_recovery_candidates() -> void:
 	var backup_session = _new_map_session(_build_for_luck(5), 7_002)
 	_expect(backup_session != null, "backup recovery session must exist")
 	if backup_session != null:
-		_expect(bool(FirstDaySaveScript.save_session(backup_session, backup_path).get("ok", false)), "first backup source save must succeed")
+		_expect(bool(RunSaveScript.save_session(backup_session, backup_path).get("ok", false)), "first backup source save must succeed")
 		var expected_backup: Dictionary = backup_session.to_dict()
 		_expect(backup_session.set_setting("show_locked_options", true), "second revision must mutate flow")
-		_expect(bool(FirstDaySaveScript.save_session(backup_session, backup_path).get("ok", false)), "second save must create backup")
+		_expect(bool(RunSaveScript.save_session(backup_session, backup_path).get("ok", false)), "second save must create backup")
 		_expect(_write_text(backup_path, "{broken"), "test must corrupt primary")
-		var recovered_backup: Dictionary = FirstDaySaveScript.load_session(backup_path)
+		var recovered_backup: Dictionary = RunSaveScript.load_session(backup_path)
 		_expect(bool(recovered_backup.get("ok", false)), "valid backup must recover")
 		_expect(bool(recovered_backup.get("recovered_from_backup", false)), "backup recovery flag must be true")
 		var restored_backup = recovered_backup.get("session")
@@ -476,7 +476,7 @@ func _test_three_complete_runs() -> void:
 
 
 func _test_phase_round_trips() -> void:
-	var event_session = FirstDaySessionScript.create(_build_for_luck(5), 90_001)
+	var event_session = RunSessionScript.create(_build_for_luck(5), 90_001)
 	_expect(event_session != null and event_session.phase == "event", "new run must expose event phase")
 	if event_session != null:
 		_expect(_assert_session_round_trip(event_session, "event"), "event phase must survive save round-trip")
@@ -490,7 +490,7 @@ func _test_phase_round_trips() -> void:
 func _test_psyche_setting() -> void:
 	var session = null
 	for seed in range(1, 100):
-		var candidate = FirstDaySessionScript.create(_build_for_luck(1), seed)
+		var candidate = RunSessionScript.create(_build_for_luck(1), seed)
 		if candidate != null and candidate.psyche_intensity() > 0.0:
 			session = candidate
 			break
@@ -525,7 +525,7 @@ func _build_for_luck(luck: int) -> Dictionary:
 
 
 func _new_map_session(build: Dictionary, seed: int) -> Variant:
-	var session = FirstDaySessionScript.create(build, seed)
+	var session = RunSessionScript.create(build, seed)
 	if session == null:
 		return null
 	var guard := 0
@@ -595,7 +595,7 @@ func _location_path(origin: String, destination: String) -> Array:
 	var parent: Dictionary = {origin: ""}
 	while not queue.is_empty():
 		var current := String(queue.pop_front())
-		for route_value in FirstDayContentScript.routes_from(current):
+		for route_value in DistrictContentScript.routes_from(current):
 			if not route_value is Dictionary:
 				continue
 			var next := String(route_value.get("destination_id", route_value.get("to", "")))
@@ -691,11 +691,11 @@ func _assert_session_round_trip(session: Variant, label: String) -> bool:
 	var path := _test_save_path("phase_%s" % label)
 	_cleanup_save(path)
 	var expected: Dictionary = session.to_dict()
-	var saved: Dictionary = FirstDaySaveScript.save_session(session, path)
+	var saved: Dictionary = RunSaveScript.save_session(session, path)
 	if not bool(saved.get("ok", false)):
 		_cleanup_save(path)
 		return false
-	var loaded: Dictionary = FirstDaySaveScript.load_session(path)
+	var loaded: Dictionary = RunSaveScript.load_session(path)
 	var restored = loaded.get("session")
 	var result: bool = bool(loaded.get("ok", false)) and restored != null and _values_equal(restored.to_dict(), expected)
 	_cleanup_save(path)

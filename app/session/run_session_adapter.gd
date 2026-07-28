@@ -1,4 +1,4 @@
-class_name FirstDaySessionAdapter
+class_name RunSessionAdapter
 extends RefCounted
 
 ## Compatibility façade between the M2 orchestration API and the M3A session
@@ -6,28 +6,28 @@ extends RefCounted
 ## or RunState directly, while the existing M2 UI keeps its public API.
 
 const GameSessionScript := preload("res://app/session/game_session.gd")
-const FirstDaySessionScript := preload("res://game/first_day/first_day_session.gd")
-const FirstDaySaveScript := preload("res://game/first_day/first_day_save.gd")
+const RunSessionScript := preload("res://game/run/run_session.gd")
+const RunSaveScript := preload("res://game/run/run_save.gd")
 
-var _session: FirstDaySession
+var _session: RunSession
 
 
-func _init(session: FirstDaySession = null) -> void:
+func _init(session: RunSession = null) -> void:
 	_session = session
 
 
 static func create(characteristics: Dictionary, seed: int) -> RefCounted:
-	var session := FirstDaySessionScript.create(characteristics, seed)
+	var session := RunSessionScript.create(characteristics, seed)
 	if session == null:
 		return null
-	var adapter_script: Script = load("res://app/session/first_day_session_adapter.gd")
+	var adapter_script: Script = load("res://app/session/run_session_adapter.gd")
 	return adapter_script.new(session)
 
 
-static func load_session(path: String = FirstDaySave.DEFAULT_SAVE_PATH) -> Dictionary:
-	var result: Dictionary = FirstDaySaveScript.load_session(path)
+static func load_session(path: String = RunSave.DEFAULT_SAVE_PATH) -> Dictionary:
+	var result: Dictionary = RunSaveScript.load_session(path)
 	if bool(result.get("ok", false)):
-		var adapter_script: Script = load("res://app/session/first_day_session_adapter.gd")
+		var adapter_script: Script = load("res://app/session/run_session_adapter.gd")
 		result["adapter"] = adapter_script.new(result.get("session"))
 	return result
 
@@ -207,8 +207,8 @@ func set_setting(key: String, value: Variant) -> bool:
 	return false if _session == null else _session.set_setting(key, value)
 
 
-func save(path: String = FirstDaySave.DEFAULT_SAVE_PATH) -> Dictionary:
-	return _missing_session() if _session == null else FirstDaySaveScript.save_session(_session, path)
+func save(path: String = RunSave.DEFAULT_SAVE_PATH) -> Dictionary:
+	return _missing_session() if _session == null else RunSaveScript.save_session(_session, path)
 
 
 static func activity_from_legacy(session: Object) -> Dictionary:
@@ -287,4 +287,4 @@ static func values_equal(left: Variant, right: Variant) -> bool:
 
 
 func _missing_session() -> Dictionary:
-	return {"ok": false, "code": "missing_session", "error": "FirstDaySession is not attached."}
+	return {"ok": false, "code": "missing_session", "error": "RunSession is not attached."}

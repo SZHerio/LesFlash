@@ -1,6 +1,6 @@
 extends SceneTree
 
-const SessionScript := preload("res://game/first_day/first_day_session.gd")
+const SessionScript := preload("res://game/run/run_session.gd")
 const Service := preload("res://game/search/search_session_service.gd")
 const InventoryStateScript := preload("res://core/inventory/inventory_state.gd")
 
@@ -383,7 +383,7 @@ func _test_activity_guard() -> void:
 const ZONE_LOCATION_ID := "underpass"
 
 
-func _new_session(seed: int, build: Dictionary = {}) -> FirstDaySession:
+func _new_session(seed: int, build: Dictionary = {}) -> RunSession:
 	var selected := _build() if build.is_empty() else build
 	var session := SessionScript.create_location_first(selected, seed)
 	_expect(session != null, "session must start")
@@ -394,7 +394,7 @@ func _new_session(seed: int, build: Dictionary = {}) -> FirstDaySession:
 	return session
 
 
-func _active_session(seed: int, build: Dictionary = {}) -> FirstDaySession:
+func _active_session(seed: int, build: Dictionary = {}) -> RunSession:
 	var session := _new_session(seed, build)
 	if session == null:
 		return null
@@ -403,7 +403,7 @@ func _active_session(seed: int, build: Dictionary = {}) -> FirstDaySession:
 	return session if bool(result.get("ok", false)) else null
 
 
-func _session_with_dumpster_loot(seed: int) -> FirstDaySession:
+func _session_with_dumpster_loot(seed: int) -> RunSession:
 	var session := _active_session(seed)
 	if session == null or not _move_to(session, "open_dumpster", "loot:%d" % seed):
 		return null
@@ -417,7 +417,7 @@ func _session_with_dumpster_loot(seed: int) -> FirstDaySession:
 	return session if bool(result.get("ok", false)) else null
 
 
-func _move_to(session: FirstDaySession, object_id: String, prefix: String) -> bool:
+func _move_to(session: RunSession, object_id: String, prefix: String) -> bool:
 	var plan := Service.plan_move(session, object_id, "%s:plan" % prefix)
 	_expect_ok(plan, "movement plan for %s" % object_id)
 	if not bool(plan.get("ok", false)):
@@ -445,7 +445,7 @@ func _place_at_object(snapshot: Dictionary, object_id: String) -> void:
 
 
 func _replace_active_snapshot(
-	session: FirstDaySession,
+	session: RunSession,
 	snapshot: Dictionary
 ) -> bool:
 	var zones := session.search_zone_states.duplicate(true)
@@ -470,7 +470,7 @@ func _ground(snapshot: Dictionary, stack_id: String) -> Dictionary:
 	return {}
 
 
-func _carried_stack(session: FirstDaySession, item_id: String) -> Dictionary:
+func _carried_stack(session: RunSession, item_id: String) -> Dictionary:
 	for raw_stack: Variant in InventoryStateScript.all_stacks(session.run_state.inventory):
 		if (
 			raw_stack is Dictionary

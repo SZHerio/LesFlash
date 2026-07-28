@@ -11,14 +11,14 @@ class SpyPersistence extends SessionPersistence:
 	func has_candidates() -> bool:
 		return false
 
-	func create_session(characteristics: Dictionary, seed: int) -> FirstDaySessionAdapter:
+	func create_session(characteristics: Dictionary, seed: int) -> RunSessionAdapter:
 		create_calls += 1
-		return Adapter.create(characteristics, seed) as FirstDaySessionAdapter
+		return Adapter.create(characteristics, seed) as RunSessionAdapter
 
 	func load_session() -> Dictionary:
 		return {"ok": false, "code": "save_not_found", "error": "No save exists."}
 
-	func save_session(_session: FirstDaySessionAdapter) -> Dictionary:
+	func save_session(_session: RunSessionAdapter) -> Dictionary:
 		save_calls += 1
 		if fail_save:
 			return {"ok": false, "code": "temporary_write_failed", "error": "Could not write save."}

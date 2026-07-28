@@ -1,19 +1,19 @@
 extends SceneTree
 
 const AppShellScene := preload("res://app/app_shell.tscn")
-const LegacySession := preload("res://game/first_day/first_day_session.gd")
+const LegacySession := preload("res://game/run/run_session.gd")
 const SandboxAdapterScript := preload("res://app/session/sandbox_session_adapter.gd")
 const InventoryStateScript := preload("res://core/inventory/inventory_state.gd")
 
 
 class MemoryPersistence extends SessionPersistence:
-	var session: FirstDaySession
+	var session: RunSession
 	var saves := 0
 
 	func has_candidates() -> bool:
 		return false
 
-	func create_session(characteristics: Dictionary, _seed: int) -> FirstDaySessionAdapter:
+	func create_session(characteristics: Dictionary, _seed: int) -> RunSessionAdapter:
 		session = LegacySession.create_location_first(characteristics, 72_311)
 		session.run_state.add_item("cardboard_sheet", 1, "pockets")
 		session.run_state.add_item("recyclables", 1, "pockets")
@@ -37,7 +37,7 @@ class MemoryPersistence extends SessionPersistence:
 	func load_session() -> Dictionary:
 		return {"ok": false, "code": "save_not_found"}
 
-	func save_session(_session: FirstDaySessionAdapter) -> Dictionary:
+	func save_session(_session: RunSessionAdapter) -> Dictionary:
 		saves += 1
 		return {"ok": true}
 
@@ -171,7 +171,7 @@ func _action_button(card: InventoryItemCard, title: String) -> Button:
 	return null
 
 
-func _external_stack(session: FirstDaySession, item_id: String) -> Dictionary:
+func _external_stack(session: RunSession, item_id: String) -> Dictionary:
 	for stack in InventoryStateScript.all_stacks(session.run_state.inventory):
 		if bool(stack.get("external", false)) and String(stack.get("item_id", "")) == item_id:
 			return stack

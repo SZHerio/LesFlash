@@ -18,8 +18,8 @@ M3A создал платформу, поверх которой M3B добав�
 ## Поток данных и ответственности
 
 ```text
-RunState / FirstDaySession
-→ FirstDaySessionAdapter
+RunState / RunSession
+→ RunSessionAdapter
 → UiCoordinator
 → UiScreenPresenter + UiModelFactory
 → AppShell
@@ -32,8 +32,8 @@ RunState / FirstDaySession
 | Узел | Ответственность |
 |---|---|
 | `GameSession` | UI-независимый контракт `base_location`, `active_activity` и read-model оболочки/локации |
-| `FirstDaySessionMigration` | доменная миграция полной цепочки legacy-сессии без обратной зависимости `game → app` |
-| `FirstDaySessionAdapter` | временный фасад над M2 без чтения legacy-полей экранными сценами |
+| `RunSessionMigration` | доменная миграция полной цепочки legacy-сессии без обратной зависимости `game → app` |
+| `RunSessionAdapter` | временный фасад над M2 без чтения legacy-полей экранными сценами |
 | `UiCoordinator` | маршруты, выполнение intent-команд, Back, lifecycle и границы сохранения |
 | `SessionPersistence` / `SaveSlot` | внедряемый доступ к слоту и защита от параллельной записи |
 | `UiModelFactory` | чистое преобразование доменных моделей в русский UI-read-model |
@@ -47,7 +47,7 @@ RunState / FirstDaySession
 
 ## Контракт сессии и миграция
 
-В M3A версии envelope, `FirstDaySession` и `RunState` подняты до `2`. Миграция цепочки `v1 → v2`:
+В M3A версии envelope, `RunSession` и `RunState` подняты до `2`. Миграция цепочки `v1 → v2`:
 
 - работает на глубокой копии и не изменяет исходный payload при ошибке;
 - переносит `location` в `base_location`;

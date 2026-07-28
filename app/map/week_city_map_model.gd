@@ -1,7 +1,7 @@
 class_name WeekCityMapModel
 extends RefCounted
 
-const FirstDayContentScript := preload("res://game/first_day/first_day_content.gd")
+const DistrictContentScript := preload("res://game/district/district_content.gd")
 
 
 static func build(session: Object) -> Dictionary:
@@ -27,7 +27,7 @@ static func build(session: Object) -> Dictionary:
 		route["option_id"] = "%s:%s:%s" % [origin, destination, mode]
 		route["price"] = _route_price(origin, destination, mode)
 		routes.append(route)
-	var district: Dictionary = FirstDayContentScript.district()
+	var district: Dictionary = DistrictContentScript.district()
 	return {
 		"district_id": String(district.get("id", "")),
 		"district_title": String(district.get("title", "Город")),
@@ -55,7 +55,7 @@ static func find_route(model: Dictionary, destination: String, mode: String) -> 
 static func _route_price(origin: String, destination: String, mode: String) -> int:
 	if mode != "bus":
 		return 0
-	var place: Dictionary = FirstDayContentScript.location(origin)
+	var place: Dictionary = DistrictContentScript.location(origin)
 	for raw_route: Variant in Array(place.get("routes", [])):
 		if not raw_route is Dictionary:
 			continue

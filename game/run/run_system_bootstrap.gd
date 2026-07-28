@@ -1,4 +1,4 @@
-class_name FirstDaySystemBootstrap
+class_name RunSystemBootstrap
 extends RefCounted
 
 ## Builds the versioned systems owned by a fresh run without coupling the

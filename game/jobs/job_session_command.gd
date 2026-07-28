@@ -39,6 +39,7 @@ const JOBS := {
 		"supervisor": "npc_tamara_roven",
 		"opens_minute": 330,
 		"last_start_minute": 900,
+		"required_qualification_id": "qual_sanitary_book",
 		"title": "смена в ряду",
 		"description": "Продуктовый ряд. Клара показывает, что разгружать.",
 	},
@@ -192,7 +193,18 @@ static func quick_resolve(target: Object, command_id: String) -> Dictionary:
 	var progress: Dictionary = candidate_work.progress.duplicate(true)
 	var resolved_steps := 0
 	var resolved_choices: Array = []
+	# A shift cannot need more turns than it has steps. Without this bound a step
+	# that resolves successfully without advancing — a snapshot whose steps do not
+	# line up with its progress, which a hand-edited or half-migrated save can
+	# produce — spins here forever, and the player sees the game stop responding
+	# with no way out but killing it.
+	var turns_allowed := step_count + 1
 	while String(progress.get("status", "")) != "completed":
+		if resolved_steps >= turns_allowed:
+			return _failure(
+				"shift_did_not_advance",
+				"Смена не сдвинулась с места — доработайте её вручную"
+			)
 		var planned := ServiceScript.quick_choice(snapshot, progress, profile)
 		if not bool(planned.get("ok", false)):
 			break

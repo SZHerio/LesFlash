@@ -1,4 +1,4 @@
-class_name FirstDaySessionCommandBridge
+class_name RunSessionCommandBridge
 extends RefCounted
 
 ## Compatibility bridge that lets the legacy first-day aggregate participate in

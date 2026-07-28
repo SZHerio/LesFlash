@@ -1,10 +1,10 @@
 extends SceneTree
 
 const GameSessionScript := preload("res://app/session/game_session.gd")
-const FirstDaySessionAdapterScript := preload("res://app/session/first_day_session_adapter.gd")
-const M2SessionMigrationScript := preload("res://game/first_day/first_day_session_migration.gd")
-const FirstDaySessionScript := preload("res://game/first_day/first_day_session.gd")
-const FirstDaySaveScript := preload("res://game/first_day/first_day_save.gd")
+const RunSessionAdapterScript := preload("res://app/session/run_session_adapter.gd")
+const M2SessionMigrationScript := preload("res://game/run/run_session_migration.gd")
+const RunSessionScript := preload("res://game/run/run_session.gd")
+const RunSaveScript := preload("res://game/run/run_save.gd")
 
 const V1_FIXTURE_PATH := "res://tests/fixtures/m2_first_day_v1.json"
 const GAME_SESSION_V4_FIXTURE_PATH := "res://tests/fixtures/game_session_v4.json"
@@ -25,7 +25,7 @@ func _init() -> void:
 	_run_test("M2 commands remain available through adapter", _test_adapter_commands)
 	_run_test("location actions expose completion reasons", _test_location_action_reasons)
 	_run_test("RunState v1 migrates explicitly", _test_run_state_v1_migration)
-	_run_test("FirstDaySession v1 migrates explicitly", _test_session_v1_migration)
+	_run_test("RunSession v1 migrates explicitly", _test_session_v1_migration)
 	_run_test("real M2 v1 JSON migrates without data loss", _test_real_v1_json_fixture)
 	_run_test("contract mismatches are rejected", _test_contract_mismatch_rejected)
 	_run_test("v2 save round-trip reports versions", _test_v2_save_round_trip)
@@ -139,11 +139,11 @@ func _test_game_session_v4_fixture() -> void:
 
 
 func _test_read_models_are_pure() -> void:
-	var legacy = FirstDaySessionScript.create(_build(), 7_002)
+	var legacy = RunSessionScript.create(_build(), 7_002)
 	_expect(legacy != null, "M2 session must be created")
 	if legacy == null:
 		return
-	var adapter := FirstDaySessionAdapterScript.new(legacy)
+	var adapter := RunSessionAdapterScript.new(legacy)
 	var before: Dictionary = legacy.to_dict()
 	var map_model: Dictionary = legacy.get_map_model()
 	var shell: Dictionary = adapter.get_shell_model()
@@ -166,11 +166,11 @@ func _test_read_models_are_pure() -> void:
 
 
 func _test_adapter_commands() -> void:
-	var legacy = FirstDaySessionScript.create(_build(), 7_003)
+	var legacy = RunSessionScript.create(_build(), 7_003)
 	_expect(legacy != null, "M2 session must be created")
 	if legacy == null:
 		return
-	var adapter := FirstDaySessionAdapterScript.new(legacy)
+	var adapter := RunSessionAdapterScript.new(legacy)
 	_expect(adapter.set_setting("font_scale", 2.0), "adapter must accept the supported 200% font scale")
 	_expect_equal(float(legacy.settings.get("font_scale", 0.0)), 2.0, "200% font scale must survive the compatibility contract")
 	var model: Dictionary = adapter.get_current_event_model()
@@ -186,7 +186,7 @@ func _test_adapter_commands() -> void:
 
 
 func _test_location_action_reasons() -> void:
-	var legacy = FirstDaySessionScript.create(_build(), 7_008)
+	var legacy = RunSessionScript.create(_build(), 7_008)
 	_expect(legacy != null, "M2 session must be created")
 	if legacy == null:
 		return
@@ -194,7 +194,7 @@ func _test_location_action_reasons() -> void:
 	legacy.current_event = ""
 	legacy.location = "recycling_point"
 	legacy.completed = []
-	var adapter := FirstDaySessionAdapterScript.new(legacy)
+	var adapter := RunSessionAdapterScript.new(legacy)
 	var wait_action := _find_action(adapter.get_location_model(), "wait_until_evening")
 	_expect(not wait_action.is_empty(), "early map state must expose wait action")
 	_expect(not String(wait_action.get("description", "")).is_empty(), "locked wait must expose description")
@@ -213,7 +213,7 @@ func _test_run_state_v1_migration() -> void:
 	state.set_knowledge_level("known_place", 3)
 	var legacy: Dictionary = _downgrade_run_state(state.to_dict(), 1)
 	var source_copy: Dictionary = legacy.duplicate(true)
-	var migration := RunState.migrate_serialized(legacy)
+	var migration := RunStateMigration.migrate(legacy)
 	_expect(bool(migration.get("ok", false)), "RunState v1 migration must succeed")
 	_expect(bool(migration.get("migrated", false)), "RunState v1 migration must be reported")
 	_expect_equal(migration.get("source_version"), 1, "source RunState version must be reported")
@@ -229,7 +229,7 @@ func _test_run_state_v1_migration() -> void:
 
 
 func _test_session_v1_migration() -> void:
-	var session = FirstDaySessionScript.create(_build(), 7_005)
+	var session = RunSessionScript.create(_build(), 7_005)
 	_expect(session != null, "M2 session must be created")
 	if session == null:
 		return
@@ -241,8 +241,8 @@ func _test_session_v1_migration() -> void:
 	_expect_equal(migration.get("source_session_version"), 1, "source session version must be reported")
 	_expect_equal(migration.get("source_run_state_version"), 1, "source RunState version must be reported")
 	_expect_equal(legacy, source_copy, "session migration must not mutate source dictionary")
-	var restored := FirstDaySessionScript.from_dict(legacy)
-	_expect(restored != null, "FirstDaySession.from_dict must accept v1")
+	var restored := RunSessionScript.from_dict(legacy)
+	_expect(restored != null, "RunSession.from_dict must accept v1")
 	if restored != null:
 		_expect_equal(_downgrade_session(restored.to_dict()), source_copy, "legacy session fields must survive")
 
@@ -267,7 +267,7 @@ func _test_real_v1_json_fixture() -> void:
 	destination.store_string(payload)
 	destination.flush()
 	destination = null
-	var loaded: Dictionary = FirstDaySaveScript.load_session(_save_path)
+	var loaded: Dictionary = RunSaveScript.load_session(_save_path)
 	_expect(bool(loaded.get("ok", false)), "real v1 envelope must load: %s" % String(loaded.get("error", "")))
 	_expect(bool(loaded.get("migrated", false)), "full-chain migration must be reported")
 	_expect_equal(loaded.get("source_schema_version"), 1, "source envelope version must be reported")
@@ -292,7 +292,7 @@ func _test_real_v1_json_fixture() -> void:
 
 
 func _test_contract_mismatch_rejected() -> void:
-	var session = FirstDaySessionScript.create(_build(), 7_006)
+	var session = RunSessionScript.create(_build(), 7_006)
 	_expect(session != null, "M2 session must be created")
 	if session == null:
 		return
@@ -302,19 +302,19 @@ func _test_contract_mismatch_rejected() -> void:
 	var migration := M2SessionMigrationScript.migrate_session(mismatch)
 	_expect(not bool(migration.get("ok", true)), "location mismatch must be rejected")
 	_expect_equal(mismatch, source_copy, "failed migration must not mutate source")
-	_expect(FirstDaySessionScript.from_dict(mismatch) == null, "deserializer must reject mismatched contract")
+	_expect(RunSessionScript.from_dict(mismatch) == null, "deserializer must reject mismatched contract")
 
 
 func _test_v2_save_round_trip() -> void:
 	_cleanup_save()
-	var session = FirstDaySessionScript.create(_build(), 7_007)
+	var session = RunSessionScript.create(_build(), 7_007)
 	_expect(session != null, "M2 session must be created")
 	if session == null:
 		return
 	var expected: Dictionary = session.to_dict()
-	var saved: Dictionary = FirstDaySaveScript.save_session(session, _save_path)
+	var saved: Dictionary = RunSaveScript.save_session(session, _save_path)
 	_expect(bool(saved.get("ok", false)), "current session must save")
-	var loaded: Dictionary = FirstDaySaveScript.load_session(_save_path)
+	var loaded: Dictionary = RunSaveScript.load_session(_save_path)
 	_expect(bool(loaded.get("ok", false)), "current session must load")
 	_expect(not bool(loaded.get("migrated", true)), "current save must not report migration")
 	_expect_equal(loaded.get("schema_version"), M2SessionMigrationScript.CURRENT_VERSION, "current envelope version must be current")

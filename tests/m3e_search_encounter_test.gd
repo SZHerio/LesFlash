@@ -4,8 +4,8 @@ extends SceneTree
 ## answerable encounter, and answering it must be atomic, idempotent and must
 ## hand the zone back to the player.
 
-const SessionScript := preload("res://game/first_day/first_day_session.gd")
-const SaveScript := preload("res://game/first_day/first_day_save.gd")
+const SessionScript := preload("res://game/run/run_session.gd")
+const SaveScript := preload("res://game/run/run_save.gd")
 const Service := preload("res://game/search/search_session_service.gd")
 const Encounter := preload("res://game/events/search_encounter_command.gd")
 const RiskResolver := preload("res://game/search/search_risk_resolver.gd")
@@ -249,7 +249,7 @@ func _test_persistence() -> void:
 func _session_with_encounter(
 	seed: int,
 	build: Dictionary = {}
-) -> FirstDaySession:
+) -> RunSession:
 	var selected := _build() if build.is_empty() else build
 	var session := SessionScript.create_location_first(selected, seed)
 	if session == null:
@@ -276,11 +276,11 @@ func _session_with_encounter(
 	return session
 
 
-func _first_available_option(session: FirstDaySession) -> String:
+func _first_available_option(session: RunSession) -> String:
 	return String(_first_available_option_model(session).get("id", ""))
 
 
-func _first_available_option_model(session: FirstDaySession) -> Dictionary:
+func _first_available_option_model(session: RunSession) -> Dictionary:
 	var pending := Encounter.pending(session)
 	for raw_option: Variant in Array(Dictionary(pending.get("preview", {})).get("options", [])):
 		if raw_option is Dictionary and bool(raw_option.get("available", false)):
@@ -288,7 +288,7 @@ func _first_available_option_model(session: FirstDaySession) -> Dictionary:
 	return {}
 
 
-func _move_to(session: FirstDaySession, object_id: String, prefix: String) -> bool:
+func _move_to(session: RunSession, object_id: String, prefix: String) -> bool:
 	var plan := Service.plan_move(session, object_id, "%s:plan" % prefix)
 	_expect_ok(plan, "movement plan for %s" % object_id)
 	if not bool(plan.get("ok", false)):

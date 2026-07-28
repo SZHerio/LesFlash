@@ -2,9 +2,9 @@ extends RefCounted
 
 const InventoryStateScript := preload("res://core/inventory/inventory_state.gd")
 const InventoryTransactionScript := preload("res://core/inventory/inventory_transaction.gd")
-const SessionMigrationScript := preload("res://game/first_day/first_day_session_migration.gd")
-const FirstDaySessionScript := preload("res://game/first_day/first_day_session.gd")
-const FirstDaySaveScript := preload("res://game/first_day/first_day_save.gd")
+const SessionMigrationScript := preload("res://game/run/run_session_migration.gd")
+const RunSessionScript := preload("res://game/run/run_session.gd")
+const RunSaveScript := preload("res://game/run/run_save.gd")
 const RunStateSaveScript := preload("res://core/save/run_state_save.gd")
 
 const SESSION_V2_FIXTURE := "res://tests/fixtures/m3b_session_v2.json"
@@ -132,15 +132,15 @@ func _round_trip_run_state(state: RunState, expected_metadata: Dictionary) -> vo
 
 
 func _round_trip_session(state: RunState, expected_metadata: Dictionary) -> void:
-	var session = FirstDaySessionScript.create_location_first(_build(), 42_005)
+	var session = RunSessionScript.create_location_first(_build(), 42_005)
 	_expect(session != null, "session fixture must be created")
 	if session == null:
 		return
 	session.run_state = state.clone()
 	var path := _temporary_path("session")
-	var saved := FirstDaySaveScript.save_session(session, path)
+	var saved := RunSaveScript.save_session(session, path)
 	_expect(bool(saved.get("ok", false)), "session envelope must save metadata")
-	var loaded := FirstDaySaveScript.load_session(path)
+	var loaded := RunSaveScript.load_session(path)
 	_expect(bool(loaded.get("ok", false)), "session envelope must load metadata")
 	if bool(loaded.get("ok", false)):
 		_expect(

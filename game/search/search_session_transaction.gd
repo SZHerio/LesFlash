@@ -2,7 +2,7 @@ class_name SearchSessionTransaction
 extends RefCounted
 
 ## Shared atomic boundary for search commands. A command always edits a full
-## FirstDaySession clone and publishes it only after session validation.
+## RunSession clone and publishes it only after session validation.
 
 
 static func active_search(session: Object) -> Dictionary:

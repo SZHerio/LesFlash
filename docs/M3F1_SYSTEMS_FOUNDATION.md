@@ -21,7 +21,7 @@ M3F.1 переводит решения M3F.0 в проверяемые runtime-
 |---|---:|---:|---|
 | `RunState` | 3 | 4 | `morale → mental_state` |
 | standalone save envelope | 2 | 3 | новый `RunState` |
-| `FirstDaySession` | 4 | 5 | `WorldState`, `SocialState`, ledger команд, вложенный `EventContext v2` |
+| `RunSession` | 4 | 5 | `WorldState`, `SocialState`, ledger команд, вложенный `EventContext v2` |
 | first-day envelope | 4 | 5 | новый session payload |
 | `GameSession` | 3 | 4 | мир, социальное состояние и ledger |
 | `EventContext` | 1 | 2 | объективный мир, typed relationships, память и обязательства |

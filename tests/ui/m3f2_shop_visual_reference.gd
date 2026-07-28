@@ -21,7 +21,7 @@ func _run() -> void:
 		push_error("M3F.2 SHOP REFERENCE: session creation failed")
 		quit(1)
 		return
-	var session: FirstDaySession = adapter.get("_session")
+	var session: RunSession = adapter.get("_session")
 	session.location = "station_square"
 	session.run_state.money = 240
 	session.run_state.calendar.advance_minutes(60)

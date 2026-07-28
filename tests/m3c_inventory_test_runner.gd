@@ -3,8 +3,8 @@ extends SceneTree
 const ItemCatalogScript := preload("res://core/inventory/item_catalog.gd")
 const InventoryStateScript := preload("res://core/inventory/inventory_state.gd")
 const InventoryTransactionScript := preload("res://core/inventory/inventory_transaction.gd")
-const SessionMigration := preload("res://game/first_day/first_day_session_migration.gd")
-const FirstDaySaveScript := preload("res://game/first_day/first_day_save.gd")
+const SessionMigration := preload("res://game/run/run_session_migration.gd")
+const RunSaveScript := preload("res://game/run/run_save.gd")
 const RunStateSaveScript := preload("res://core/save/run_state_save.gd")
 const IntegritySuiteScript := preload("res://tests/m3c_inventory_integrity_suite.gd")
 const SaveIntegritySuiteScript := preload("res://tests/m3c_inventory_save_integrity_suite.gd")
@@ -192,7 +192,7 @@ func _test_v2_fixture() -> void:
 	_expect_equal(migration.get("source_schema_version"), 2, "source envelope version must be reported")
 	_expect_equal(migration.get("source_session_version"), 2, "source session version must be reported")
 	_expect_equal(migration.get("source_run_state_version"), 2, "source state version must be reported")
-	var loaded := FirstDaySaveScript.load_session(ProjectSettings.globalize_path(SESSION_V2_FIXTURE))
+	var loaded := RunSaveScript.load_session(ProjectSettings.globalize_path(SESSION_V2_FIXTURE))
 	_expect(bool(loaded.get("ok", false)), "real v2 fixture must load")
 	if not bool(loaded.get("ok", false)):
 		return

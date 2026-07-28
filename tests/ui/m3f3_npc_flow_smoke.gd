@@ -10,10 +10,10 @@ class MemoryPersistence extends SessionPersistence:
 	func has_candidates() -> bool:
 		return false
 
-	func create_session(characteristics: Dictionary, _seed: int) -> FirstDaySessionAdapter:
-		return SandboxAdapter.create(characteristics, 43_303) as FirstDaySessionAdapter
+	func create_session(characteristics: Dictionary, _seed: int) -> RunSessionAdapter:
+		return SandboxAdapter.create(characteristics, 43_303) as RunSessionAdapter
 
-	func save_session(_session: FirstDaySessionAdapter) -> Dictionary:
+	func save_session(_session: RunSessionAdapter) -> Dictionary:
 		save_calls += 1
 		return {"ok": true}
 
@@ -74,7 +74,7 @@ func _run() -> void:
 	if adapter == null or command_runner == null:
 		_finish()
 		return
-	var session: FirstDaySession = adapter.get("_session")
+	var session: RunSession = adapter.get("_session")
 	session.location = "recycling_point"
 	session.phase = "map"
 	coordinator.call("_show_location")

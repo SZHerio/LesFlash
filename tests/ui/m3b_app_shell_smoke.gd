@@ -9,13 +9,13 @@ class MemoryPersistence extends SessionPersistence:
 	func has_candidates() -> bool:
 		return false
 
-	func create_session(characteristics: Dictionary, _seed: int) -> FirstDaySessionAdapter:
-		return SandboxAdapter.create(characteristics, 41_337) as FirstDaySessionAdapter
+	func create_session(characteristics: Dictionary, _seed: int) -> RunSessionAdapter:
+		return SandboxAdapter.create(characteristics, 41_337) as RunSessionAdapter
 
 	func load_session() -> Dictionary:
 		return {"ok": false, "code": "save_not_found"}
 
-	func save_session(_session: FirstDaySessionAdapter) -> Dictionary:
+	func save_session(_session: RunSessionAdapter) -> Dictionary:
 		return {"ok": true}
 
 

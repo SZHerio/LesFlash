@@ -69,8 +69,8 @@ ItemStack
 |---|---:|---:|
 | `RunState` | 2 | 3 |
 | `GameSession` | 2 | 3 |
-| `FirstDaySession` | 2 | 3 |
-| envelope `FirstDaySave` | 2 | 3 |
+| `RunSession` | 2 | 3 |
+| envelope `RunSave` | 2 | 3 |
 | envelope `RunStateSave` | 1 | 2 |
 
 Цепочка `v1 → v2 → v3` выполняется на глубокой копии. Переход `RunState v2 → v3`:

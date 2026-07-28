@@ -1,27 +1,27 @@
-class_name FirstDaySave
+class_name RunSave
 extends RefCounted
 
-## Atomic, recoverable persistence for FirstDaySession.
+## Atomic, recoverable persistence for RunSession.
 ## A valid .tmp file is treated as an interrupted newer save and is promoted on
 ## load before the primary or .bak candidates are considered.
 
-const SCHEMA_VERSION := FirstDaySessionMigration.CURRENT_VERSION
+const SCHEMA_VERSION := RunSessionMigration.CURRENT_VERSION
 const DEFAULT_SAVE_PATH := "user://first_day_session.json"
 
-const M2SessionMigrationScript := preload("res://game/first_day/first_day_session_migration.gd")
+const M2SessionMigrationScript := preload("res://game/run/run_session_migration.gd")
 const JsonValueEquivalence := preload("res://core/save/json_value_equivalence.gd")
 
 
-static func save_session(session: FirstDaySession, path: String = DEFAULT_SAVE_PATH) -> Dictionary:
+static func save_session(session: RunSession, path: String = DEFAULT_SAVE_PATH) -> Dictionary:
 	var resolved := _resolve_path(path)
 	if not bool(resolved.get("ok", false)):
 		return resolved
 	var absolute_path := String(resolved["path"])
 	if session == null:
-		return _failure("session_is_null", "FirstDaySession cannot be null.", absolute_path)
+		return _failure("session_is_null", "RunSession cannot be null.", absolute_path)
 	var validation := session.validate()
 	if not bool(validation.get("ok", false)):
-		return _failure("session_validation_failed", "FirstDaySession is invalid and was not saved.", absolute_path, {"validation": validation})
+		return _failure("session_validation_failed", "RunSession is invalid and was not saved.", absolute_path, {"validation": validation})
 	var envelope := {
 		"schema_version": SCHEMA_VERSION,
 		"saved_at_unix": int(Time.get_unix_time_from_system()),
@@ -42,7 +42,7 @@ static func save_session(session: FirstDaySession, path: String = DEFAULT_SAVE_P
 	if FileAccess.file_exists(temporary_path):
 		var pending := _read_and_validate(temporary_path)
 		if bool(pending.get("ok", false)):
-			var pending_session := pending.get("session") as FirstDaySession
+			var pending_session := pending.get("session") as RunSession
 			if (
 				pending_session != null
 				and JsonValueEquivalence.are_equivalent(
@@ -67,7 +67,7 @@ static func save_session(session: FirstDaySession, path: String = DEFAULT_SAVE_P
 						{"cause": promotion}
 					)
 				var promoted := _read_and_validate(absolute_path)
-				var promoted_session := promoted.get("session") as FirstDaySession
+				var promoted_session := promoted.get("session") as RunSession
 				if (
 					not bool(promoted.get("ok", false))
 					or promoted_session == null
@@ -273,9 +273,9 @@ static func _parse_and_validate(payload: String, source_path: String) -> Diction
 			{"migration": migration, "actual": int(schema)}
 		)
 	var current_envelope: Dictionary = migration["data"]
-	var session := FirstDaySession.from_dict(current_envelope["session"])
+	var session := RunSession.from_dict(current_envelope["session"])
 	if session == null:
-		return _failure("session_deserialization_failed", "FirstDaySession could not be reconstructed.", source_path)
+		return _failure("session_deserialization_failed", "RunSession could not be reconstructed.", source_path)
 	var validation := session.validate()
 	if not bool(validation.get("ok", false)):
 		return _failure("loaded_session_validation_failed", "The reconstructed session is invalid.", source_path, {"validation": validation})
@@ -283,7 +283,7 @@ static func _parse_and_validate(payload: String, source_path: String) -> Diction
 		"path": source_path,
 		"schema_version": SCHEMA_VERSION,
 		"source_schema_version": int(migration.get("source_schema_version", schema)),
-		"source_session_version": int(migration.get("source_session_version", FirstDaySession.SESSION_VERSION)),
+		"source_session_version": int(migration.get("source_session_version", RunSession.SESSION_VERSION)),
 		"source_run_state_version": int(migration.get("source_run_state_version", GameRules.SAVE_VERSION)),
 		"migrated": bool(migration.get("migrated", false)),
 		"saved_at_unix": current_envelope.get("saved_at_unix", null),

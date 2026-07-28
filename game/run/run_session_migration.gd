@@ -1,4 +1,4 @@
-class_name FirstDaySessionMigration
+class_name RunSessionMigration
 extends RefCounted
 
 ## Explicit, non-destructive migration for the legacy first-day save chain.
@@ -49,7 +49,7 @@ static func migrate_envelope(raw: Dictionary) -> Dictionary:
 	if not bool(session_result.get("ok", false)):
 		return _failure(
 			"session_migration_failed",
-			"FirstDaySession migration failed.",
+			"RunSession migration failed.",
 			{"cause": session_result}
 		)
 	var migrated := raw.duplicate(true)
@@ -73,12 +73,12 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 	if int(source_version) not in SUPPORTED_VERSIONS:
 		return _failure(
 			"unsupported_session_version",
-			"FirstDaySession version is unsupported.",
+			"RunSession version is unsupported.",
 			{"actual": int(source_version)}
 		)
 	if typeof(raw.get("run_state", null)) != TYPE_DICTIONARY:
 		return _failure("invalid_run_state_payload", "Session does not contain a RunState object.")
-	var state_result := RunState.migrate_serialized(raw["run_state"])
+	var state_result := RunStateMigration.migrate(raw["run_state"])
 	if not bool(state_result.get("ok", false)):
 		return _failure(
 			"run_state_migration_failed",
@@ -156,7 +156,7 @@ static func migrate_session(raw: Dictionary) -> Dictionary:
 	if current_version != CURRENT_VERSION:
 		return _failure(
 			"session_migration_incomplete",
-			"FirstDaySession migration did not reach the current version."
+			"RunSession migration did not reach the current version."
 		)
 	migrated["session_version"] = CURRENT_VERSION
 	migrated["run_state"] = state_result["data"]

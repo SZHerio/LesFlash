@@ -1231,7 +1231,7 @@ func _district_graph(adapter: Object) -> Dictionary:
 		graph[String(Dictionary(raw_location).get("id", ""))] = []
 	# The map read-model only exposes routes out of the current place, so the
 	# graph is completed from the authored district instead.
-	var content = load("res://game/first_day/first_day_content.gd")
+	var content = load("res://game/district/district_content.gd")
 	for location_id: String in Dictionary(content.locations()):
 		var place: Dictionary = Dictionary(content.locations())[location_id]
 		var exits: Array[String] = []

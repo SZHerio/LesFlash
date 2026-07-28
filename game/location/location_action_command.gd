@@ -1,10 +1,10 @@
-class_name FirstDayLocationActionCommand
+class_name LocationActionCommand
 extends RefCounted
 
 const ActionService := preload("res://game/location/location_action_service.gd")
 
 
-static func execute(session: FirstDaySession, action_id: String) -> Dictionary:
+static func execute(session: RunSession, action_id: String) -> Dictionary:
 	if session == null:
 		return _failure("missing_session", "Игровая попытка отсутствует")
 	if session.day_completed or session.phase != "map":

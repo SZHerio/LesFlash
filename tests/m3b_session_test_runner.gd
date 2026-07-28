@@ -1,6 +1,6 @@
 extends SceneTree
 
-const LegacySession := preload("res://game/first_day/first_day_session.gd")
+const LegacySession := preload("res://game/run/run_session.gd")
 const SandboxAdapter := preload("res://app/session/sandbox_session_adapter.gd")
 const CityMapModels := preload("res://app/map/city_map_view_model.gd")
 

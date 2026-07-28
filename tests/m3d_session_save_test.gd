@@ -1,12 +1,12 @@
 extends SceneTree
 
-const SessionScript := preload("res://game/first_day/first_day_session.gd")
-const MigrationScript := preload("res://game/first_day/first_day_session_migration.gd")
-const SaveScript := preload("res://game/first_day/first_day_save.gd")
+const SessionScript := preload("res://game/run/run_session.gd")
+const MigrationScript := preload("res://game/run/run_session_migration.gd")
+const SaveScript := preload("res://game/run/run_save.gd")
 const CatalogScript := preload("res://game/search/search_zone_catalog.gd")
 const GeneratorScript := preload("res://game/search/search_snapshot_generator.gd")
 const LocationActionService := preload("res://game/location/location_action_service.gd")
-const LocationActionCommand := preload("res://game/location/first_day_location_action_command.gd")
+const LocationActionCommand := preload("res://game/location/location_action_command.gd")
 
 const V3_FIXTURE := "res://tests/fixtures/m3c_session_v3.json"
 const SAVE_PATH := "user://m3d_session_v4_test.json"
@@ -79,7 +79,7 @@ func _test_v3_fixture() -> void:
 	if restored != null:
 		_expect_equal(restored.run_state.get_item_count("legacy_mystery"), 4, "inventory survives v3→v4")
 	var loaded := SaveScript.load_session(ProjectSettings.globalize_path(V3_FIXTURE))
-	_expect(bool(loaded.get("ok", false)), "real v3 envelope must load through FirstDaySave")
+	_expect(bool(loaded.get("ok", false)), "real v3 envelope must load through RunSave")
 	_expect_equal(loaded.get("source_schema_version"), 3, "load reports v3 envelope")
 	_expect_equal(loaded.get("source_session_version"), 3, "load reports v3 session")
 
@@ -214,7 +214,7 @@ func _test_replace_from() -> void:
 	_expect_equal(target.to_dict(), before, "failed replace must be atomic")
 
 
-func _session_with_search(seed: int) -> FirstDaySession:
+func _session_with_search(seed: int) -> RunSession:
 	if _template.is_empty():
 		_expect(false, "search template must load")
 		return null
@@ -241,7 +241,7 @@ func _session_with_search(seed: int) -> FirstDaySession:
 	return session if bool(replaced.get("ok", false)) else null
 
 
-func _as_v3(session: FirstDaySession) -> Dictionary:
+func _as_v3(session: RunSession) -> Dictionary:
 	var result := session.to_dict()
 	result["session_version"] = 3
 	result["active_activity"] = session.get_active_activity()

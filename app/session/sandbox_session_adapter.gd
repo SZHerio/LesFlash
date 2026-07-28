@@ -1,5 +1,5 @@
 class_name SandboxSessionAdapter
-extends FirstDaySessionAdapter
+extends RunSessionAdapter
 
 ## Product-facing session façade for the location-first sandbox.
 ##
@@ -8,8 +8,6 @@ extends FirstDaySessionAdapter
 ## base screen, ordinary events are not exposed as permanent action buttons,
 ## and travel is described before it is confirmed.
 
-const LegacySessionScript := preload("res://game/first_day/first_day_session.gd")
-const LegacySaveScript := preload("res://game/first_day/first_day_save.gd")
 const WeekCityMapModelScript := preload("res://app/map/week_city_map_model.gd")
 const WeekInventoryBoundary := preload("res://app/session/week_inventory_session_boundary.gd")
 const WeekFacade := preload("res://app/session/week_session_facade.gd")
@@ -19,15 +17,15 @@ const EncounterCommand := preload("res://game/events/search_encounter_command.gd
 const HeroModels := preload("res://app/hero/hero_view_model.gd")
 
 static func create(characteristics: Dictionary, seed: int) -> RefCounted:
-	var session := LegacySessionScript.create_location_first(characteristics, seed)
+	var session := RunSessionScript.create_location_first(characteristics, seed)
 	if session == null:
 		return null
 	var adapter_script: Script = load("res://app/session/sandbox_session_adapter.gd")
 	return adapter_script.new(session)
 
 
-static func load_session(path: String = FirstDaySave.DEFAULT_SAVE_PATH) -> Dictionary:
-	var result: Dictionary = LegacySaveScript.load_session(path)
+static func load_session(path: String = RunSave.DEFAULT_SAVE_PATH) -> Dictionary:
+	var result: Dictionary = RunSaveScript.load_session(path)
 	if bool(result.get("ok", false)):
 		var adapter_script: Script = load("res://app/session/sandbox_session_adapter.gd")
 		result["adapter"] = adapter_script.new(result.get("session"))
@@ -269,6 +267,16 @@ func resolve_job_shift_step(choice_id: String) -> Dictionary:
 	))
 
 
+func obtain_qualification(qualification_id: String) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.obtain_qualification(
+		_session,
+		qualification_id,
+		_session.flow_revision
+	))
+
+
 func _finish_week_command(result: Dictionary) -> Dictionary:
 	if (
 		bool(result.get("ok", false))
@@ -397,5 +405,5 @@ func _missing_sandbox_session() -> Dictionary:
 	return {
 		"ok": false,
 		"code": "missing_session",
-		"error": "FirstDaySession is not attached.",
+		"error": "RunSession is not attached.",
 	}

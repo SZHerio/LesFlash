@@ -53,6 +53,13 @@ func _on_action_requested(_action_id: String, action_model: Dictionary) -> void:
 			_show_npc(action_model)
 		"job_shift":
 			_show_job_shift()
+		"qualification":
+			var intent: Dictionary = Dictionary(action_model.get("intent", {}))
+			var payload: Dictionary = Dictionary(intent.get("payload", {}))
+			_hook("run_command").call(
+				_session.obtain_qualification.bind(String(payload.get("qualification_id", ""))),
+				true
+			)
 		"recycling":
 			_hook("recycling").call()
 		"wait":

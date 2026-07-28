@@ -7,7 +7,7 @@ extends RefCounted
 
 const SCHEMA_VERSION := 1
 const DEFAULT_PATH := "res://game/location/data/location_actions_v1.json"
-const FirstDayContentScript := preload("res://game/first_day/first_day_content.gd")
+const DistrictContentScript := preload("res://game/district/district_content.gd")
 const CATEGORY_ICON_IDS := {
 	"observe": &"action_observe",
 	"search": &"action_search",
@@ -29,7 +29,7 @@ static func load_path(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return _failure("Не удалось открыть каталог локальных действий: %s" % path)
-	var parsed: Variant = _normalize_json_numbers(JSON.parse_string(file.get_as_text()))
+	var parsed: Variant = SerializedValue.normalize_json_numbers(JSON.parse_string(file.get_as_text()))
 	if not parsed is Dictionary:
 		return _failure("Каталог локальных действий не является JSON-объектом")
 	var catalog: Dictionary = parsed
@@ -99,7 +99,7 @@ static func validate(catalog: Dictionary) -> Dictionary:
 		if duration <= 0:
 			errors.append("%s: duration_minutes должен быть положительным" % prefix)
 		_append_semantic_errors(
-			FirstDayContentScript.validate_condition_packet(
+			DistrictContentValidator.validate_condition_packet(
 				action.get("conditions", []),
 				"%s.conditions" % prefix
 			),
@@ -107,7 +107,7 @@ static func validate(catalog: Dictionary) -> Dictionary:
 		)
 		_validate_time_windows(action.get("time_windows", []), prefix, errors)
 		_append_semantic_errors(
-			FirstDayContentScript.validate_effect_packet(
+			DistrictContentValidator.validate_effect_packet(
 				action.get("effects", []),
 				"%s.effects" % prefix
 			),
@@ -167,26 +167,6 @@ static func _validate_time_windows(
 static func _append_semantic_errors(validation: Dictionary, errors: Array[String]) -> void:
 	for raw_error: Variant in Array(validation.get("errors", [])):
 		errors.append(String(raw_error))
-
-
-static func _normalize_json_numbers(value: Variant, depth: int = 0) -> Variant:
-	if depth > 64:
-		return value
-	match typeof(value):
-		TYPE_FLOAT:
-			return int(value) if is_equal_approx(float(value), roundf(float(value))) else value
-		TYPE_ARRAY:
-			var normalized_array: Array = []
-			for item: Variant in value:
-				normalized_array.append(_normalize_json_numbers(item, depth + 1))
-			return normalized_array
-		TYPE_DICTIONARY:
-			var normalized_dictionary: Dictionary = {}
-			for key: Variant in value:
-				normalized_dictionary[key] = _normalize_json_numbers(value[key], depth + 1)
-			return normalized_dictionary
-		_:
-			return value
 
 
 static func _failure(message: String) -> Dictionary:

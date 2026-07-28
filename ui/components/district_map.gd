@@ -3,7 +3,7 @@ extends Control
 
 ## Lightweight, touch-first map for the first-day district.
 ## Spatial coordinates belong to presentation only; gameplay routes always come
-## from FirstDaySession.get_map_model().
+## from RunSession.get_map_model().
 
 signal location_selected(location_id: String)
 

@@ -1,9 +1,9 @@
 extends SceneTree
 
 const RunSave := preload("res://core/save/run_state_save.gd")
-const FirstDaySessionScript := preload("res://game/first_day/first_day_session.gd")
-const FirstDayMigration := preload("res://game/first_day/first_day_session_migration.gd")
-const FirstDaySave := preload("res://game/first_day/first_day_save.gd")
+const RunSessionScript := preload("res://game/run/run_session.gd")
+const RunMigration := preload("res://game/run/run_session_migration.gd")
+const RunSessionSave := preload("res://game/run/run_save.gd")
 const EventContextScript := preload("res://game/events/event_context.gd")
 const EventCatalogScript := preload("res://game/events/event_catalog.gd")
 const SearchCatalog := preload("res://game/search/search_zone_catalog.gd")
@@ -62,7 +62,7 @@ func _test_fresh_start() -> void:
 	_expect(not state.meters.has("morale"), "legacy meter is absent")
 	_expect_equal(state.money, 0, "no starting money")
 	_expect(InventoryStateScript.all_stacks(state.inventory).is_empty(), "no starting items")
-	var session := FirstDaySessionScript.create_location_first(_build(), 1_980_111)
+	var session := RunSessionScript.create_location_first(_build(), 1_980_111)
 	_expect(session != null, "fresh sandbox session starts")
 	if session != null:
 		_expect_equal(session.world_state.metrics.size(), 5, "fresh session receives world defaults")
@@ -72,7 +72,7 @@ func _test_fresh_start() -> void:
 func _test_run_state_fixture() -> void:
 	var source := _read_json(RUN_V2_FIXTURE)
 	var before := JSON.stringify(source)
-	var migration := RunState.migrate_serialized(Dictionary(source.get("run_state", {})))
+	var migration := RunStateMigration.migrate(Dictionary(source.get("run_state", {})))
 	_expect(bool(migration.get("ok", false)), "RunState v3 migrates: %s" % str(migration))
 	_expect_equal(JSON.stringify(source), before, "migration does not mutate parsed source")
 	if not bool(migration.get("ok", false)):
@@ -95,21 +95,21 @@ func _test_run_state_fixture() -> void:
 func _test_session_fixture() -> void:
 	var source := _read_json(SESSION_V4_FIXTURE)
 	var before := JSON.stringify(source)
-	var migration := FirstDayMigration.migrate_envelope(source)
+	var migration := RunMigration.migrate_envelope(source)
 	_expect(bool(migration.get("ok", false)), "v4 envelope migrates: %s" % str(migration))
 	_expect_equal(JSON.stringify(source), before, "session migration deep-copies its source")
 	if not bool(migration.get("ok", false)):
 		return
 	var data: Dictionary = migration["data"]
-	_expect_equal(data.get("schema_version"), FirstDayMigration.CURRENT_VERSION, "envelope reaches the current version")
-	_expect_equal(data["session"].get("session_version"), FirstDayMigration.CURRENT_VERSION, "session reaches the current version")
+	_expect_equal(data.get("schema_version"), RunMigration.CURRENT_VERSION, "envelope reaches the current version")
+	_expect_equal(data["session"].get("session_version"), RunMigration.CURRENT_VERSION, "session reaches the current version")
 	_expect_equal(data["session"]["run_state"].get("save_version"), GameRules.SAVE_VERSION, "nested RunState reaches the current version")
 	_expect_equal(data["session"]["run_state"]["calendar"]["stamp"]["year"], 1970, "legacy calendar is preserved")
 	_expect(data["session"].has("world_state"), "world state is added")
 	_expect(data["session"].has("social_state"), "social state is added")
 	_expect(data["session"].has("survival_state"), "survival state is added")
 	_expect_equal(data["session"].get("applied_command_ids"), {}, "command ledger starts empty")
-	var loaded := FirstDaySave.load_session(ProjectSettings.globalize_path(SESSION_V4_FIXTURE))
+	var loaded := RunSessionSave.load_session(ProjectSettings.globalize_path(SESSION_V4_FIXTURE))
 	_expect(bool(loaded.get("ok", false)), "previous full envelope loads: %s" % str(loaded))
 	_expect_equal(loaded.get("source_schema_version"), 4, "source envelope reported")
 	_expect_equal(loaded.get("source_session_version"), 4, "source session reported")
@@ -122,7 +122,7 @@ func _test_m3f2_session_fixture() -> void:
 	_expect_equal(Dictionary(source.get("session", {})).get("session_version"), 5, "fixture is a previous v5 session")
 	_expect(not Dictionary(source.get("session", {})).has("survival_state"), "v5 fixture predates survival state")
 	var before := source.duplicate(true)
-	var migration := FirstDayMigration.migrate_envelope(source)
+	var migration := RunMigration.migrate_envelope(source)
 	_expect(bool(migration.get("ok", false)), "v5 envelope migrates: %s" % str(migration))
 	_expect_equal(source, before, "v5 migration does not mutate its source")
 	_expect_equal(migration.get("source_schema_version"), 5, "v5 source envelope is reported")
@@ -130,14 +130,14 @@ func _test_m3f2_session_fixture() -> void:
 	if bool(migration.get("ok", false)):
 		var migrated: Dictionary = migration["data"]
 		var migrated_session: Dictionary = migrated["session"]
-		_expect_equal(migrated.get("schema_version"), FirstDayMigration.CURRENT_VERSION, "v5 envelope reaches the current version")
-		_expect_equal(migrated_session.get("session_version"), FirstDayMigration.CURRENT_VERSION, "v5 session reaches the current version")
+		_expect_equal(migrated.get("schema_version"), RunMigration.CURRENT_VERSION, "v5 envelope reaches the current version")
+		_expect_equal(migrated_session.get("session_version"), RunMigration.CURRENT_VERSION, "v5 session reaches the current version")
 		_expect_equal(migrated_session["run_state"]["calendar"]["stamp"]["year"], 1970, "recorded 1970 calendar survives")
 		_expect_equal(migrated_session["run_state"]["birth_date"]["year"], 1952, "recorded birth year survives")
 		_expect_equal(migrated_session["run_state"]["rng"]["seed"], "1970180001", "recorded RNG survives")
 		_expect_equal(migrated_session["survival_state"].get("processed_elapsed_minutes"), 0, "survival starts at recorded elapsed time")
 
-	var loaded := FirstDaySave.load_session(ProjectSettings.globalize_path(SESSION_V5_FIXTURE))
+	var loaded := RunSessionSave.load_session(ProjectSettings.globalize_path(SESSION_V5_FIXTURE))
 	_expect(bool(loaded.get("ok", false)), "v5 fixture loads: %s" % str(loaded))
 	_expect_equal(loaded.get("source_schema_version"), 5, "load reports v5 envelope")
 	_expect_equal(loaded.get("source_session_version"), 5, "load reports v5 session")
@@ -147,7 +147,7 @@ func _test_m3f2_session_fixture() -> void:
 	var invalid := source.duplicate(true)
 	invalid["session"]["social_state"] = {}
 	var invalid_before := invalid.duplicate(true)
-	var rejected := FirstDayMigration.migrate_envelope(invalid)
+	var rejected := RunMigration.migrate_envelope(invalid)
 	_expect(not bool(rejected.get("ok", true)), "invalid v5 payload is rejected")
 	_expect_equal(invalid, invalid_before, "failed v5 migration leaves source untouched")
 
@@ -163,7 +163,7 @@ func _test_m3f4_session_fixture() -> void:
 	_expect_equal(source_session.get("phase"), "job", "v7 fixture sits inside the removed job phase")
 	_expect(source_session.has("job_state"), "v7 fixture still carries the legacy job_state")
 	var before := source.duplicate(true)
-	var migration := FirstDayMigration.migrate_envelope(source)
+	var migration := RunMigration.migrate_envelope(source)
 	_expect(bool(migration.get("ok", false)), "v7 envelope migrates: %s" % str(migration))
 	_expect_equal(source, before, "v7 migration does not mutate its source")
 	_expect_equal(migration.get("source_session_version"), 7, "v7 source session is reported")
@@ -171,7 +171,7 @@ func _test_m3f4_session_fixture() -> void:
 		var migrated_session: Dictionary = Dictionary(migration["data"])["session"]
 		_expect_equal(
 			migrated_session.get("session_version"),
-			FirstDayMigration.CURRENT_VERSION,
+			RunMigration.CURRENT_VERSION,
 			"v7 session reaches the current version"
 		)
 		_expect_equal(migrated_session.get("phase"), "map", "the interrupted shift returns to the yard")
@@ -183,7 +183,7 @@ func _test_m3f4_session_fixture() -> void:
 		)
 		_expect(migrated_session.has("job_work_state"), "the modern shift state is present")
 
-	var loaded := FirstDaySave.load_session(ProjectSettings.globalize_path(SESSION_V7_FIXTURE))
+	var loaded := RunSessionSave.load_session(ProjectSettings.globalize_path(SESSION_V7_FIXTURE))
 	_expect(bool(loaded.get("ok", false)), "v7 fixture loads: %s" % str(loaded))
 	if bool(loaded.get("ok", false)):
 		var session = loaded["session"]
@@ -193,7 +193,7 @@ func _test_m3f4_session_fixture() -> void:
 
 	var inconsistent := source.duplicate(true)
 	inconsistent["session"]["job_state"] = {"active": false}
-	var rejected := FirstDayMigration.migrate_envelope(inconsistent)
+	var rejected := RunMigration.migrate_envelope(inconsistent)
 	_expect(not bool(rejected.get("ok", true)), "a job phase without an active shift is refused, not guessed")
 
 
@@ -202,7 +202,7 @@ func _test_ambiguous_meter() -> void:
 	source["save_version"] = 3
 	source["meters"]["morale"] = source["meters"]["mental_state"]
 	var before := source.duplicate(true)
-	var migration := RunState.migrate_serialized(source)
+	var migration := RunStateMigration.migrate(source)
 	_expect(not bool(migration.get("ok", true)), "ambiguous state is rejected")
 	_expect_equal(migration.get("code"), "ambiguous_mental_state", "failure is diagnostic")
 	_expect_equal(source, before, "failed migration leaves source intact")
@@ -229,7 +229,7 @@ func _test_nested_context_migration() -> void:
 	_expect(bool(loaded.get("ok", false)), "search template loads")
 	if not bool(loaded.get("ok", false)):
 		return
-	var session := FirstDaySessionScript.create_location_first(_build(), 19_803)
+	var session := RunSessionScript.create_location_first(_build(), 19_803)
 	_expect(session != null, "legacy session fixture starts")
 	if session == null:
 		return
@@ -257,7 +257,7 @@ func _test_nested_context_migration() -> void:
 	legacy_session.erase("applied_command_ids")
 	legacy_session["run_state"] = _as_run_state_v3(legacy_session["run_state"])
 	var before := legacy_session.duplicate(true)
-	var migration := FirstDayMigration.migrate_session(legacy_session)
+	var migration := RunMigration.migrate_session(legacy_session)
 	_expect(bool(migration.get("ok", false)), "nested contexts migrate: %s" % str(migration))
 	_expect_equal(legacy_session, before, "nested migration is non-destructive")
 	if not bool(migration.get("ok", false)):

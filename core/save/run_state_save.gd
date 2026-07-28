@@ -498,7 +498,7 @@ static func _parse_and_validate(payload: String, source_path: String) -> Diction
 			source_path
 		)
 
-	var state_migration := RunState.migrate_serialized(envelope.run_state)
+	var state_migration := RunStateMigration.migrate(envelope.run_state)
 	if not bool(state_migration.get("ok", false)):
 		return _failure(
 			"run_state_migration_failed",

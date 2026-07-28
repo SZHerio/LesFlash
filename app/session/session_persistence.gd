@@ -20,8 +20,8 @@ func has_candidates() -> bool:
 	return bool(_has_candidates.call())
 
 
-func create_session(characteristics: Dictionary, seed: int) -> FirstDaySessionAdapter:
-	return _create_session.call(characteristics, seed) as FirstDaySessionAdapter
+func create_session(characteristics: Dictionary, seed: int) -> RunSessionAdapter:
+	return _create_session.call(characteristics, seed) as RunSessionAdapter
 
 
 func load_session() -> Dictionary:
@@ -33,7 +33,7 @@ func load_session() -> Dictionary:
 	}
 
 
-func save_session(session: FirstDaySessionAdapter) -> Dictionary:
+func save_session(session: RunSessionAdapter) -> Dictionary:
 	if session == null:
 		return {"ok": true}
 	if _save_in_progress:

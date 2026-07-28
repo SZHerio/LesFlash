@@ -1,7 +1,7 @@
 class_name SearchSessionState
 extends RefCounted
 
-## Validation boundary for search state persisted by FirstDaySession.
+## Validation boundary for search state persisted by RunSession.
 ## Search snapshots are accepted only when the matching authored template is
 ## available and the snapshot validator accepts that exact template version.
 
@@ -23,7 +23,7 @@ static func normalize_activity(value: Variant) -> Dictionary:
 	var kind := String(normalized.get("kind", ""))
 	if kind not in [GameSessionScript.NO_ACTIVITY_KIND, SEARCH_KIND]:
 		return {}
-	normalized["snapshot"] = _normalize_json_numbers(normalized["snapshot"])
+	normalized["snapshot"] = SerializedValue.normalize_json_numbers(normalized["snapshot"])
 	return normalized
 
 
@@ -73,34 +73,11 @@ static func normalized_zone_states(value: Dictionary) -> Dictionary:
 	for raw_key: Variant in keys:
 		var raw_value: Variant = value[raw_key]
 		result[String(raw_key)] = (
-			_normalize_json_numbers(Dictionary(raw_value).duplicate(true))
+			SerializedValue.normalize_json_numbers(Dictionary(raw_value).duplicate(true))
 			if raw_value is Dictionary
 			else raw_value
 		)
 	return result
-
-
-static func _normalize_json_numbers(value: Variant, depth: int = 0) -> Variant:
-	if depth > 64:
-		return value
-	if (
-		value is float
-		and is_finite(float(value))
-		and value == floor(value)
-		and absf(float(value)) <= float(GameRules.JSON_SAFE_INTEGER_MAX)
-	):
-		return int(value)
-	if value is Array:
-		var array: Array = []
-		for item: Variant in value:
-			array.append(_normalize_json_numbers(item, depth + 1))
-		return array
-	if value is Dictionary:
-		var dictionary: Dictionary = {}
-		for key: Variant in value:
-			dictionary[key] = _normalize_json_numbers(value[key], depth + 1)
-		return dictionary
-	return value
 
 
 ## Every authored zone, so a save made in one yard reopens even while the hero

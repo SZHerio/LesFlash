@@ -9,7 +9,7 @@ extends SceneTree
 ## far above the readability floor on all of them.
 
 const AppShellScene := preload("res://app/app_shell.tscn")
-const LegacySession := preload("res://game/first_day/first_day_session.gd")
+const LegacySession := preload("res://game/run/run_session.gd")
 const SandboxAdapterScript := preload("res://app/session/sandbox_session_adapter.gd")
 const TokensScript := preload("res://ui/theme/tokens.gd")
 const ColourSpace := preload("res://ui/theme/colour_space.gd")
@@ -23,19 +23,19 @@ const MONTH_NAMES := [
 const TEXT := Color("#f4efe4")
 
 class MemoryPersistence extends SessionPersistence:
-	var session: FirstDaySession
+	var session: RunSession
 
 	func has_candidates() -> bool:
 		return false
 
-	func create_session(characteristics: Dictionary, _seed: int) -> FirstDaySessionAdapter:
+	func create_session(characteristics: Dictionary, _seed: int) -> RunSessionAdapter:
 		session = LegacySession.create_location_first(characteristics, 74_112)
 		return SandboxAdapterScript.new(session)
 
 	func load_session() -> Dictionary:
 		return {"ok": false, "code": "save_not_found"}
 
-	func save_session(_session: FirstDaySessionAdapter) -> Dictionary:
+	func save_session(_session: RunSessionAdapter) -> Dictionary:
 		return {"ok": true}
 
 

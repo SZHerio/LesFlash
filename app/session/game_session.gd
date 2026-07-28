@@ -87,7 +87,7 @@ static func normalize_activity(value: Variant) -> Dictionary:
 	elif identifier.is_empty():
 		return {}
 	var errors: Array[String] = []
-	_validate_json_value(snapshot, "active_activity.snapshot", errors)
+	SerializedValue.validate_json_value(snapshot, "active_activity.snapshot", errors)
 	if not errors.is_empty():
 		return {}
 	return {
@@ -191,7 +191,7 @@ func to_dict() -> Dictionary:
 
 
 static func from_dict(data: Dictionary) -> GameSession:
-	var version: Variant = _parse_integral(data.get("session_version", null))
+	var version: Variant = SerializedValue.parse_integral(data.get("session_version", null))
 	if version == null or int(version) not in [LEGACY_CONTRACT_VERSION, 3, PREVIOUS_CONTRACT_VERSION, CONTRACT_VERSION]:
 		return null
 	if typeof(data.get("run_state", null)) != TYPE_DICTIONARY:
@@ -304,44 +304,3 @@ static func _validate_command_ids(value: Variant, errors: Array[String]) -> void
 		if typeof(raw_id) != TYPE_STRING or String(raw_id).strip_edges().is_empty() or not Dictionary(value)[raw_id] is Dictionary:
 			errors.append("applied_command_ids contains an invalid entry")
 
-
-static func _parse_integral(value: Variant) -> Variant:
-	if typeof(value) == TYPE_INT:
-		return value
-	if typeof(value) != TYPE_FLOAT:
-		return null
-	var numeric := float(value)
-	if not is_finite(numeric) or numeric != floor(numeric):
-		return null
-	return int(numeric)
-
-
-static func _validate_json_value(
-	value: Variant,
-	path: String,
-	errors: Array[String],
-	depth: int = 0
-) -> void:
-	if depth > 32:
-		errors.append("%s exceeds maximum nesting depth" % path)
-		return
-	match typeof(value):
-		TYPE_NIL, TYPE_BOOL, TYPE_STRING:
-			return
-		TYPE_INT:
-			if abs(float(value)) > float(GameRules.JSON_SAFE_INTEGER_MAX):
-				errors.append("%s contains an inexact integer" % path)
-		TYPE_FLOAT:
-			if not is_finite(float(value)):
-				errors.append("%s contains a non-finite number" % path)
-		TYPE_ARRAY:
-			for index in range(value.size()):
-				_validate_json_value(value[index], "%s[%d]" % [path, index], errors, depth + 1)
-		TYPE_DICTIONARY:
-			for key in value:
-				if typeof(key) != TYPE_STRING:
-					errors.append("%s contains a non-string key" % path)
-					continue
-				_validate_json_value(value[key], "%s.%s" % [path, key], errors, depth + 1)
-		_:
-			errors.append("%s contains unsupported type %s" % [path, type_string(typeof(value))])

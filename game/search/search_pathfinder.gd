@@ -41,8 +41,13 @@ static func find_path(template: Dictionary, start_id: String, goal_id: String) -
 
 	var node_path: Array[String] = [goal_id]
 	var cursor := goal_id
+	# Dijkstra cannot produce a loop in `previous`, but a saved graph can arrive
+	# holding one. Walking it would never reach the start, so the walk is bounded
+	# by the node count rather than trusted to terminate on its own.
+	var steps_allowed := positions.size() + 1
 	while cursor != start_id:
-		if not previous.has(cursor):
+		steps_allowed -= 1
+		if not previous.has(cursor) or steps_allowed <= 0:
 			return _failure("unreachable", ["Не удалось восстановить путь"])
 		cursor = String(previous[cursor])
 		node_path.push_front(cursor)

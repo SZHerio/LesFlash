@@ -51,6 +51,12 @@ static func location_actions(
 			reasons.append("На сегодня смены разобраны")
 		elif not CommandScript.can_begin_today(session, job_id):
 			reasons.append("Сегодняшняя смена уже отработана")
+		else:
+			# Rule 3.4: the reason is what a supervisor would say, not the id of
+			# the document the code is checking for.
+			var paper := String(posting.get("required_qualification_id", ""))
+			if not paper.is_empty() and not session.get("run_state").holds_qualification(paper):
+				reasons.append("Без нужной бумаги к товару не поставят")
 	var available := reasons.is_empty()
 	if not available and not include_blocked:
 		return result

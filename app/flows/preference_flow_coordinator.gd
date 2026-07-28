@@ -23,7 +23,7 @@ func _init(
 	_screens = screens
 
 
-func change(key: String, value: Variant, session: FirstDaySessionAdapter) -> void:
+func change(key: String, value: Variant, session: RunSessionAdapter) -> void:
 	if session != null and not _lifecycle.ensure_durable(session):
 		return
 	if not _preferences.apply(key, value):
@@ -37,14 +37,14 @@ func change(key: String, value: Variant, session: FirstDaySessionAdapter) -> voi
 		_lifecycle.save(session)
 
 
-func apply_visual(session: FirstDaySessionAdapter) -> void:
+func apply_visual(session: RunSessionAdapter) -> void:
 	_shell.set_font_scale(_preferences.font_scale)
 	_shell.set_reduced_motion(_preferences.reduced_motion)
 	if session != null:
 		_screens.apply_session_ambience(session.get_shell_model(), _preferences.to_model())
 
 
-func apply_to_session(session: FirstDaySessionAdapter) -> void:
+func apply_to_session(session: RunSessionAdapter) -> void:
 	if session == null:
 		return
 	session.set_setting("show_locked_options", _preferences.show_locked_options)

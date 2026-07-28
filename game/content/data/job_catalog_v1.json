@@ -222,7 +222,9 @@
       "organization_id": "org_riverside_market",
       "location_id": "market",
       "supervisor_npc_id": "npc_tamara_roven",
-      "qualification_ids": [],
+      "qualification_ids": [
+        "qual_sanitary_book"
+      ],
       "task_class_ids": [
         "task_market_receive_delivery",
         "task_market_stack_produce",

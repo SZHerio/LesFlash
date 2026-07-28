@@ -88,9 +88,9 @@ func to_dict() -> Dictionary:
 
 
 static func from_dict(data: Dictionary) -> SurvivalState:
-	var schema: Variant = _parse_integral(data.get("schema_version", null))
-	var start: Variant = _parse_integral(data.get("start_elapsed_minutes", null))
-	var processed: Variant = _parse_integral(data.get("processed_elapsed_minutes", null))
+	var schema: Variant = SerializedValue.parse_integral(data.get("schema_version", null))
+	var start: Variant = SerializedValue.parse_integral(data.get("start_elapsed_minutes", null))
+	var processed: Variant = SerializedValue.parse_integral(data.get("processed_elapsed_minutes", null))
 	if schema == null or int(schema) != SCHEMA_VERSION or start == null or processed == null:
 		return null
 	if not data.get("remainders", null) is Dictionary:
@@ -105,7 +105,7 @@ static func from_dict(data: Dictionary) -> SurvivalState:
 	if raw_remainders.size() != REMAINDER_KEYS.size():
 		return null
 	for key: String in REMAINDER_KEYS:
-		var value: Variant = _parse_integral(raw_remainders.get(key, null))
+		var value: Variant = SerializedValue.parse_integral(raw_remainders.get(key, null))
 		if value == null:
 			return null
 		parsed_remainders[key] = int(value)
@@ -182,10 +182,3 @@ static func _empty_remainders() -> Dictionary:
 		result[key] = 0
 	return result
 
-
-static func _parse_integral(value: Variant) -> Variant:
-	if typeof(value) == TYPE_INT:
-		return int(value)
-	if typeof(value) == TYPE_FLOAT and is_finite(float(value)) and floor(float(value)) == float(value):
-		return int(value)
-	return null

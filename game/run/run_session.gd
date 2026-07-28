@@ -1,4 +1,4 @@
-class_name FirstDaySession
+class_name RunSession
 extends RefCounted
 
 ## Serializable orchestration for the complete first-day vertical slice.
@@ -12,14 +12,14 @@ const FIRST_DAY_DURATION_MINUTES := 24 * 60
 const SHELTER_EVENING_MINUTE := 18 * 60
 const SHELTER_WAKE_MINUTE := 8 * 60
 
-const M2SessionMigrationScript := preload("res://game/first_day/first_day_session_migration.gd")
+const M2SessionMigrationScript := preload("res://game/run/run_session_migration.gd")
 const SearchSessionStateScript := preload("res://game/search/search_session_state.gd")
 const WorldStateScript := preload("res://core/world/world_state.gd")
 const SocialStateScript := preload("res://core/social/social_state.gd")
 const SurvivalStateScript := preload("res://game/survival/survival_state.gd")
 const JobWorkStateScript := preload("res://game/jobs/job_work_state.gd")
-const SystemBootstrapScript := preload("res://game/first_day/first_day_system_bootstrap.gd")
-const SessionCommandBridgeScript := preload("res://game/first_day/first_day_session_command_bridge.gd")
+const SystemBootstrapScript := preload("res://game/run/run_system_bootstrap.gd")
+const SessionCommandBridgeScript := preload("res://game/run/run_session_command_bridge.gd")
 const PsycheScaleScript := preload("res://core/state/psyche_scale.gd")
 
 const DEFERRED_PAYLOADS := {
@@ -55,14 +55,14 @@ var active_activity: Dictionary = SearchSessionStateScript.empty_activity()
 var search_zone_states: Dictionary = {}
 
 
-static func create(characteristics: Dictionary, seed: int) -> FirstDaySession:
-	var session := FirstDaySession.new()
+static func create(characteristics: Dictionary, seed: int) -> RunSession:
+	var session := RunSession.new()
 	var result := session.start_new_run(characteristics, seed)
 	return session if bool(result.get("ok", false)) else null
 
 
-static func create_location_first(characteristics: Dictionary, seed: int) -> FirstDaySession:
-	var session := FirstDaySession.new()
+static func create_location_first(characteristics: Dictionary, seed: int) -> RunSession:
+	var session := RunSession.new()
 	var result := session.start_new_location_first(characteristics, seed)
 	return session if bool(result.get("ok", false)) else null
 
@@ -105,7 +105,7 @@ func start_new_run(
 			{"errors": Array(system_bootstrap.get("errors", [])).duplicate(true)}
 		)
 	var candidate_world: WorldState = system_bootstrap["world_state"]
-	var chosen_start := _weighted_start(starts, candidate_state)
+	var chosen_start := RunWeightedChoice.start_situation(starts, candidate_state)
 	if chosen_start.is_empty():
 		return _failure("start_selection_failed", "Не удалось выбрать стартовую ситуацию")
 
@@ -113,8 +113,8 @@ func start_new_run(
 		"id": "first_day_start:%s" % String(chosen_start.get("id", "unknown")),
 		"title": String(chosen_start.get("title", "Начало пути")),
 		"journal_message": String(chosen_start.get("journal_message", chosen_start.get("title", "Первый день начался"))),
-		"conditions": _array_copy(chosen_start.get("conditions", [])),
-		"effects": _array_copy(chosen_start.get("effects", chosen_start.get("initial_effects", []))),
+		"conditions": ContentShape.array_copy(chosen_start.get("conditions", [])),
+		"effects": ContentShape.array_copy(chosen_start.get("effects", chosen_start.get("initial_effects", []))),
 		"journal_payload": {"start_id": String(chosen_start.get("id", ""))},
 	}
 	var transaction := ActionTransaction.execute(candidate_state, start_action, {"phase": "start"})
@@ -134,7 +134,7 @@ func start_new_run(
 	survival_state = SurvivalStateScript.fresh(candidate_state.calendar.elapsed_minutes)
 	job_work_state = JobWorkStateScript.fresh()
 	applied_command_ids = {}
-	phase = "event" if not opening_card.is_empty() else ("start" if not _choices_of(chosen_start).is_empty() else "map")
+	phase = "event" if not opening_card.is_empty() else ("start" if not ContentShape.choices_of(chosen_start).is_empty() else "map")
 	location = chosen_location
 	current_event = opening_card
 	start = String(chosen_start.get("id", ""))
@@ -232,7 +232,7 @@ func get_map_model() -> Dictionary:
 			"title": String(raw_location.get("title", location_id)),
 			"description": String(raw_location.get("description", "")),
 			"background_key": String(raw_location.get("background_key", raw_location.get("background_id", ""))),
-			"tags": _array_copy(raw_location.get("tags", [])),
+			"tags": ContentShape.array_copy(raw_location.get("tags", [])),
 			"current": location_id == location,
 		})
 
@@ -257,18 +257,18 @@ func get_map_model() -> Dictionary:
 				"mode_title": String(mode.get("title", mode.get("label", "Пешком"))),
 				"minutes": _travel_minutes(route, mode),
 				"available": bool(check["allowed"]),
-				"reasons": _array_copy(check["reasons"]),
+				"reasons": ContentShape.array_copy(check["reasons"]),
 			})
 
 	var local_events: Array = []
 	for card in _events_for_location(location):
 		var event_id := String(card.get("id", ""))
-		var check := CheckResolver.evaluate_all(run_state, _array_copy(card.get("conditions", [])))
+		var check := CheckResolver.evaluate_all(run_state, ContentShape.array_copy(card.get("conditions", [])))
 		local_events.append({
 			"id": event_id,
 			"title": String(card.get("title", event_id)),
 			"available": bool(check["allowed"]),
-			"reasons": _array_copy(check["reasons"]),
+			"reasons": ContentShape.array_copy(check["reasons"]),
 			"seen": event_id in seen,
 			"completed": event_id in completed,
 		})
@@ -297,9 +297,9 @@ func enter_event(event_id: String) -> Dictionary:
 		return _failure("event_completed", "Это событие уже завершено")
 	if not _event_belongs_to_location(card, location):
 		return _failure("event_not_here", "Это событие недоступно в текущей локации")
-	var check := CheckResolver.evaluate_all(run_state, _array_copy(card.get("conditions", [])), {"event_id": event_id})
+	var check := CheckResolver.evaluate_all(run_state, ContentShape.array_copy(card.get("conditions", [])), {"event_id": event_id})
 	if not bool(check["allowed"]):
-		return _failure("event_blocked", "Событие сейчас недоступно", {"reasons": _array_copy(check["reasons"])})
+		return _failure("event_blocked", "Событие сейчас недоступно", {"reasons": ContentShape.array_copy(check["reasons"])})
 	current_event = event_id
 	phase = "event"
 	if event_id not in seen:
@@ -319,7 +319,7 @@ func select_event(event_id: String = "") -> Dictionary:
 		var card_id := String(card.get("id", ""))
 		if card_id.is_empty() or (bool(card.get("once", true)) and card_id in completed):
 			continue
-		var check := CheckResolver.evaluate_all(run_state, _array_copy(card.get("conditions", [])))
+		var check := CheckResolver.evaluate_all(run_state, ContentShape.array_copy(card.get("conditions", [])))
 		if bool(check["allowed"]):
 			candidates.append(card)
 	if candidates.is_empty():
@@ -329,7 +329,7 @@ func select_event(event_id: String = "") -> Dictionary:
 		if String(card.get("id", "")) not in seen:
 			unseen.append(card)
 	var pool := unseen if not unseen.is_empty() else candidates
-	var chosen := _weighted_pick(pool, "event:%s:%d" % [location, seen.size()])
+	var chosen := RunWeightedChoice.event_card(pool, "event:%s:%d" % [location, seen.size()], run_state)
 	return enter_event(String(chosen.get("id", "")))
 
 
@@ -338,8 +338,8 @@ func get_current_event_model() -> Dictionary:
 	if card.is_empty():
 		return {}
 	var options: Array = []
-	for option in _choices_of(card):
-		var conditions := _array_copy(option.get("conditions", option.get("requirements", [])))
+	for option in ContentShape.choices_of(card):
+		var conditions := ContentShape.array_copy(option.get("conditions", option.get("requirements", [])))
 		var check := CheckResolver.evaluate_all(run_state, conditions, {
 			"event_id": String(card.get("id", start)),
 			"option_id": String(option.get("id", "")),
@@ -351,7 +351,7 @@ func get_current_event_model() -> Dictionary:
 			"id": String(option.get("id", "")),
 			"text": String(option.get("text", option.get("label", "Продолжить"))),
 			"locked": locked,
-			"reasons": _array_copy(check["reasons"]) if locked else [],
+			"reasons": ContentShape.array_copy(check["reasons"]) if locked else [],
 		})
 	var backdrop := _location(location)
 	return {
@@ -417,7 +417,7 @@ func resolve_choice(choice_id: String) -> Dictionary:
 	var card := _active_card()
 	if card.is_empty():
 		return _failure("missing_event", "Текущее событие не найдено")
-	var choice := _find_by_id(_choices_of(card), choice_id)
+	var choice := _find_by_id(ContentShape.choices_of(card), choice_id)
 	if choice.is_empty():
 		return _failure("unknown_choice", "Вариант ответа не найден")
 	var card_id := String(card.get("id", start))
@@ -429,8 +429,8 @@ func resolve_choice(choice_id: String) -> Dictionary:
 		"option_id": choice_id,
 		"title": String(card.get("title", "Событие")),
 		"option_title": String(choice.get("text", choice.get("label", choice_id))),
-		"conditions": _array_copy(choice.get("conditions", choice.get("requirements", []))),
-		"effects": _array_copy(choice.get("effects", [])),
+		"conditions": ContentShape.array_copy(choice.get("conditions", choice.get("requirements", []))),
+		"effects": ContentShape.array_copy(choice.get("effects", [])),
 		"journal_payload": {"event_id": card_id, "choice_id": choice_id},
 	}
 	var transaction := _execute_action_with_due(action, {"phase": phase, "location": location})
@@ -463,10 +463,10 @@ func available_shelters() -> Array:
 			continue
 		var check := CheckResolver.evaluate_all(
 			run_state,
-			_array_copy(shelter.get("conditions", [])),
+			ContentShape.array_copy(shelter.get("conditions", [])),
 			{"shelter_id": String(shelter.get("id", ""))}
 		)
-		var reasons := _array_copy(check["reasons"])
+		var reasons := ContentShape.array_copy(check["reasons"])
 		if not time_open:
 			reasons.append({
 				"passed": false,
@@ -561,8 +561,8 @@ func choose_shelter(shelter_id: String) -> Dictionary:
 	if String(shelter.get("location_id", "")) != location:
 		return _failure("shelter_not_here", "Это место ночлега находится в другой локации")
 	var effects: Array = []
-	for effect in _array_copy(shelter.get("effects", [])):
-		if _effect_type(effect) != "advance_time":
+	for effect in ContentShape.array_copy(shelter.get("effects", [])):
+		if ContentShape.effect_type(effect) != "advance_time":
 			effects.append(effect)
 	var wake_minute := int(shelter.get("wake_minute", SHELTER_WAKE_MINUTE))
 	wake_minute = clampi(wake_minute, 0, run_state.calendar.minutes_per_day - 1)
@@ -583,7 +583,7 @@ func choose_shelter(shelter_id: String) -> Dictionary:
 		"id": "shelter:%s" % shelter_id,
 		"title": "Ночлег",
 		"option_title": String(shelter.get("title", shelter_id)),
-		"conditions": _array_copy(shelter.get("conditions", [])),
+		"conditions": ContentShape.array_copy(shelter.get("conditions", [])),
 		"effects": effects,
 		"journal_payload": {"shelter_id": shelter_id},
 	}
@@ -649,7 +649,7 @@ func to_dict() -> Dictionary:
 	}
 
 
-static func from_dict(data: Dictionary) -> FirstDaySession:
+static func from_dict(data: Dictionary) -> RunSession:
 	var migration := M2SessionMigrationScript.migrate_session(data)
 	if not bool(migration.get("ok", false)):
 		return null
@@ -700,13 +700,13 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 	var parsed_completed: Variant = _string_array(source["completed"])
 	if parsed_seen == null or parsed_completed == null:
 		return null
-	var result := FirstDaySession.new()
+	var result := RunSession.new()
 	result.run_state = parsed_state
 	result.world_state = parsed_world
 	result.social_state = parsed_social
 	result.survival_state = parsed_survival
 	result.job_work_state = parsed_job
-	result.applied_command_ids = _normalize_json_numbers(
+	result.applied_command_ids = SerializedValue.normalize_json_numbers(
 		Dictionary(source["applied_command_ids"]).duplicate(true)
 	)
 	result.phase = String(source["phase"])
@@ -717,7 +717,7 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 	result.completed = parsed_completed
 	result.settings = Dictionary(source["settings"]).duplicate(true)
 	result.day_completed = bool(source["day_completed"])
-	result.biography = _normalize_json_numbers(Array(source["biography"]).duplicate(true))
+	result.biography = SerializedValue.normalize_json_numbers(Array(source["biography"]).duplicate(true))
 	result.flow_revision = int(revision)
 	result.active_activity = parsed_activity
 	result.search_zone_states = parsed_zone_states
@@ -725,14 +725,14 @@ static func from_dict(data: Dictionary) -> FirstDaySession:
 	return result if bool(validation["ok"]) else null
 
 
-func clone() -> FirstDaySession:
-	return FirstDaySession.from_dict(to_dict())
+func clone() -> RunSession:
+	return RunSession.from_dict(to_dict())
 
 
-func replace_from(other: FirstDaySession) -> bool:
+func replace_from(other: RunSession) -> bool:
 	if other == null:
 		return false
-	var candidate := FirstDaySession.from_dict(other.to_dict())
+	var candidate := RunSession.from_dict(other.to_dict())
 	if candidate == null:
 		return false
 	run_state = candidate.run_state
@@ -792,10 +792,10 @@ func validate() -> Dictionary:
 		errors.append("phase is unknown: %s" % phase)
 	if phase != "uninitialized":
 		if location.is_empty() or _location(location).is_empty():
-			errors.append("location is missing from FirstDayContent")
+			errors.append("location is missing from DistrictContent")
 		start_data = _find_by_id(_start_situations(), start)
 		if start.is_empty() or start_data.is_empty():
-			errors.append("start is missing from FirstDayContent")
+			errors.append("start is missing from DistrictContent")
 	if phase == "event":
 		var event_card := _event_card(current_event)
 		if current_event.is_empty() or event_card.is_empty():
@@ -856,7 +856,7 @@ func validate() -> Dictionary:
 	})
 	if not bool(contract_validation.get("ok", false)):
 		errors.append("M3A session contract: %s" % String(contract_validation.get("error", "invalid")))
-	_validate_json_value(biography, "biography", errors)
+	SerializedValue.validate_json_value(biography, "biography", errors)
 	var content_validation := _content_validation()
 	if not bool(content_validation.get("ok", false)):
 		_append_validation("content", content_validation, errors)
@@ -914,7 +914,7 @@ func _resolve_due_consequences(candidate: RunState, context: Dictionary) -> Dict
 			"title": "Отложенное последствие",
 			"journal_message": "Проявилось отложенное последствие: %s" % effect_id,
 			"conditions": [],
-			"effects": _array_copy(conversion.get("effects", [])),
+			"effects": ContentShape.array_copy(conversion.get("effects", [])),
 			"journal_payload": {
 				"consequence_id": consequence_id,
 				"effect_id": effect_id,
@@ -949,7 +949,7 @@ func _deferred_effects(consequence: Dictionary) -> Dictionary:
 	var payload_value: Variant = consequence.get("payload", null)
 	if not payload_value is Dictionary:
 		return _failure("invalid_deferred_payload", "payload должен быть словарём")
-	var payload: Dictionary = _normalize_json_numbers(payload_value)
+	var payload: Dictionary = SerializedValue.normalize_json_numbers(payload_value)
 	if DEFERRED_PAYLOADS.has(effect_id):
 		var expected: Dictionary = Dictionary(DEFERRED_PAYLOADS[effect_id]).duplicate(true)
 		if payload != expected:
@@ -1010,7 +1010,7 @@ func _find_route(destination: String, requested_mode: String) -> Dictionary:
 
 
 func _route_modes(route: Dictionary) -> Array:
-	var explicit := _dictionary_array(route.get("modes", []))
+	var explicit := ContentShape.dictionary_array(route.get("modes", []))
 	if not explicit.is_empty():
 		return explicit
 	if route.has("mode"):
@@ -1018,8 +1018,8 @@ func _route_modes(route: Dictionary) -> Array:
 			"id": String(route.get("mode", "walk")),
 			"title": String(route.get("mode_title", route.get("title", "Пешком"))),
 			"minutes": int(route.get("minutes", route.get("duration_minutes", 0))),
-			"conditions": _array_copy(route.get("mode_conditions", [])),
-			"effects": _array_copy(route.get("mode_effects", [])),
+			"conditions": ContentShape.array_copy(route.get("mode_conditions", [])),
+			"effects": ContentShape.array_copy(route.get("mode_effects", [])),
 		}]
 	var result: Array = [{
 		"id": "walk",
@@ -1055,14 +1055,14 @@ func _travel_minutes(route: Dictionary, mode: Dictionary) -> int:
 
 
 func _combined_conditions(first: Dictionary, second: Dictionary) -> Array:
-	var result := _array_copy(first.get("conditions", first.get("requirements", [])))
-	result.append_array(_array_copy(second.get("conditions", second.get("requirements", []))))
+	var result := ContentShape.array_copy(first.get("conditions", first.get("requirements", [])))
+	result.append_array(ContentShape.array_copy(second.get("conditions", second.get("requirements", []))))
 	return result
 
 
 func _combined_effects(first: Dictionary, second: Dictionary) -> Array:
-	var result := _array_copy(first.get("effects", []))
-	result.append_array(_array_copy(second.get("effects", [])))
+	var result := ContentShape.array_copy(first.get("effects", []))
+	result.append_array(ContentShape.array_copy(second.get("effects", [])))
 	return result
 
 
@@ -1088,129 +1088,8 @@ func _build_biography_entry(shelter: Dictionary, transaction: ActionResult) -> D
 	}
 
 
-func _weighted_start(starts: Array, state: RunState) -> Dictionary:
-	var weights: Array = []
-	var luck := state.get_characteristic("luck")
-	for situation in starts:
-		var weight := float(situation.get("weight", 1.0))
-		var by_luck: Variant = situation.get("weights_by_luck", situation.get("weight_by_luck", null))
-		if by_luck is Dictionary:
-			weight = float(by_luck.get(str(luck), by_luck.get(luck, weight)))
-		elif by_luck is Array:
-			if by_luck.size() == 11:
-				weight = float(by_luck[luck])
-			elif by_luck.size() >= 10:
-				weight = float(by_luck[luck - 1])
-		var bands := _dictionary_array(situation.get("luck_bands", []))
-		for band in bands:
-			if luck >= int(band.get("min", 1)) and luck <= int(band.get("max", 10)):
-				weight = float(band.get("weight", weight))
-				break
-		weights.append(maxf(weight, 0.0))
-	return _weighted_pick_with_weights(starts, weights, "start:%s" % String(state.rng.to_dict().get("seed", "0")), state)
-
-
-func _weighted_pick(values: Array, tag: String) -> Dictionary:
-	var weights: Array = []
-	var luck_ratio := clampf(
-		float(run_state.get_characteristic("luck") - GameRules.CHARACTERISTIC_MIN) /
-		float(GameRules.CHARACTERISTIC_MAX - GameRules.CHARACTERISTIC_MIN),
-		0.0,
-		1.0
-	)
-	for value in values:
-		var base_weight := maxf(float(value.get("weight", 1.0)), 0.0)
-		var adversity_ratio := clampf(_event_adversity(value) / 8.0, 0.0, 1.0)
-		var unlucky_multiplier := 1.0 + adversity_ratio
-		var lucky_multiplier := 1.0 - 0.75 * adversity_ratio
-		weights.append(base_weight * lerpf(unlucky_multiplier, lucky_multiplier, luck_ratio))
-	return _weighted_pick_with_weights(values, weights, tag, run_state)
-
-
-static func _event_adversity(card: Dictionary) -> float:
-	if card.has("adversity"):
-		return maxf(float(card.get("adversity", 0.0)), 0.0)
-	var choices := _choices_of(card)
-	if choices.is_empty():
-		return 0.0
-	var total := 0.0
-	for choice in choices:
-		for effect in _array_copy(choice.get("effects", [])):
-			total += _effect_adversity(effect)
-	return total / float(choices.size())
-
-
-static func _effect_adversity(effect: Variant) -> float:
-	if not effect is Dictionary:
-		return 0.0
-	var effect_type := _effect_type(effect)
-	match effect_type:
-		"change_state":
-			var identifier := String(effect.get("id", effect.get("key", "")))
-			var delta := float(effect.get("delta", effect.get("amount", 0)))
-			if identifier in ["hunger", "tension"]:
-				return maxf(delta, 0.0)
-			return maxf(-delta, 0.0)
-		"change_money":
-			return maxf(-float(effect.get("delta", effect.get("amount", 0))) / 10.0, 0.0)
-		"remove_item":
-			return maxf(float(effect.get("quantity", effect.get("amount", 1))) * 3.0, 0.0)
-		"deferred":
-			var payload: Variant = effect.get("payload", {})
-			if not payload is Dictionary:
-				return 0.0
-			var result := 0.0
-			for key_value in payload:
-				var key := String(key_value)
-				var delta_value: Variant = payload[key_value]
-				if not (delta_value is int or delta_value is float):
-					continue
-				var delta := float(delta_value)
-				if key in ["hunger", "tension"]:
-					result += maxf(delta, 0.0)
-				elif key == "money":
-					result += maxf(-delta / 10.0, 0.0)
-				elif GameRules.is_known_meter(key):
-					result += maxf(-delta, 0.0)
-			return result
-	return 0.0
-
-
-func _weighted_pick_with_weights(values: Array, weights: Array, tag: String, state: RunState) -> Dictionary:
-	if values.is_empty() or values.size() != weights.size():
-		return {}
-	var total := 0.0
-	for weight in weights:
-		total += float(weight)
-	if total <= 0.0:
-		return values[0]
-	var cursor := _stable_unit(tag, state) * total
-	for index in range(values.size()):
-		cursor -= float(weights[index])
-		if cursor < 0.0:
-			return values[index]
-	return values.back()
-
-
-func _stable_index(tag: String, count: int) -> int:
-	if count <= 1:
-		return 0
-	return int(floor(_stable_unit(tag, run_state) * float(count))) % count
-
-
-static func _stable_unit(tag: String, state: RunState) -> float:
-	var seed_text := "0"
-	if state != null and state.rng != null:
-		seed_text = String(state.rng.to_dict().get("seed", "0"))
-	var text := "%s|%s" % [seed_text, tag]
-	var hash_value: int = 2_166_136_261
-	for index in range(text.length()):
-		hash_value = ((hash_value ^ text.unicode_at(index)) * 16_777_619) & 0x7fffffff
-	return float(hash_value % 1_000_000) / 1_000_000.0
-
-
 static func _locations() -> Array:
-	return _dictionary_array(FirstDayContent.locations())
+	return ContentShape.dictionary_array(DistrictContent.locations())
 
 
 ## Just the place: its id, its name and its background. Readers that need only
@@ -1225,20 +1104,20 @@ func get_location_summary() -> Dictionary:
 
 
 static func _location(location_id: String) -> Dictionary:
-	var value: Variant = FirstDayContent.location(location_id)
+	var value: Variant = DistrictContent.location(location_id)
 	return value.duplicate(true) if value is Dictionary else {}
 
 
 static func _routes_from(location_id: String) -> Array:
-	return _dictionary_array(FirstDayContent.routes_from(location_id))
+	return ContentShape.dictionary_array(DistrictContent.routes_from(location_id))
 
 
 static func _start_situations() -> Array:
-	return _dictionary_array(FirstDayContent.start_situations())
+	return ContentShape.dictionary_array(DistrictContent.start_situations())
 
 
 static func _event_cards() -> Array:
-	return _dictionary_array(FirstDayContent.event_cards())
+	return ContentShape.dictionary_array(DistrictContent.event_cards())
 
 
 static func _event_card(event_id: String) -> Dictionary:
@@ -1249,20 +1128,20 @@ static func _event_card(event_id: String) -> Dictionary:
 
 
 static func _events_for_location(location_id: String) -> Array:
-	return _dictionary_array(FirstDayContent.events_for_location(location_id))
+	return ContentShape.dictionary_array(DistrictContent.events_for_location(location_id))
 
 
 static func _shelters() -> Array:
-	return _dictionary_array(FirstDayContent.shelters())
+	return ContentShape.dictionary_array(DistrictContent.shelters())
 
 
 static func _content_validation() -> Dictionary:
-	var raw: Variant = FirstDayContent.validate_content()
+	var raw: Variant = DistrictContentValidator.validate_content()
 	if raw is Dictionary:
 		return raw.duplicate(true)
 	if raw is bool:
-		return {"ok": raw, "errors": [] if raw else ["FirstDayContent rejected its data"]}
-	return {"ok": false, "errors": ["FirstDayContent.validate_content returned an invalid value"]}
+		return {"ok": raw, "errors": [] if raw else ["DistrictContent rejected its data"]}
+	return {"ok": false, "errors": ["DistrictContentValidator.validate_content returned an invalid value"]}
 
 
 static func _event_belongs_to_location(card: Dictionary, location_id: String) -> bool:
@@ -1272,33 +1151,11 @@ static func _event_belongs_to_location(card: Dictionary, location_id: String) ->
 	return location_ids is Array and location_id in location_ids
 
 
-static func _choices_of(card: Dictionary) -> Array:
-	return _dictionary_array(card.get("choices", card.get("options", [])))
-
-
 static func _find_by_id(values: Array, identifier: String) -> Dictionary:
 	for value in values:
 		if value is Dictionary and String(value.get("id", value.get("category", ""))) == identifier:
 			return value.duplicate(true)
 	return {}
-
-
-static func _dictionary_array(raw: Variant) -> Array:
-	var result: Array = []
-	if raw is Dictionary:
-		for key in raw:
-			var value: Variant = raw[key]
-			if value is Dictionary:
-				result.append(value.duplicate(true))
-	elif raw is Array:
-		for value in raw:
-			if value is Dictionary:
-				result.append(value.duplicate(true))
-	return result
-
-
-static func _array_copy(raw: Variant) -> Array:
-	return raw.duplicate(true) if raw is Array else []
 
 
 static func _typed_dictionary_array(raw: Variant) -> Array[Dictionary]:
@@ -1312,7 +1169,7 @@ static func _typed_dictionary_array(raw: Variant) -> Array[Dictionary]:
 
 static func _has_effect(effects: Array, wanted_type: String) -> bool:
 	for effect in effects:
-		if effect is Dictionary and _effect_type(effect) == wanted_type:
+		if effect is Dictionary and ContentShape.effect_type(effect) == wanted_type:
 			return true
 	return false
 
@@ -1321,27 +1178,11 @@ static func _has_target_effect(effects: Array, wanted_type: String, target_id: S
 	for effect in effects:
 		if not effect is Dictionary:
 			continue
-		if _effect_type(effect) != wanted_type:
+		if ContentShape.effect_type(effect) != wanted_type:
 			continue
 		if String(effect.get("id", effect.get("key", ""))) == target_id:
 			return true
 	return false
-
-
-static func _effect_type(effect: Variant) -> String:
-	if not effect is Dictionary:
-		return ""
-	var result := String(effect.get("type", effect.get("kind", ""))).strip_edges().to_lower().replace("-", "_")
-	match result:
-		"time", "advance_clock":
-			return "advance_time"
-		"change_meter", "meter":
-			return "change_state"
-		"money":
-			return "change_money"
-		"mastery_points":
-			return "mastery"
-	return result
 
 
 static func _default_settings() -> Dictionary:
@@ -1389,22 +1230,6 @@ static func _integral(value: Variant) -> Variant:
 	return int(number)
 
 
-static func _normalize_json_numbers(value: Variant) -> Variant:
-	if value is float and is_finite(value) and value == floor(value) and absf(value) <= float(GameRules.JSON_SAFE_INTEGER_MAX):
-		return int(value)
-	if value is Array:
-		var array: Array = []
-		for item in value:
-			array.append(_normalize_json_numbers(item))
-		return array
-	if value is Dictionary:
-		var dictionary: Dictionary = {}
-		for key in value:
-			dictionary[key] = _normalize_json_numbers(value[key])
-		return dictionary
-	return value
-
-
 static func _validate_unique_strings(values: Array, path: String, errors: Array[String]) -> void:
 	var seen_values: Dictionary = {}
 	for index in range(values.size()):
@@ -1414,29 +1239,6 @@ static func _validate_unique_strings(values: Array, path: String, errors: Array[
 		if seen_values.has(values[index]):
 			errors.append("%s contains duplicate id %s" % [path, values[index]])
 		seen_values[values[index]] = true
-
-
-static func _validate_json_value(value: Variant, path: String, errors: Array[String], depth: int = 0) -> void:
-	if depth > 32:
-		errors.append("%s exceeds maximum nesting depth" % path)
-		return
-	match typeof(value):
-		TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_STRING:
-			return
-		TYPE_FLOAT:
-			if not is_finite(float(value)):
-				errors.append("%s contains a non-finite number" % path)
-		TYPE_ARRAY:
-			for index in range(value.size()):
-				_validate_json_value(value[index], "%s[%d]" % [path, index], errors, depth + 1)
-		TYPE_DICTIONARY:
-			for key in value:
-				if typeof(key) != TYPE_STRING:
-					errors.append("%s contains a non-string key" % path)
-					continue
-				_validate_json_value(value[key], "%s.%s" % [path, key], errors, depth + 1)
-		_:
-			errors.append("%s contains unsupported type %s" % [path, type_string(typeof(value))])
 
 
 static func _append_validation(prefix: String, validation: Dictionary, errors: Array[String]) -> void:

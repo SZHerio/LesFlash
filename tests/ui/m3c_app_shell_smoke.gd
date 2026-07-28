@@ -1,19 +1,19 @@
 extends SceneTree
 
 const AppShellScene := preload("res://app/app_shell.tscn")
-const LegacySession := preload("res://game/first_day/first_day_session.gd")
+const LegacySession := preload("res://game/run/run_session.gd")
 const SandboxAdapterScript := preload("res://app/session/sandbox_session_adapter.gd")
 const TEST_SIZES: Array[Vector2i] = [Vector2i(360, 640), Vector2i(540, 960)]
 const OUTPUT_DIR := "res://docs/qa/m3c"
 
 class MemoryPersistence extends SessionPersistence:
-	var session: FirstDaySession
+	var session: RunSession
 	var saves := 0
 
 	func has_candidates() -> bool:
 		return false
 
-	func create_session(characteristics: Dictionary, _seed: int) -> FirstDaySessionAdapter:
+	func create_session(characteristics: Dictionary, _seed: int) -> RunSessionAdapter:
 		session = LegacySession.create_location_first(characteristics, 61_337)
 		session.run_state.add_item("simple_meal", 1)
 		session.run_state.set_meter("hunger", 55)
@@ -22,7 +22,7 @@ class MemoryPersistence extends SessionPersistence:
 	func load_session() -> Dictionary:
 		return {"ok": false, "code": "save_not_found"}
 
-	func save_session(_session: FirstDaySessionAdapter) -> Dictionary:
+	func save_session(_session: RunSessionAdapter) -> Dictionary:
 		saves += 1
 		return {"ok": true}
 

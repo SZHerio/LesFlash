@@ -304,7 +304,7 @@ func advance_time(minutes: int, reason: String = "", payload: Dictionary = {}) -
 	if minutes < 0 or calendar == null:
 		return false
 	var payload_errors: Array[String] = []
-	_validate_json_value(payload, "time_payload", payload_errors)
+	SerializedValue.validate_json_value(payload, "time_payload", payload_errors)
 	if not payload_errors.is_empty():
 		return false
 	if not calendar.advance_minutes(minutes):
@@ -324,10 +324,10 @@ func add_journal_entry(
 	if entry_type.is_empty() or calendar == null:
 		return false
 	var payload_errors: Array[String] = []
-	_validate_json_value(payload, "journal.payload", payload_errors)
+	SerializedValue.validate_json_value(payload, "journal.payload", payload_errors)
 	if not payload_errors.is_empty():
 		return false
-	var canonical_payload: Dictionary = _normalize_json_numbers(payload)
+	var canonical_payload: Dictionary = SerializedValue.normalize_json_numbers(payload)
 	var resolved_id := entry_id
 	if resolved_id.is_empty():
 		resolved_id = "%s:%d" % [entry_type, _next_journal_sequence]
@@ -358,13 +358,13 @@ func schedule_consequence(
 		if String(existing.get("id", "")) == consequence_id:
 			return false
 	var payload_errors: Array[String] = []
-	_validate_json_value(payload, "deferred.payload", payload_errors)
+	SerializedValue.validate_json_value(payload, "deferred.payload", payload_errors)
 	if not payload_errors.is_empty():
 		return false
-	var canonical_payload: Dictionary = _normalize_json_numbers(payload)
+	var canonical_payload: Dictionary = SerializedValue.normalize_json_numbers(payload)
 	deferred_consequences.append({
 		"id": consequence_id,
-		"due": _normalized_stamp(due),
+		"due": SerializedValue.normalized_stamp(due),
 		"effect_id": effect_id,
 		"payload": canonical_payload,
 		"source_id": source_id,
@@ -430,184 +430,20 @@ func to_dict() -> Dictionary:
 	}
 
 
-static func migrate_serialized(data: Dictionary) -> Dictionary:
-	var source_version: Variant = _parse_integral(data.get("save_version", null))
-	if source_version == null:
-		return {
-			"ok": false,
-			"code": "invalid_run_state_version",
-			"error": "RunState save_version must be an integer.",
-		}
-	if int(source_version) not in [
-		GameRules.RUN_STATE_VERSION_V1,
-		GameRules.RUN_STATE_VERSION_V2,
-		GameRules.RUN_STATE_VERSION_V3,
-		GameRules.RUN_STATE_VERSION_V4,
-		GameRules.RUN_STATE_VERSION_V5,
-		GameRules.RUN_STATE_VERSION_V6,
-	]:
-		return {
-			"ok": false,
-			"code": "unsupported_run_state_version",
-			"error": "RunState save version is unsupported.",
-			"actual": int(source_version),
-		}
-	var migrated := data.duplicate(true)
-	var current_version := int(source_version)
-	if current_version == GameRules.RUN_STATE_VERSION_V1:
-		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V2
-		current_version = GameRules.RUN_STATE_VERSION_V2
-	if current_version == GameRules.RUN_STATE_VERSION_V2:
-		var legacy_inventory: Variant = migrated.get("inventory", null)
-		if not legacy_inventory is Dictionary:
-			return {
-				"ok": false,
-				"code": "invalid_legacy_inventory",
-				"error": "Legacy inventory must be a dictionary.",
-			}
-		var parsed_legacy_inventory: Variant = _parse_string_int_map(
-			legacy_inventory,
-			GameRules.INVENTORY_QUANTITY_MIN,
-			GameRules.INVENTORY_QUANTITY_MAX
-		)
-		if parsed_legacy_inventory == null:
-			return {
-				"ok": false,
-				"code": "invalid_legacy_inventory",
-				"error": "Legacy inventory contains invalid quantities.",
-			}
-		var legacy_skills: Variant = migrated.get("skills", null)
-		var parsed_legacy_skills: Variant = _parse_int_map(
-			legacy_skills,
-			GameRules.LEGACY_SKILL_KEYS,
-			GameRules.SKILL_MIN_RANK,
-			GameRules.SKILL_MAX_RANK
-		)
-		if parsed_legacy_skills == null:
-			return {
-				"ok": false,
-				"code": "invalid_legacy_skills",
-				"error": "Legacy skills must contain exactly the six M1 skills.",
-			}
-		parsed_legacy_skills["search"] = 0
-		migrated["skills"] = parsed_legacy_skills
-		migrated["inventory"] = InventoryStateScript.migrate_legacy(parsed_legacy_inventory)
-		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V3
-		current_version = GameRules.RUN_STATE_VERSION_V3
-	if current_version == GameRules.RUN_STATE_VERSION_V3:
-		var legacy_meters: Variant = migrated.get("meters", null)
-		if not legacy_meters is Dictionary:
-			return {
-				"ok": false,
-				"code": "invalid_legacy_meters",
-				"error": "RunState v3 meters must be a dictionary.",
-			}
-		var meter_map: Dictionary = Dictionary(legacy_meters).duplicate(true)
-		if meter_map.has("morale") and meter_map.has("mental_state"):
-			return {
-				"ok": false,
-				"code": "ambiguous_mental_state",
-				"error": "RunState v3 contains both morale and mental_state.",
-			}
-		if not meter_map.has("morale"):
-			return {
-				"ok": false,
-				"code": "missing_legacy_morale",
-				"error": "RunState v3 does not contain morale.",
-			}
-		meter_map["mental_state"] = meter_map["morale"]
-		meter_map.erase("morale")
-		migrated["meters"] = meter_map
-		for field: String in ["journal", "deferred_consequences"]:
-			var references := _rename_legacy_meter_references(
-				migrated.get(field, null),
-				field
-			)
-			if not bool(references.get("ok", false)):
-				return references
-			migrated[field] = references["data"]
-		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V4
-		current_version = GameRules.RUN_STATE_VERSION_V4
-	if current_version == GameRules.RUN_STATE_VERSION_V4:
-		# Nothing was recorded about how a rank was earned before this version,
-		# so practice starts empty. Ranks already held are kept: the hero does
-		# not forget what he could do yesterday.
-		migrated["skill_practice"] = GameRules.default_skill_practice()
-		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V5
-		current_version = GameRules.RUN_STATE_VERSION_V5
-	if current_version == GameRules.RUN_STATE_VERSION_V5:
-		# Nobody held papers before they existed.
-		migrated["qualifications"] = {}
-		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V6
-		current_version = GameRules.RUN_STATE_VERSION_V6
-	if current_version != GameRules.SAVE_VERSION:
-		return {
-			"ok": false,
-			"code": "run_state_migration_incomplete",
-			"error": "RunState migration did not reach the current version.",
-		}
-	migrated["save_version"] = GameRules.SAVE_VERSION
-	return {
-		"ok": true,
-		"code": "ok",
-		"error": "",
-		"data": migrated,
-		"migrated": int(source_version) != GameRules.SAVE_VERSION,
-		"source_version": int(source_version),
-	}
-
-
-static func _rename_legacy_meter_references(value: Variant, path: String) -> Dictionary:
-	if value is Array:
-		var output: Array = []
-		for index: int in value.size():
-			var item := _rename_legacy_meter_references(value[index], "%s[%d]" % [path, index])
-			if not bool(item.get("ok", false)):
-				return item
-			output.append(item["data"])
-		return {"ok": true, "data": output}
-	if value is Dictionary:
-		var source: Dictionary = value
-		var is_meter_map := path.ends_with(".meters") or path == "meters"
-		if is_meter_map and source.has("morale") and source.has("mental_state"):
-			return {
-				"ok": false,
-				"code": "ambiguous_mental_state_reference",
-				"error": "%s contains both morale and mental_state." % path,
-			}
-		var output: Dictionary = {}
-		for raw_key: Variant in source:
-			var key: Variant = (
-				"mental_state"
-				if is_meter_map and String(raw_key) == "morale"
-				else raw_key
-			)
-			var item := _rename_legacy_meter_references(source[raw_key], "%s.%s" % [path, String(raw_key)])
-			if not bool(item.get("ok", false)):
-				return item
-			output[key] = item["data"]
-		var effect_type := String(output.get("type", output.get("kind", ""))).to_lower()
-		if String(output.get("id", "")) == "morale" and effect_type in ["change_state", "change_meter", "meter"]:
-			output["id"] = "mental_state"
-		if String(output.get("target_id", "")) == "morale" and String(output.get("target_kind", "")) == "state":
-			output["target_id"] = "mental_state"
-		return {"ok": true, "data": output}
-	return {"ok": true, "data": value}
-
 
 static func from_dict(data: Dictionary) -> RunState:
-	var migration := migrate_serialized(data)
+	var migration := RunStateMigration.migrate(data)
 	if not bool(migration.get("ok", false)):
 		return null
 	var source: Dictionary = migration["data"]
 
-	var parsed_characteristics: Variant = _parse_int_map(
+	var parsed_characteristics: Variant = SerializedValue.parse_int_map(
 		source.get("characteristics", null),
 		GameRules.CHARACTERISTIC_KEYS,
 		GameRules.CHARACTERISTIC_MIN,
 		GameRules.CHARACTERISTIC_MAX
 	)
-	var parsed_meters: Variant = _parse_int_map(
+	var parsed_meters: Variant = SerializedValue.parse_int_map(
 		source.get("meters", null),
 		GameRules.METER_KEYS,
 		GameRules.METER_MIN,
@@ -619,13 +455,13 @@ static func from_dict(data: Dictionary) -> RunState:
 	var parsed_practice: Variant = _parse_practice(data.get("skill_practice", null))
 	if parsed_practice == null:
 		return null
-	var parsed_polarities: Variant = _parse_int_map(
+	var parsed_polarities: Variant = SerializedValue.parse_int_map(
 		source.get("stored_polarities", null),
 		GameRules.STORED_POLARITY_KEYS,
 		GameRules.POLARITY_MIN,
 		GameRules.POLARITY_MAX
 	)
-	var parsed_skills: Variant = _parse_int_map(
+	var parsed_skills: Variant = SerializedValue.parse_int_map(
 		source.get("skills", null),
 		GameRules.SKILL_KEYS,
 		GameRules.SKILL_MIN_RANK,
@@ -636,9 +472,9 @@ static func from_dict(data: Dictionary) -> RunState:
 	if not GameRules.characteristics_use_budget(parsed_characteristics):
 		return null
 
-	var parsed_money: Variant = _parse_integral(source.get("money", null))
-	var parsed_mastery: Variant = _parse_integral(source.get("mastery_points", null))
-	var parsed_sequence: Variant = _parse_integral(source.get("next_journal_sequence", null))
+	var parsed_money: Variant = SerializedValue.parse_integral(source.get("money", null))
+	var parsed_mastery: Variant = SerializedValue.parse_integral(source.get("mastery_points", null))
+	var parsed_sequence: Variant = SerializedValue.parse_integral(source.get("next_journal_sequence", null))
 	if parsed_money == null or int(parsed_money) < GameRules.MONEY_MIN or int(parsed_money) > GameRules.MONEY_MAX:
 		return null
 	if parsed_mastery == null or int(parsed_mastery) < GameRules.MASTERY_POINTS_MIN or int(parsed_mastery) > GameRules.MASTERY_POINTS_MAX:
@@ -651,7 +487,7 @@ static func from_dict(data: Dictionary) -> RunState:
 		if source.get("inventory", null) is Dictionary
 		else null
 	)
-	var parsed_knowledge: Variant = _parse_string_int_map(
+	var parsed_knowledge: Variant = SerializedValue.parse_string_int_map(
 		source.get("knowledge", null),
 		GameRules.KNOWLEDGE_LEVEL_MIN,
 		GameRules.KNOWLEDGE_LEVEL_MAX
@@ -741,7 +577,7 @@ func replace_from(other: RunState) -> bool:
 
 func validate() -> Dictionary:
 	var errors: Array[String] = []
-	_validate_exact_int_map(
+	SerializedValue.validate_exact_int_map(
 		characteristics,
 		GameRules.CHARACTERISTIC_KEYS,
 		GameRules.CHARACTERISTIC_MIN,
@@ -751,8 +587,8 @@ func validate() -> Dictionary:
 	)
 	if not GameRules.characteristics_use_budget(characteristics):
 		errors.append("characteristics must total %d points" % GameRules.CHARACTERISTIC_BUDGET)
-	_validate_exact_int_map(meters, GameRules.METER_KEYS, GameRules.METER_MIN, GameRules.METER_MAX, "meters", errors)
-	_validate_exact_int_map(
+	SerializedValue.validate_exact_int_map(meters, GameRules.METER_KEYS, GameRules.METER_MIN, GameRules.METER_MAX, "meters", errors)
+	SerializedValue.validate_exact_int_map(
 		stored_polarities,
 		GameRules.STORED_POLARITY_KEYS,
 		GameRules.POLARITY_MIN,
@@ -760,15 +596,15 @@ func validate() -> Dictionary:
 		"stored_polarities",
 		errors
 	)
-	_validate_exact_int_map(skills, GameRules.SKILL_KEYS, GameRules.SKILL_MIN_RANK, GameRules.SKILL_MAX_RANK, "skills", errors)
+	SerializedValue.validate_exact_int_map(skills, GameRules.SKILL_KEYS, GameRules.SKILL_MIN_RANK, GameRules.SKILL_MAX_RANK, "skills", errors)
 	_validate_computed_profiles(errors)
 
 	if money < GameRules.MONEY_MIN or money > GameRules.MONEY_MAX:
 		errors.append("money is outside allowed range")
 	if mastery_points < GameRules.MASTERY_POINTS_MIN or mastery_points > GameRules.MASTERY_POINTS_MAX:
 		errors.append("mastery_points is outside allowed range")
-	_append_nested_errors("inventory", InventoryStateScript.validate(inventory), errors)
-	_validate_string_int_map(
+	SerializedValue.append_nested_errors("inventory", InventoryStateScript.validate(inventory), errors)
+	SerializedValue.validate_string_int_map(
 		knowledge,
 		GameRules.KNOWLEDGE_LEVEL_MIN,
 		GameRules.KNOWLEDGE_LEVEL_MAX,
@@ -779,7 +615,7 @@ func validate() -> Dictionary:
 	if calendar == null:
 		errors.append("calendar is null")
 	else:
-		_append_nested_errors("calendar", calendar.validate(), errors)
+		SerializedValue.append_nested_errors("calendar", calendar.validate(), errors)
 		if _parse_birth_date(birth_date, calendar) == null:
 			errors.append("birth_date is invalid for the configured calendar")
 		elif get_age_years() < GameRules.START_AGE_YEARS:
@@ -787,7 +623,7 @@ func validate() -> Dictionary:
 	if rng == null:
 		errors.append("rng is null")
 	else:
-		_append_nested_errors("rng", rng.validate(), errors)
+		SerializedValue.append_nested_errors("rng", rng.validate(), errors)
 	if _next_journal_sequence < 0:
 		errors.append("next_journal_sequence cannot be negative")
 	_validate_journal(errors)
@@ -804,7 +640,7 @@ func _load_journal(raw_entries: Array) -> bool:
 		if typeof(raw_entry) != TYPE_DICTIONARY:
 			return false
 		var entry: Dictionary = raw_entry
-		var sequence: Variant = _parse_integral(entry.get("sequence", null))
+		var sequence: Variant = SerializedValue.parse_integral(entry.get("sequence", null))
 		if sequence == null or int(sequence) < 0:
 			return false
 		if typeof(entry.get("id", null)) != TYPE_STRING:
@@ -818,16 +654,16 @@ func _load_journal(raw_entries: Array) -> bool:
 		if typeof(entry.get("payload", null)) != TYPE_DICTIONARY:
 			return false
 		var payload_errors: Array[String] = []
-		_validate_json_value(entry["payload"], "journal.payload", payload_errors)
+		SerializedValue.validate_json_value(entry["payload"], "journal.payload", payload_errors)
 		if not payload_errors.is_empty():
 			return false
 		parsed.append({
 			"sequence": int(sequence),
 			"id": String(entry["id"]),
-			"at": _normalized_stamp(entry["at"]),
+			"at": SerializedValue.normalized_stamp(entry["at"]),
 			"type": String(entry["type"]),
 			"message": String(entry["message"]),
-			"payload": _normalize_json_numbers(entry["payload"]),
+			"payload": SerializedValue.normalize_json_numbers(entry["payload"]),
 		})
 	journal = parsed
 	return true
@@ -851,15 +687,15 @@ func _load_deferred(raw_consequences: Array) -> bool:
 		if typeof(consequence.get("payload", null)) != TYPE_DICTIONARY:
 			return false
 		var payload_errors: Array[String] = []
-		_validate_json_value(consequence["payload"], "deferred.payload", payload_errors)
+		SerializedValue.validate_json_value(consequence["payload"], "deferred.payload", payload_errors)
 		if not payload_errors.is_empty():
 			return false
 		seen_ids[consequence_id] = true
 		parsed.append({
 			"id": consequence_id,
-			"due": _normalized_stamp(consequence["due"]),
+			"due": SerializedValue.normalized_stamp(consequence["due"]),
 			"effect_id": String(consequence["effect_id"]),
-			"payload": _normalize_json_numbers(consequence["payload"]),
+			"payload": SerializedValue.normalize_json_numbers(consequence["payload"]),
 			"source_id": String(consequence["source_id"]),
 		})
 	deferred_consequences = parsed
@@ -913,7 +749,7 @@ func _validate_journal(errors: Array[String]) -> void:
 			errors.append("journal[%d].message must be a string" % index)
 		if calendar != null and (typeof(entry.get("at", null)) != TYPE_DICTIONARY or not calendar.is_valid_stamp(entry.get("at", {}), false)):
 			errors.append("journal[%d].at is not a valid calendar stamp" % index)
-		_validate_json_value(entry.get("payload", null), "journal[%d].payload" % index, errors)
+		SerializedValue.validate_json_value(entry.get("payload", null), "journal[%d].payload" % index, errors)
 	if previous_sequence >= _next_journal_sequence:
 		errors.append("next_journal_sequence must be greater than every journal sequence")
 
@@ -936,7 +772,7 @@ func _validate_deferred(errors: Array[String]) -> void:
 			errors.append("deferred_consequences[%d].source_id must be a string" % index)
 		if calendar != null and (typeof(consequence.get("due", null)) != TYPE_DICTIONARY or not calendar.is_valid_stamp(consequence.get("due", {}), false)):
 			errors.append("deferred_consequences[%d].due is not a valid calendar stamp" % index)
-		_validate_json_value(consequence.get("payload", null), "deferred_consequences[%d].payload" % index, errors)
+		SerializedValue.validate_json_value(consequence.get("payload", null), "deferred_consequences[%d].payload" % index, errors)
 
 
 func _birth_date_for_age(age: int) -> Dictionary:
@@ -953,7 +789,7 @@ static func _parse_birth_date(raw: Variant, target_calendar: GameCalendar) -> Va
 		return null
 	var result: Dictionary = {}
 	for key in ["year", "month", "day"]:
-		var value: Variant = _parse_integral(raw.get(key, null))
+		var value: Variant = SerializedValue.parse_integral(raw.get(key, null))
 		if value == null:
 			return null
 		result[key] = int(value)
@@ -974,8 +810,8 @@ static func _parse_computed_profiles(raw: Variant) -> Variant:
 		var source: Dictionary = raw[key]
 		if source.size() != 3 or typeof(source.get("formed", null)) != TYPE_BOOL:
 			return null
-		var value: Variant = _parse_integral(source.get("value", null))
-		var evidence: Variant = _parse_integral(source.get("evidence", null))
+		var value: Variant = SerializedValue.parse_integral(source.get("value", null))
+		var evidence: Variant = SerializedValue.parse_integral(source.get("evidence", null))
 		if value == null or evidence == null:
 			return null
 		var formed: bool = source["formed"]
@@ -1010,7 +846,7 @@ static func _parse_qualifications(value: Variant) -> Variant:
 		var qualification_id := String(raw_key).strip_edges()
 		if qualification_id.is_empty() or not qualification_id.begins_with("qual_"):
 			return null
-		var granted: Variant = _parse_integral(Dictionary(value)[raw_key])
+		var granted: Variant = SerializedValue.parse_integral(Dictionary(value)[raw_key])
 		if granted == null or int(granted) < 0:
 			return null
 		result[qualification_id] = int(granted)
@@ -1042,163 +878,3 @@ static func _parse_practice(value: Variant) -> Variant:
 			return null
 		result[skill_id] = sources
 	return result
-
-
-static func _parse_int_map(raw: Variant, keys: Array, minimum: int, maximum: int) -> Variant:
-	if typeof(raw) != TYPE_DICTIONARY or raw.size() != keys.size():
-		return null
-	var result: Dictionary = {}
-	for key in keys:
-		var value: Variant = _parse_integral(raw.get(key, null))
-		if value == null or int(value) < minimum or int(value) > maximum:
-			return null
-		result[key] = int(value)
-	return result
-
-
-static func _parse_string_int_map(raw: Variant, minimum: int, maximum: int) -> Variant:
-	if typeof(raw) != TYPE_DICTIONARY:
-		return null
-	var result: Dictionary = {}
-	for raw_key in raw:
-		if typeof(raw_key) != TYPE_STRING or String(raw_key).is_empty():
-			return null
-		var value: Variant = _parse_integral(raw[raw_key])
-		if value == null or int(value) < minimum or int(value) > maximum:
-			return null
-		result[String(raw_key)] = int(value)
-	return result
-
-
-static func _parse_integral(value: Variant) -> Variant:
-	if typeof(value) == TYPE_INT:
-		return value
-	if typeof(value) != TYPE_FLOAT:
-		return null
-	var float_value := float(value)
-	if not is_finite(float_value) or float_value != floor(float_value):
-		return null
-	if absf(float_value) > 9_007_199_254_740_991.0:
-		return null
-	return int(float_value)
-
-
-static func _normalized_stamp(raw: Dictionary) -> Dictionary:
-	var result := {
-		"year": int(raw["year"]),
-		"month": int(raw["month"]),
-		"day": int(raw["day"]),
-		"minute_of_day": int(raw["minute_of_day"]),
-	}
-	if raw.has("elapsed_minutes") and _parse_integral(raw["elapsed_minutes"]) != null:
-		result["elapsed_minutes"] = int(raw["elapsed_minutes"])
-	return result
-
-
-static func _validate_exact_int_map(
-	values: Dictionary,
-	keys: Array,
-	minimum: int,
-	maximum: int,
-	path: String,
-	errors: Array[String]
-) -> void:
-	if values.size() != keys.size():
-		errors.append("%s must contain exactly the configured keys" % path)
-	for key in keys:
-		if not values.has(key) or typeof(values[key]) != TYPE_INT:
-			errors.append("%s.%s must be an integer" % [path, key])
-			continue
-		var value: int = values[key]
-		if value < minimum or value > maximum:
-			errors.append("%s.%s is outside allowed range" % [path, key])
-
-
-static func _validate_string_int_map(
-	values: Dictionary,
-	minimum: int,
-	maximum: int,
-	path: String,
-	errors: Array[String]
-) -> void:
-	for key in values:
-		if typeof(key) != TYPE_STRING or String(key).is_empty():
-			errors.append("%s keys must be non-empty strings" % path)
-			continue
-		if typeof(values[key]) != TYPE_INT or int(values[key]) < minimum or int(values[key]) > maximum:
-			errors.append("%s.%s is outside allowed integer range" % [path, key])
-
-
-static func _validate_json_value(
-	value: Variant,
-	path: String,
-	errors: Array[String],
-	depth: int = 0
-) -> void:
-	if depth > 32:
-		errors.append("%s exceeds maximum nesting depth" % path)
-		return
-	match typeof(value):
-		TYPE_NIL, TYPE_BOOL, TYPE_STRING:
-			return
-		TYPE_INT:
-			var integer_value := int(value)
-			if integer_value < -GameRules.JSON_SAFE_INTEGER_MAX or integer_value > GameRules.JSON_SAFE_INTEGER_MAX:
-				errors.append("%s contains an integer outside JSON's exact range" % path)
-		TYPE_FLOAT:
-			if not is_finite(float(value)):
-				errors.append("%s contains a non-finite number" % path)
-		TYPE_ARRAY:
-			for index in range(value.size()):
-				_validate_json_value(value[index], "%s[%d]" % [path, index], errors, depth + 1)
-		TYPE_DICTIONARY:
-			for key in value:
-				if typeof(key) != TYPE_STRING:
-					errors.append("%s contains a non-string dictionary key" % path)
-					continue
-				_validate_json_value(value[key], "%s.%s" % [path, key], errors, depth + 1)
-		_:
-			errors.append("%s contains a non-JSON value of type %s" % [path, type_string(typeof(value))])
-
-
-## Godot's JSON parser returns open-ended numeric payloads as floats. Gameplay
-## effects use integer quantities, so integral values are normalized on load to
-## keep journal/deferred payloads stable across a save round-trip. Fractional
-## values remain floats.
-static func _normalize_json_numbers(value: Variant, depth: int = 0) -> Variant:
-	if depth > 32:
-		return null
-	match typeof(value):
-		TYPE_FLOAT:
-			var numeric := float(value)
-			if (
-				is_finite(numeric)
-				and numeric >= -float(GameRules.JSON_SAFE_INTEGER_MAX)
-				and numeric <= float(GameRules.JSON_SAFE_INTEGER_MAX)
-				and numeric == roundf(numeric)
-			):
-				return int(numeric)
-			return numeric
-		TYPE_ARRAY:
-			var normalized_array: Array = []
-			for item: Variant in value:
-				normalized_array.append(_normalize_json_numbers(item, depth + 1))
-			return normalized_array
-		TYPE_DICTIONARY:
-			var normalized_dictionary: Dictionary = {}
-			for key: Variant in value:
-				normalized_dictionary[key] = _normalize_json_numbers(value[key], depth + 1)
-			return normalized_dictionary
-		_:
-			return value
-
-
-static func _append_nested_errors(prefix: String, validation: Dictionary, errors: Array[String]) -> void:
-	if bool(validation.get("ok", false)):
-		return
-	var nested: Variant = validation.get("errors", [])
-	if typeof(nested) != TYPE_ARRAY:
-		errors.append("%s validation failed" % prefix)
-		return
-	for error in nested:
-		errors.append("%s: %s" % [prefix, String(error)])

@@ -13,6 +13,7 @@ const ShelterServiceScript := preload("res://game/shelter/shelter_session_servic
 const RecyclingServiceScript := preload("res://game/recycling/recycling_service.gd")
 const NpcInteractionServiceScript := preload("res://game/npc/npc_interaction_service.gd")
 const JobLocationActionsScript := preload("res://game/jobs/job_location_actions.gd")
+const QualificationCommandScript := preload("res://game/content/qualification_session_command.gd")
 const JobSessionCommandScript := preload("res://game/jobs/job_session_command.gd")
 const JobShiftViewModelScript := preload("res://app/jobs/job_shift_view_model.gd")
 const NpcInteractionCommandScript := preload("res://game/npc/npc_interaction_command.gd")
@@ -34,6 +35,7 @@ static func location_model(
 		include_blocked
 	))
 	actions.append_array(JobLocationActionsScript.location_actions(session, include_blocked))
+	actions.append_array(_qualification_actions(session, include_blocked))
 	result["actions"] = actions
 	return result
 
@@ -398,3 +400,44 @@ static func resolve_job_shift_step(
 		_command_id(session, "job_shift_step:%s" % choice_id, flow_revision)
 	)
 
+
+## Counters where a paper can be obtained. A blocked counter is hidden rather
+## than greyed out: rule 3.4 says the interface does not teach its own rules,
+## and Artur or a neighbour is how a hero learns what he needs.
+static func _qualification_actions(session: Object, include_blocked: bool) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for raw_offer: Variant in QualificationCommandScript.available(session):
+		var offer: Dictionary = raw_offer
+		var reasons: Array = Array(offer.get("reasons", []))
+		var available := reasons.is_empty()
+		if not available and not include_blocked:
+			continue
+		result.append({
+			"id": "qualification_%s" % String(offer["id"]),
+			"kind": "qualification",
+			"category_id": "talk",
+			"category_icon_id": "action_talk",
+			"title": "Оформить: %s" % String(offer["title"]),
+			"description": String(offer["description"]),
+			"available": available,
+			"reasons": reasons,
+			"minutes": int(offer.get("minutes", 0)),
+			"intent": {
+				"type": "obtain_qualification",
+				"payload": {"qualification_id": String(offer["id"])},
+			},
+			"confirmation_required": true,
+		})
+	return result
+
+
+static func obtain_qualification(
+	session: Object,
+	qualification_id: String,
+	flow_revision: int
+) -> Dictionary:
+	return QualificationCommandScript.obtain(
+		session,
+		qualification_id,
+		_command_id(session, "qualification:%s" % qualification_id, flow_revision)
+	)
