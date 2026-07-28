@@ -52,8 +52,12 @@ const HEALING_ITEMS := ["bandage_roll", "painkiller_strip", "medicine_blister", 
 const COMMISSION_STORE := "store_station_commission"
 const STATION := "station_square"
 ## What a week outdoors is actually worth spending on, in the order it pays off.
-const WEEK_GEAR := ["warm_jacket", "sturdy_boots"]
-const GEAR_RESERVE := 280
+## Cheapest warmth first: a blanket is what a first wage can actually reach,
+## and sleeping rough without one is what killed the labourer.
+const WEEK_GEAR := ["blanket_roll", "work_gloves", "sturdy_boots", "warm_jacket"]
+## Gear is bought out of surplus, never out of the food money: a blanket that
+## costs the week its meals kills faster than the cold it prevents.
+const GEAR_RESERVE := 260
 ## A paid room costs a hundred; below this the night has to be free.
 const ROOM_RESERVE := 420
 ## Below this a week of cold nights and heavy days needs treating, not enduring.

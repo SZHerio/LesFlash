@@ -88,6 +88,8 @@ static func apply_one(
 			return _unlock_skill(run_state, effect)
 		"advance_skill":
 			return _advance_skill(run_state, effect)
+		"practice_skill":
+			return _practice_skill(run_state, effect)
 		"mastery":
 			return _change_mastery(run_state, effect)
 		"deferred":
@@ -357,6 +359,29 @@ static func _unlock_skill(run_state: Object, effect: Dictionary) -> Dictionary:
 		after,
 		after - before,
 		"Навык %s: ранг %s → %s" % [identifier, before, after],
+		effect
+	))
+
+
+static func _practice_skill(run_state: Object, effect: Dictionary) -> Dictionary:
+	var identifier := _identifier(effect)
+	if identifier.is_empty():
+		return _failure("missing_identifier", "Не указан навык")
+	var source_id := String(effect.get("source_id", "")).strip_edges()
+	if source_id.is_empty():
+		return _failure("missing_practice_source", "Практика должна называть свой источник")
+	if not GameRules.is_known_skill(identifier):
+		return _failure("unknown_skill", "Неизвестный навык: %s" % identifier)
+	var before := int(run_state.get_skill_rank(identifier))
+	var after := int(run_state.record_practice(identifier, source_id))
+	return _success(_record(
+		"practice_skill",
+		"skill",
+		identifier,
+		before,
+		after,
+		after - before,
+		"Навык %s: практика «%s»" % [identifier, source_id],
 		effect
 	))
 

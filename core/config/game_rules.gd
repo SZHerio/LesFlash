@@ -10,9 +10,10 @@ const RUN_STATE_VERSION_V1 := 1
 const RUN_STATE_VERSION_V2 := 2
 const RUN_STATE_VERSION_V3 := 3
 const RUN_STATE_VERSION_V4 := 4
+const RUN_STATE_VERSION_V5 := 5
 const LEGACY_SAVE_VERSION := RUN_STATE_VERSION_V1
-const PREVIOUS_SAVE_VERSION := RUN_STATE_VERSION_V3
-const SAVE_VERSION := RUN_STATE_VERSION_V4
+const PREVIOUS_SAVE_VERSION := RUN_STATE_VERSION_V4
+const SAVE_VERSION := RUN_STATE_VERSION_V5
 
 const CHARACTERISTIC_MIN := 1
 const CHARACTERISTIC_MAX := 10
@@ -82,6 +83,31 @@ const LEGACY_SKILL_KEYS := [
 	"first_aid",
 	"trade",
 ]
+## A skill grows from varied practice, never from repetition. What counts is
+## how many *different* things the hero has done with it: sorting the same
+## bundle twenty times teaches the twentieth nothing the second did not.
+##
+## The thresholds are distinct practice sources, not attempts.
+const SKILL_PRACTICE_FOR_RANK := [3, 7, 12]
+const SKILL_PRACTICE_SOURCES_MAX := 64
+
+
+## The rank a given number of distinct practice sources has earned.
+static func rank_for_practice(distinct_sources: int) -> int:
+	var rank := 0
+	for index: int in SKILL_PRACTICE_FOR_RANK.size():
+		if distinct_sources >= int(SKILL_PRACTICE_FOR_RANK[index]):
+			rank = index + 1
+	return mini(rank, SKILL_MAX_RANK)
+
+
+static func default_skill_practice() -> Dictionary:
+	var result: Dictionary = {}
+	for key: String in SKILL_KEYS:
+		result[key] = []
+	return result
+
+
 const MASTERY_POINTS_MIN := 0
 const MASTERY_POINTS_MAX := 1_000_000
 

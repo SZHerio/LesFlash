@@ -18,6 +18,9 @@ var stored_polarities: Dictionary = GameRules.default_stored_polarities()
 var computed_profiles: Dictionary = GameRules.default_computed_profiles()
 
 var skills: Dictionary = GameRules.default_skills()
+## skill_id -> distinct practice source ids. The rank above is derived from
+## this, never set directly by content.
+var skill_practice: Dictionary = GameRules.default_skill_practice()
 var mastery_points: int = 0
 var knowledge: Dictionary = {}
 
@@ -201,6 +204,29 @@ func set_computed_profile(
 	return true
 
 
+## Records one confirmed use of a skill. Returns the rank after recording, so a
+## caller can tell whether the practice mattered.
+##
+## Repetition is deliberately worthless: a source already recorded changes
+## nothing. What raises a rank is having done different things with the skill.
+func record_practice(skill_id: String, source_id: String) -> int:
+	if not GameRules.is_known_skill(skill_id) or source_id.strip_edges().is_empty():
+		return get_skill_rank(skill_id)
+	if not skill_practice.has(skill_id):
+		skill_practice[skill_id] = []
+	var sources: Array = skill_practice[skill_id]
+	if not sources.has(source_id) and sources.size() < GameRules.SKILL_PRACTICE_SOURCES_MAX:
+		sources.append(source_id)
+	var earned := GameRules.rank_for_practice(sources.size())
+	if earned > get_skill_rank(skill_id):
+		set_skill_rank(skill_id, earned)
+	return get_skill_rank(skill_id)
+
+
+func practice_sources(skill_id: String) -> int:
+	return Array(skill_practice.get(skill_id, [])).size()
+
+
 func get_skill_rank(key: String) -> int:
 	return int(skills.get(key, 0))
 
@@ -375,6 +401,7 @@ func to_dict() -> Dictionary:
 		"stored_polarities": stored_polarities.duplicate(true),
 		"computed_profiles": computed_profiles.duplicate(true),
 		"skills": skills.duplicate(true),
+		"skill_practice": skill_practice.duplicate(true),
 		"mastery_points": mastery_points,
 		"knowledge": knowledge.duplicate(true),
 		"calendar": calendar.to_dict(),
@@ -399,6 +426,7 @@ static func migrate_serialized(data: Dictionary) -> Dictionary:
 		GameRules.RUN_STATE_VERSION_V2,
 		GameRules.RUN_STATE_VERSION_V3,
 		GameRules.RUN_STATE_VERSION_V4,
+		GameRules.RUN_STATE_VERSION_V5,
 	]:
 		return {
 			"ok": false,
@@ -482,6 +510,13 @@ static func migrate_serialized(data: Dictionary) -> Dictionary:
 			migrated[field] = references["data"]
 		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V4
 		current_version = GameRules.RUN_STATE_VERSION_V4
+	if current_version == GameRules.RUN_STATE_VERSION_V4:
+		# Nothing was recorded about how a rank was earned before this version,
+		# so practice starts empty. Ranks already held are kept: the hero does
+		# not forget what he could do yesterday.
+		migrated["skill_practice"] = GameRules.default_skill_practice()
+		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V5
+		current_version = GameRules.RUN_STATE_VERSION_V5
 	if current_version != GameRules.SAVE_VERSION:
 		return {
 			"ok": false,
@@ -555,6 +590,9 @@ static func from_dict(data: Dictionary) -> RunState:
 		GameRules.METER_MIN,
 		GameRules.METER_MAX
 	)
+	var parsed_practice: Variant = _parse_practice(data.get("skill_practice", null))
+	if parsed_practice == null:
+		return null
 	var parsed_polarities: Variant = _parse_int_map(
 		source.get("stored_polarities", null),
 		GameRules.STORED_POLARITY_KEYS,
@@ -622,6 +660,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	result.stored_polarities = parsed_polarities
 	result.computed_profiles = parsed_profiles
 	result.skills = parsed_skills
+	result.skill_practice = Dictionary(parsed_practice)
 	result.mastery_points = int(parsed_mastery)
 	result.knowledge = parsed_knowledge
 	result.calendar = parsed_calendar
@@ -660,6 +699,7 @@ func replace_from(other: RunState) -> bool:
 	stored_polarities = other.stored_polarities.duplicate(true)
 	computed_profiles = other.computed_profiles.duplicate(true)
 	skills = other.skills.duplicate(true)
+	skill_practice = other.skill_practice.duplicate(true)
 	mastery_points = other.mastery_points
 	knowledge = other.knowledge.duplicate(true)
 	calendar = other.calendar.clone()
@@ -927,6 +967,34 @@ static func _parse_computed_profiles(raw: Variant) -> Variant:
 			"formed": formed,
 			"evidence": int(evidence),
 		}
+	return result
+
+
+## skill_id -> array of unique, non-empty source ids.
+static func _parse_practice(value: Variant) -> Variant:
+	if value == null:
+		return GameRules.default_skill_practice()
+	if not value is Dictionary:
+		return null
+	var result: Dictionary = {}
+	for key: String in GameRules.SKILL_KEYS:
+		result[key] = []
+	for raw_key: Variant in Dictionary(value):
+		var skill_id := String(raw_key)
+		if not GameRules.is_known_skill(skill_id):
+			return null
+		var raw_sources: Variant = Dictionary(value)[raw_key]
+		if not raw_sources is Array:
+			return null
+		var sources: Array = []
+		for raw_source: Variant in Array(raw_sources):
+			var source_id := String(raw_source).strip_edges()
+			if source_id.is_empty() or sources.has(source_id):
+				return null
+			sources.append(source_id)
+		if sources.size() > GameRules.SKILL_PRACTICE_SOURCES_MAX:
+			return null
+		result[skill_id] = sources
 	return result
 
 

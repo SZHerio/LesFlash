@@ -314,15 +314,14 @@ static func _finish(
 		effects.append({"type": "change_money", "amount": payout, "reason": "Оплата смены"})
 		payload["result"] = result.duplicate(true)
 		payload["payout_ard"] = payout
-		# Hauling loads for a whole shift is where a person learns to haul
-		# loads. Without this the yard was the only place the skill was ever
-		# checked and the only place it could never be earned.
-		if (
-			CARGO_TASK_CLASS in _newly_practiced(Dictionary(next_mastery["history"]))
-			and int(candidate.get("run_state").get_skill_rank(CARGO_SKILL)) < 1
-		):
-			effects.append({"type": "unlock_skill", "id": CARGO_SKILL, "rank": 1})
-			payload["unlocked_skill_id"] = CARGO_SKILL
+		# A shift is where a trade is actually learned. Each task class the hero
+		# worked counts as one distinct piece of practice for the skill that
+		# task uses, so a rank comes from doing different things rather than
+		# repeating the easy one.
+		var practised := _practice_effects(snapshot, next_progress)
+		effects.append_array(practised)
+		if not practised.is_empty():
+			payload["practiced_skills"] = _practiced_skill_ids(practised)
 		var social := _record_social(candidate, result, candidate_work.active_job_id())
 		if not bool(social.get("ok", false)):
 			return social
@@ -358,6 +357,44 @@ static func _finish(
 
 ## Pay follows the grade rather than attendance, so a careless shift is worth
 ## less than a careful one even though both took six hours.
+## One practice entry per task class worked, tagged by that class. Repeating a
+## class within the same shift teaches nothing extra, and the run state refuses
+## a duplicate source anyway.
+static func _practice_effects(snapshot: Dictionary, progress: Dictionary) -> Array:
+	var by_class: Dictionary = {}
+	for raw_step: Variant in Array(snapshot.get("steps", [])):
+		var step: Dictionary = raw_step
+		if String(step.get("kind", "")) != "task":
+			continue
+		by_class[String(step.get("task_class_id", ""))] = String(step.get("skill_id", ""))
+	var effects: Array = []
+	var seen: Dictionary = {}
+	for raw_done: Variant in Array(progress.get("completed_steps", [])):
+		var done: Dictionary = raw_done
+		var class_id := String(done.get("task_class_id", ""))
+		if class_id.is_empty() or seen.has(class_id):
+			continue
+		seen[class_id] = true
+		var skill_id := String(by_class.get(class_id, ""))
+		if skill_id.is_empty():
+			continue
+		effects.append({
+			"type": "practice_skill",
+			"id": skill_id,
+			"source_id": class_id,
+		})
+	return effects
+
+
+static func _practiced_skill_ids(effects: Array) -> Array:
+	var ids: Array = []
+	for raw_effect: Variant in effects:
+		var skill_id := String(Dictionary(raw_effect).get("id", ""))
+		if not skill_id.is_empty() and not ids.has(skill_id):
+			ids.append(skill_id)
+	return ids
+
+
 static func _payout(result: Dictionary) -> int:
 	return int(
 		float(int(result.get("base_payout_ard", 0)))

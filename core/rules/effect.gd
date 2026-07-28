@@ -14,6 +14,7 @@ const REMOVE_ITEM: StringName = &"remove_item"
 const SHIFT_POLARITY: StringName = &"shift_polarity"
 const UNLOCK_SKILL: StringName = &"unlock_skill"
 const ADVANCE_SKILL: StringName = &"advance_skill"
+const PRACTICE_SKILL: StringName = &"practice_skill"
 const MASTERY: StringName = &"mastery"
 const DEFERRED: StringName = &"deferred"
 const KNOWLEDGE: StringName = &"knowledge"
@@ -74,6 +75,13 @@ static func unlock_skill(skill_id: StringName, initial_rank: int = 1) -> Diction
 		"id": String(skill_id),
 		"rank": initial_rank,
 	}
+
+
+## One confirmed use of a skill, tagged by what it was. Ranks are derived from
+## how many different sources have been recorded, so content declares practice
+## and never a rank.
+static func practice_skill(skill_id: StringName, source_id: StringName) -> Dictionary:
+	return {"type": PRACTICE_SKILL, "id": skill_id, "source_id": source_id}
 
 
 static func advance_skill(skill_id: StringName, ranks: int = 1, max_rank: int = 3) -> Dictionary:

@@ -78,7 +78,7 @@ func _test_run_state_fixture() -> void:
 	if not bool(migration.get("ok", false)):
 		return
 	var migrated: Dictionary = migration["data"]
-	_expect_equal(migrated.get("save_version"), 4, "RunState reaches v4")
+	_expect_equal(migrated.get("save_version"), GameRules.SAVE_VERSION, "RunState reaches the current version")
 	_expect_equal(migrated["meters"].get("mental_state"), 50, "meter value is exact")
 	_expect(not migrated["meters"].has("morale"), "legacy key removed")
 	_expect_equal(migrated["calendar"]["stamp"]["year"], 1970, "recorded year is preserved")
@@ -103,7 +103,7 @@ func _test_session_fixture() -> void:
 	var data: Dictionary = migration["data"]
 	_expect_equal(data.get("schema_version"), FirstDayMigration.CURRENT_VERSION, "envelope reaches the current version")
 	_expect_equal(data["session"].get("session_version"), FirstDayMigration.CURRENT_VERSION, "session reaches the current version")
-	_expect_equal(data["session"]["run_state"].get("save_version"), 4, "nested RunState reaches v4")
+	_expect_equal(data["session"]["run_state"].get("save_version"), GameRules.SAVE_VERSION, "nested RunState reaches the current version")
 	_expect_equal(data["session"]["run_state"]["calendar"]["stamp"]["year"], 1970, "legacy calendar is preserved")
 	_expect(data["session"].has("world_state"), "world state is added")
 	_expect(data["session"].has("social_state"), "social state is added")

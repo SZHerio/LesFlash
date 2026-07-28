@@ -319,7 +319,7 @@ func _test_v2_save_round_trip() -> void:
 	_expect(not bool(loaded.get("migrated", true)), "current save must not report migration")
 	_expect_equal(loaded.get("schema_version"), M2SessionMigrationScript.CURRENT_VERSION, "current envelope version must be current")
 	_expect_equal(loaded.get("source_session_version"), M2SessionMigrationScript.CURRENT_VERSION, "current session version must be current")
-	_expect_equal(loaded.get("source_run_state_version"), 4, "current state version must be 4")
+	_expect_equal(loaded.get("source_run_state_version"), GameRules.SAVE_VERSION, "current state version must be current")
 	var restored = loaded.get("session")
 	_expect(restored != null, "loaded current session must exist")
 	if restored != null:

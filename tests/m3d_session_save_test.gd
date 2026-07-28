@@ -104,7 +104,7 @@ func _test_current_round_trip() -> void:
 	_expect(not bool(loaded.get("migrated", true)), "current envelope is not migrated")
 	_expect_equal(loaded.get("schema_version"), MigrationScript.CURRENT_VERSION, "current envelope version")
 	_expect_equal(loaded.get("source_session_version"), MigrationScript.CURRENT_VERSION, "current session version")
-	_expect_equal(loaded.get("source_run_state_version"), 4, "RunState version is unchanged")
+	_expect_equal(loaded.get("source_run_state_version"), GameRules.SAVE_VERSION, "RunState version is unchanged")
 
 
 func _test_search_survives_load() -> void:
