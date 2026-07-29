@@ -261,6 +261,9 @@ func _test_week_complete() -> void:
 		return
 	var session = _session(adapter)
 	_place(session, "clinic_yard")
+	# A run lasts far longer than a week now; this check is about what happens on
+	# a horizon, so it gives the session one it can reach inside a test.
+	session.survival_state.horizon_minutes = SurvivalStateScript.WEEK_MINUTES
 	var almost_week := SurvivalStateScript.WEEK_MINUTES - 10
 	_expect(_advance_fixture(session, almost_week), "fixture must reach ten minutes before week end")
 	session.run_state.set_meter("health", 100)
@@ -268,13 +271,13 @@ func _test_week_complete() -> void:
 	session.run_state.set_meter("energy", 90)
 	var result: Dictionary = adapter.perform_location_action("action_clinic_rest_bench")
 	_expect(bool(result.get("ok", false)), "final confirmed action must commit: %s" % str(result))
-	_expect_equal(session.survival_state.status, "week_complete", "exact boundary must complete week")
+	_expect_equal(session.survival_state.status, "week_complete", "the exact horizon must end the run")
 	_expect_equal(
 		session.run_state.calendar.elapsed_minutes,
 		SurvivalStateScript.WEEK_MINUTES,
-		"calendar must stop exactly at seven days"
+		"the calendar must stop exactly on the horizon"
 	)
-	_expect_equal(adapter.get_phase(), "completed", "adapter must expose completed week")
+	_expect_equal(adapter.get_phase(), "completed", "the adapter must expose a finished run")
 
 
 func _test_extreme_builds() -> void:

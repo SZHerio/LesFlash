@@ -161,7 +161,16 @@ func _test_three_builds_live_the_week() -> void:
 				_activity_signature(counters),
 			]
 		)
-		_expect_equal(adapter.get_phase(), "completed", "%s must finish the prototype week" % build_id)
+		# Alive on the seventh day is the claim. "Completed" used to mean the same
+		# thing only because the run was not allowed to go on.
+		_expect(
+			adapter.get_phase() != "completed",
+			"%s did not survive the week" % build_id
+		)
+		_expect(
+			int(lived.get("elapsed", 0)) >= SurvivalStateScript.WEEK_MINUTES,
+			"%s stopped short of seven days (elapsed=%d)" % [build_id, int(lived.get("elapsed", 0))]
+		)
 		_expect(
 			int(counters.get("nights", 0)) >= 5,
 			"%s must sleep through the week, not skip it (nights=%d)" % [
@@ -269,18 +278,25 @@ func _test_midweek_save_load() -> void:
 	_expect(restored.is_valid(), "reopened run must validate")
 	_expect_equal(_digest(restored), before, "reopening must not change a single observable value")
 
-	# A reopened run has to be playable, not merely readable.
+	# A reopened run has to be playable, not merely readable — for the rest of the
+	# week it was saved in, not for as long as a run may now last.
 	var rounds := 0
+	var week_ends_at := SurvivalStateScript.WEEK_MINUTES
 	while restored.get_phase() != "completed" and rounds < MAX_ROUNDS:
+		if _elapsed(restored) >= week_ends_at:
+			break
 		var before_elapsed := _elapsed(restored)
 		_live_one_day(restored, "labourer", counters)
 		rounds += 1
 		if _elapsed(restored) == before_elapsed:
 			break
-	_expect_equal(
-		restored.get_phase(),
-		"completed",
-		"a reopened run must still reach the end of the week"
+	_expect(
+		restored.get_phase() != "completed",
+		"a reopened run died before the week was out"
+	)
+	_expect(
+		_elapsed(restored) >= week_ends_at,
+		"a reopened run stopped short of seven days (elapsed=%d)" % _elapsed(restored)
 	)
 
 
@@ -451,7 +467,13 @@ func _mastery_note(adapter: Object, counters: Dictionary) -> String:
 func _live_week(adapter: Object, build_id: String, round_limit: int = MAX_ROUNDS) -> Dictionary:
 	var counters := _fresh_counters()
 	var rounds := 0
+	# A run no longer stops on the seventh day — the horizon is a property of the
+	# run and it is far longer now. What this gate has always measured is whether
+	# seven days can be lived, so it lives seven days and then stops.
+	var week_ends_at := _elapsed(adapter) + SurvivalStateScript.WEEK_MINUTES
 	while rounds < round_limit and adapter.get_phase() != "completed":
+		if _elapsed(adapter) >= week_ends_at:
+			break
 		var before := _elapsed(adapter)
 		_live_one_day(adapter, build_id, counters)
 		rounds += 1
@@ -460,7 +482,10 @@ func _live_week(adapter: Object, build_id: String, round_limit: int = MAX_ROUNDS
 	var lifecycle: Dictionary = Dictionary(adapter.get_summary_model().get("lifecycle", {}))
 	var status := String(lifecycle.get("status", "unknown"))
 	return {
-		"survived": status == SurvivalStateScript.STATUS_WEEK_COMPLETE,
+		# Surviving the week means not being dead at the end of it. It used to mean
+		# reaching a terminal "week complete", which was the same thing only
+		# because a run was not allowed to continue past the seventh day.
+		"survived": status != SurvivalStateScript.STATUS_DEAD,
 		"status": status,
 		"days": rounds,
 		"elapsed": _elapsed(adapter),

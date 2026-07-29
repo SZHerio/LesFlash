@@ -14,6 +14,7 @@ extends RefCounted
 ## the record, and no save needs migrating when the ladder changes.
 
 const MasteryScript := preload("res://game/jobs/job_mastery.gd")
+const AgingRulesScript := preload("res://game/aging/aging_rules.gd")
 
 const CASUAL := "casual"
 const REGULAR := "regular"
@@ -79,6 +80,10 @@ static func grade_of(run_state: RunState, work_state: JobWorkState, job_id: Stri
 	var record: Dictionary = work_state.record_for(job_id)
 	var raw_standing: Variant = record.get("standing", 0)
 	var standing := int(raw_standing) if typeof(raw_standing) in [TYPE_INT, TYPE_FLOAT] else 0
+	# Years count for something at the gate. An older man is taken at his word
+	# sooner than a young one with the same shifts behind him — which is the half
+	# of ageing that is not loss, and the only reason getting older is playable.
+	standing += AgingRulesScript.regard(run_state)
 	var reached := CASUAL
 	for grade_id: String in ORDER:
 		var grade: Dictionary = GRADES[grade_id]

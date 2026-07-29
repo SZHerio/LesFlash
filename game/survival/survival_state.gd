@@ -1,13 +1,22 @@
 class_name SurvivalState
 extends RefCounted
 
-## Saved progress of the short M3F survival loop.
+## Saved progress of the survival loop.
 ##
-## Needs themselves remain in RunState. This companion state stores only the
-## fixed-point debt required for interval-independent simulation and the
-## lifecycle boundary of the seven-day prototype.
+## Needs themselves remain in RunState. This companion state stores the
+## fixed-point debt required for interval-independent simulation and the point
+## at which the run stops.
+##
+## That point used to be seven days, written into the code as a constant, and it
+## was the right scaffolding for proving a week worked. It became a wall the
+## moment anything reached past a week: a bench that pays back in twenty-four
+## days, a rent that falls due on the fifth, an old man who is never allowed to
+## get older. The horizon is a property of the run now. A save written before it
+## existed keeps its seven days exactly.
 
 const SCHEMA_VERSION := 1
+## Seven days. No longer where a run ends — it is the stretch the acceptance
+## gate measures, and a milestone the journal still marks.
 const WEEK_MINUTES := 7 * 24 * 60
 const FIXED_DENOMINATOR := 60
 
@@ -17,6 +26,9 @@ const STATUS_WEEK_COMPLETE := "week_complete"
 const STATUSES := [STATUS_ACTIVE, STATUS_DEAD, STATUS_WEEK_COMPLETE]
 const REMAINDER_KEYS := ["hunger", "energy", "health", "mental_state"]
 
+## How long this run may last. Defaults to something a life fits in; a save from
+## before this field existed is given the seven days it was written under.
+var horizon_minutes: int = GameRules.DEFAULT_RUN_HORIZON_MINUTES
 var start_elapsed_minutes: int = 0
 var processed_elapsed_minutes: int = 0
 var remainders: Dictionary = _empty_remainders()
@@ -25,23 +37,27 @@ var death_reason: String = ""
 var applied_passage_ids: Dictionary = {}
 
 
-func _init(start_elapsed: int = 0) -> void:
+func _init(start_elapsed: int = 0, horizon: int = GameRules.DEFAULT_RUN_HORIZON_MINUTES) -> void:
 	start_elapsed_minutes = maxi(start_elapsed, 0)
 	processed_elapsed_minutes = start_elapsed_minutes
+	horizon_minutes = maxi(horizon, 1)
 
 
-static func fresh(start_elapsed: int = 0) -> SurvivalState:
-	if start_elapsed < 0:
+static func fresh(
+	start_elapsed: int = 0,
+	horizon: int = GameRules.DEFAULT_RUN_HORIZON_MINUTES
+) -> SurvivalState:
+	if start_elapsed < 0 or horizon <= 0:
 		return null
-	return SurvivalState.new(start_elapsed)
+	return SurvivalState.new(start_elapsed, horizon)
 
 
-func week_end_elapsed_minutes() -> int:
-	return start_elapsed_minutes + WEEK_MINUTES
+func horizon_end_elapsed_minutes() -> int:
+	return start_elapsed_minutes + horizon_minutes
 
 
-func minutes_until_week_complete() -> int:
-	return maxi(week_end_elapsed_minutes() - processed_elapsed_minutes, 0)
+func minutes_until_horizon() -> int:
+	return maxi(horizon_end_elapsed_minutes() - processed_elapsed_minutes, 0)
 
 
 func is_terminal() -> bool:
@@ -68,7 +84,7 @@ func mark_dead(reason: String) -> bool:
 
 
 func mark_week_complete() -> bool:
-	if status != STATUS_ACTIVE or processed_elapsed_minutes != week_end_elapsed_minutes():
+	if status != STATUS_ACTIVE or processed_elapsed_minutes != horizon_end_elapsed_minutes():
 		return false
 	status = STATUS_WEEK_COMPLETE
 	death_reason = ""
@@ -78,6 +94,7 @@ func mark_week_complete() -> bool:
 func to_dict() -> Dictionary:
 	return {
 		"schema_version": SCHEMA_VERSION,
+		"horizon_minutes": horizon_minutes,
 		"start_elapsed_minutes": start_elapsed_minutes,
 		"processed_elapsed_minutes": processed_elapsed_minutes,
 		"remainders": remainders.duplicate(true),
@@ -118,7 +135,12 @@ static func from_dict(data: Dictionary) -> SurvivalState:
 			return null
 		parsed_ids[String(raw_id)] = true
 
-	var result := SurvivalState.new(int(start))
+	# A save written before the horizon existed was written under seven days, and
+	# giving it a longer one would silently extend a run somebody already played.
+	var horizon: Variant = SerializedValue.parse_integral(data.get("horizon_minutes", WEEK_MINUTES))
+	if horizon == null or int(horizon) <= 0:
+		return null
+	var result := SurvivalState.new(int(start), int(horizon))
 	result.processed_elapsed_minutes = int(processed)
 	result.remainders = parsed_remainders
 	result.status = String(data["status"])
@@ -149,8 +171,8 @@ func validate() -> Dictionary:
 		errors.append("start_elapsed_minutes не может быть отрицательным")
 	if processed_elapsed_minutes < start_elapsed_minutes:
 		errors.append("processed_elapsed_minutes не может предшествовать началу")
-	if processed_elapsed_minutes > week_end_elapsed_minutes():
-		errors.append("прогресс не может выходить за границу семидневного прототипа")
+	if processed_elapsed_minutes > horizon_end_elapsed_minutes():
+		errors.append("прогресс не может выходить за горизонт забега")
 	if remainders.size() != REMAINDER_KEYS.size():
 		errors.append("remainders должен содержать точный набор потребностей")
 	for key: String in REMAINDER_KEYS:
@@ -164,10 +186,10 @@ func validate() -> Dictionary:
 		errors.append("смерть должна иметь причину")
 	if status != STATUS_DEAD and not death_reason.is_empty():
 		errors.append("причина смерти допустима только для dead")
-	if status == STATUS_ACTIVE and processed_elapsed_minutes >= week_end_elapsed_minutes():
-		errors.append("активная неделя уже достигла границы завершения")
-	if status == STATUS_WEEK_COMPLETE and processed_elapsed_minutes != week_end_elapsed_minutes():
-		errors.append("week_complete допустим только на точной границе недели")
+	if status == STATUS_ACTIVE and processed_elapsed_minutes >= horizon_end_elapsed_minutes():
+		errors.append("активный забег уже достиг своего горизонта")
+	if status == STATUS_WEEK_COMPLETE and processed_elapsed_minutes != horizon_end_elapsed_minutes():
+		errors.append("завершение допустимо только на точной границе горизонта")
 	for raw_id: Variant in applied_passage_ids:
 		if typeof(raw_id) != TYPE_STRING or String(raw_id).is_empty():
 			errors.append("идентификатор подтверждённого прохода должен быть строкой")

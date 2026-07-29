@@ -6,6 +6,7 @@ extends RefCounted
 
 const SurvivalTimeRulesScript := preload("res://game/survival/survival_time_rules.gd")
 const EquipmentRulesScript := preload("res://game/equipment/equipment_rules.gd")
+const AgingRulesScript := preload("res://game/aging/aging_rules.gd")
 
 ## Boots and a coat do not create energy; they stop the day from taking as much
 ## of it. The relief is one fixed-point unit at most, so the drain never reaches
@@ -55,11 +56,22 @@ static func prepare(
 			"time_desynchronized",
 			"Календарь и потребности рассинхронизированы"
 		)
+	# The years are in the body before they are anywhere else: the same stretch of
+	# time takes more out of an older man and less out of a young one. This is
+	# the only place it has to be said, because every confirmed command that
+	# spends time comes through here.
+	var aged_profile := profile.duplicate(true)
+	var stamina := AgingRulesScript.stamina_basis_points(run_state)
+	if stamina != 10_000 and aged_profile.has("energy_drain_units_per_minute"):
+		aged_profile["energy_drain_units_per_minute"] = maxi(
+			int(round(float(int(aged_profile["energy_drain_units_per_minute"])) * 10_000.0 / float(stamina))),
+			1
+		)
 	var simulation := SurvivalTimeRulesScript.simulate(
 		run_state.meters,
 		survival_state,
 		minutes,
-		_with_equipment(profile, run_state)
+		_with_equipment(aged_profile, run_state)
 	)
 	if not bool(simulation.get("ok", false)):
 		return simulation

@@ -176,7 +176,12 @@ func _test_death() -> void:
 
 func _test_week_complete() -> void:
 	var run := _run_state()
-	var survival := SurvivalStateScript.fresh(run.calendar.elapsed_minutes)
+	# The horizon is a property of the run now, so this asks for one a week long
+	# rather than assuming every run is. What it checks is unchanged: time stops
+	# exactly on the boundary and the leftover is reported, not swallowed.
+	var survival := SurvivalStateScript.fresh(
+		run.calendar.elapsed_minutes, SurvivalStateScript.WEEK_MINUTES
+	)
 	var result := PassageCommand.execute(run, survival, {
 		"passage_id": "week:quiet",
 		"confirmed": true,

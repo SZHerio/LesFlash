@@ -44,7 +44,7 @@ static func simulate(
 	var candidate_meters := meters.duplicate(true)
 	var profile: Dictionary = profile_result["profile"]
 	var initial_meters := meters.duplicate(true)
-	var limit := mini(requested_minutes, candidate_state.minutes_until_week_complete())
+	var limit := mini(requested_minutes, candidate_state.minutes_until_horizon())
 	var consumed := 0
 
 	if int(candidate_meters["health"]) <= 0:
@@ -64,7 +64,7 @@ static func simulate(
 			if int(candidate_meters["health"]) <= 0:
 				candidate_state.mark_dead("deprivation")
 				break
-			if candidate_state.processed_elapsed_minutes == candidate_state.week_end_elapsed_minutes():
+			if candidate_state.processed_elapsed_minutes == candidate_state.horizon_end_elapsed_minutes():
 				candidate_state.mark_week_complete()
 				break
 

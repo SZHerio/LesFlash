@@ -118,6 +118,13 @@ const JSON_SAFE_INTEGER_MAX := 9_007_199_254_740_991
 
 ## A single confirmed decision may skip up to ten leap-length years. Longer
 ## passages are split into life chapters, which keeps calendar work bounded.
+## How long a run may last before it stops on its own. Seven days was the
+## prototype's whole horizon; a game about a life needs somewhere for years to
+## happen, and the number is here rather than in the survival state so it reads
+## as a rule of the game and not an implementation detail.
+const DEFAULT_RUN_HORIZON_DAYS := 400
+const DEFAULT_RUN_HORIZON_MINUTES := DEFAULT_RUN_HORIZON_DAYS * DEFAULT_MINUTES_PER_DAY
+
 const MAX_TIME_ADVANCE_MINUTES := 10 * 366 * 24 * 60
 
 const KNOWLEDGE_LEVEL_MIN := 1
