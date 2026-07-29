@@ -92,6 +92,8 @@ static func apply_one(
 			return _practice_skill(run_state, effect)
 		"wash":
 			return _wash(run_state)
+		"standing":
+			return _standing(run_state, effect)
 		"mastery":
 			return _change_mastery(run_state, effect)
 		"deferred":
@@ -363,6 +365,18 @@ static func _unlock_skill(run_state: Object, effect: Dictionary) -> Dictionary:
 		"Навык %s: ранг %s → %s" % [identifier, before, after],
 		effect
 	))
+
+
+## Репутация живёт в сессии, а не в состоянии попытки: её знают люди, а не тело.
+## Эффект поэтому только сообщает о поступке, а записывает его команда.
+static func _standing(run_state: Object, effect: Dictionary) -> Dictionary:
+	var kind := String(effect.get("id", "")).strip_edges()
+	if kind not in ["reliable", "feared"]:
+		return _failure("unknown_standing", "Неизвестная сторона репутации")
+	var weight := int(effect.get("weight", 1))
+	if weight <= 0:
+		return _failure("invalid_standing_weight", "Поступок должен что-то значить")
+	return _success(_record("standing", "standing", kind, 0, weight, weight, "Как о нём говорят", effect))
 
 
 static func _wash(run_state: Object) -> Dictionary:

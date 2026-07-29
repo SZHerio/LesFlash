@@ -62,6 +62,11 @@ static func apply(
 	# approach teaches whatever the skill catalog says it teaches, and rank 1
 	# arrives when three different approaches have been worked — which the quick
 	# sweep still gates on, only honestly.
+	# Как он это сделал — попросил или пролез. Ось была написана в зонах поиска с
+	# самого начала и до сих пор ничего не копила.
+	var manner := _manner_of(approach_id)
+	if not manner.is_empty():
+		effects.append({"type": "standing", "id": manner, "weight": 1})
 	var taught := SkillCatalogScript.skill_taught_by(
 		_skill_catalog(),
 		"%s:%s" % [object_id, approach_id]
@@ -198,3 +203,18 @@ static func _failure(
 static func _skill_catalog() -> Dictionary:
 	var loaded := SkillCatalogScript.load_default()
 	return Dictionary(loaded.get("catalog", {})) if bool(loaded.get("ok", false)) else {}
+
+
+## По названию подхода видно, как человек себя повёл. Спросил разрешения,
+## разговорился, подождал — надёжный. Отжал, пролез, взял без спроса — опасный.
+## Остальное не говорит о нём ничего.
+static func _manner_of(approach_id: String) -> String:
+	const RELIABLE := ["ask_permission", "offer_help", "talk_your_way_in", "share_a_smoke",
+		"open_safely", "work_quietly", "study_lock", "read_the_ground"]
+	const FEARED := ["force_hinge", "force_the_latch", "slip_through", "find_blind_spot",
+		"pick_it_open", "pull_boards", "lift_grate"]
+	if approach_id in RELIABLE:
+		return "reliable"
+	if approach_id in FEARED:
+		return "feared"
+	return ""
