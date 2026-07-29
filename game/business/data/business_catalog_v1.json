@@ -1,0 +1,19 @@
+{
+	"schema_version": 1,
+	"catalog_id": "business_catalog_v1",
+	"businesses": [
+		{
+			"id": "business_repair_bench",
+			"title": "Верстак в мастерских",
+			"description": "Угол в гаражном ряду с тисками и своим ключом от ворот. Чинят всё, что приносят, — пока есть из чего.",
+			"location_id": "workshop_row",
+			"price_ard": 1400,
+			"rent_per_day_ard": 18,
+			"wage_per_day_ard": 46,
+			"stock_price_ard": 22,
+			"revenue_per_unit_ard": 50,
+			"units_per_hand_per_day": 3,
+			"max_hands": 2
+		}
+	]
+}

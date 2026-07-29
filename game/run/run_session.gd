@@ -19,6 +19,7 @@ const SocialStateScript := preload("res://core/social/social_state.gd")
 const SurvivalStateScript := preload("res://game/survival/survival_state.gd")
 const JobWorkStateScript := preload("res://game/jobs/job_work_state.gd")
 const RoutineStateScript := preload("res://game/routine/routine_state.gd")
+const BusinessStateScript := preload("res://game/business/business_state.gd")
 const SystemBootstrapScript := preload("res://game/run/run_system_bootstrap.gd")
 const SessionCommandBridgeScript := preload("res://game/run/run_session_command_bridge.gd")
 const PsycheScaleScript := preload("res://core/state/psyche_scale.gd")
@@ -43,6 +44,8 @@ var survival_state: SurvivalState = SurvivalStateScript.fresh()
 var job_work_state: JobWorkState = JobWorkStateScript.fresh()
 ## The week the hero means to have. Empty until he writes one down.
 var routine_state: RoutineState = RoutineStateScript.fresh()
+## A place of his own, if he has bought one. Empty until he does.
+var business_state: BusinessState = BusinessStateScript.fresh()
 var applied_command_ids: Dictionary = {}
 var phase: String = "uninitialized"
 var location: String = ""
@@ -137,6 +140,7 @@ func start_new_run(
 	survival_state = SurvivalStateScript.fresh(candidate_state.calendar.elapsed_minutes)
 	job_work_state = JobWorkStateScript.fresh()
 	routine_state = RoutineStateScript.fresh()
+	business_state = BusinessStateScript.fresh()
 	applied_command_ids = {}
 	phase = "event" if not opening_card.is_empty() else ("start" if not ContentShape.choices_of(chosen_start).is_empty() else "map")
 	location = chosen_location
@@ -637,6 +641,7 @@ func to_dict() -> Dictionary:
 		"survival_state": survival_state.to_dict(),
 		"job_work_state": job_work_state.to_dict(),
 		"routine_state": routine_state.to_dict(),
+		"business_state": business_state.to_dict(),
 		"applied_command_ids": applied_command_ids.duplicate(true),
 		"base_location": location,
 		"active_activity": active_activity.duplicate(true),
@@ -684,6 +689,12 @@ static func from_dict(data: Dictionary) -> RunSession:
 	var parsed_routine: RoutineState = RoutineStateScript.from_dict(source["routine_state"])
 	if parsed_routine == null:
 		return null
+	# A save from before anyone could own anything owns nothing, which is right.
+	if not source.has("business_state"):
+		source["business_state"] = BusinessStateScript.fresh().to_dict()
+	var parsed_business: BusinessState = BusinessStateScript.from_dict(source["business_state"])
+	if parsed_business == null:
+		return null
 	if parsed_job == null:
 		return null
 	var parsed_survival := SurvivalStateScript.from_dict(source["survival_state"])
@@ -719,6 +730,7 @@ static func from_dict(data: Dictionary) -> RunSession:
 	result.survival_state = parsed_survival
 	result.job_work_state = parsed_job
 	result.routine_state = parsed_routine
+	result.business_state = parsed_business
 	result.applied_command_ids = SerializedValue.normalize_json_numbers(
 		Dictionary(source["applied_command_ids"]).duplicate(true)
 	)
@@ -754,6 +766,7 @@ func replace_from(other: RunSession) -> bool:
 	survival_state = candidate.survival_state
 	job_work_state = candidate.job_work_state
 	routine_state = candidate.routine_state
+	business_state = candidate.business_state
 	applied_command_ids = candidate.applied_command_ids
 	phase = candidate.phase
 	location = candidate.location
@@ -791,6 +804,10 @@ func validate() -> Dictionary:
 		errors.append("social_state is null")
 	else:
 		_append_validation("social_state", social_state.validate(), errors)
+	if business_state == null:
+		errors.append("business_state is null")
+	else:
+		_append_validation("business_state", business_state.validate(), errors)
 	if routine_state == null:
 		errors.append("routine_state is null")
 	else:

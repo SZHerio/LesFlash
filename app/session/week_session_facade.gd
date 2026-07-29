@@ -8,6 +8,8 @@ extends RefCounted
 const WeekActions := preload("res://game/week/week_action_service.gd")
 const WeekActionCommandScript := preload("res://game/week/week_action_command.gd")
 const RoutineCommandScript := preload("res://game/routine/routine_session_command.gd")
+const BusinessCommandScript := preload("res://game/business/business_session_command.gd")
+const BusinessCatalogScript := preload("res://game/business/business_catalog.gd")
 const StoreServiceScript := preload("res://game/commerce/store_service.gd")
 const CommerceCommandScript := preload("res://game/commerce/commerce_session_command.gd")
 const ShelterServiceScript := preload("res://game/shelter/shelter_session_service.gd")
@@ -38,6 +40,7 @@ static func location_model(
 	))
 	actions.append_array(JobLocationActionsScript.location_actions(session, include_blocked))
 	actions.append_array(_qualification_actions(session, include_blocked))
+	actions.append_array(_business_actions(session, include_blocked))
 	result["actions"] = actions
 	return result
 
@@ -438,6 +441,94 @@ static func _qualification_actions(session: Object, include_blocked: bool) -> Ar
 			"confirmation_required": true,
 		})
 	return result
+
+
+## Buying a place, and — once it is his — coming by to settle up. Both are
+## ordinary location actions, because standing at your own bench and deciding
+## something is not a different kind of act from any other.
+static func _business_actions(session: Object, include_blocked: bool) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for raw_offer: Variant in BusinessCommandScript.offers_at(session):
+		var offer: Dictionary = raw_offer
+		var reasons: Array = Array(offer.get("reasons", []))
+		var available := reasons.is_empty()
+		if not available and not include_blocked:
+			continue
+		result.append({
+			"id": "business_open_%s" % String(offer["id"]),
+			"kind": "business",
+			"category_id": "trade",
+			"category_icon_id": "action_trade",
+			"title": "Взять себе: %s" % String(offer["title"]),
+			"description": "%s Цена — %d ард." % [String(offer["description"]), int(offer["price_ard"])],
+			"available": available,
+			"reasons": reasons,
+			"minutes": 0,
+			"intent": {
+				"type": "open_business",
+				"payload": {"business_id": String(offer["id"])},
+			},
+			"confirmation_required": true,
+		})
+	var business: BusinessState = session.get("business_state")
+	if business == null or not business.owns_anything():
+		return result
+	var loaded := BusinessCatalogScript.load_default()
+	if not bool(loaded.get("ok", false)):
+		return result
+	var entry := BusinessCatalogScript.find(Dictionary(loaded["catalog"]), business.business_id)
+	if String(entry.get("location_id", "")) != String(session.get("location")):
+		return result
+	var run_state: RunState = session.get("run_state")
+	var days := business.days_owed(int(run_state.calendar.elapsed_minutes))
+	result.append({
+		"id": "business_settle",
+		"kind": "business",
+		"category_id": "trade",
+		"category_icon_id": "action_trade",
+		"title": "Свести счёта",
+		"description": (
+			"Посмотреть, что тут было без вас." if days <= 0
+			else "Без вас прошло дней: %d." % days
+		),
+		"available": true,
+		"reasons": [],
+		"minutes": 0,
+		"intent": {"type": "settle_business", "payload": {}},
+		"confirmation_required": true,
+	})
+	return result
+
+
+## --- a place of his own ---------------------------------------------------
+
+
+static func business_offers(session: Object) -> Array[Dictionary]:
+	return BusinessCommandScript.offers_at(session)
+
+
+static func open_business(session: Object, business_id: String, flow_revision: int) -> Dictionary:
+	return BusinessCommandScript.open(
+		session, business_id, _command_id(session, "business:open:%s" % business_id, flow_revision)
+	)
+
+
+static func restock_business(session: Object, units: int, flow_revision: int) -> Dictionary:
+	return BusinessCommandScript.restock(
+		session, units, _command_id(session, "business:restock:%d" % units, flow_revision)
+	)
+
+
+static func set_business_hands(session: Object, count: int, flow_revision: int) -> Dictionary:
+	return BusinessCommandScript.set_hands(
+		session, count, _command_id(session, "business:hands:%d" % count, flow_revision)
+	)
+
+
+static func settle_business(session: Object, flow_revision: int) -> Dictionary:
+	return BusinessCommandScript.settle(
+		session, _command_id(session, "business:settle", flow_revision)
+	)
 
 
 ## --- the week the hero means to have ---------------------------------------

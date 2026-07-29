@@ -60,6 +60,18 @@ func _on_action_requested(_action_id: String, action_model: Dictionary) -> void:
 				_session.obtain_qualification.bind(String(payload.get("qualification_id", ""))),
 				true
 			)
+		"business":
+			var business_intent: Dictionary = Dictionary(action_model.get("intent", {}))
+			var business_payload: Dictionary = Dictionary(business_intent.get("payload", {}))
+			if String(business_intent.get("type", "")) == "open_business":
+				_hook("run_command").call(
+					_session.open_business.bind(String(business_payload.get("business_id", ""))),
+					true
+				)
+			else:
+				# Settling is where the hero finds out what the place did without
+				# him. It can be a debt, and it is confirmed like any decision.
+				_hook("run_command").call(_session.settle_business, true)
 		"recycling":
 			_hook("recycling").call()
 		"wait":

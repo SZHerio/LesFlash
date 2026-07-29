@@ -269,6 +269,38 @@ func resolve_job_shift_step(choice_id: String) -> Dictionary:
 	))
 
 
+## --- a place of his own ---------------------------------------------------
+
+
+func get_business_offers() -> Array[Dictionary]:
+	return [] if _session == null else WeekFacade.business_offers(_session)
+
+
+func open_business(business_id: String) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.open_business(_session, business_id, _session.flow_revision))
+
+
+func restock_business(units: int) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.restock_business(_session, units, _session.flow_revision))
+
+
+func set_business_hands(count: int) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.set_business_hands(_session, count, _session.flow_revision))
+
+
+## The reckoning since the hero last looked. It can be a debt.
+func settle_business() -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.settle_business(_session, _session.flow_revision))
+
+
 ## --- the week the hero means to have ---------------------------------------
 
 
