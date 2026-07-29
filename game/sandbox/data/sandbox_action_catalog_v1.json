@@ -1001,6 +1001,123 @@
 				"kind": "fixed",
 				"minutes": 120
 			}
+		},
+		{
+			"action_id": "action_clinic_wash_properly",
+			"location_id": "clinic_yard",
+			"category_id": "rest",
+			"icon_id": "action_rest",
+			"title": "Вымыться у поликлиники",
+			"description": "В служебном душе пускают до обеда, если во дворе тихо. Полчаса, и на вас перестают оглядываться.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_clinic_wash_properly"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 40
+			}
+		},
+		{
+			"action_id": "action_almshouse_bathhouse",
+			"location_id": "almshouse",
+			"category_id": "rest",
+			"icon_id": "action_rest",
+			"title": "Помыться в богадельне",
+			"description": "Раз в неделю топят баню. Очередь длинная, но выходят оттуда другими людьми.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_almshouse_bathhouse"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 90
+			}
+		},
+		{
+			"action_id": "action_market_mend_clothes",
+			"location_id": "market",
+			"category_id": "rest",
+			"icon_id": "action_rest",
+			"title": "Заштопать одежду",
+			"description": "Иголка с ниткой у любой торговки. Дыра, которую видно, — это не про тепло.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_market_mend_clothes"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 45
+			}
+		},
+		{
+			"action_id": "action_station_waiting_hall",
+			"location_id": "station_square",
+			"category_id": "rest",
+			"icon_id": "action_rest",
+			"title": "Посидеть в зале ожидания",
+			"description": "Внутри тепло и есть скамейки. Дежурный пропускает тех, кто похож на пассажира.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_underpass_rest_by_pipes"
+				}
+			},
+			"requirements": [
+				{
+					"type": "appearance_min",
+					"band_id": "ordinary",
+					"blocked_reason": "На вас смотрят и отходят."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 60
+			}
+		},
+		{
+			"action_id": "action_pawn_row_talk_terms",
+			"location_id": "pawn_row",
+			"category_id": "trade",
+			"icon_id": "action_trade",
+			"title": "Договориться о цене",
+			"description": "С приёмщиком говорят иначе, когда видят перед собой не бродягу.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_pawn_row_haggle_talk"
+				}
+			},
+			"requirements": [
+				{
+					"type": "appearance_min",
+					"band_id": "respectable",
+					"blocked_reason": "В таком виде туда не заходят."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 30
+			}
 		}
 	]
 }

@@ -90,6 +90,8 @@ static func apply_one(
 			return _advance_skill(run_state, effect)
 		"practice_skill":
 			return _practice_skill(run_state, effect)
+		"wash":
+			return _wash(run_state)
 		"mastery":
 			return _change_mastery(run_state, effect)
 		"deferred":
@@ -361,6 +363,13 @@ static func _unlock_skill(run_state: Object, effect: Dictionary) -> Dictionary:
 		"Навык %s: ранг %s → %s" % [identifier, before, after],
 		effect
 	))
+
+
+static func _wash(run_state: Object) -> Dictionary:
+	var before := int(run_state.days_unwashed())
+	if not bool(run_state.record_wash()):
+		return _failure("wash_rejected", "Отметка о мытье не принята")
+	return _success(_record("wash", "appearance", "washed", before, 0, -before, "Вымылся", {}))
 
 
 static func _practice_skill(run_state: Object, effect: Dictionary) -> Dictionary:

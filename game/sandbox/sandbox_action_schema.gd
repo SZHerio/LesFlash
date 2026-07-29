@@ -188,6 +188,10 @@ static func _validate_requirement(value: Variant, path: String, errors: Array[St
 		# July, and a warming station open all summer is not a warming station.
 		"season":
 			keys = ["type", "season_ids", "blocked_reason"]
+		# Как героя читают, не спрашивая. Не «обаяние 7», а то, пустят ли его
+		# внутрь в том, в чём он пришёл.
+		"appearance_min":
+			keys = ["type", "band_id", "blocked_reason"]
 		_:
 			errors.append("%s.type is unknown" % path)
 			return
@@ -207,6 +211,12 @@ static func _validate_requirement(value: Variant, path: String, errors: Array[St
 		"inventory_item_min":
 			_expect_id(requirement.get("item_id", null), "%s.item_id" % path, errors)
 			_expect_int(requirement.get("quantity", null), 1, 999, "%s.quantity" % path, errors)
+		"appearance_min":
+			if String(requirement.get("band_id", "")) not in AppearanceRules.ORDER:
+				errors.append("%s.band_id is unknown" % path)
+			elif String(requirement.get("band_id", "")) == AppearanceRules.DERELICT:
+				# Худшая полоса — это все, поэтому такое требование ничего не значит.
+				errors.append("%s.band_id gates nothing: everyone is at least that" % path)
 		"season":
 			var raw_seasons: Variant = requirement.get("season_ids", null)
 			if not raw_seasons is Array or Array(raw_seasons).is_empty():

@@ -292,7 +292,9 @@ func _test_midweek_save_load() -> void:
 			break
 	_expect(
 		restored.get_phase() != "completed",
-		"a reopened run died before the week was out"
+		"a reopened run died before the week was out%s, meters=%s" % [
+			_death_note(restored), _meter_note(restored),
+		]
 	)
 	_expect(
 		_elapsed(restored) >= week_ends_at,

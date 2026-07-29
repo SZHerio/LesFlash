@@ -3,7 +3,7 @@ extends RefCounted
 
 const JsonValidator := preload("res://core/save/json_value_validator.gd")
 const DEFAULT_PATH := "res://game/week/data/week_activity_profiles_v1.json"
-const EFFECT_TYPES := ["change_state", "shift_polarity", "mastery"]
+const EFFECT_TYPES := ["change_state", "shift_polarity", "mastery", "wash"]
 
 
 static func load_default() -> Dictionary:
@@ -48,6 +48,13 @@ static func validate(catalog: Dictionary) -> Dictionary:
 		for raw_effect: Variant in Array(effects):
 			if not raw_effect is Dictionary or String(raw_effect.get("type", "")) not in EFFECT_TYPES:
 				errors.append("%s содержит запрещённый эффект" % activity_id)
+				continue
+			# Мытьё — отметка о времени, а не сдвиг показателя: у него нечему быть
+			# дельтой. Всё остальное обязано двигать что-то на ненулевую величину,
+			# иначе занятие тратит время и не делает ничего.
+			if String(raw_effect.get("type", "")) == "wash":
+				if raw_effect.size() != 1:
+					errors.append("%s: отметка о мытье не принимает других полей" % activity_id)
 				continue
 			if typeof(raw_effect.get("delta", null)) != TYPE_INT or int(raw_effect.get("delta", 0)) == 0:
 				errors.append("%s содержит неверный delta" % activity_id)

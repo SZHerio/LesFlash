@@ -15,6 +15,7 @@ const SHIFT_POLARITY: StringName = &"shift_polarity"
 const UNLOCK_SKILL: StringName = &"unlock_skill"
 const ADVANCE_SKILL: StringName = &"advance_skill"
 const PRACTICE_SKILL: StringName = &"practice_skill"
+const WASH: StringName = &"wash"
 const MASTERY: StringName = &"mastery"
 const DEFERRED: StringName = &"deferred"
 const KNOWLEDGE: StringName = &"knowledge"
@@ -83,6 +84,13 @@ static func unlock_skill(skill_id: StringName, initial_rank: int = 1) -> Diction
 ## Stringified like its neighbours: a StringName reaching the journal makes the
 ## save payload non-JSON, and the packet is rejected as an unwritable entry —
 ## an error that names the journal and says nothing about the skill.
+## Мытьё. Не показатель — отметка о времени, из которой потом выводится то, как
+## героя читают. Отдельным эффектом, потому что записать это может только то,
+## что действительно было сделано.
+static func wash() -> Dictionary:
+	return {"type": String(WASH)}
+
+
 static func practice_skill(skill_id: StringName, source_id: StringName) -> Dictionary:
 	return {
 		"type": String(PRACTICE_SKILL),

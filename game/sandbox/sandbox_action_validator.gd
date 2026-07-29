@@ -10,7 +10,7 @@ const MIN_ACTIONS := 18
 ## Raised from 22 when first aid and warming food were given somewhere to be
 ## practised. The cap exists so a place never turns into a wall of buttons; the
 ## per-location limit below is what actually protects the screen.
-const MAX_ACTIONS := 46
+const MAX_ACTIONS := 52
 ## The places whose action list this catalog owns. The two districts beyond
 ## Riverside were added here rather than given a catalog of their own: a place
 ## the hero can stand in and do nothing is a worse district than none at all.

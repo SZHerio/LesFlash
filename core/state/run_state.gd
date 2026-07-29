@@ -24,6 +24,11 @@ var skill_practice: Dictionary = GameRules.default_skill_practice()
 ## qualification_id -> elapsed minute it was granted. A skill says what the hero
 ## can do; this says what he is allowed to do, and the two are not the same.
 var qualifications: Dictionary = {}
+
+## Elapsed minute of the last proper wash. How a man looks is otherwise worked
+## out from what he wears and whether he has a roof — all of that is already
+## recorded — and this is the one part of it nothing else knows.
+var washed_at_minute: int = 0
 var mastery_points: int = 0
 var knowledge: Dictionary = {}
 
@@ -218,6 +223,21 @@ func grant_qualification(qualification_id: String) -> bool:
 	if qualification_id.strip_edges().is_empty() or qualifications.has(qualification_id):
 		return false
 	qualifications[qualification_id] = int(calendar.elapsed_minutes)
+	return true
+
+
+## Days since he last washed properly. Nothing shows this as a number; it is one
+## of the things people read off him without being told.
+func days_unwashed() -> int:
+	@warning_ignore("integer_division")
+	return maxi(int(calendar.elapsed_minutes) - washed_at_minute, 0) / GameRules.DEFAULT_MINUTES_PER_DAY
+
+
+func record_wash() -> bool:
+	var now := int(calendar.elapsed_minutes)
+	if now < washed_at_minute:
+		return false
+	washed_at_minute = now
 	return true
 
 
@@ -419,6 +439,7 @@ func to_dict() -> Dictionary:
 		"skills": skills.duplicate(true),
 		"skill_practice": skill_practice.duplicate(true),
 		"qualifications": qualifications.duplicate(true),
+		"washed_at_minute": washed_at_minute,
 		"mastery_points": mastery_points,
 		"knowledge": knowledge.duplicate(true),
 		"calendar": calendar.to_dict(),
@@ -449,6 +470,9 @@ static func from_dict(data: Dictionary) -> RunState:
 		GameRules.METER_MIN,
 		GameRules.METER_MAX
 	)
+	var parsed_washed: Variant = SerializedValue.parse_integral(source.get("washed_at_minute", 0))
+	if parsed_washed == null or int(parsed_washed) < 0:
+		return null
 	var parsed_qualifications: Variant = _parse_qualifications(source.get("qualifications", null))
 	if parsed_qualifications == null:
 		return null
@@ -524,6 +548,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	result.skills = parsed_skills
 	result.skill_practice = Dictionary(parsed_practice)
 	result.qualifications = Dictionary(parsed_qualifications)
+	result.washed_at_minute = int(parsed_washed)
 	result.mastery_points = int(parsed_mastery)
 	result.knowledge = parsed_knowledge
 	result.calendar = parsed_calendar
@@ -564,6 +589,7 @@ func replace_from(other: RunState) -> bool:
 	skills = other.skills.duplicate(true)
 	skill_practice = other.skill_practice.duplicate(true)
 	qualifications = other.qualifications.duplicate(true)
+	washed_at_minute = other.washed_at_minute
 	mastery_points = other.mastery_points
 	knowledge = other.knowledge.duplicate(true)
 	calendar = other.calendar.clone()

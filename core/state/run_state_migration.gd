@@ -26,6 +26,7 @@ static func migrate(data: Dictionary) -> Dictionary:
 		GameRules.RUN_STATE_VERSION_V4,
 		GameRules.RUN_STATE_VERSION_V5,
 		GameRules.RUN_STATE_VERSION_V6,
+		GameRules.RUN_STATE_VERSION_V7,
 	]:
 		return {
 			"ok": false,
@@ -121,6 +122,14 @@ static func migrate(data: Dictionary) -> Dictionary:
 		migrated["qualifications"] = {}
 		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V6
 		current_version = GameRules.RUN_STATE_VERSION_V6
+	if current_version == GameRules.RUN_STATE_VERSION_V6:
+		# How a man looks is worked out from what he is wearing and whether he
+		# has a roof — all of it already recorded. The one thing that cannot be
+		# derived is when he last washed, so it starts at the beginning of the
+		# run: nobody arrives filthy on the first morning.
+		migrated["washed_at_minute"] = 0
+		migrated["save_version"] = GameRules.RUN_STATE_VERSION_V7
+		current_version = GameRules.RUN_STATE_VERSION_V7
 	if current_version != GameRules.SAVE_VERSION:
 		return {
 			"ok": false,

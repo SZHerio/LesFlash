@@ -411,6 +411,67 @@
 					"delta": -2
 				}
 			]
+		},
+		{
+			"activity_id": "activity_clinic_wash_properly",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "health",
+					"delta": 3
+				},
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": -5
+				},
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -3
+				},
+				{
+					"type": "wash"
+				}
+			]
+		},
+		{
+			"activity_id": "activity_almshouse_bathhouse",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "health",
+					"delta": 5
+				},
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": -9
+				},
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -4
+				},
+				{
+					"type": "wash"
+				}
+			]
+		},
+		{
+			"activity_id": "activity_market_mend_clothes",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": -3
+				},
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -5
+				}
+			]
 		}
 	]
 }
