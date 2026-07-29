@@ -22,10 +22,8 @@ const DEFAULT_PATH := "res://game/routine/data/routine_catalog_v1.json"
 ## would plan a day the runner cannot live.
 const KINDS := ["job_shift", "search", "recycle", "meal", "stock", "npc", "shelter", "rest"]
 
-const KNOWN_LOCATION_IDS := [
-	"underpass", "market", "station_square", "recycling_point", "clinic_yard", "embankment",
-	"freight_yard", "courtyard_blocks",
-]
+## One list, in CityPlaces. Six catalogs used to carry their own copy of this.
+const KNOWN_LOCATION_IDS := CityPlaces.PLACES
 
 ## Longest a single planned activity may run. Anything past this is not one
 ## stretch of a day, it is the whole day, and the plan stops describing a week.

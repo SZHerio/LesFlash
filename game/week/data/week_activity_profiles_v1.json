@@ -141,6 +141,186 @@
 					"delta": -4
 				}
 			]
+		},
+		{
+			"activity_id": "activity_depot_lend_a_hand",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -10
+				},
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": -2
+				}
+			]
+		},
+		{
+			"activity_id": "activity_canteen_warm_up",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "hunger",
+					"delta": -12
+				},
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": -5
+				}
+			]
+		},
+		{
+			"activity_id": "activity_workshop_borrow_bench",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -6
+				},
+				{
+					"type": "change_state",
+					"id": "mental_state",
+					"delta": 4
+				}
+			]
+		},
+		{
+			"activity_id": "activity_steps_sit_with_others",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": -6
+				},
+				{
+					"type": "change_state",
+					"id": "mental_state",
+					"delta": 3
+				}
+			]
+		},
+		{
+			"activity_id": "activity_almshouse_help_inside",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -8
+				},
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": -4
+				}
+			]
+		},
+		{
+			"activity_id": "activity_pawn_row_look_around",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "mental_state",
+					"delta": 2
+				},
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -3
+				}
+			]
+		},
+		{
+			"activity_id": "activity_depot_wait_for_word",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": -3
+				},
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -2
+				}
+			]
+		},
+		{
+			"activity_id": "activity_canteen_wash_up",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "health",
+					"delta": 2
+				},
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": -3
+				}
+			]
+		},
+		{
+			"activity_id": "activity_workshop_sort_scrap",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -9
+				},
+				{
+					"type": "change_state",
+					"id": "mental_state",
+					"delta": 2
+				}
+			]
+		},
+		{
+			"activity_id": "activity_steps_ask_around",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": -2
+				},
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -4
+				}
+			]
+		},
+		{
+			"activity_id": "activity_almshouse_wait_for_place",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": -4
+				},
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -2
+				}
+			]
+		},
+		{
+			"activity_id": "activity_pawn_row_haggle_talk",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "mental_state",
+					"delta": 3
+				},
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -4
+				}
+			]
 		}
 	]
 }

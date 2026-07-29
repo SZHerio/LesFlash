@@ -1,24 +1,236 @@
 {
-  "schema_version": 1,
-  "catalog_id": "knowledge_catalog_v1",
-  "knowledge": [
-    {"id": "underpass_layout", "title": "Устройство перехода", "description": "Расположение входов, лестниц и основных проходов Старого перехода.", "kind": "fact", "max_level": 1, "tags": ["place", "underpass"]},
-    {"id": "underpass_services", "title": "Служебные зоны перехода", "description": "Назначение и взаимное расположение служебных помещений перехода.", "kind": "topic", "max_level": 3, "tags": ["place", "underpass", "services"]},
-    {"id": "underpass_dry_corner", "title": "Сухой угол перехода", "description": "Когда защищённый от сырости угол пустует и откуда он просматривается.", "kind": "fact", "max_level": 1, "tags": ["place", "shelter", "underpass"]},
-    {"id": "station_layout", "title": "Устройство вокзала", "description": "Расположение путей, касс, выходов и переходов станции Гранов-Центральный.", "kind": "fact", "max_level": 1, "tags": ["place", "station"]},
-    {"id": "embankment_routines", "title": "Ритм набережной", "description": "Привычные часы прохожих, работников и патрулей у набережной Ивары.", "kind": "fact", "max_level": 1, "tags": ["place", "embankment", "routine"]},
-    {"id": "embankment_shelter", "title": "Укрытия набережной", "description": "Известные места, защищённые от ветра и посторонних взглядов.", "kind": "fact", "max_level": 1, "tags": ["place", "embankment", "shelter"]},
-    {"id": "market_schedule", "title": "Расписание рынка", "description": "Часы работы торговых рядов и наиболее спокойные периоды Центрального рынка.", "kind": "fact", "max_level": 1, "tags": ["market", "schedule"]},
-    {"id": "station_schedule", "title": "Расписание вокзала", "description": "Часы движения и смена потока людей на вокзальной площади.", "kind": "fact", "max_level": 1, "tags": ["schedule", "station", "transport"]},
-    {"id": "district_services", "title": "Службы Приречного", "description": "Назначение, требования и часы основных районных служб.", "kind": "topic", "max_level": 3, "tags": ["district", "services"]},
-    {"id": "clinic_hours", "title": "Часы поликлиники", "description": "Расписание окон, приёма и служебных входов Приречной поликлиники.", "kind": "fact", "max_level": 1, "tags": ["clinic", "schedule"]},
-    {"id": "clinic_support", "title": "Помощь поликлиники", "description": "Какая помощь доступна без направления и какие требования действуют для планового обращения.", "kind": "topic", "max_level": 3, "tags": ["clinic", "services"]},
-    {"id": "recycling_rates", "title": "Расценки вторсырья", "description": "Опубликованные категории приёма и действующие расценки Приречного пункта вторсырья.", "kind": "fact", "max_level": 1, "tags": ["recycling", "trade"]},
-    {"id": "recycling_basics", "title": "Основы сортировки", "description": "Базовые признаки материала, чистоты и пригодности вторсырья к приёму.", "kind": "topic", "max_level": 3, "tags": ["recycling", "work"]},
-    {"id": "recycling_scale", "title": "Устройство весов", "description": "Работа, нулевая отметка и типичные причины погрешности механических весов пункта.", "kind": "topic", "max_level": 3, "tags": ["recycling", "repair", "work"]},
-    {"id": "metal_grades", "title": "Марки металлов", "description": "Признаки распространённых металлов и сплавов, важные для сортировки и оценки.", "kind": "topic", "max_level": 3, "tags": ["materials", "recycling", "work"]},
-    {"id": "recycling_safety", "title": "Безопасность пункта", "description": "Опасные зоны, средства защиты и безопасный порядок работы с прессом и грузом.", "kind": "topic", "max_level": 3, "tags": ["recycling", "safety", "work"]},
-    {"id": "recycling_shift_routine", "title": "Порядок смены", "description": "Последовательность подготовки площадки, сортировки, взвешивания и сдачи смены.", "kind": "topic", "max_level": 3, "tags": ["recycling", "routine", "work"]},
-    {"id": "recycling_inspection_rules", "title": "Правила проверки пункта", "description": "Требования санитарной и трудовой проверки, документы и возможные ограничения.", "kind": "topic", "max_level": 3, "tags": ["inspection", "recycling", "services"]}
-  ]
+	"schema_version": 1,
+	"catalog_id": "knowledge_catalog_v1",
+	"knowledge": [
+		{
+			"id": "underpass_layout",
+			"title": "Устройство перехода",
+			"description": "Расположение входов, лестниц и основных проходов Старого перехода.",
+			"kind": "fact",
+			"max_level": 1,
+			"tags": [
+				"place",
+				"underpass"
+			]
+		},
+		{
+			"id": "underpass_services",
+			"title": "Служебные зоны перехода",
+			"description": "Назначение и взаимное расположение служебных помещений перехода.",
+			"kind": "topic",
+			"max_level": 3,
+			"tags": [
+				"place",
+				"underpass",
+				"services"
+			]
+		},
+		{
+			"id": "underpass_dry_corner",
+			"title": "Сухой угол перехода",
+			"description": "Когда защищённый от сырости угол пустует и откуда он просматривается.",
+			"kind": "fact",
+			"max_level": 1,
+			"tags": [
+				"place",
+				"shelter",
+				"underpass"
+			]
+		},
+		{
+			"id": "station_layout",
+			"title": "Устройство вокзала",
+			"description": "Расположение путей, касс, выходов и переходов станции Гранов-Центральный.",
+			"kind": "fact",
+			"max_level": 1,
+			"tags": [
+				"place",
+				"station"
+			]
+		},
+		{
+			"id": "embankment_routines",
+			"title": "Ритм набережной",
+			"description": "Привычные часы прохожих, работников и патрулей у набережной Ивары.",
+			"kind": "fact",
+			"max_level": 1,
+			"tags": [
+				"place",
+				"embankment",
+				"routine"
+			]
+		},
+		{
+			"id": "embankment_shelter",
+			"title": "Укрытия набережной",
+			"description": "Известные места, защищённые от ветра и посторонних взглядов.",
+			"kind": "fact",
+			"max_level": 1,
+			"tags": [
+				"place",
+				"embankment",
+				"shelter"
+			]
+		},
+		{
+			"id": "market_schedule",
+			"title": "Расписание рынка",
+			"description": "Часы работы торговых рядов и наиболее спокойные периоды Центрального рынка.",
+			"kind": "fact",
+			"max_level": 1,
+			"tags": [
+				"market",
+				"schedule"
+			]
+		},
+		{
+			"id": "station_schedule",
+			"title": "Расписание вокзала",
+			"description": "Часы движения и смена потока людей на вокзальной площади.",
+			"kind": "fact",
+			"max_level": 1,
+			"tags": [
+				"schedule",
+				"station",
+				"transport"
+			]
+		},
+		{
+			"id": "district_services",
+			"title": "Службы Приречного",
+			"description": "Назначение, требования и часы основных районных служб.",
+			"kind": "topic",
+			"max_level": 3,
+			"tags": [
+				"district",
+				"services"
+			]
+		},
+		{
+			"id": "clinic_hours",
+			"title": "Часы поликлиники",
+			"description": "Расписание окон, приёма и служебных входов Приречной поликлиники.",
+			"kind": "fact",
+			"max_level": 1,
+			"tags": [
+				"clinic",
+				"schedule"
+			]
+		},
+		{
+			"id": "clinic_support",
+			"title": "Помощь поликлиники",
+			"description": "Какая помощь доступна без направления и какие требования действуют для планового обращения.",
+			"kind": "topic",
+			"max_level": 3,
+			"tags": [
+				"clinic",
+				"services"
+			]
+		},
+		{
+			"id": "recycling_rates",
+			"title": "Расценки вторсырья",
+			"description": "Опубликованные категории приёма и действующие расценки Приречного пункта вторсырья.",
+			"kind": "fact",
+			"max_level": 1,
+			"tags": [
+				"recycling",
+				"trade"
+			]
+		},
+		{
+			"id": "recycling_basics",
+			"title": "Основы сортировки",
+			"description": "Базовые признаки материала, чистоты и пригодности вторсырья к приёму.",
+			"kind": "topic",
+			"max_level": 3,
+			"tags": [
+				"recycling",
+				"work"
+			]
+		},
+		{
+			"id": "recycling_scale",
+			"title": "Устройство весов",
+			"description": "Работа, нулевая отметка и типичные причины погрешности механических весов пункта.",
+			"kind": "topic",
+			"max_level": 3,
+			"tags": [
+				"recycling",
+				"repair",
+				"work"
+			]
+		},
+		{
+			"id": "metal_grades",
+			"title": "Марки металлов",
+			"description": "Признаки распространённых металлов и сплавов, важные для сортировки и оценки.",
+			"kind": "topic",
+			"max_level": 3,
+			"tags": [
+				"materials",
+				"recycling",
+				"work"
+			]
+		},
+		{
+			"id": "recycling_safety",
+			"title": "Безопасность пункта",
+			"description": "Опасные зоны, средства защиты и безопасный порядок работы с прессом и грузом.",
+			"kind": "topic",
+			"max_level": 3,
+			"tags": [
+				"recycling",
+				"safety",
+				"work"
+			]
+		},
+		{
+			"id": "recycling_shift_routine",
+			"title": "Порядок смены",
+			"description": "Последовательность подготовки площадки, сортировки, взвешивания и сдачи смены.",
+			"kind": "topic",
+			"max_level": 3,
+			"tags": [
+				"recycling",
+				"routine",
+				"work"
+			]
+		},
+		{
+			"id": "recycling_inspection_rules",
+			"title": "Правила проверки пункта",
+			"description": "Требования санитарной и трудовой проверки, документы и возможные ограничения.",
+			"kind": "topic",
+			"max_level": 3,
+			"tags": [
+				"inspection",
+				"recycling",
+				"services"
+			]
+		},
+		{
+			"id": "district_zavokzalny",
+			"title": "Дорога в Завокзальный",
+			"description": "Куда идёт автобус за вокзал, сколько стоит проезд и во сколько уходит последний.",
+			"kind": "fact",
+			"max_level": 1,
+			"tags": [
+				"place",
+				"transport"
+			]
+		},
+		{
+			"id": "district_sobornaya",
+			"title": "Дорога на Соборную",
+			"description": "Что трамвай с набережной идёт на Соборную сторону и когда перестаёт ходить.",
+			"kind": "fact",
+			"max_level": 1,
+			"tags": [
+				"place",
+				"transport"
+			]
+		}
+	]
 }

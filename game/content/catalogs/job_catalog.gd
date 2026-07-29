@@ -10,10 +10,8 @@ const DEFAULT_PATH := "res://game/content/data/job_catalog_v1.json"
 const ACTIVE_SKILL_IDS := [
 	"city_navigation", "cargo_handling", "cooking", "repair", "first_aid", "trade", "search",
 ]
-const KNOWN_LOCATION_IDS := [
-	"underpass", "market", "station_square", "recycling_point", "clinic_yard", "embankment",
-	"freight_yard", "courtyard_blocks",
-]
+## One list, in CityPlaces. Six catalogs used to carry their own copy of this.
+const KNOWN_LOCATION_IDS := CityPlaces.PLACES
 
 
 static func load_default() -> Dictionary:

@@ -8,16 +8,10 @@ extends RefCounted
 ## later be moved to JSON without changing the session flow.
 
 const DISTRICT_ID := "riverside_central"
-const REQUIRED_LOCATION_IDS := [
-	"underpass",
-	"market",
-	"station_square",
-	"recycling_point",
-	"clinic_yard",
-	"embankment",
-	"freight_yard",
-	"courtyard_blocks",
-]
+## The places a run opens with. The other two districts are in the catalog but
+## not in this list: a run has to be complete inside Riverside alone, or a hero
+## who never finds the bus is playing a broken game rather than a harder one.
+const REQUIRED_LOCATION_IDS := CityPlaces.RIVERSIDE_PLACE_IDS
 
 
 static func district() -> Dictionary:
@@ -27,6 +21,20 @@ static func district() -> Dictionary:
 		"description": "Старый район между вокзалом и рекой: шумный рынок, дворы учреждений и несколько мест, где можно переждать ночь.",
 		"location_ids": REQUIRED_LOCATION_IDS.duplicate(),
 	}
+
+
+## Every district in the city, home one first. What the hero may see of this is
+## decided elsewhere: one he has not heard of is absent from his map.
+static func districts() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for district_id: String in CityPlaces.district_ids():
+		result.append({
+			"id": district_id,
+			"title": CityPlaces.district_title(district_id),
+			"location_ids": CityPlaces.ids_in(district_id),
+			"knowledge_id": CityPlaces.knowledge_for(district_id),
+		})
+	return result
 
 
 static func locations() -> Dictionary:
@@ -72,6 +80,7 @@ static func locations() -> Dictionary:
 			"tags": ["транспорт", "людно", "подработка"],
 			"routes": [
 				_route("underpass", 12),
+				_line("bus_depot", "bus", "Автобус в Завокзальный", 35, 24, 6 * 60, 23 * 60),
 				_route("freight_yard", 14),
 				_route("market", 16),
 				_route("clinic_yard", 32, 8, 10),
@@ -123,6 +132,7 @@ static func locations() -> Dictionary:
 				_route("recycling_point", 22),
 				_route("clinic_yard", 18),
 				_route("courtyard_blocks", 22),
+				_line("cathedral_steps", "tram", "Трамвай на Соборную", 28, 18, 6 * 60 + 30, 22 * 60 + 30),
 			],
 		},
 		"freight_yard": {
@@ -152,7 +162,88 @@ static func locations() -> Dictionary:
 				_route("market", 19),
 				_route("embankment", 22),
 			],
-		},	}
+		},
+		"bus_depot": {
+			"id": "bus_depot",
+			"district_id": CityPlaces.ZAVOKZALNY,
+			"title": "Автобусный парк",
+			"description": "Кольцо маршрутов, мойка и вечная очередь у диспетчерской. Здесь всегда кому-то не хватает рук на час.",
+			"background_id": "zavokzalny_bus_depot_day",
+			"background_key": "zavokzalny_bus_depot_day",
+			"tags": ["транспорт", "работа", "людно"],
+			"routes": [
+				_line("station_square", "bus", "Автобус в Приречный", 35, 24, 6 * 60, 23 * 60),
+				_route("night_canteen", 14),
+				_route("workshop_row", 20),
+			],
+		},
+		"night_canteen": {
+			"id": "night_canteen",
+			"district_id": CityPlaces.ZAVOKZALNY,
+			"title": "Ночная столовая",
+			"description": "Работает, пока ходят автобусы. Кормят дёшево и не спрашивают, откуда вы пришли.",
+			"background_id": "zavokzalny_night_canteen_day",
+			"background_key": "zavokzalny_night_canteen_day",
+			"tags": ["еда", "тепло", "ночь"],
+			"routes": [
+				_route("bus_depot", 14),
+				_route("workshop_row", 16),
+			],
+		},
+		"workshop_row": {
+			"id": "workshop_row",
+			"district_id": CityPlaces.ZAVOKZALNY,
+			"title": "Мастерские",
+			"description": "Ряд гаражей, где чинят всё подряд. Инструмент чужой, но за помощь иногда дают им пользоваться.",
+			"background_id": "zavokzalny_workshop_row_day",
+			"background_key": "zavokzalny_workshop_row_day",
+			"tags": ["ремонт", "работа", "инструмент"],
+			"routes": [
+				_route("bus_depot", 20),
+				_route("night_canteen", 16),
+			],
+		},
+		"cathedral_steps": {
+			"id": "cathedral_steps",
+			"district_id": CityPlaces.SOBORNAYA,
+			"title": "Соборные ступени",
+			"description": "Широкая паперть, где раздают и просят. Тут запоминают всех, кто пришёл второй раз.",
+			"background_id": "sobornaya_cathedral_steps_day",
+			"background_key": "sobornaya_cathedral_steps_day",
+			"tags": ["люди", "подаяние", "тихо"],
+			"routes": [
+				_line("embankment", "tram", "Трамвай в Приречный", 28, 18, 6 * 60 + 30, 22 * 60 + 30),
+				_route("almshouse", 12),
+				_route("pawn_row", 18),
+			],
+		},
+		"almshouse": {
+			"id": "almshouse",
+			"district_id": CityPlaces.SOBORNAYA,
+			"title": "Богадельня",
+			"description": "Ночлежка при приходе. Мест мало, порядки строгие, но крыша настоящая.",
+			"background_id": "sobornaya_almshouse_day",
+			"background_key": "sobornaya_almshouse_day",
+			"tags": ["ночлег", "порядок", "тепло"],
+			"routes": [
+				_route("cathedral_steps", 12),
+				_route("pawn_row", 20),
+			],
+		},
+		"pawn_row": {
+			"id": "pawn_row",
+			"district_id": CityPlaces.SOBORNAYA,
+			"title": "Ломбардный ряд",
+			"description": "Витрины с чужими вещами. Здесь берут почти всё и дают за это меньше, чем оно стоит.",
+			"background_id": "sobornaya_pawn_row_day",
+			"background_key": "sobornaya_pawn_row_day",
+			"tags": ["торговля", "деньги", "риск"],
+			"routes": [
+				_route("cathedral_steps", 18),
+				_route("almshouse", 20),
+			],
+		},
+	}
 
 
 static func location(location_id: String) -> Dictionary:
@@ -898,6 +989,31 @@ static func _event_list() -> Array:
 			]
 		),
 	]
+
+
+## A road between districts. Walking one is not on offer: the point of another
+## district is that reaching it costs a fare and a departure you can miss.
+static func _line(
+	destination_id: String,
+	mode_id: String,
+	title: String,
+	minutes: int,
+	fare: int,
+	opens_minute: int,
+	closes_minute: int
+) -> Dictionary:
+	return {
+		"destination_id": destination_id,
+		"walk_minutes": 0,
+		"transport": {
+			"mode": mode_id,
+			"title": title,
+			"minutes": minutes,
+			"fare": fare,
+			"opens_minute": opens_minute,
+			"closes_minute": closes_minute,
+		},
+	}
 
 
 static func _route(destination_id: String, walk_minutes: int, fare: int = -1, bus_minutes: int = -1) -> Dictionary:

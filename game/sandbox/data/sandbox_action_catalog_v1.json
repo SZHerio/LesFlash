@@ -8,7 +8,13 @@
 		"station_square",
 		"recycling_point",
 		"clinic_yard",
-		"embankment"
+		"embankment",
+		"bus_depot",
+		"night_canteen",
+		"workshop_row",
+		"cathedral_steps",
+		"almshouse",
+		"pawn_row"
 	],
 	"actions": [
 		{
@@ -544,6 +550,292 @@
 					"blocked_reason": "Сил на чужие дела не осталось."
 				}
 			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 30
+			}
+		},
+		{
+			"action_id": "action_station_ask_about_lines",
+			"location_id": "station_square",
+			"category_id": "study",
+			"icon_id": "action_study",
+			"title": "Расспросить о маршрутах",
+			"description": "Узнать у водителей, куда идёт автобус за вокзал и во сколько уходит последний.",
+			"repeat_policy": "once_per_run",
+			"confirmation": "none",
+			"intent": {
+				"type": "inspect",
+				"payload": {
+					"knowledge_id": "district_zavokzalny"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_embankment_ask_about_tram",
+			"location_id": "embankment",
+			"category_id": "study",
+			"icon_id": "action_study",
+			"title": "Спросить про трамвай",
+			"description": "На остановке объясняют, что вагон идёт на Соборную и когда перестаёт ходить.",
+			"repeat_policy": "once_per_run",
+			"confirmation": "none",
+			"intent": {
+				"type": "inspect",
+				"payload": {
+					"knowledge_id": "district_sobornaya"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_depot_lend_a_hand",
+			"location_id": "bus_depot",
+			"category_id": "work",
+			"icon_id": "action_work",
+			"title": "Подсобить в парке",
+			"description": "У мойки вечно не хватает рук. Час работы — и диспетчер запомнит лицо.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_depot_lend_a_hand"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 60
+			}
+		},
+		{
+			"action_id": "action_canteen_warm_up",
+			"location_id": "night_canteen",
+			"category_id": "food",
+			"icon_id": "action_food",
+			"title": "Отогреться за столом",
+			"description": "Взять самое дешёвое и посидеть в тепле, пока не выгонят.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_canteen_warm_up"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 40
+			}
+		},
+		{
+			"action_id": "action_workshop_borrow_bench",
+			"location_id": "workshop_row",
+			"category_id": "work",
+			"icon_id": "action_work",
+			"title": "Постоять у верстака",
+			"description": "Посмотреть, как чинят, и подержать то, что просят подержать.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_workshop_borrow_bench"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 45
+			}
+		},
+		{
+			"action_id": "action_steps_sit_with_others",
+			"location_id": "cathedral_steps",
+			"category_id": "observe",
+			"icon_id": "action_observe",
+			"title": "Посидеть на ступенях",
+			"description": "Здесь никто не гонит. Слушать и запоминать, кто чем живёт.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_steps_sit_with_others"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 40
+			}
+		},
+		{
+			"action_id": "action_almshouse_help_inside",
+			"location_id": "almshouse",
+			"category_id": "observe",
+			"icon_id": "action_observe",
+			"title": "Помочь по дому",
+			"description": "Разнести бельё, вынести вёдра. За это здесь смотрят иначе.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_almshouse_help_inside"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 50
+			}
+		},
+		{
+			"action_id": "action_pawn_row_look_around",
+			"location_id": "pawn_row",
+			"category_id": "trade",
+			"icon_id": "action_trade",
+			"title": "Присмотреться к витринам",
+			"description": "Понять, что здесь берут и почём, прежде чем что-то нести.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_pawn_row_look_around"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 25
+			}
+		},
+		{
+			"action_id": "action_depot_wait_for_word",
+			"location_id": "bus_depot",
+			"category_id": "observe",
+			"icon_id": "action_observe",
+			"title": "Подождать у диспетчерской",
+			"description": "Постоять там, где решают, кого сегодня возьмут. Иногда зовут.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_depot_wait_for_word"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 30
+			}
+		},
+		{
+			"action_id": "action_canteen_wash_up",
+			"location_id": "night_canteen",
+			"category_id": "rest",
+			"icon_id": "action_rest",
+			"title": "Умыться в столовой",
+			"description": "Горячая вода в подсобке — редкость, которой здесь не жалеют.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_canteen_wash_up"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 20
+			}
+		},
+		{
+			"action_id": "action_workshop_sort_scrap",
+			"location_id": "workshop_row",
+			"category_id": "work",
+			"icon_id": "action_work",
+			"title": "Разобрать хлам у гаражей",
+			"description": "Отделить то, что ещё пойдёт в дело, от того, что вывезут.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_workshop_sort_scrap"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 55
+			}
+		},
+		{
+			"action_id": "action_steps_ask_around",
+			"location_id": "cathedral_steps",
+			"category_id": "observe",
+			"icon_id": "action_observe",
+			"title": "Расспросить на паперти",
+			"description": "Кто здесь раздаёт, когда открывают богадельню и чего лучше не делать.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_steps_ask_around"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 30
+			}
+		},
+		{
+			"action_id": "action_almshouse_wait_for_place",
+			"location_id": "almshouse",
+			"category_id": "rest",
+			"icon_id": "action_rest",
+			"title": "Дождаться места",
+			"description": "Сесть у стены и ждать, пока назовут. Раньше вечера смысла нет.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_almshouse_wait_for_place"
+				}
+			},
+			"requirements": [],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 45
+			}
+		},
+		{
+			"action_id": "action_pawn_row_haggle_talk",
+			"location_id": "pawn_row",
+			"category_id": "trade",
+			"icon_id": "action_trade",
+			"title": "Поговорить с приёмщиком",
+			"description": "Выяснить, что здесь считают вещью, а что — мусором.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_pawn_row_haggle_talk"
+				}
+			},
+			"requirements": [],
 			"duration": {
 				"kind": "fixed",
 				"minutes": 30

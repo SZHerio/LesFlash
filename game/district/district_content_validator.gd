@@ -79,8 +79,15 @@ static func _validate_content_uncached() -> Dictionary:
 	_validate_display_text(String(district_data.get("description", "")), "описание района", errors)
 	# M4 grows the district to eight and allows twelve. The floor is what the
 	# week needs; the ceiling is what one district can stay legible at.
-	if place_map.size() < 6 or place_map.size() > 12:
-		errors.append("В районе должно быть от 6 до 12 локаций")
+	# The ceiling is what one *district* stays legible at, and the city now holds
+	# three. Riverside keeps its own floor below; the total is bounded by what
+	# CityPlaces declares, so a place can never exist on the map and nowhere else.
+	if place_map.size() != CityPlaces.PLACES.size():
+		errors.append("Каталог локаций расходится со списком мест города")
+	for district_id: String in CityPlaces.district_ids():
+		var count := CityPlaces.ids_in(district_id).size()
+		if count < 3 or count > 12:
+			errors.append("В районе %s должно быть от 3 до 12 локаций" % district_id)
 	for required_id in Content.REQUIRED_LOCATION_IDS:
 		if not place_map.has(required_id):
 			errors.append("Отсутствует обязательная локация: %s" % required_id)
@@ -93,7 +100,7 @@ static func _validate_content_uncached() -> Dictionary:
 		var place_id := String(place.get("id", ""))
 		if place_id != String(key) or not _valid_identifier(place_id):
 			errors.append("Некорректный id локации: %s" % key)
-		if String(place.get("district_id", "")) != Content.DISTRICT_ID:
+		if String(place.get("district_id", "")) != CityPlaces.district_of(place_id):
 			errors.append("Локация %s относится к неизвестному району" % place_id)
 		if String(place.get("title", "")).strip_edges().is_empty():
 			errors.append("У локации %s нет названия" % place_id)
@@ -112,7 +119,11 @@ static func _validate_content_uncached() -> Dictionary:
 				errors.append("Маршрут из %s ведёт в неизвестную локацию %s" % [place_id, destination_id])
 			if destination_id == place_id:
 				errors.append("Маршрут %s не должен вести в исходную локацию" % place_id)
-			if typeof(route_value.get("walk_minutes", null)) != TYPE_INT or int(route_value.get("walk_minutes", 0)) <= 0:
+			# A line between districts is not walked: no walking time is the mark
+			# of one, and it must then carry a schedule and a fare instead.
+			if route_value.has("transport"):
+				_validate_line(Dictionary(route_value["transport"]), place_id, destination_id, errors)
+			elif typeof(route_value.get("walk_minutes", null)) != TYPE_INT or int(route_value.get("walk_minutes", 0)) <= 0:
 				errors.append("У маршрута %s -> %s неверное время пешком" % [place_id, destination_id])
 			var has_fare: bool = route_value.has("fare")
 			var has_bus_time: bool = route_value.has("bus_minutes")
@@ -286,6 +297,27 @@ static func _validate_content_uncached() -> Dictionary:
 			"shelters": shelter_map.size(),
 		},
 	}
+
+
+## A scheduled line has to be catchable: a departure window that is open at some
+## point in the day, a journey that takes time, and a fare that can be counted.
+static func _validate_line(
+	transport: Dictionary,
+	place_id: String,
+	destination_id: String,
+	errors: Array
+) -> void:
+	var label := "%s -> %s" % [place_id, destination_id]
+	if String(transport.get("mode", "")).strip_edges().is_empty():
+		errors.append("У линии %s нет вида транспорта" % label)
+	if typeof(transport.get("minutes", null)) != TYPE_INT or int(transport.get("minutes", 0)) <= 0:
+		errors.append("У линии %s неверное время в пути" % label)
+	if typeof(transport.get("fare", null)) != TYPE_INT or int(transport.get("fare", 0)) < 0:
+		errors.append("У линии %s неверная плата за проезд" % label)
+	var opens := int(transport.get("opens_minute", -1))
+	var closes := int(transport.get("closes_minute", -1))
+	if opens < 0 or closes <= opens or closes > GameRules.DEFAULT_MINUTES_PER_DAY:
+		errors.append("У линии %s расписание, по которому нельзя уехать" % label)
 
 
 static func _validate_connected_map(place_map: Dictionary, errors: Array) -> void:

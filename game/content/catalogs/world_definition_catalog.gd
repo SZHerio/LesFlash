@@ -13,10 +13,8 @@ const CATALOG_ID := "world_definition_catalog_v2"
 const PREVIOUS_PATH := "res://game/content/data/world_definition_catalog_v1.json"
 const DEFAULT_PATH := "res://game/content/data/world_definition_catalog_v2.json"
 const KNOWN_SCOPE_KINDS := ["location", "district", "organization"]
-const KNOWN_LOCATION_IDS := [
-	"underpass", "market", "station_square", "recycling_point", "clinic_yard", "embankment",
-	"freight_yard", "courtyard_blocks",
-]
+## One list, in CityPlaces. Six catalogs used to carry their own copy of this.
+const KNOWN_LOCATION_IDS := CityPlaces.PLACES
 const OBSERVABLE_KINDS := [
 	"location", "npc", "job", "fact", "metric", "reputation",
 ]

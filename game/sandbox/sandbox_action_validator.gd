@@ -10,7 +10,10 @@ const MIN_ACTIONS := 18
 ## Raised from 22 when first aid and warming food were given somewhere to be
 ## practised. The cap exists so a place never turns into a wall of buttons; the
 ## per-location limit below is what actually protects the screen.
-const MAX_ACTIONS := 26
+const MAX_ACTIONS := 40
+## The places whose action list this catalog owns. The two districts beyond
+## Riverside were added here rather than given a catalog of their own: a place
+## the hero can stand in and do nothing is a worse district than none at all.
 const CANONICAL_LOCATION_IDS := [
 	"underpass",
 	"market",
@@ -18,6 +21,12 @@ const CANONICAL_LOCATION_IDS := [
 	"recycling_point",
 	"clinic_yard",
 	"embankment",
+	"bus_depot",
+	"night_canteen",
+	"workshop_row",
+	"cathedral_steps",
+	"almshouse",
+	"pawn_row",
 ]
 
 
@@ -86,7 +95,7 @@ static func _validate_locations(value: Variant, errors: Array[String]) -> Dictio
 		return result
 	var location_ids: Array = value
 	if location_ids != CANONICAL_LOCATION_IDS:
-		errors.append("location_ids must equal the six canonical Riverside locations in stable order")
+		errors.append("location_ids must equal the canonical city locations in stable order")
 	for index: int in location_ids.size():
 		if typeof(location_ids[index]) != TYPE_STRING:
 			errors.append("location_ids[%d] must be a string" % index)

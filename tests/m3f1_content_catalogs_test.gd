@@ -25,6 +25,8 @@ const KNOWLEDGE_IDS := [
 	"recycling_safety",
 	"recycling_shift_routine",
 	"recycling_inspection_rules",
+	"district_zavokzalny",
+	"district_sobornaya",
 ]
 const CANONICAL_NPC_IDS := [
 	"npc_viktor_koren", "npc_lidia_maren", "npc_tamara_roven",
@@ -125,7 +127,7 @@ func _test_versioned_bundle() -> void:
 
 func _test_knowledge() -> void:
 	var definitions: Array = Dictionary(_catalogs.get("knowledge", {})).get("knowledge", [])
-	_expect_equal(definitions.size(), 18, "knowledge definition count")
+	_expect_equal(definitions.size(), 20, "knowledge definition count")
 	var ids := _id_set(definitions)
 	_expect_equal(_sorted(ids.keys()), _sorted(KNOWLEDGE_IDS), "knowledge IDs")
 	for knowledge_id: String in [

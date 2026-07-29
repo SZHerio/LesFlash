@@ -15,10 +15,8 @@ const SCHEMA_VERSION := 1
 const CATALOG_ID := "qualification_catalog_v1"
 const DEFAULT_PATH := "res://game/content/data/qualification_catalog_v1.json"
 const KINDS := ["document", "clearance", "course", "licence"]
-const KNOWN_LOCATION_IDS := [
-	"underpass", "market", "station_square", "recycling_point", "clinic_yard", "embankment",
-	"freight_yard", "courtyard_blocks",
-]
+## One list, in CityPlaces. Six catalogs used to carry their own copy of this.
+const KNOWN_LOCATION_IDS := CityPlaces.PLACES
 const KNOWN_ISSUER_IDS := ["org_riverside_recycling", "org_riverside_market"]
 
 

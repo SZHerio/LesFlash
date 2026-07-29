@@ -1020,6 +1020,10 @@ func _find_route(destination: String, requested_mode: String) -> Dictionary:
 		var route_destination := String(route.get("to", route.get("destination_id", route.get("destination", ""))))
 		if route_destination != destination:
 			continue
+		# A line that has stopped for the night is not a route right now. The map
+		# does not show it either, so this refuses only a stale confirmation.
+		if not route_is_running(route, int(run_state.calendar.minute_of_day)):
+			continue
 		for mode in _route_modes(route):
 			var mode_id := String(mode.get("id", mode.get("mode", "walk")))
 			if mode_id == requested_mode:
@@ -1039,13 +1043,20 @@ func _route_modes(route: Dictionary) -> Array:
 			"conditions": ContentShape.array_copy(route.get("mode_conditions", [])),
 			"effects": ContentShape.array_copy(route.get("mode_effects", [])),
 		}]
-	var result: Array = [{
-		"id": "walk",
-		"title": "Пешком",
-		"minutes": int(route.get("walk_minutes", route.get("minutes", 0))),
-		"conditions": [],
-		"effects": [],
-	}]
+	var result: Array = []
+	# A road with no walking time is a line between districts: the fare and the
+	# departure are the point of it, and strolling there would skip both.
+	var walk_minutes := int(route.get("walk_minutes", route.get("minutes", 0)))
+	if walk_minutes > 0:
+		result.append({
+			"id": "walk",
+			"title": "Пешком",
+			"minutes": walk_minutes,
+			"conditions": [],
+			"effects": [],
+		})
+	if route.has("transport"):
+		result.append(_transport_mode(Dictionary(route["transport"])))
 	if route.has("bus_minutes"):
 		var fare := int(route.get("fare", 0))
 		var bus_conditions: Array = []
@@ -1061,6 +1072,36 @@ func _route_modes(route: Dictionary) -> Array:
 			"effects": bus_effects,
 		})
 	return result
+
+
+## One scheduled line. Whether it is running right now is not asked here — the
+## map leaves a line that has stopped for the night off the board entirely, the
+## way a person reads a timetable rather than a disabled button.
+func _transport_mode(transport: Dictionary) -> Dictionary:
+	var fare := int(transport.get("fare", 0))
+	var conditions: Array = []
+	var effects: Array = []
+	if fare > 0:
+		conditions.append({"kind": "money", "value": fare, "operator": ">="})
+		effects.append({"type": "change_money", "delta": -fare})
+	return {
+		"id": String(transport.get("mode", "bus")),
+		"title": String(transport.get("title", "Транспорт")),
+		"minutes": int(transport.get("minutes", 0)),
+		"conditions": conditions,
+		"effects": effects,
+	}
+
+
+## Whether a scheduled line is running at this minute of the day. A road with no
+## schedule always is.
+static func route_is_running(route: Dictionary, minute_of_day: int) -> bool:
+	if not route.has("transport"):
+		return true
+	var transport: Dictionary = route["transport"]
+	var opens := int(transport.get("opens_minute", 0))
+	var closes := int(transport.get("closes_minute", GameRules.DEFAULT_MINUTES_PER_DAY))
+	return minute_of_day >= opens and minute_of_day < closes
 
 
 func _travel_minutes(route: Dictionary, mode: Dictionary) -> int:

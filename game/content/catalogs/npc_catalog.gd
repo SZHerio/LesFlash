@@ -11,10 +11,8 @@ const SENTENCE_LENGTHS := ["short", "mixed", "long"]
 const APPEARANCE_KINDS := [
 	"location", "knowledge", "job", "world_process", "world_metric", "reputation",
 ]
-const KNOWN_LOCATION_IDS := [
-	"underpass", "market", "station_square", "recycling_point", "clinic_yard", "embankment",
-	"freight_yard", "courtyard_blocks",
-]
+## One list, in CityPlaces. Six catalogs used to carry their own copy of this.
+const KNOWN_LOCATION_IDS := CityPlaces.PLACES
 
 
 static var _default_cache: Dictionary = {}

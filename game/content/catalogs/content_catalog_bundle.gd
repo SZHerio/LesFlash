@@ -11,10 +11,8 @@ const ReputationCatalog := preload("res://game/content/catalogs/reputation_catal
 const JobCatalog := preload("res://game/content/catalogs/job_catalog.gd")
 const WorldCatalog := preload("res://game/content/catalogs/world_definition_catalog.gd")
 
-const KNOWN_LOCATION_IDS := [
-	"underpass", "market", "station_square", "recycling_point", "clinic_yard", "embankment",
-	"freight_yard", "courtyard_blocks",
-]
+## One list, in CityPlaces. Six catalogs used to carry their own copy of this.
+const KNOWN_LOCATION_IDS := CityPlaces.PLACES
 
 
 static func load_default() -> Dictionary:

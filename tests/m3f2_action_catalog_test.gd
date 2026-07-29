@@ -14,12 +14,18 @@ const IconRegistry := preload("res://ui/icons/icon_registry.gd")
 ## pipes, helping in the queue at the clinic. Six of seven skills could not
 ## otherwise leave rank zero.
 const EXPECTED_LOCATION_COUNTS := {
+	"bus_depot": 2,
+	"night_canteen": 2,
+	"workshop_row": 2,
+	"cathedral_steps": 2,
+	"almshouse": 2,
+	"pawn_row": 2,
 	"underpass": 6,
 	"market": 3,
-	"station_square": 4,
+	"station_square": 5,
 	"recycling_point": 4,
 	"clinic_yard": 4,
-	"embankment": 3,
+	"embankment": 4,
 }
 
 var _catalog: Dictionary = {}
@@ -36,7 +42,7 @@ func _init() -> void:
 		_catalog = Dictionary(loaded.get("catalog", {}))
 	else:
 		_failures.append("catalog setup — %s" % str(loaded.get("errors", [])))
-	_run("versioned catalog loads with exactly six locations and 24 actions", _test_header_and_spread)
+	_run("versioned catalog loads with twelve locations and 38 actions", _test_header_and_spread)
 	_run("free-week activity coverage is complete", _test_activity_coverage)
 	_run("only confirmed decisions carry duration", _test_time_contract)
 	_run("all external IDs and semantic icons are canonical", _test_references)
@@ -54,7 +60,7 @@ func _test_header_and_spread() -> void:
 	_expect(_catalog.get("catalog_id") == "riverside_sandbox_actions", "catalog ID")
 	_expect(_catalog.get("catalog_version") == 1, "catalog version must be 1")
 	_expect(_catalog.get("location_ids", []) == Validator.CANONICAL_LOCATION_IDS, "canonical location order")
-	_expect(Array(_catalog.get("actions", [])).size() == 24, "the authored slice must contain 24 actions")
+	_expect(Array(_catalog.get("actions", [])).size() == 38, "the authored slice must contain 38 actions")
 	for location_id: String in EXPECTED_LOCATION_COUNTS:
 		var actions := Catalog.actions_for_location(_catalog, location_id)
 		_expect(actions.size() == int(EXPECTED_LOCATION_COUNTS[location_id]), "%s action count" % location_id)
@@ -94,8 +100,8 @@ func _test_time_contract() -> void:
 		else:
 			immediate += 1
 			_expect(not action.has("duration"), "%s must not advance time" % action.get("action_id", ""))
-	_expect(confirmed == 10, "ten actions are confirmed decisions")
-	_expect(immediate == 14, "fourteen actions only open or inspect content")
+	_expect(confirmed == 22, "twenty-two actions are confirmed decisions")
+	_expect(immediate == 16, "sixteen actions only open or inspect content")
 
 
 func _test_references() -> void:
