@@ -12,6 +12,7 @@ extends SceneTree
 
 const Topics = preload("res://game/topics/topic_catalog.gd")
 const RunStateScript = preload("res://core/state/run_state.gd")
+const SandboxAdapter = preload("res://app/session/sandbox_session_adapter.gd")
 
 const PLAIN := {"strength": 7, "charisma": 4, "intelligence": 4, "luck": 3}
 const TALKER := {"strength": 3, "charisma": 10, "intelligence": 3, "luck": 2}
@@ -33,6 +34,7 @@ func _init() -> void:
 	_test_the_same_question_gets_different_answers()
 	_test_charisma_opens_topics_a_plain_build_never_sees()
 	_test_something_is_open_to_everyone()
+	_test_a_topic_can_be_raised_in_play()
 	_finish()
 
 
@@ -106,6 +108,54 @@ func _test_something_is_open_to_everyone() -> void:
 	_expect(plain > 0, "сборке без особых качеств не о чем говорить вовсе")
 
 
+## Разговор должен быть занятием: стоить времени и отдавать ответ того самого
+## человека, а не общий текст темы.
+func _test_a_topic_can_be_raised_in_play() -> void:
+	var adapter = SandboxAdapter.create(PLAIN, 91_301)
+	if adapter == null:
+		_failures.append("песочница не стартовала")
+		return
+	var session = adapter.get("_session")
+	var offered: Array = adapter.get_npc_topics("npc_stepan_gulev")
+	_expect(not offered.is_empty(), "со Степаном не о чем заговорить")
+	if offered.is_empty():
+		return
+	# Закрытых тем в списке быть не должно: их герой не видит вовсе.
+	for raw_topic: Variant in offered:
+		var entry := Topics.find(_catalog, String(Dictionary(raw_topic).get("id", "")))
+		_expect(
+			Topics.is_open(entry, session.run_state),
+			"в списке оказалась тема, которую поднять нельзя"
+		)
+	var before := int(session.run_state.calendar.elapsed_minutes)
+	var topic_id := String(Dictionary(offered[0]).get("id", ""))
+	var said: Dictionary = adapter.raise_topic("npc_stepan_gulev", topic_id)
+	_expect(bool(said.get("ok", false)), "заговорить не вышло: %s" % str(said))
+	if not bool(said.get("ok", false)):
+		return
+	_expect(
+		int(session.run_state.calendar.elapsed_minutes) > before,
+		"разговор не занял времени и потому ничего не стоит"
+	)
+	_expect(String(said.get("line", "")).strip_edges() != "", "человек ничего не ответил")
+	var entry := Topics.find(_catalog, topic_id)
+	_expect_equal(
+		String(said.get("line", "")),
+		String(Dictionary(entry.get("opinions", {})).get("npc_stepan_gulev", {}).get("line", "")),
+		"ответил не своими словами"
+	)
+	# А о том, что ему безразлично, ответ всё равно должен быть — пожал плечами.
+	_expect(
+		not bool(adapter.raise_topic("npc_stepan_gulev", "topic_nonexistent").get("ok", true)),
+		"поднялась тема, которой нет"
+	)
+
+
+func _expect_equal(actual: Variant, expected: Variant, message: String) -> void:
+	if actual != expected:
+		_failures.append("%s (ожидалось=%s, получено=%s)" % [message, str(expected), str(actual)])
+
+
 func _open_count(run_state: RunState) -> int:
 	var open := 0
 	for raw_entry: Variant in Array(_catalog.get("topics", [])):
@@ -121,7 +171,7 @@ func _expect(condition: bool, message: String) -> void:
 
 func _finish() -> void:
 	if _failures.is_empty():
-		print("M6 TOPICS TESTS PASSED: 6/6")
+		print("M6 TOPICS TESTS PASSED: 7/7")
 		quit(0)
 		return
 	for failure: String in _failures:

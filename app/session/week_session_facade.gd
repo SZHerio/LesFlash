@@ -11,6 +11,7 @@ const RoutineCommandScript := preload("res://game/routine/routine_session_comman
 const BusinessCommandScript := preload("res://game/business/business_session_command.gd")
 const BusinessCatalogScript := preload("res://game/business/business_catalog.gd")
 const ObligationCommandScript := preload("res://game/obligations/obligation_session_command.gd")
+const TopicCommandScript := preload("res://game/topics/topic_session_command.gd")
 const StoreServiceScript := preload("res://game/commerce/store_service.gd")
 const CommerceCommandScript := preload("res://game/commerce/commerce_session_command.gd")
 const ShelterServiceScript := preload("res://game/shelter/shelter_session_service.gd")
@@ -556,6 +557,27 @@ static func _room_actions(session: Object, include_blocked: bool) -> Array[Dicti
 			"confirmation_required": true,
 		})
 	return result
+
+
+## --- о чём с ним можно заговорить ------------------------------------------
+
+
+static func npc_topics(session: Object, npc_id: String) -> Array[Dictionary]:
+	return TopicCommandScript.available(session, npc_id)
+
+
+static func raise_topic(
+	session: Object,
+	npc_id: String,
+	topic_id: String,
+	flow_revision: int
+) -> Dictionary:
+	return TopicCommandScript.raise_topic(
+		session,
+		npc_id,
+		topic_id,
+		_command_id(session, "topic:%s:%s" % [npc_id, topic_id], flow_revision)
+	)
 
 
 ## --- what he owes, and by when ---------------------------------------------

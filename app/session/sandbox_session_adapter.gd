@@ -158,6 +158,9 @@ func get_npc_model(npc_id: String, reduced_motion: bool = false) -> Dictionary:
 	)
 	if bool(result.get("ok", false)):
 		result["expected_revision"] = _session.flow_revision
+		# Только то, о чём герой действительно может заговорить: закрытой темы
+		# он не видит и не узнаёт, что она была.
+		result["topics"] = WeekFacade.npc_topics(_session, npc_id)
 	return result
 
 
@@ -266,6 +269,22 @@ func resolve_job_shift_step(choice_id: String) -> Dictionary:
 		_session,
 		choice_id,
 		_session.flow_revision
+	))
+
+
+## --- о чём с ним можно заговорить ------------------------------------------
+
+
+func get_npc_topics(npc_id: String) -> Array[Dictionary]:
+	return [] if _session == null else WeekFacade.npc_topics(_session, npc_id)
+
+
+## Поднимает тему и возвращает то, что человек ответил.
+func raise_topic(npc_id: String, topic_id: String) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.raise_topic(
+		_session, npc_id, topic_id, _session.flow_revision
 	))
 
 
