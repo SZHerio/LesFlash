@@ -86,6 +86,8 @@ const PRIORITIES := {
 var _failures: Array[String] = []
 ## Empty means every build; set by `three:<build>` to live one week at a time.
 var _only_build := ""
+## Куда ушли минуты дня. Заполняется только замером; в проверках пусто.
+var _minutes: Dictionary = {}
 var _tests_run := 0
 var _current := ""
 
@@ -157,6 +159,10 @@ func _diagnose(seed: int) -> void:
 			var delta := int(counters.get(key, 0)) - int(before.get(key, 0))
 			if delta > 0:
 				did.append("%s=%d" % [key, delta])
+		var spent := ""
+		for bucket: String in ["по списку", "еда", "лечение", "пауза"]:
+			spent += " %s=%d" % [bucket, int(_minutes.get(bucket, 0))]
+		_minutes.clear()
 		var work_state: JobWorkState = adapter.get("_session").get("job_work_state")
 		var standing := ""
 		for job_id: String in [DEFAULT_JOB_ID, PORTER_JOB_ID]:
@@ -175,9 +181,14 @@ func _diagnose(seed: int) -> void:
 			_carried_food(adapter),
 			_meter(adapter, "health"),
 			", ".join(did),
-			standing,
+			spent,
 		])
 	print("DIAGNOSE %d WRITTEN" % seed)
+
+
+func _charge_minutes(bucket: String, minutes: int) -> void:
+	if minutes > 0:
+		_minutes[bucket] = int(_minutes.get(bucket, 0)) + minutes
 
 
 func _run(title: String, callback: Callable) -> void:
@@ -573,17 +584,22 @@ func _live_one_day(adapter: Object, build_id: String, counters: Dictionary) -> v
 			return
 		if _minute_of_day(adapter) >= EVENING_MINUTE:
 			break
+		var turn_started := _elapsed(adapter)
 		if _feed_if_hungry(adapter, counters):
+			_charge_minutes("еда", _elapsed(adapter) - turn_started)
 			wallet = _record_income(counters, wallet, _money(adapter))
 			continue
 		if _treat_if_hurt(adapter, counters):
+			_charge_minutes("лечение", _elapsed(adapter) - turn_started)
 			wallet = _record_income(counters, wallet, _money(adapter))
 			continue
 		if _take_priority_turn(adapter, build_id, counters):
+			_charge_minutes("по списку", _elapsed(adapter) - turn_started)
 			wallet = _record_income(counters, wallet, _money(adapter))
 			continue
 		if not _pass_time(adapter, counters):
 			break
+		_charge_minutes("пауза", _elapsed(adapter) - turn_started)
 		wallet = _record_income(counters, wallet, _money(adapter))
 	# Twelve hours of sleep cost as much hunger as a working day, so a hero who
 	# goes to bed merely "not starving" wakes up starving.
@@ -993,10 +1009,17 @@ func _food_stack_id(adapter: Object) -> String:
 
 
 ## Keeps a day's meals in the pack whenever the shop and the wallet allow it.
+## Ходит за едой так же, как за лекарством — через весь город, если надо.
+##
+## Раньше он покупал еду только стоя на рынке и никогда ради неё не шёл, а за
+## лекарством шёл всегда. Пока дни были пустыми, он оказывался на рынке сам
+## собой. Когда дел стало пятнадцать вместо трёх, перестал — и умирал с деньгами
+## в кармане, потратив последние на аптеку: замер показал ноль минут на еду в тот
+## день, когда голод дошёл от 34 до 85.
 func _stock_food(adapter: Object, counters: Dictionary) -> bool:
 	if _carried_food(adapter) >= FOOD_STOCK or _money(adapter) < FOOD_RESERVE:
 		return false
-	if String(adapter.get_location_id()) != MARKET:
+	if not _go_to(adapter, MARKET):
 		return false
 	return _buy_food(adapter, counters)
 
