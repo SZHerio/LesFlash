@@ -157,7 +157,17 @@ func _diagnose(seed: int) -> void:
 			var delta := int(counters.get(key, 0)) - int(before.get(key, 0))
 			if delta > 0:
 				did.append("%s=%d" % [key, delta])
-		print("  %3d %6d %+6d %5d %5d %5d  %s" % [
+		var work_state: JobWorkState = adapter.get("_session").get("job_work_state")
+		var standing := ""
+		for job_id: String in [DEFAULT_JOB_ID, PORTER_JOB_ID]:
+			if work_state.is_dismissed(job_id):
+				standing += " УВОЛЕН:%s" % job_id
+			else:
+				var record: Dictionary = work_state.record_for(job_id)
+				var raw: Variant = record.get("standing", 0)
+				var value := int(raw) if typeof(raw) in [TYPE_INT, TYPE_FLOAT] else 0
+				standing += " %s=%d" % [job_id.trim_prefix("job_"), value]
+		print("  %3d %6d %+6d %5d %5d %5d  %s |%s" % [
 			day + 1,
 			_elapsed(adapter),
 			_money(adapter) - money_before,
@@ -165,6 +175,7 @@ func _diagnose(seed: int) -> void:
 			_carried_food(adapter),
 			_meter(adapter, "health"),
 			", ".join(did),
+			standing,
 		])
 	print("DIAGNOSE %d WRITTEN" % seed)
 
