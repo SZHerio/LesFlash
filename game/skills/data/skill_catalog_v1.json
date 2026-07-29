@@ -1,0 +1,283 @@
+{
+	"schema_version": 1,
+	"catalog_id": "skill_catalog_v1",
+	"skills": [
+		{
+			"id": "search",
+			"title": "Поиск",
+			"description": "Умение смотреть так, чтобы находить: где смотрели уже, где ещё нет, и что здесь лежит не просто так.",
+			"applications": [
+				{
+					"kind": "job_task",
+					"source_id": "task_recycling_identify_material"
+				},
+				{
+					"kind": "job_task",
+					"source_id": "task_recycling_safety_check"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "hidden_newspapers:search_methodically"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "hidden_newspapers:inspect_marks"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "sleeper_gap_nest:read_the_ground"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "sleeper_gap_nest:feel_along"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "dark_tunnel:feel_along_wall"
+				}
+			]
+		},
+		{
+			"id": "cargo_handling",
+			"title": "Погрузка",
+			"description": "Как поднять тяжёлое и не сорвать спину, и как сдвинуть то, что не поднять.",
+			"applications": [
+				{
+					"kind": "job_task",
+					"source_id": "task_recycling_move_load"
+				},
+				{
+					"kind": "job_task",
+					"source_id": "task_market_clear_aisle"
+				},
+				{
+					"kind": "location_action",
+					"source_id": "action_recycling_move_bundle"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "heavy_pallet:shift_crate"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "loaded_pallet:heave_it_aside"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "loaded_pallet:lever_with_board"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "pallet_stack:pull_boards"
+				},
+				{
+					"kind": "event_choice",
+					"source_id": "legacy_shift_hard"
+				},
+				{
+					"kind": "event_choice",
+					"source_id": "legacy_shift_clean"
+				},
+				{
+					"kind": "event_choice",
+					"source_id": "legacy_market_unload"
+				},
+				{
+					"kind": "event_choice",
+					"source_id": "legacy_station_luggage"
+				}
+			]
+		},
+		{
+			"id": "repair",
+			"title": "Починка",
+			"description": "Как устроены замки, петли, весы и панели — и как открыть их, ничего не сломав.",
+			"applications": [
+				{
+					"kind": "job_task",
+					"source_id": "task_recycling_prepare_scale"
+				},
+				{
+					"kind": "job_task",
+					"source_id": "task_recycling_clear_press"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "locked_shed:study_lock"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "locked_shed:force_hinge"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "weigh_hut_shelf:pick_it_open"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "weigh_hut_shelf:force_the_latch"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "signal_cabinet:open_the_panel"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "storm_drain:open_safely"
+				},
+				{
+					"kind": "event_choice",
+					"source_id": "legacy_scales_check"
+				}
+			]
+		},
+		{
+			"id": "trade",
+			"title": "Торговля",
+			"description": "Разговор о цене: что стоит дороже, чем кажется, и когда лучше промолчать.",
+			"applications": [
+				{
+					"kind": "job_task",
+					"source_id": "task_recycling_handle_customer"
+				},
+				{
+					"kind": "job_task",
+					"source_id": "task_market_receive_delivery"
+				},
+				{
+					"kind": "job_task",
+					"source_id": "task_market_stack_produce"
+				},
+				{
+					"kind": "job_task",
+					"source_id": "task_market_weigh_order"
+				},
+				{
+					"kind": "job_task",
+					"source_id": "task_market_serve_queue"
+				},
+				{
+					"kind": "location_action",
+					"source_id": "action_recycling_read_rates"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "guard_booth:ask_permission"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "guard_booth:offer_help"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "night_watchman:talk_your_way_in"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "night_watchman:share_a_smoke"
+				},
+				{
+					"kind": "event_choice",
+					"source_id": "legacy_market_paid_help"
+				}
+			]
+		},
+		{
+			"id": "city_navigation",
+			"title": "Город",
+			"description": "Знание района: куда выходит переход, когда идёт транспорт, где не стоит попадаться.",
+			"applications": [
+				{
+					"kind": "location_action",
+					"source_id": "action_underpass_read_wayfinding"
+				},
+				{
+					"kind": "location_action",
+					"source_id": "action_market_read_board"
+				},
+				{
+					"kind": "location_action",
+					"source_id": "action_station_read_timetable"
+				},
+				{
+					"kind": "location_action",
+					"source_id": "action_embankment_observe_routines"
+				},
+				{
+					"kind": "location_action",
+					"source_id": "action_station_walk_to_underpass"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "market_fence:find_blind_spot"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "market_fence:slip_through"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "empty_wagon:check_from_step"
+				},
+				{
+					"kind": "event_choice",
+					"source_id": "legacy_market_talk"
+				}
+			]
+		},
+		{
+			"id": "cooking",
+			"title": "Еда",
+			"description": "Что ещё съедобно, а что уже нет; как растянуть банку и как согреть то, что есть.",
+			"applications": [
+				{
+					"kind": "job_task",
+					"source_id": "task_market_close_stall"
+				},
+				{
+					"kind": "location_action",
+					"source_id": "action_underpass_heat_food"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "open_dumpster:sort_by_hand"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "pallet_stack:work_quietly"
+				},
+				{
+					"kind": "event_choice",
+					"source_id": "legacy_market_meal"
+				}
+			]
+		},
+		{
+			"id": "first_aid",
+			"title": "Помощь",
+			"description": "Что делать с порезом, ознобом и чужим обмороком до того, как приедут те, кто умеет.",
+			"applications": [
+				{
+					"kind": "location_action",
+					"source_id": "action_clinic_read_notice"
+				},
+				{
+					"kind": "location_action",
+					"source_id": "action_underpass_tend_hands"
+				},
+				{
+					"kind": "location_action",
+					"source_id": "action_clinic_help_at_queue"
+				},
+				{
+					"kind": "search_approach",
+					"source_id": "dark_tunnel:protected_search"
+				},
+				{
+					"kind": "event_choice",
+					"source_id": "legacy_clinic_notices"
+				}
+			]
+		}
+	]
+}

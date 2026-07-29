@@ -80,8 +80,15 @@ static func unlock_skill(skill_id: StringName, initial_rank: int = 1) -> Diction
 ## One confirmed use of a skill, tagged by what it was. Ranks are derived from
 ## how many different sources have been recorded, so content declares practice
 ## and never a rank.
+## Stringified like its neighbours: a StringName reaching the journal makes the
+## save payload non-JSON, and the packet is rejected as an unwritable entry —
+## an error that names the journal and says nothing about the skill.
 static func practice_skill(skill_id: StringName, source_id: StringName) -> Dictionary:
-	return {"type": PRACTICE_SKILL, "id": skill_id, "source_id": source_id}
+	return {
+		"type": String(PRACTICE_SKILL),
+		"id": String(skill_id),
+		"source_id": String(source_id),
+	}
 
 
 static func advance_skill(skill_id: StringName, ranks: int = 1, max_rank: int = 3) -> Dictionary:

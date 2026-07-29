@@ -9,12 +9,16 @@ const StoreCatalog := preload("res://game/commerce/store_catalog.gd")
 const SearchZoneCatalog := preload("res://game/search/search_zone_catalog.gd")
 const IconRegistry := preload("res://ui/icons/icon_registry.gd")
 
+## Underpass and the clinic yard each gained somewhere to practise what the
+## skill catalog now says they teach: warming food and dressing hands at the
+## pipes, helping in the queue at the clinic. Six of seven skills could not
+## otherwise leave rank zero.
 const EXPECTED_LOCATION_COUNTS := {
-	"underpass": 4,
+	"underpass": 6,
 	"market": 3,
 	"station_square": 4,
 	"recycling_point": 4,
-	"clinic_yard": 3,
+	"clinic_yard": 4,
 	"embankment": 3,
 }
 
@@ -32,7 +36,7 @@ func _init() -> void:
 		_catalog = Dictionary(loaded.get("catalog", {}))
 	else:
 		_failures.append("catalog setup — %s" % str(loaded.get("errors", [])))
-	_run("versioned catalog loads with exactly six locations and 21 actions", _test_header_and_spread)
+	_run("versioned catalog loads with exactly six locations and 24 actions", _test_header_and_spread)
 	_run("free-week activity coverage is complete", _test_activity_coverage)
 	_run("only confirmed decisions carry duration", _test_time_contract)
 	_run("all external IDs and semantic icons are canonical", _test_references)
@@ -50,7 +54,7 @@ func _test_header_and_spread() -> void:
 	_expect(_catalog.get("catalog_id") == "riverside_sandbox_actions", "catalog ID")
 	_expect(_catalog.get("catalog_version") == 1, "catalog version must be 1")
 	_expect(_catalog.get("location_ids", []) == Validator.CANONICAL_LOCATION_IDS, "canonical location order")
-	_expect(Array(_catalog.get("actions", [])).size() == 21, "the authored slice must contain 21 actions")
+	_expect(Array(_catalog.get("actions", [])).size() == 24, "the authored slice must contain 24 actions")
 	for location_id: String in EXPECTED_LOCATION_COUNTS:
 		var actions := Catalog.actions_for_location(_catalog, location_id)
 		_expect(actions.size() == int(EXPECTED_LOCATION_COUNTS[location_id]), "%s action count" % location_id)
@@ -90,7 +94,7 @@ func _test_time_contract() -> void:
 		else:
 			immediate += 1
 			_expect(not action.has("duration"), "%s must not advance time" % action.get("action_id", ""))
-	_expect(confirmed == 7, "seven actions are confirmed decisions")
+	_expect(confirmed == 10, "ten actions are confirmed decisions")
 	_expect(immediate == 14, "fourteen actions only open or inspect content")
 
 

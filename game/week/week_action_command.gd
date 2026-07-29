@@ -9,6 +9,7 @@ const InventoryStateScript := preload("res://core/inventory/inventory_state.gd")
 const ItemCatalogScript := preload("res://core/inventory/item_catalog.gd")
 const SessionTransactionScript := preload("res://game/session/session_command_transaction.gd")
 const WorldCatalogScript := preload("res://game/content/catalogs/world_definition_catalog.gd")
+const SkillCatalogScript := preload("res://game/skills/skill_catalog.gd")
 
 
 static func execute(target: Object, action_id: String, command_id: String) -> Dictionary:
@@ -37,6 +38,7 @@ static func execute(target: Object, action_id: String, command_id: String) -> Di
 	var effects_result := _effects(candidate, definition, intent_type)
 	if not bool(effects_result.get("ok", false)):
 		return effects_result
+	_teach(effects_result, action_id)
 	var world_loaded := WorldCatalogScript.load_default()
 	if not bool(world_loaded.get("ok", false)):
 		return _failure("world_catalog_failed", "Каталог состояния мира недоступен")
@@ -69,6 +71,22 @@ static func execute(target: Object, action_id: String, command_id: String) -> Di
 		"transaction": transaction,
 		"lifecycle": target.get("survival_state").to_dict(),
 	}
+
+
+## Doing something in a place is one of the ways a skill grows, and until the
+## skill catalog existed it was not one of them: only a work shift taught
+## anything, which is why six of seven skills could never leave rank zero. The
+## catalog decides — this only asks it.
+static func _teach(effects_result: Dictionary, action_id: String) -> void:
+	var loaded := SkillCatalogScript.load_default()
+	if not bool(loaded.get("ok", false)):
+		return
+	var skill_id := SkillCatalogScript.skill_taught_by(Dictionary(loaded["catalog"]), action_id)
+	if skill_id.is_empty():
+		return
+	var effects: Array = Array(effects_result.get("effects", []))
+	effects.append({"type": "practice_skill", "id": skill_id, "source_id": action_id})
+	effects_result["effects"] = effects
 
 
 static func _effects(candidate: Object, definition: Dictionary, intent_type: String) -> Dictionary:

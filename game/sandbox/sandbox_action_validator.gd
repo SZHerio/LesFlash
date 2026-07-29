@@ -7,7 +7,10 @@ const SCHEMA_VERSION := 1
 const CATALOG_ID := "riverside_sandbox_actions"
 const CATALOG_VERSION := 1
 const MIN_ACTIONS := 18
-const MAX_ACTIONS := 22
+## Raised from 22 when first aid and warming food were given somewhere to be
+## practised. The cap exists so a place never turns into a wall of buttons; the
+## per-location limit below is what actually protects the screen.
+const MAX_ACTIONS := 26
 const CANONICAL_LOCATION_IDS := [
 	"underpass",
 	"market",

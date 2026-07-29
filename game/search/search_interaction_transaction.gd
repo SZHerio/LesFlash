@@ -4,6 +4,7 @@ extends RefCounted
 const InteractionResolver := preload(
 	"res://game/search/search_interaction_resolver.gd"
 )
+const SkillCatalogScript := preload("res://game/skills/skill_catalog.gd")
 const LootTransaction := preload("res://game/search/search_loot_transaction.gd")
 const RiskResolver := preload("res://game/search/search_risk_resolver.gd")
 const SessionCommandTransaction := preload(
@@ -54,12 +55,23 @@ static func apply(
 			"id": "energy",
 			"delta": -int(costs["energy"]),
 		})
-	if (
-		before_resolved < QUICK_SEARCH_RESOLVED_REQUIRED
-		and before_resolved + 1 >= QUICK_SEARCH_RESOLVED_REQUIRED
-		and run_state.get_skill_rank("search") < 1
-	):
-		effects.append({"type": "unlock_skill", "id": "search", "rank": 1})
+	# This used to hand the hero search rank 1 outright once he had opened enough
+	# things. That was the only place in the game where a rank was granted rather
+	# than earned, and it contradicted the rule everything else follows: a rank
+	# comes from having done several *different* things with the skill. Now the
+	# approach teaches whatever the skill catalog says it teaches, and rank 1
+	# arrives when three different approaches have been worked — which the quick
+	# sweep still gates on, only honestly.
+	var taught := SkillCatalogScript.skill_taught_by(
+		_skill_catalog(),
+		"%s:%s" % [object_id, approach_id]
+	)
+	if not taught.is_empty():
+		effects.append({
+			"type": "practice_skill",
+			"id": taught,
+			"source_id": "%s:%s" % [object_id, approach_id],
+		})
 	var session_command_id := command_id.strip_edges()
 	if session_command_id.is_empty():
 		session_command_id = _derived_command_id(
@@ -179,3 +191,10 @@ static func _failure(
 	var result := {"ok": false, "code": code, "error": message}
 	result.merge(details, true)
 	return result
+
+
+## The catalog is a static file; reading it once per interaction is cheap enough,
+## and holding it would mean a stale copy after a content reload.
+static func _skill_catalog() -> Dictionary:
+	var loaded := SkillCatalogScript.load_default()
+	return Dictionary(loaded.get("catalog", {})) if bool(loaded.get("ok", false)) else {}

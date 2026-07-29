@@ -342,7 +342,7 @@ static func job() -> Dictionary:
 					Effect.change_state(&"energy", -28),
 					Effect.change_state(&"hunger", 20),
 					Effect.change_money(180),
-					Effect.unlock_skill(&"cargo_handling"),
+					Effect.practice_skill(&"cargo_handling", &"legacy_shift_hard"),
 					Effect.mastery(2),
 				],
 			},
@@ -356,7 +356,7 @@ static func job() -> Dictionary:
 					Effect.change_state(&"energy", -24),
 					Effect.change_state(&"hunger", 18),
 					Effect.change_money(260),
-					Effect.unlock_skill(&"cargo_handling"),
+					Effect.practice_skill(&"cargo_handling", &"legacy_shift_clean"),
 					Effect.knowledge(&"recycling_rules", 1, &"unlock"),
 					Effect.mastery(3),
 				],
@@ -517,8 +517,8 @@ static func _event_list() -> Array:
 				_choice(
 					"market_damaged_food.make_meal", "Собрать продукты для простой еды",
 					"Из нескольких невзрачных продуктов получится сытная порция.",
-					[Condition.with_reason(Condition.skill(&"cooking", 1), "Нужен хотя бы базовый навык готовки")],
-					[Effect.advance_time(12, "Сбор продуктов"), Effect.add_item(&"simple_meal"), Effect.mastery(1)]
+					[],
+					[Effect.advance_time(12, "Сбор продуктов"), Effect.add_item(&"simple_meal"), Effect.practice_skill(&"cooking", &"legacy_market_meal"), Effect.mastery(1)]
 				),
 				_choice(
 					"market_damaged_food.eat_pastry", "Съесть то, что выглядит лучше",
@@ -558,7 +558,7 @@ static func _event_list() -> Array:
 					"market_city_rumors.listen", "Запомнить полезные ориентиры",
 					"Из обрывков разговора складывается первая понятная карта района и несколько практичных правил обращения с простой едой.",
 					[Condition.with_reason(Condition.stat(&"intelligence", 4), "Нужно отделить полезные сведения от слухов")],
-					[Effect.advance_time(10, "Разговоры у рынка"), Effect.knowledge(&"district_landmarks", 1, &"unlock"), Effect.unlock_skill(&"city_navigation"), Effect.unlock_skill(&"cooking"), Effect.shift_polarity(&"attention_distribution", 3)]
+					[Effect.advance_time(10, "Разговоры у рынка"), Effect.knowledge(&"district_landmarks", 1, &"unlock"), Effect.practice_skill(&"city_navigation", &"legacy_market_talk"), Effect.shift_polarity(&"attention_distribution", 3)]
 				),
 				_choice(
 					"market_city_rumors.move_on", "Не задерживаться у ворот",
@@ -575,7 +575,7 @@ static func _event_list() -> Array:
 					"market_unloading_offer.lift", "Взяться за тяжёлые ящики",
 					"Работа заканчивается быстро, и водитель рассчитывается сразу.",
 					[Condition.with_reason(Condition.stat(&"strength", 6), "Ящики слишком тяжелы для безопасной разгрузки")],
-					[Effect.advance_time(40, "Разгрузка у рынка"), Effect.change_state(&"energy", -14), Effect.change_state(&"hunger", 8), Effect.change_money(90), Effect.unlock_skill(&"cargo_handling")]
+					[Effect.advance_time(40, "Разгрузка у рынка"), Effect.change_state(&"energy", -14), Effect.change_state(&"hunger", 8), Effect.change_money(90), Effect.practice_skill(&"cargo_handling", &"legacy_market_unload")]
 				),
 				_choice(
 					"market_unloading_offer.organize", "Предложить удобный порядок разгрузки",
@@ -587,7 +587,7 @@ static func _event_list() -> Array:
 					"market_unloading_offer.negotiate", "Сначала договориться об оплате",
 					"Водитель ворчит, но называет ясную сумму и сдерживает слово.",
 					[Condition.with_reason(Condition.stat(&"charisma", 6), "Нужно уверенно договориться до начала работы")],
-					[Effect.advance_time(35, "Оплаченная помощь у рынка"), Effect.change_state(&"energy", -10), Effect.change_money(105), Effect.unlock_skill(&"trade"), Effect.shift_polarity(&"influence_style", 4)]
+					[Effect.advance_time(35, "Оплаченная помощь у рынка"), Effect.change_state(&"energy", -10), Effect.change_money(105), Effect.practice_skill(&"trade", &"legacy_market_paid_help"), Effect.shift_polarity(&"influence_style", 4)]
 				),
 				_choice(
 					"market_unloading_offer.decline", "Отказаться от тяжёлой работы",
@@ -627,7 +627,7 @@ static func _event_list() -> Array:
 					"station_porter_offer.carry", "Донести чемодан до платформы",
 					"Чемодан тяжёлый, зато помощь оценивают честно.",
 					[Condition.with_reason(Condition.stat(&"strength", 6), "Не хватает силы нести чемодан по лестнице")],
-					[Effect.advance_time(25, "Помощь с багажом"), Effect.change_state(&"energy", -10), Effect.change_money(70), Effect.unlock_skill(&"cargo_handling"), Effect.deferred(&"muscle_soreness", 240, {"energy": -5}, &"station_porter_soreness", &"station_porter_offer")]
+					[Effect.advance_time(25, "Помощь с багажом"), Effect.change_state(&"energy", -10), Effect.change_money(70), Effect.practice_skill(&"cargo_handling", &"legacy_station_luggage"), Effect.deferred(&"muscle_soreness", 240, {"energy": -5}, &"station_porter_soreness", &"station_porter_offer")]
 				),
 				_choice(
 					"station_porter_offer.find_cart", "Найти свободную багажную тележку",
@@ -722,7 +722,7 @@ static func _event_list() -> Array:
 					"recycling_scale_dispute.check", "Проверить нулевую отметку",
 					"Под платформой застрял кусок проволоки. После проверки весы снова показывают ровно.",
 					[Condition.with_reason(Condition.stat(&"intelligence", 6), "Нужно понимать, как исключить простую ошибку измерения")],
-					[Effect.advance_time(12, "Проверка весов"), Effect.knowledge(&"recycling_rules", 1, &"unlock"), Effect.unlock_skill(&"repair"), Effect.change_state(&"mental_state", 4)]
+					[Effect.advance_time(12, "Проверка весов"), Effect.knowledge(&"recycling_rules", 1, &"unlock"), Effect.practice_skill(&"repair", &"legacy_scales_check"), Effect.change_state(&"mental_state", 4)]
 				),
 				_choice(
 					"recycling_scale_dispute.mediate", "Предложить повторное взвешивание",
@@ -802,7 +802,7 @@ static func _event_list() -> Array:
 					"clinic_notice_board.read", "Разобраться в объявлениях",
 					"Вы находите полезный адрес, запоминаете правила простой перевязки и замечаете расписание служебной калитки.",
 					[Condition.with_reason(Condition.stat(&"intelligence", 4), "Нужно сопоставить несколько старых объявлений")],
-					[Effect.advance_time(12, "Чтение объявлений"), Effect.knowledge(&"clinic_back_gate", 1, &"unlock"), Effect.knowledge(&"cheap_canteen", 1, &"unlock"), Effect.unlock_skill(&"first_aid"), Effect.shift_polarity(&"attention_distribution", -3)]
+					[Effect.advance_time(12, "Чтение объявлений"), Effect.knowledge(&"clinic_back_gate", 1, &"unlock"), Effect.knowledge(&"cheap_canteen", 1, &"unlock"), Effect.practice_skill(&"first_aid", &"legacy_clinic_notices"), Effect.shift_polarity(&"attention_distribution", -3)]
 				),
 				_choice(
 					"clinic_notice_board.rest", "Просто передохнуть у доски",

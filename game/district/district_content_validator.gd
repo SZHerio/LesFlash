@@ -354,7 +354,7 @@ static func _validate_conditions(conditions: Array, context: String, errors: Arr
 static func _validate_effects(effects: Array, context: String, errors: Array) -> void:
 	const VALID_TYPES := [
 		"advance_time", "change_state", "change_money", "add_item", "remove_item",
-		"shift_polarity", "unlock_skill", "advance_skill", "mastery", "deferred", "knowledge",
+		"shift_polarity", "unlock_skill", "advance_skill", "practice_skill", "mastery", "deferred", "knowledge",
 	]
 	var total_advance_minutes := 0
 	for effect_value in effects:
@@ -392,6 +392,15 @@ static func _validate_effects(effects: Array, context: String, errors: Array) ->
 			"advance_skill":
 				if not GameRules.is_known_skill(identifier) or typeof(effect_value.get("ranks", null)) != TYPE_INT or int(effect_value.get("ranks", 0)) <= 0:
 					errors.append("В %s указано неверное развитие навыка" % context)
+			# A card teaches a skill by naming what the hero did, not by handing
+			# over a rank. The source has to be there, or the practice cannot be
+			# told apart from every other practice of the same skill.
+			"practice_skill":
+				if (
+					not GameRules.is_known_skill(identifier)
+					or String(effect_value.get("source_id", "")).strip_edges().is_empty()
+				):
+					errors.append("В %s указана неверная практика навыка" % context)
 			"mastery":
 				if typeof(effect_value.get("delta", null)) != TYPE_INT or int(effect_value.get("delta", 0)) <= 0:
 					errors.append("В %s указано неверное изменение мастерства" % context)
@@ -501,7 +510,7 @@ static func _validate_job(job_data: Dictionary, place_map: Dictionary, errors: A
 static func _validate_start_effects(effects: Array, start_id: String, errors: Array) -> void:
 	const RESOURCE_EFFECTS := [
 		"change_money", "add_item", "remove_item", "unlock_skill",
-		"advance_skill", "mastery", "knowledge",
+		"advance_skill", "practice_skill", "mastery", "knowledge",
 	]
 	for effect_value in effects:
 		if effect_value is Dictionary and String(effect_value.get("type", "")) in RESOURCE_EFFECTS:
@@ -600,7 +609,7 @@ static func _validate_skill_reachability(cards: Dictionary, job_data: Dictionary
 				continue
 			var conditions := _array_copy(choice_value.get("conditions", []))
 			for effect_value in _array_copy(choice_value.get("effects", [])):
-				if not effect_value is Dictionary or String(effect_value.get("type", "")) != "unlock_skill":
+				if not effect_value is Dictionary or String(effect_value.get("type", "")) not in ["unlock_skill", "practice_skill"]:
 					continue
 				var skill_id := String(effect_value.get("id", ""))
 				if _condition_requires_skill(conditions, skill_id):

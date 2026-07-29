@@ -1,404 +1,553 @@
 {
-  "schema_version": 1,
-  "catalog_id": "riverside_sandbox_actions",
-  "catalog_version": 1,
-  "location_ids": [
-    "underpass",
-    "market",
-    "station_square",
-    "recycling_point",
-    "clinic_yard",
-    "embankment"
-  ],
-  "actions": [
-    {
-      "action_id": "action_underpass_read_wayfinding",
-      "location_id": "underpass",
-      "category_id": "study",
-      "icon_id": "action_study",
-      "title": "Разобраться в указателях",
-      "description": "Сверить выцветшие таблички и понять, куда ведут выходы перехода.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "inspect",
-        "payload": {"knowledge_id": "underpass_layout"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_underpass_enter_service_yard",
-      "location_id": "underpass",
-      "category_id": "search",
-      "icon_id": "action_search",
-      "title": "Осмотреть служебный двор",
-      "description": "Войти на карту двора и самому проверить доступные места и предметы.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "enter_search",
-        "payload": {"zone_id": "underpass_service_yard"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_underpass_rest_by_pipes",
-      "location_id": "underpass",
-      "category_id": "rest",
-      "icon_id": "action_rest",
-      "title": "Передохнуть у тёплых труб",
-      "description": "Сесть в стороне от прохода и ненадолго восстановить силы.",
-      "repeat_policy": "repeatable",
-      "confirmation": "required",
-      "intent": {
-        "type": "perform_activity",
-        "payload": {"activity_id": "activity_underpass_rest_by_pipes"}
-      },
-      "requirements": [
-        {
-          "type": "meter_max",
-          "meter_id": "energy",
-          "value": 90,
-          "blocked_reason": "Силы почти полностью восстановлены."
-        }
-      ],
-      "duration": {"kind": "fixed", "minutes": 15}
-    },
-    {
-      "action_id": "action_underpass_open_shelter",
-      "location_id": "underpass",
-      "category_id": "shelter",
-      "icon_id": "action_shelter",
-      "title": "Выбрать место для ночлега",
-      "description": "Посмотреть доступные поблизости варианты и их известные условия.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "open_shelter",
-        "payload": {"location_id": "underpass"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_market_read_board",
-      "location_id": "market",
-      "category_id": "study",
-      "icon_id": "action_study",
-      "title": "Прочитать рыночную доску",
-      "description": "Уточнить часы работы рядов и объявления на сегодняшний день.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "inspect",
-        "payload": {"knowledge_id": "market_schedule"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_market_open_food_row",
-      "location_id": "market",
-      "category_id": "trade",
-      "icon_id": "action_trade",
-      "title": "Зайти в продуктовый ряд",
-      "description": "Посмотреть сегодняшнюю поставку еды и хозяйственных мелочей.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "open_store",
-        "payload": {"store_id": "store_market_food_row"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_market_eat_simple_meal",
-      "location_id": "market",
-      "category_id": "food",
-      "icon_id": "action_food",
-      "title": "Съесть простой обед",
-      "description": "Найти спокойное место у торговых рядов и поесть из своих запасов.",
-      "repeat_policy": "repeatable",
-      "confirmation": "required",
-      "intent": {
-        "type": "consume_item",
-        "payload": {"item_id": "simple_meal", "quantity": 1}
-      },
-      "requirements": [
-        {
-          "type": "inventory_item_min",
-          "item_id": "simple_meal",
-          "quantity": 1,
-          "blocked_reason": "В вещах нет простого обеда."
-        },
-        {
-          "type": "meter_min",
-          "meter_id": "hunger",
-          "value": 10,
-          "blocked_reason": "Сейчас герой не голоден."
-        }
-      ],
-      "duration": {"kind": "fixed", "minutes": 10}
-    },
-    {
-      "action_id": "action_station_read_timetable",
-      "location_id": "station_square",
-      "category_id": "study",
-      "icon_id": "action_study",
-      "title": "Изучить расписание",
-      "description": "Разобраться в отправлениях и часах работы служб у вокзала.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "inspect",
-        "payload": {"knowledge_id": "station_schedule"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_station_open_commission",
-      "location_id": "station_square",
-      "category_id": "trade",
-      "icon_id": "action_trade",
-      "title": "Зайти в комиссионный магазин",
-      "description": "Посмотреть подержанную одежду, инструменты и снаряжение из текущей поставки.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "open_store",
-        "payload": {"store_id": "store_station_commission"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_station_walk_to_underpass",
-      "location_id": "station_square",
-      "category_id": "travel",
-      "icon_id": "transport_walk",
-      "title": "Пройти к старому переходу",
-      "description": "Срезать путь через привокзальные дворы и выйти к переходу пешком.",
-      "repeat_policy": "repeatable",
-      "confirmation": "required",
-      "intent": {
-        "type": "travel",
-        "payload": {"destination_location_id": "underpass", "mode_id": "walk"}
-      },
-      "requirements": [
-        {
-          "type": "meter_min",
-          "meter_id": "energy",
-          "value": 8,
-          "blocked_reason": "Сейчас не хватает сил на пеший путь."
-        }
-      ],
-      "duration": {"kind": "fixed", "minutes": 12}
-    },
-    {
-      "action_id": "action_station_open_shelter",
-      "location_id": "station_square",
-      "category_id": "shelter",
-      "icon_id": "action_shelter",
-      "title": "Найти ночлег у вокзала",
-      "description": "Сравнить известные варианты ночлега, доступность мест и условия оплаты.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "open_shelter",
-        "payload": {"location_id": "station_square"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_recycling_read_rates",
-      "location_id": "recycling_point",
-      "category_id": "study",
-      "icon_id": "action_study",
-      "title": "Прочитать расценки",
-      "description": "Сверить категории вторсырья и вывешенные у приёмного окна цены.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "inspect",
-        "payload": {"knowledge_id": "recycling_rates"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_recycling_open_sale",
-      "location_id": "recycling_point",
-      "category_id": "trade",
-      "icon_id": "action_trade",
-      "title": "Сдать вторсырьё",
-      "description": "Открыть взвешивание подходящих предметов и заранее увидеть расчёт выплаты.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "open_recycling_sale",
-        "payload": {"organization_id": "org_riverside_recycling"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_recycling_open_shift",
-      "location_id": "recycling_point",
-      "category_id": "work",
-      "icon_id": "action_work",
-      "title": "Узнать о смене",
-      "description": "Открыть доступные рабочие задачи и условия смены на пункте приёма.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "open_job",
-        "payload": {"job_id": "job_recycling_sorter"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_recycling_move_bundle",
-      "location_id": "recycling_point",
-      "category_id": "work",
-      "icon_id": "action_work",
-      "title": "Перенести тяжёлую связку",
-      "description": "Помочь убрать связку картона с прохода к площадке сортировки.",
-      "repeat_policy": "repeatable",
-      "confirmation": "required",
-      "intent": {
-        "type": "perform_activity",
-        "payload": {"activity_id": "activity_recycling_move_bundle"}
-      },
-      "requirements": [
-        {
-          "type": "characteristic_min",
-          "characteristic_id": "strength",
-          "value": 6,
-          "blocked_reason": "Для этой связки не хватает Силы 6."
-        },
-        {
-          "type": "meter_min",
-          "meter_id": "energy",
-          "value": 35,
-          "blocked_reason": "Для тяжёлой работы не хватает энергии."
-        }
-      ],
-      "duration": {"kind": "fixed", "minutes": 15}
-    },
-    {
-      "action_id": "action_clinic_read_notice",
-      "location_id": "clinic_yard",
-      "category_id": "study",
-      "icon_id": "action_study",
-      "title": "Прочитать объявления поликлиники",
-      "description": "Уточнить часы приёма и порядок обращения за помощью.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "inspect",
-        "payload": {"knowledge_id": "clinic_hours"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_clinic_open_pharmacy",
-      "location_id": "clinic_yard",
-      "category_id": "trade",
-      "icon_id": "action_trade",
-      "title": "Подойти к аптечному окну",
-      "description": "Посмотреть сегодняшнюю поставку лекарств и перевязочных материалов.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "open_store",
-        "payload": {"store_id": "store_clinic_pharmacy_window"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_clinic_rest_bench",
-      "location_id": "clinic_yard",
-      "category_id": "rest",
-      "icon_id": "action_rest",
-      "title": "Посидеть во дворе",
-      "description": "Отдохнуть на скамье вдали от очереди и уличного шума.",
-      "repeat_policy": "repeatable",
-      "confirmation": "required",
-      "intent": {
-        "type": "perform_activity",
-        "payload": {"activity_id": "activity_clinic_rest_bench"}
-      },
-      "requirements": [
-        {
-          "type": "meter_max",
-          "meter_id": "energy",
-          "value": 95,
-          "blocked_reason": "Дополнительный отдых сейчас не нужен."
-        }
-      ],
-      "duration": {"kind": "fixed", "minutes": 20}
-    },
-    {
-      "action_id": "action_embankment_observe_routines",
-      "location_id": "embankment",
-      "category_id": "observe",
-      "icon_id": "action_observe",
-      "title": "Понаблюдать за набережной",
-      "description": "Отметить привычные часы обходов, уборки и движения прохожих.",
-      "repeat_policy": "repeatable",
-      "confirmation": "none",
-      "intent": {
-        "type": "inspect",
-        "payload": {"knowledge_id": "embankment_routines"}
-      },
-      "requirements": []
-    },
-    {
-      "action_id": "action_embankment_walk_waterfront",
-      "location_id": "embankment",
-      "category_id": "rest",
-      "icon_id": "action_rest",
-      "title": "Пройтись вдоль воды",
-      "description": "Медленно пройти по открытому участку и привести мысли в порядок.",
-      "repeat_policy": "repeatable",
-      "confirmation": "required",
-      "intent": {
-        "type": "perform_activity",
-        "payload": {"activity_id": "activity_embankment_walk_waterfront"}
-      },
-      "requirements": [
-        {
-          "type": "meter_min",
-          "meter_id": "energy",
-          "value": 15,
-          "blocked_reason": "Для прогулки не хватает энергии."
-        }
-      ],
-      "duration": {"kind": "fixed", "minutes": 20}
-    },
-    {
-      "action_id": "action_embankment_watch_lights",
-      "location_id": "embankment",
-      "category_id": "rest",
-      "icon_id": "action_rest",
-      "title": "Посмотреть на вечерние огни",
-      "description": "Остановиться у парапета, когда на другом берегу зажигаются окна.",
-      "repeat_policy": "repeatable",
-      "confirmation": "required",
-      "intent": {
-        "type": "perform_activity",
-        "payload": {"activity_id": "activity_embankment_watch_lights"}
-      },
-      "requirements": [
-        {
-          "type": "time_window",
-          "start_minute": 1080,
-          "end_minute": 1440,
-          "blocked_reason": "Огни на другом берегу ещё не зажглись."
-        },
-        {
-          "type": "meter_min",
-          "meter_id": "tension",
-          "value": 10,
-          "blocked_reason": "Сейчас герою не требуется такая передышка."
-        }
-      ],
-      "duration": {"kind": "fixed", "minutes": 10}
-    }
-  ]
+	"schema_version": 1,
+	"catalog_id": "riverside_sandbox_actions",
+	"catalog_version": 1,
+	"location_ids": [
+		"underpass",
+		"market",
+		"station_square",
+		"recycling_point",
+		"clinic_yard",
+		"embankment"
+	],
+	"actions": [
+		{
+			"action_id": "action_underpass_read_wayfinding",
+			"location_id": "underpass",
+			"category_id": "study",
+			"icon_id": "action_study",
+			"title": "Разобраться в указателях",
+			"description": "Сверить выцветшие таблички и понять, куда ведут выходы перехода.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "inspect",
+				"payload": {
+					"knowledge_id": "underpass_layout"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_underpass_enter_service_yard",
+			"location_id": "underpass",
+			"category_id": "search",
+			"icon_id": "action_search",
+			"title": "Осмотреть служебный двор",
+			"description": "Войти на карту двора и самому проверить доступные места и предметы.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "enter_search",
+				"payload": {
+					"zone_id": "underpass_service_yard"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_underpass_rest_by_pipes",
+			"location_id": "underpass",
+			"category_id": "rest",
+			"icon_id": "action_rest",
+			"title": "Передохнуть у тёплых труб",
+			"description": "Сесть в стороне от прохода и ненадолго восстановить силы.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_underpass_rest_by_pipes"
+				}
+			},
+			"requirements": [
+				{
+					"type": "meter_max",
+					"meter_id": "energy",
+					"value": 90,
+					"blocked_reason": "Силы почти полностью восстановлены."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 15
+			}
+		},
+		{
+			"action_id": "action_underpass_open_shelter",
+			"location_id": "underpass",
+			"category_id": "shelter",
+			"icon_id": "action_shelter",
+			"title": "Выбрать место для ночлега",
+			"description": "Посмотреть доступные поблизости варианты и их известные условия.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "open_shelter",
+				"payload": {
+					"location_id": "underpass"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_market_read_board",
+			"location_id": "market",
+			"category_id": "study",
+			"icon_id": "action_study",
+			"title": "Прочитать рыночную доску",
+			"description": "Уточнить часы работы рядов и объявления на сегодняшний день.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "inspect",
+				"payload": {
+					"knowledge_id": "market_schedule"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_market_open_food_row",
+			"location_id": "market",
+			"category_id": "trade",
+			"icon_id": "action_trade",
+			"title": "Зайти в продуктовый ряд",
+			"description": "Посмотреть сегодняшнюю поставку еды и хозяйственных мелочей.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "open_store",
+				"payload": {
+					"store_id": "store_market_food_row"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_market_eat_simple_meal",
+			"location_id": "market",
+			"category_id": "food",
+			"icon_id": "action_food",
+			"title": "Съесть простой обед",
+			"description": "Найти спокойное место у торговых рядов и поесть из своих запасов.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "consume_item",
+				"payload": {
+					"item_id": "simple_meal",
+					"quantity": 1
+				}
+			},
+			"requirements": [
+				{
+					"type": "inventory_item_min",
+					"item_id": "simple_meal",
+					"quantity": 1,
+					"blocked_reason": "В вещах нет простого обеда."
+				},
+				{
+					"type": "meter_min",
+					"meter_id": "hunger",
+					"value": 10,
+					"blocked_reason": "Сейчас герой не голоден."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 10
+			}
+		},
+		{
+			"action_id": "action_station_read_timetable",
+			"location_id": "station_square",
+			"category_id": "study",
+			"icon_id": "action_study",
+			"title": "Изучить расписание",
+			"description": "Разобраться в отправлениях и часах работы служб у вокзала.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "inspect",
+				"payload": {
+					"knowledge_id": "station_schedule"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_station_open_commission",
+			"location_id": "station_square",
+			"category_id": "trade",
+			"icon_id": "action_trade",
+			"title": "Зайти в комиссионный магазин",
+			"description": "Посмотреть подержанную одежду, инструменты и снаряжение из текущей поставки.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "open_store",
+				"payload": {
+					"store_id": "store_station_commission"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_station_walk_to_underpass",
+			"location_id": "station_square",
+			"category_id": "travel",
+			"icon_id": "transport_walk",
+			"title": "Пройти к старому переходу",
+			"description": "Срезать путь через привокзальные дворы и выйти к переходу пешком.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "travel",
+				"payload": {
+					"destination_location_id": "underpass",
+					"mode_id": "walk"
+				}
+			},
+			"requirements": [
+				{
+					"type": "meter_min",
+					"meter_id": "energy",
+					"value": 8,
+					"blocked_reason": "Сейчас не хватает сил на пеший путь."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 12
+			}
+		},
+		{
+			"action_id": "action_station_open_shelter",
+			"location_id": "station_square",
+			"category_id": "shelter",
+			"icon_id": "action_shelter",
+			"title": "Найти ночлег у вокзала",
+			"description": "Сравнить известные варианты ночлега, доступность мест и условия оплаты.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "open_shelter",
+				"payload": {
+					"location_id": "station_square"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_recycling_read_rates",
+			"location_id": "recycling_point",
+			"category_id": "study",
+			"icon_id": "action_study",
+			"title": "Прочитать расценки",
+			"description": "Сверить категории вторсырья и вывешенные у приёмного окна цены.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "inspect",
+				"payload": {
+					"knowledge_id": "recycling_rates"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_recycling_open_sale",
+			"location_id": "recycling_point",
+			"category_id": "trade",
+			"icon_id": "action_trade",
+			"title": "Сдать вторсырьё",
+			"description": "Открыть взвешивание подходящих предметов и заранее увидеть расчёт выплаты.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "open_recycling_sale",
+				"payload": {
+					"organization_id": "org_riverside_recycling"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_recycling_open_shift",
+			"location_id": "recycling_point",
+			"category_id": "work",
+			"icon_id": "action_work",
+			"title": "Узнать о смене",
+			"description": "Открыть доступные рабочие задачи и условия смены на пункте приёма.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "open_job",
+				"payload": {
+					"job_id": "job_recycling_sorter"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_recycling_move_bundle",
+			"location_id": "recycling_point",
+			"category_id": "work",
+			"icon_id": "action_work",
+			"title": "Перенести тяжёлую связку",
+			"description": "Помочь убрать связку картона с прохода к площадке сортировки.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_recycling_move_bundle"
+				}
+			},
+			"requirements": [
+				{
+					"type": "characteristic_min",
+					"characteristic_id": "strength",
+					"value": 6,
+					"blocked_reason": "Для этой связки не хватает Силы 6."
+				},
+				{
+					"type": "meter_min",
+					"meter_id": "energy",
+					"value": 35,
+					"blocked_reason": "Для тяжёлой работы не хватает энергии."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 15
+			}
+		},
+		{
+			"action_id": "action_clinic_read_notice",
+			"location_id": "clinic_yard",
+			"category_id": "study",
+			"icon_id": "action_study",
+			"title": "Прочитать объявления поликлиники",
+			"description": "Уточнить часы приёма и порядок обращения за помощью.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "inspect",
+				"payload": {
+					"knowledge_id": "clinic_hours"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_clinic_open_pharmacy",
+			"location_id": "clinic_yard",
+			"category_id": "trade",
+			"icon_id": "action_trade",
+			"title": "Подойти к аптечному окну",
+			"description": "Посмотреть сегодняшнюю поставку лекарств и перевязочных материалов.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "open_store",
+				"payload": {
+					"store_id": "store_clinic_pharmacy_window"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_clinic_rest_bench",
+			"location_id": "clinic_yard",
+			"category_id": "rest",
+			"icon_id": "action_rest",
+			"title": "Посидеть во дворе",
+			"description": "Отдохнуть на скамье вдали от очереди и уличного шума.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_clinic_rest_bench"
+				}
+			},
+			"requirements": [
+				{
+					"type": "meter_max",
+					"meter_id": "energy",
+					"value": 95,
+					"blocked_reason": "Дополнительный отдых сейчас не нужен."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 20
+			}
+		},
+		{
+			"action_id": "action_embankment_observe_routines",
+			"location_id": "embankment",
+			"category_id": "observe",
+			"icon_id": "action_observe",
+			"title": "Понаблюдать за набережной",
+			"description": "Отметить привычные часы обходов, уборки и движения прохожих.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "inspect",
+				"payload": {
+					"knowledge_id": "embankment_routines"
+				}
+			},
+			"requirements": []
+		},
+		{
+			"action_id": "action_embankment_walk_waterfront",
+			"location_id": "embankment",
+			"category_id": "rest",
+			"icon_id": "action_rest",
+			"title": "Пройтись вдоль воды",
+			"description": "Медленно пройти по открытому участку и привести мысли в порядок.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_embankment_walk_waterfront"
+				}
+			},
+			"requirements": [
+				{
+					"type": "meter_min",
+					"meter_id": "energy",
+					"value": 15,
+					"blocked_reason": "Для прогулки не хватает энергии."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 20
+			}
+		},
+		{
+			"action_id": "action_embankment_watch_lights",
+			"location_id": "embankment",
+			"category_id": "rest",
+			"icon_id": "action_rest",
+			"title": "Посмотреть на вечерние огни",
+			"description": "Остановиться у парапета, когда на другом берегу зажигаются окна.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_embankment_watch_lights"
+				}
+			},
+			"requirements": [
+				{
+					"type": "time_window",
+					"start_minute": 1080,
+					"end_minute": 1440,
+					"blocked_reason": "Огни на другом берегу ещё не зажглись."
+				},
+				{
+					"type": "meter_min",
+					"meter_id": "tension",
+					"value": 10,
+					"blocked_reason": "Сейчас герою не требуется такая передышка."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 10
+			}
+		},
+		{
+			"action_id": "action_underpass_heat_food",
+			"location_id": "underpass",
+			"category_id": "food",
+			"icon_id": "action_food",
+			"title": "Разогреть еду у труб",
+			"description": "Пристроить банку к горячей трубе и дождаться, пока прогреется. Тёплое держится в человеке дольше холодного.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_underpass_heat_food"
+				}
+			},
+			"requirements": [
+				{
+					"type": "meter_min",
+					"meter_id": "hunger",
+					"value": 15,
+					"blocked_reason": "Есть пока не хочется."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 20
+			}
+		},
+		{
+			"action_id": "action_underpass_tend_hands",
+			"location_id": "underpass",
+			"category_id": "rest",
+			"icon_id": "action_rest",
+			"title": "Заняться руками",
+			"description": "Промыть ссадины, перемотать то, что за день разошлось. Днём этим заниматься некогда.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_underpass_tend_hands"
+				}
+			},
+			"requirements": [
+				{
+					"type": "meter_max",
+					"meter_id": "health",
+					"value": 95,
+					"blocked_reason": "Перематывать нечего."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 15
+			}
+		},
+		{
+			"action_id": "action_clinic_help_at_queue",
+			"location_id": "clinic_yard",
+			"category_id": "observe",
+			"icon_id": "action_observe",
+			"title": "Помочь в очереди",
+			"description": "Придержать дверь, подать воды, объяснить кому-то, куда идти. В очереди у двора всегда есть кто-то, кому хуже.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_clinic_help_at_queue"
+				}
+			},
+			"requirements": [
+				{
+					"type": "meter_min",
+					"meter_id": "energy",
+					"value": 25,
+					"blocked_reason": "Сил на чужие дела не осталось."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 30
+			}
+		}
+	]
 }

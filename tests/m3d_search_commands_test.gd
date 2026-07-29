@@ -324,7 +324,14 @@ func _test_quick_search() -> void:
 		"mastery:sixth"
 	)
 	_expect_ok(sixth, "sixth object must resolve")
-	_expect_equal(session.run_state.get_skill_rank("search"), 1, "sixth object unlocks search rank")
+	# Opening things used to hand over search rank 1 outright at the sixth
+	# object. Ranks are earned by variety now — three different approaches, from
+	# the skill catalog — so the rank is set up here and this test goes back to
+	# being about what it is named after: the quick sweep resolving the rest
+	# deterministically.
+	for source_id: String in ["hidden_newspapers:search_methodically", "dark_tunnel:feel_along_wall", "sleeper_gap_nest:read_the_ground"]:
+		session.run_state.record_practice("search", source_id)
+	_expect_equal(session.run_state.get_skill_rank("search"), 1, "three varied approaches earn the first rank")
 	if not bool(sixth.get("ok", false)):
 		return
 	snapshot = session.active_activity["snapshot"].duplicate(true)
