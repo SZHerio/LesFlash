@@ -171,22 +171,25 @@ func _test_variety_and_antifarm() -> void:
 	var total_awarded := 0
 	for sequence: int in [1, 3, 5]:
 		var completed := _complete(_snapshot(sequence), _specialist_build(), 1)
-		var recorded := Mastery.record_completed_shift(history, completed.get("progress", {}), 1)
+		var recorded := Mastery.record_completed_shift(history, completed.get("progress", {}))
 		_expect(bool(recorded.get("ok", false)), "shift %d records" % sequence)
 		total_awarded += int(recorded.get("mastery_awarded", 0))
 		history = Dictionary(recorded.get("history", {}))
 	_expect_equal(int(history.get("mastery_points", -1)), Array(history.get("practiced_task_class_ids", [])).size(), "mastery equals varied classes only")
 	_expect_equal(int(history.get("mastery_points", -1)), total_awarded, "only first practice awards mastery")
 	_expect(Array(history.get("practiced_task_class_ids", [])).size() >= 4, "three varied shifts cover at least four classes")
-	_expect(not Mastery.quick_resolve_eligible(history, 0), "cargo rank zero blocks quick resolve")
-	_expect(Mastery.quick_resolve_eligible(history, 1), "three shifts four classes and cargo rank one unlock quick resolve")
+	_expect(Mastery.quick_resolve_eligible(history), "three varied shifts unlock quick resolve")
+	_expect(
+		not Mastery.quick_resolve_eligible(Mastery.fresh()),
+		"a hero who has never worked a shift is offered the shortcut"
+	)
 	var duplicate_progress: Dictionary = _complete(_snapshot(5), _specialist_build(), 1).get("progress", {})
-	var duplicate := Mastery.record_completed_shift(history, duplicate_progress, 1)
+	var duplicate := Mastery.record_completed_shift(history, duplicate_progress)
 	_expect_equal(duplicate.get("code"), "already_recorded", "same shift cannot be recorded twice")
 	_expect_equal(duplicate.get("mastery_awarded"), 0, "duplicate awards no mastery")
 	_expect_equal(duplicate.get("history"), history, "duplicate leaves history untouched")
 	var repeat_progress: Dictionary = _complete(_snapshot(7), _specialist_build(), 1).get("progress", {})
-	var repeat_record := Mastery.record_completed_shift(history, repeat_progress, 1)
+	var repeat_record := Mastery.record_completed_shift(history, repeat_progress)
 	var new_classes: Array = Array(repeat_record.get("history", {}).get("practiced_task_class_ids", []))
 	var old_classes: Array = Array(history.get("practiced_task_class_ids", []))
 	_expect(int(repeat_record.get("mastery_awarded", -1)) <= new_classes.size() - old_classes.size(), "repeat never awards for old classes")

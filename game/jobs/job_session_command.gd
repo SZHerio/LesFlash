@@ -275,8 +275,7 @@ static func quick_resolve_available(target: Object) -> bool:
 	if work_state == null or not work_state.is_active():
 		return false
 	return MasteryScript.quick_resolve_eligible(
-		work_state.mastery_for(work_state.active_job_id()),
-		int(target.get("run_state").get_skill_rank("cargo_handling"))
+		work_state.mastery_for(work_state.active_job_id())
 	)
 
 
@@ -309,8 +308,7 @@ static func _finish(
 		var day_index := int(candidate.get("run_state").calendar.elapsed_minutes / 1440)
 		var next_mastery: Dictionary = MasteryScript.record_completed_shift(
 			candidate_work.mastery_for(candidate_work.active_job_id()),
-			next_progress,
-			int(candidate.get("run_state").get_skill_rank("cargo_handling"))
+			next_progress
 		)
 		if not bool(next_mastery.get("ok", false)):
 			return _failure("mastery_rejected", "Освоение смены не записалось")

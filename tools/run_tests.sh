@@ -33,12 +33,18 @@ declare -a failed=()
 
 run_suite() {
 	local suite="$1"
-	local name log
+	local name log display
 	name="$(basename "$suite" .gd)"
 	log="$LOG_DIR/$name.log"
+	# The visual reference suites save screenshots, and there is nothing to
+	# capture without a window. They are the only suites that need one.
+	display="--headless"
+	case "$suite" in
+		*_visual_reference.gd) display="" ;;
+	esac
 	# Redirect to a file rather than piping: Godot block-buffers stdout into a
 	# pipe and the verdict is lost when the process exits.
-	timeout 600 "$GODOT" --headless --path "$ROOT" --script "res://$suite" >"$log" 2>&1
+	timeout 600 "$GODOT" $display --path "$ROOT" --script "res://$suite" >"$log" 2>&1
 	if grep -qiE "PASSED|tests passed|: PASS$|WRITTEN" "$log"; then
 		passed=$((passed + 1))
 	else

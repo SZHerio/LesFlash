@@ -11,7 +11,6 @@ const ProgressScript := preload("res://game/jobs/job_shift_progress.gd")
 const SCHEMA_VERSION := 1
 const QUICK_MIN_SHIFTS := 3
 const QUICK_MIN_CLASSES := 4
-const QUICK_MIN_CARGO_RANK := 1
 
 
 static func fresh(job_id: String = "job_recycling_sorter") -> Dictionary:
@@ -24,7 +23,7 @@ static func fresh(job_id: String = "job_recycling_sorter") -> Dictionary:
 	}
 
 
-static func record_completed_shift(history: Dictionary, progress: Dictionary, cargo_handling_rank: int) -> Dictionary:
+static func record_completed_shift(history: Dictionary, progress: Dictionary) -> Dictionary:
 	var history_validation := validate(history)
 	if not bool(history_validation.get("ok", false)):
 		return _failure("invalid_history", history_validation.get("errors", []))
@@ -41,7 +40,7 @@ static func record_completed_shift(history: Dictionary, progress: Dictionary, ca
 				"code": "already_recorded",
 				"history": history.duplicate(true),
 				"mastery_awarded": 0,
-				"quick_resolve_eligible": quick_resolve_eligible(history, cargo_handling_rank),
+				"quick_resolve_eligible": quick_resolve_eligible(history),
 			}
 	var candidate := history.duplicate(true)
 	var newly_practiced: Array[String] = []
@@ -67,15 +66,24 @@ static func record_completed_shift(history: Dictionary, progress: Dictionary, ca
 		"code": "ok",
 		"history": candidate,
 		"mastery_awarded": newly_practiced.size(),
-		"quick_resolve_eligible": quick_resolve_eligible(candidate, cargo_handling_rank),
+		"quick_resolve_eligible": quick_resolve_eligible(candidate),
 	}
 
 
-static func quick_resolve_eligible(history: Dictionary, cargo_handling_rank: int) -> bool:
+## The shortcut is earned by having visibly done the job several different ways:
+## enough shifts behind you, and enough kinds of task among them.
+##
+## It used to also demand cargo_handling rank 1. That worked while ranks came
+## from repetition, but M5 made a rank grow from *varied* practice — three
+## different sources for the first rank — and cargo_handling is reachable from
+## exactly one task class per profession. A sorter could work the yard forever
+## and never see rank 1, so the shortcut had quietly become content nobody could
+## reach. The variety it was standing in for is already what the class count
+## measures, so the rank condition is gone rather than propped up.
+static func quick_resolve_eligible(history: Dictionary) -> bool:
 	return (
 		Array(history.get("completed_shifts", [])).size() >= QUICK_MIN_SHIFTS
 		and Array(history.get("practiced_task_class_ids", [])).size() >= QUICK_MIN_CLASSES
-		and cargo_handling_rank >= QUICK_MIN_CARGO_RANK
 	)
 
 

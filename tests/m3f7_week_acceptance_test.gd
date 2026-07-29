@@ -19,6 +19,10 @@ const InventoryState := preload("res://core/inventory/inventory_state.gd")
 const ItemCatalog := preload("res://core/inventory/item_catalog.gd")
 const MasteryScript := preload("res://game/jobs/job_mastery.gd")
 
+## The two professions a hero can hold; mastery is kept per employer.
+const DEFAULT_JOB_ID := "job_recycling_sorter"
+const PORTER_JOB_ID := "job_market_porter"
+
 const EVENING_MINUTE := 18 * 60
 const MAX_TURNS_PER_DAY := 60
 const MAX_DAYS := 10
@@ -80,15 +84,35 @@ const PRIORITIES := {
 }
 
 var _failures: Array[String] = []
+## Empty means every build; set by `three:<build>` to live one week at a time.
+var _only_build := ""
 var _tests_run := 0
 var _current := ""
 
 
+## Living four weeks of game takes longer than most run budgets allow, so a
+## single check can be asked for by name: `-- three`, `-- save`, `-- luck`,
+## `-- quick`. Without an argument all four run, which is what the gate means.
 func _init() -> void:
-	_run("three builds live seven real days through public commands", _test_three_builds_live_the_week)
-	_run("a mid-week save reopens on exactly the same state", _test_midweek_save_load)
-	_run("low and high Luck diverge on one seed without becoming a lottery", _test_luck_spread)
-	_run("the earned quick shift is never worse than working it by hand", _test_quick_resolve_not_worse)
+	var wanted := ""
+	for argument: String in OS.get_cmdline_user_args():
+		wanted = argument.strip_edges().to_lower()
+	# `three:labourer` lives the week for one build only. Three whole weeks in one
+	# process outlast most run budgets, and a check that cannot be run is a check
+	# nobody runs.
+	if wanted.begins_with("three:"):
+		_only_build = wanted.substr(6)
+		wanted = "three"
+	if wanted.is_empty() or wanted == "three":
+		_run("three builds live seven real days through public commands", _test_three_builds_live_the_week)
+	if wanted.is_empty() or wanted == "save":
+		_run("a mid-week save reopens on exactly the same state", _test_midweek_save_load)
+	if wanted.is_empty() or wanted == "luck":
+		_run("low and high Luck diverge on one seed without becoming a lottery", _test_luck_spread)
+	if wanted.is_empty() or wanted == "quick":
+		_run("the earned quick shift is never worse than working it by hand", _test_quick_resolve_not_worse)
+	if wanted == "diverge":
+		_run("separately lived weeks end apart, not in the same place", _test_recorded_weeks_diverge)
 	_cleanup_saves()
 	if _failures.is_empty():
 		print("M3F.7 WEEK ACCEPTANCE PASSED: %d/%d" % [_tests_run, _tests_run])
@@ -117,6 +141,8 @@ func _test_three_builds_live_the_week() -> void:
 	var digests: Dictionary = {}
 	var signatures: Dictionary = {}
 	for build_id: String in BUILDS:
+		if not _only_build.is_empty() and build_id != _only_build:
+			continue
 		var adapter = SandboxAdapter.create(BUILDS[build_id], 51_000)
 		_expect(adapter != null, "%s must start" % build_id)
 		if adapter == null:
@@ -148,7 +174,19 @@ func _test_three_builds_live_the_week() -> void:
 		)
 		digests[build_id] = _digest(adapter)
 		signatures[build_id] = _activity_signature(counters)
+		_record_week(build_id, digests[build_id], signatures[build_id])
+	if not _only_build.is_empty():
+		# One build alone cannot be compared with the others. It was recorded, so
+		# `-- diverge` compares whatever the separate runs have left behind.
+		return
+	_compare_weeks(digests, signatures)
+
+
+## Three builds must not converge: a week of the same seed lived from different
+## characteristics has to end somewhere else and be spent on something else.
+func _compare_weeks(digests: Dictionary, signatures: Dictionary) -> void:
 	var ids: Array = digests.keys()
+	_expect(ids.size() >= 2, "divergence needs at least two lived weeks (have %d)" % ids.size())
 	for left: int in ids.size():
 		for right: int in range(left + 1, ids.size()):
 			_expect(
@@ -161,6 +199,47 @@ func _test_three_builds_live_the_week() -> void:
 					ids[left], ids[right], signatures[ids[left]], signatures[ids[right]],
 				]
 			)
+
+
+## Living three weeks in one process takes longer than a run budget allows, so a
+## build run alone leaves its result here and `-- diverge` reads them back.
+func _record_week(build_id: String, digest: String, signature: String) -> void:
+	var file := FileAccess.open(_week_record_path(build_id), FileAccess.WRITE)
+	if file == null:
+		return
+	file.store_string(JSON.stringify({"digest": digest, "signature": signature}))
+	file.close()
+
+
+func _week_record_path(build_id: String) -> String:
+	return "user://m3f7_week_%s.json" % build_id
+
+
+func _test_recorded_weeks_diverge() -> void:
+	var digests: Dictionary = {}
+	var signatures: Dictionary = {}
+	for build_id: String in BUILDS:
+		var path := _week_record_path(build_id)
+		if not FileAccess.file_exists(path):
+			continue
+		var file := FileAccess.open(path, FileAccess.READ)
+		if file == null:
+			continue
+		var parsed: Variant = JSON.parse_string(file.get_as_text())
+		file.close()
+		if not parsed is Dictionary:
+			continue
+		digests[build_id] = String(Dictionary(parsed).get("digest", ""))
+		signatures[build_id] = String(Dictionary(parsed).get("signature", ""))
+	_expect(
+		digests.size() == BUILDS.size(),
+		"every build must have lived its week first: run three:<build> for each (have %d of %d)" % [
+			digests.size(), BUILDS.size(),
+		]
+	)
+	if digests.size() < 2:
+		return
+	_compare_weeks(digests, signatures)
 
 
 # --- save and load in the middle of the week --------------------------------
@@ -268,19 +347,21 @@ func _test_quick_resolve_not_worse() -> void:
 	if adapter == null:
 		return
 	var counters := _fresh_counters()
-	# Earn the shortcut first: it opens only after several different shifts.
+	# Earn the shortcut first. Counting shifts is not the condition — the
+	# shortcut also wants several different kinds of task among them — so the
+	# hero keeps working until the domain itself says he has earned it.
 	for _round: int in MAX_ROUNDS:
 		if adapter.get_phase() == "completed":
 			break
+		if _shortcut_earned(adapter):
+			break
 		var before_elapsed := _elapsed(adapter)
 		_live_one_day(adapter, "labourer", counters)
-		if int(counters.get("shifts", 0)) >= MasteryScript.QUICK_MIN_SHIFTS:
-			break
 		if _elapsed(adapter) == before_elapsed:
 			break
 	_expect(
-		int(counters.get("shifts", 0)) >= MasteryScript.QUICK_MIN_SHIFTS,
-		"the week must allow the practice the shortcut asks for (shifts=%d)" % int(counters.get("shifts", 0))
+		_shortcut_earned(adapter),
+		"a week of work must earn the shortcut (%s)" % _mastery_note(adapter, counters)
 	)
 	# Then stand at the briefing of the next shift without working it.
 	var prepared := false
@@ -293,7 +374,7 @@ func _test_quick_resolve_not_worse() -> void:
 		_rest_until_morning(adapter, counters)
 	_expect(
 		prepared,
-		"varied confirmed practice must open the quick calculation (shifts=%d)" % int(counters.get("shifts", 0))
+		"varied confirmed practice must open the quick calculation (%s)" % _mastery_note(adapter, counters)
 	)
 	if not prepared:
 		return
@@ -327,6 +408,38 @@ func _test_quick_resolve_not_worse() -> void:
 			int(quick_result["money"]), int(manual_result["money"]),
 		]
 	)
+
+
+## Whether the domain considers the shortcut earned, asked of the domain rather
+## than guessed from a shift count.
+func _shortcut_earned(adapter: Object) -> bool:
+	var session: Object = adapter.get("_session")
+	if session == null:
+		return false
+	var work_state: JobWorkState = session.get("job_work_state")
+	if work_state == null:
+		return false
+	for job_id: String in [DEFAULT_JOB_ID, PORTER_JOB_ID]:
+		if MasteryScript.quick_resolve_eligible(work_state.mastery_for(job_id)):
+			return true
+	return false
+
+
+## What the hero actually has, so a failure says why the shortcut stayed shut.
+func _mastery_note(adapter: Object, counters: Dictionary) -> String:
+	var session: Object = adapter.get("_session")
+	if session == null:
+		return "no session"
+	var work_state: JobWorkState = session.get("job_work_state")
+	var parts: Array[String] = ["shifts=%d" % int(counters.get("shifts", 0))]
+	for job_id: String in [DEFAULT_JOB_ID, PORTER_JOB_ID]:
+		var mastery: Dictionary = work_state.mastery_for(job_id)
+		parts.append("%s: %d worked, %d classes" % [
+			job_id,
+			Array(mastery.get("completed_shifts", [])).size(),
+			Array(mastery.get("practiced_task_class_ids", [])).size(),
+		])
+	return ", ".join(parts)
 
 
 # --- the week driver --------------------------------------------------------
