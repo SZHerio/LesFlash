@@ -111,6 +111,13 @@ func _init() -> void:
 		_run("low and high Luck diverge on one seed without becoming a lottery", _test_luck_spread)
 	if wanted.is_empty() or wanted == "quick":
 		_run("the earned quick shift is never worse than working it by hand", _test_quick_resolve_not_worse)
+	# `diagnose:<seed>` проживает неделю и печатает её по дням. Не проверка —
+	# инструмент: две недели на разных зёрнах расходятся, и разницу надо видеть,
+	# а не угадывать.
+	if wanted.begins_with("diagnose:"):
+		_diagnose(int(wanted.substr(9)))
+		quit(0)
+		return
 	if wanted == "diverge":
 		_run("separately lived weeks end apart, not in the same place", _test_recorded_weeks_diverge)
 	_cleanup_saves()
@@ -124,6 +131,42 @@ func _init() -> void:
 	for failure: String in _failures:
 		print("  - %s" % failure)
 	quit(1)
+
+
+## Проживает неделю и печатает, куда ушли деньги и часы каждого дня.
+func _diagnose(seed: int) -> void:
+	var adapter = SandboxAdapter.create(BUILDS["labourer"], seed)
+	if adapter == null:
+		print("DIAGNOSE %d: песочница не стартовала" % seed)
+		return
+	print("DIAGNOSE %d" % seed)
+	print("  %3s %6s %6s %5s %5s %5s  %s" % ["дн", "мин", "деньги", "голод", "еда", "здор", "за день"])
+	var counters := _fresh_counters()
+	for day: int in MAX_DAYS:
+		if adapter.get_phase() == "completed":
+			break
+		var before := _fresh_counters()
+		before.merge(counters, true)
+		var money_before := _money(adapter)
+		var elapsed_before := _elapsed(adapter)
+		_live_one_day(adapter, "labourer", counters)
+		if _elapsed(adapter) == elapsed_before:
+			break
+		var did: Array[String] = []
+		for key: String in ["shifts", "meals", "purchases", "sales", "searches", "nights", "local_actions"]:
+			var delta := int(counters.get(key, 0)) - int(before.get(key, 0))
+			if delta > 0:
+				did.append("%s=%d" % [key, delta])
+		print("  %3d %6d %+6d %5d %5d %5d  %s" % [
+			day + 1,
+			_elapsed(adapter),
+			_money(adapter) - money_before,
+			_meter(adapter, "hunger"),
+			_carried_food(adapter),
+			_meter(adapter, "health"),
+			", ".join(did),
+		])
+	print("DIAGNOSE %d WRITTEN" % seed)
 
 
 func _run(title: String, callback: Callable) -> void:
