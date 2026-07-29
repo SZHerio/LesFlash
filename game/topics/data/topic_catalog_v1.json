@@ -1,0 +1,159 @@
+{
+	"schema_version": 1,
+	"catalog_id": "topic_catalog_v1",
+	"topics": [
+		{
+			"id": "topic_weather",
+			"title": "Погода",
+			"prompt": "Заговорить о том, что на улице.",
+			"opinions": {
+				"npc_viktor_koren": {
+					"stance": "willing",
+					"line": "К зиме площадку заносит так, что весы не найдёшь. Готовься."
+				},
+				"npc_lidia_maren": {
+					"stance": "eager",
+					"line": "Уже холодает. Ты в этом ходить собрался?"
+				},
+				"npc_tamara_roven": {
+					"stance": "indifferent",
+					"line": "Погода как погода. Бери, что берёшь."
+				},
+				"npc_stepan_gulev": {
+					"stance": "willing",
+					"line": "Ночью подмораживает. У труб место занимай засветло."
+				}
+			}
+		},
+		{
+			"id": "topic_work_here",
+			"title": "Работа",
+			"prompt": "Спросить, берут ли сюда людей.",
+			"opinions": {
+				"npc_viktor_koren": {
+					"stance": "eager",
+					"line": "Руки нужны всегда. Другое дело, надолго ли тебя хватит."
+				},
+				"npc_tamara_roven": {
+					"stance": "willing",
+					"line": "Разгрузка бывает. Приходи к утру, а не когда проснёшься."
+				},
+				"npc_stepan_gulev": {
+					"stance": "guarded",
+					"line": "Тебе-то зачем? Тут своих хватает."
+				},
+				"npc_lidia_maren": {
+					"stance": "indifferent",
+					"line": "Я в этом не разбираюсь, милый."
+				}
+			}
+		},
+		{
+			"id": "topic_papers",
+			"title": "Бумаги",
+			"prompt": "Спросить, где оформляют документы.",
+			"opinions": {
+				"npc_viktor_koren": {
+					"stance": "willing",
+					"line": "Без бумаги на весы не поставлю. Порядок такой."
+				},
+				"npc_lidia_maren": {
+					"stance": "eager",
+					"line": "Регистрацию делают на вокзале. Очередь с утра, иди раньше."
+				},
+				"npc_tamara_roven": {
+					"stance": "guarded",
+					"line": "С разрешением торгуй хоть где. Без — не у моего ряда."
+				},
+				"npc_stepan_gulev": {
+					"stance": "indifferent",
+					"line": "Бумаги. Ну да, бывают."
+				}
+			},
+			"gate": {
+				"kind": "knowledge",
+				"id": "district_services",
+				"value": 1
+			}
+		},
+		{
+			"id": "topic_night_places",
+			"title": "Где ночевать",
+			"prompt": "Спросить, где пускают на ночь.",
+			"opinions": {
+				"npc_stepan_gulev": {
+					"stance": "eager",
+					"line": "В ночлежке до отбоя пускают. После — только под трубы."
+				},
+				"npc_lidia_maren": {
+					"stance": "willing",
+					"line": "У прихода топят. Но там смотрят, в чём ты пришёл."
+				},
+				"npc_viktor_koren": {
+					"stance": "indifferent",
+					"line": "Не моё дело, где ты спишь. Лишь бы к семи был."
+				},
+				"npc_tamara_roven": {
+					"stance": "guarded",
+					"line": "У ряда не ложись. Один раз уже сгоняла."
+				}
+			}
+		},
+		{
+			"id": "topic_yourself",
+			"title": "О себе",
+			"prompt": "Рассказать, как оказался здесь.",
+			"opinions": {
+				"npc_lidia_maren": {
+					"stance": "eager",
+					"line": "Господи. И давно ты так?"
+				},
+				"npc_stepan_gulev": {
+					"stance": "willing",
+					"line": "У всех своя история. Мою не спрашивай."
+				},
+				"npc_viktor_koren": {
+					"stance": "indifferent",
+					"line": "Работать умеешь — остальное меня не касается."
+				},
+				"npc_tamara_roven": {
+					"stance": "guarded",
+					"line": "Мне бы отторговать, а не слушать."
+				}
+			},
+			"gate": {
+				"kind": "characteristic",
+				"id": "charisma",
+				"value": 6
+			}
+		},
+		{
+			"id": "topic_prices",
+			"title": "Цены",
+			"prompt": "Спросить, почём нынче.",
+			"opinions": {
+				"npc_tamara_roven": {
+					"stance": "eager",
+					"line": "Дорожает всё. Хлеб на два арда за месяц."
+				},
+				"npc_viktor_koren": {
+					"stance": "willing",
+					"line": "Медь берут дороже стекла. Сортируй — больше выйдет."
+				},
+				"npc_lidia_maren": {
+					"stance": "indifferent",
+					"line": "Я цен не считаю, мне пенсию приносят."
+				},
+				"npc_stepan_gulev": {
+					"stance": "guarded",
+					"line": "Знал бы цены — не сидел бы тут."
+				}
+			},
+			"gate": {
+				"kind": "skill",
+				"id": "trade",
+				"value": 1
+			}
+		}
+	]
+}
