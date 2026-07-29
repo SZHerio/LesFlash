@@ -192,6 +192,10 @@ static func _validate_requirement(value: Variant, path: String, errors: Array[St
 		# внутрь в том, в чём он пришёл.
 		"appearance_min":
 			keys = ["type", "band_id", "blocked_reason"]
+		# Что о нём знают. Одна сторона открывает то, что закрывает другая, —
+		# поэтому требование называет и сторону, и то, сколько её нужно.
+		"standing_min":
+			keys = ["type", "side", "value", "blocked_reason"]
 		_:
 			errors.append("%s.type is unknown" % path)
 			return
@@ -211,6 +215,10 @@ static func _validate_requirement(value: Variant, path: String, errors: Array[St
 		"inventory_item_min":
 			_expect_id(requirement.get("item_id", null), "%s.item_id" % path, errors)
 			_expect_int(requirement.get("quantity", null), 1, 999, "%s.quantity" % path, errors)
+		"standing_min":
+			if String(requirement.get("side", "")) not in ["reliable", "feared"]:
+				errors.append("%s.side must be reliable or feared" % path)
+			_expect_int(requirement.get("value", null), 1, 40, "%s.value" % path, errors)
 		"appearance_min":
 			if String(requirement.get("band_id", "")) not in AppearanceRules.ORDER:
 				errors.append("%s.band_id is unknown" % path)

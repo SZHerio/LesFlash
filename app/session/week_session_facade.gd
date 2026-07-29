@@ -10,6 +10,7 @@ const WeekActionCommandScript := preload("res://game/week/week_action_command.gd
 const RoutineCommandScript := preload("res://game/routine/routine_session_command.gd")
 const BusinessCommandScript := preload("res://game/business/business_session_command.gd")
 const BusinessCatalogScript := preload("res://game/business/business_catalog.gd")
+const SandboxActionCatalogScript := preload("res://game/sandbox/sandbox_action_catalog.gd")
 const ObligationCommandScript := preload("res://game/obligations/obligation_session_command.gd")
 const TopicCommandScript := preload("res://game/topics/topic_session_command.gd")
 const StoreServiceScript := preload("res://game/commerce/store_service.gd")
@@ -35,7 +36,7 @@ static func location_model(
 	include_blocked: bool
 ) -> Dictionary:
 	var result := base_model.duplicate(true)
-	var actions := WeekActions.actions(session, include_blocked)
+	var actions := _standing_filtered(session, WeekActions.actions(session, include_blocked), include_blocked)
 	actions.append_array(NpcInteractionServiceScript.location_actions(
 		session,
 		include_blocked
@@ -556,6 +557,57 @@ static func _room_actions(session: Object, include_blocked: bool) -> Array[Dicti
 			"intent": {"type": "pay_obligation", "payload": {"obligation_id": String(entry["id"])}},
 			"confirmation_required": true,
 		})
+	return result
+
+
+## Отсеивает то, чего человеку с такой славой не предложат. Проверяется здесь, а
+## не уровнем ниже, потому что репутацию знают люди — она живёт в сессии, а не в
+## состоянии тела, и ниже её попросту не видно.
+##
+## Правило 3.4: закрытого не показывают. Заблокированное остаётся в списке только
+## тогда, когда игрок сам попросил видеть недоступное.
+static func _standing_filtered(
+	session: Object,
+	actions: Array[Dictionary],
+	include_blocked: bool
+) -> Array[Dictionary]:
+	var standing: StandingState = session.get("standing_state")
+	if standing == null:
+		return actions
+	# Требования к этому моменту уже свёрнуты в «доступно/нет», поэтому они
+	# берутся из каталога, а не из собранной модели: первая версия читала поле,
+	# которого в модели нет, и не отсеивала ничего.
+	var loaded := SandboxActionCatalogScript.load_default()
+	if not bool(loaded.get("ok", false)):
+		return actions
+	var catalog: Dictionary = loaded["catalog"]
+	var result: Array[Dictionary] = []
+	for action: Dictionary in actions:
+		var definition := SandboxActionCatalogScript.find_action(
+			catalog, String(action.get("id", ""))
+		)
+		var met := true
+		var reason := ""
+		for raw_requirement: Variant in Array(definition.get("requirements", [])):
+			var requirement: Dictionary = raw_requirement
+			if String(requirement.get("type", "")) != "standing_min":
+				continue
+			var side := String(requirement.get("side", ""))
+			var have := standing.reliable if side == "reliable" else standing.feared
+			if have < int(requirement.get("value", 1)):
+				met = false
+				reason = String(requirement.get("blocked_reason", ""))
+		if met:
+			result.append(action)
+			continue
+		if not include_blocked:
+			continue
+		var blocked := action.duplicate(true)
+		blocked["available"] = false
+		var reasons: Array = Array(blocked.get("reasons", []))
+		reasons.append(reason)
+		blocked["reasons"] = reasons
+		result.append(blocked)
 	return result
 
 

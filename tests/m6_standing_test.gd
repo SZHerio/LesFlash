@@ -21,6 +21,7 @@ func _init() -> void:
 	_test_the_louder_one_is_what_he_is_called()
 	_test_it_survives_a_save()
 	_test_the_manner_of_a_search_is_recorded()
+	_test_each_side_opens_what_the_other_shuts()
 	_finish()
 
 
@@ -121,6 +122,50 @@ func _test_the_manner_of_a_search_is_recorded() -> void:
 	)
 
 
+## То, ради чего репутации нужны вообще: одна открывает то, чего не откроет
+## другая, и без обеих не открыто ни то ни другое.
+func _test_each_side_opens_what_the_other_shuts() -> void:
+	var adapter = SandboxAdapter.create(BUILD, 91_301)
+	if adapter == null:
+		_failures.append("песочница не стартовала")
+		return
+	var session = adapter.get("_session")
+	session.phase = "map"
+
+	session.location = "recycling_point"
+	_expect(not _offers(adapter, "action_yard_trusted_key"), "ключ от склада дали незнакомцу")
+	session.location = "pawn_row"
+	_expect(not _offers(adapter, "action_pawn_row_no_questions"), "с незнакомцем говорят без бланка")
+
+	# Стал надёжным — открылось одно и не открылось другое.
+	session.standing_state.record("reliable", 6)
+	session.location = "recycling_point"
+	_expect(_offers(adapter, "action_yard_trusted_key"), "надёжному не доверили ключ")
+	session.location = "pawn_row"
+	_expect(
+		not _offers(adapter, "action_pawn_row_no_questions"),
+		"надёжному стали сдавать без вопросов — обе стороны открылись сразу"
+	)
+
+	# Стал опасным — поменялось местами.
+	session.standing_state.record("feared", 12)
+	session.location = "pawn_row"
+	_expect(_offers(adapter, "action_pawn_row_no_questions"), "опасному всё ещё выписывают бланк")
+	session.location = "recycling_point"
+	_expect(
+		not _offers(adapter, "action_yard_trusted_key"),
+		"тому, кого боятся, оставили ключ от склада"
+	)
+
+
+func _offers(adapter: Object, action_id: String) -> bool:
+	for raw_action: Variant in Array(Dictionary(adapter.get_location_model()).get("actions", [])):
+		var action: Dictionary = raw_action
+		if String(action.get("id", "")) == action_id and bool(action.get("available", false)):
+			return true
+	return false
+
+
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		_failures.append(message)
@@ -133,7 +178,7 @@ func _expect_equal(actual: Variant, expected: Variant, message: String) -> void:
 
 func _finish() -> void:
 	if _failures.is_empty():
-		print("M6 STANDING TESTS PASSED: 6/6")
+		print("M6 STANDING TESTS PASSED: 7/7")
 		quit(0)
 		return
 	for failure: String in _failures:

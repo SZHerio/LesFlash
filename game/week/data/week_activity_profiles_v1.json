@@ -472,6 +472,36 @@
 					"delta": -5
 				}
 			]
+		},
+		{
+			"activity_id": "activity_yard_trusted_key",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -6
+				},
+				{
+					"type": "change_state",
+					"id": "mental_state",
+					"delta": 5
+				}
+			]
+		},
+		{
+			"activity_id": "activity_pawn_row_no_questions",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": -6
+				},
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -3
+				}
+			]
 		}
 	]
 }

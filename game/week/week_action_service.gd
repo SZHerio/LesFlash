@@ -56,6 +56,10 @@ static func _requirement_passed(run_state: RunState, requirement: Dictionary) ->
 			return run_state.get_meter(String(requirement.get("meter_id", ""))) <= int(requirement.get("value", 0))
 		"inventory_item_min":
 			return InventoryStateScript.item_count(run_state.inventory, String(requirement.get("item_id", ""))) >= int(requirement.get("quantity", 0))
+		"standing_min":
+			# Репутацию знают люди, а не тело: она живёт в сессии, куда этот
+			# уровень не смотрит. Требование доносится выше, там, где сессия видна.
+			return true
 		"appearance_min":
 			return AppearanceRules.at_least(
 				AppearanceRules.band_of(run_state),

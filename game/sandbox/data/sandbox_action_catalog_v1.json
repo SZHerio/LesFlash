@@ -1118,6 +1118,62 @@
 				"kind": "fixed",
 				"minutes": 30
 			}
+		},
+		{
+			"action_id": "action_yard_trusted_key",
+			"location_id": "recycling_point",
+			"category_id": "work",
+			"icon_id": "action_work",
+			"title": "Взять ключ от склада",
+			"description": "Мартин отдаёт ключ и уходит домой. Такое доверяют не всякому, и это дороже прибавки.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_yard_trusted_key"
+				}
+			},
+			"requirements": [
+				{
+					"type": "standing_min",
+					"side": "reliable",
+					"value": 5,
+					"blocked_reason": "Ключи дают тем, кого знают."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 45
+			}
+		},
+		{
+			"action_id": "action_pawn_row_no_questions",
+			"location_id": "pawn_row",
+			"category_id": "trade",
+			"icon_id": "action_trade",
+			"title": "Сдать без разговоров",
+			"description": "Приёмщик смотрит на вас, откладывает бланк и просто отсчитывает деньги.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_pawn_row_no_questions"
+				}
+			},
+			"requirements": [
+				{
+					"type": "standing_min",
+					"side": "feared",
+					"value": 5,
+					"blocked_reason": "С вами говорят как со всеми."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 25
+			}
 		}
 	]
 }
