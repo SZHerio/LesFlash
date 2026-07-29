@@ -38,8 +38,19 @@ func _present_initial() -> void:
 		model,
 		_session.get_shell_model(),
 		_preferences,
-		{"back": _hook("back"), "interaction": _on_interaction_requested}
+		{"back": _hook("back"), "interaction": _on_interaction_requested, "topic": _on_topic_requested}
 	)
+
+
+## Заговорить — обычная подтверждённая команда: она стоит времени, и после неё
+## экран перерисовывается, потому что список тем мог измениться.
+func _on_topic_requested(npc_id: String, topic_id: String) -> void:
+	var said: Dictionary = _session.raise_topic(npc_id, topic_id)
+	if not bool(said.get("ok", false)):
+		return
+	# Ответ человека показывается тем же способом, что и итог любого другого
+	# дела, а список тем перерисовывается: время прошло, и он мог измениться.
+	_refresh(String(said.get("line", "")))
 
 
 func _on_interaction_requested(
@@ -87,7 +98,7 @@ func _refresh(outcome: String = "") -> bool:
 			model,
 			_session.get_shell_model(),
 			_preferences,
-			{"back": _hook("back"), "interaction": _on_interaction_requested}
+			{"back": _hook("back"), "interaction": _on_interaction_requested, "topic": _on_topic_requested}
 		)
 	else:
 		_screen.present(model)

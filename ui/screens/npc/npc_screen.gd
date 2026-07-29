@@ -7,6 +7,9 @@ signal interaction_requested(
 	expected_revision: int
 )
 signal back_requested
+## Герой заговорил о чём-то. Отдельный сигнал, потому что это не взаимодействие
+## с ревизией и подтверждением, а обычный разговор.
+signal topic_requested(npc_id: String, topic_id: String)
 
 const ActionRowScene := preload("res://ui/components/action_row.tscn")
 const Motion := preload("res://ui/theme/motion.gd")
@@ -147,6 +150,28 @@ func _rebuild_interactions(models: Array) -> void:
 		var interaction_id := String(Dictionary(raw_model).get("id", ""))
 		if not interaction_id.is_empty():
 			_interaction_rows[interaction_id] = row
+	# Темы идут тем же списком, что и всё остальное: заговорить — такое же дело,
+	# как отдать вещь или попросить о работе, и отдельного режима у него нет.
+	for raw_topic: Variant in Array(_model.get("topics", [])):
+		if not raw_topic is Dictionary:
+			continue
+		var topic: Dictionary = raw_topic
+		var topic_row := ActionRowScene.instantiate() as ActionRow
+		if topic_row == null:
+			continue
+		_interactions.add_child(topic_row)
+		topic_row.set_reduced_motion(_reduced_motion)
+		topic_row.present({
+			"id": String(topic.get("id", "")),
+			"title": String(topic.get("title", "")),
+			"description": String(topic.get("prompt", "")),
+			"available": true,
+			"minutes": int(topic.get("minutes", 0)),
+		})
+		var topic_id := String(topic.get("id", ""))
+		topic_row.action_requested.connect(
+			func(_id: String) -> void: topic_requested.emit(_npc_id, topic_id)
+		)
 	_empty_state.visible = _interactions.get_child_count() == 0
 	_interactions.visible = not _empty_state.visible
 

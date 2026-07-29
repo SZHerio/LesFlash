@@ -213,6 +213,7 @@ func show_npc(
 	var screen := _shell.show_screen(NpcScene) as NpcScreen
 	screen.back_requested.connect(_handler(handlers, "back"))
 	screen.interaction_requested.connect(_handler(handlers, "interaction"))
+	screen.topic_requested.connect(_handler(handlers, "topic"))
 	screen.present(model)
 	return screen
 
