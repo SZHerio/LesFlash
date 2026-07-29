@@ -321,6 +321,96 @@
 					"delta": -4
 				}
 			]
+		},
+		{
+			"activity_id": "activity_yard_clear_snow",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -18
+				},
+				{
+					"type": "change_state",
+					"id": "hunger",
+					"delta": 9
+				},
+				{
+					"type": "change_state",
+					"id": "health",
+					"delta": -2
+				}
+			]
+		},
+		{
+			"activity_id": "activity_station_clear_platform",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -15
+				},
+				{
+					"type": "change_state",
+					"id": "hunger",
+					"delta": 8
+				}
+			]
+		},
+		{
+			"activity_id": "activity_warming_station",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "health",
+					"delta": 4
+				},
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": -8
+				},
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": 7
+				}
+			]
+		},
+		{
+			"activity_id": "activity_canteen_night_shift",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -12
+				},
+				{
+					"type": "change_state",
+					"id": "hunger",
+					"delta": -6
+				}
+			]
+		},
+		{
+			"activity_id": "activity_underpass_night_watch",
+			"effects": [
+				{
+					"type": "change_state",
+					"id": "tension",
+					"delta": 4
+				},
+				{
+					"type": "change_state",
+					"id": "energy",
+					"delta": -8
+				},
+				{
+					"type": "change_state",
+					"id": "mental_state",
+					"delta": -2
+				}
+			]
 		}
 	]
 }

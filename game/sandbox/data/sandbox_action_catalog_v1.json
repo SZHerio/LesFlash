@@ -857,6 +857,150 @@
 				}
 			},
 			"requirements": []
+		},
+		{
+			"action_id": "action_yard_clear_snow",
+			"location_id": "recycling_point",
+			"category_id": "work",
+			"icon_id": "action_work",
+			"title": "Расчистить площадку",
+			"description": "Снег с подъездных путей убирают те, кто оказался рядом. Платят в тот же день.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_yard_clear_snow"
+				}
+			},
+			"requirements": [
+				{
+					"type": "season",
+					"season_ids": [
+						"winter"
+					],
+					"blocked_reason": "Снега нет."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 120
+			}
+		},
+		{
+			"action_id": "action_station_clear_platform",
+			"location_id": "station_square",
+			"category_id": "work",
+			"icon_id": "action_work",
+			"title": "Разгрести перрон",
+			"description": "К утреннему поезду перрон должен быть чистым, и станции всё равно, кто это сделал.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_station_clear_platform"
+				}
+			},
+			"requirements": [
+				{
+					"type": "season",
+					"season_ids": [
+						"winter"
+					],
+					"blocked_reason": "Снега нет."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 90
+			}
+		},
+		{
+			"action_id": "action_clinic_warming_station",
+			"location_id": "clinic_yard",
+			"category_id": "rest",
+			"icon_id": "action_rest",
+			"title": "Зайти в пункт обогрева",
+			"description": "Во дворе поликлиники на холода открывают комнату с батареями. Пускают по очереди и ненадолго.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_warming_station"
+				}
+			},
+			"requirements": [
+				{
+					"type": "season",
+					"season_ids": [
+						"winter",
+						"autumn"
+					],
+					"blocked_reason": "Пункт открывают, когда холодает."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 60
+			}
+		},
+		{
+			"action_id": "action_canteen_night_shift",
+			"location_id": "night_canteen",
+			"category_id": "work",
+			"icon_id": "action_work",
+			"title": "Помочь до закрытия",
+			"description": "Ночью в столовой не хватает рук, а к утру всё должно быть отмыто.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_canteen_night_shift"
+				}
+			},
+			"requirements": [
+				{
+					"type": "time_window",
+					"start_minute": 1380,
+					"end_minute": 300,
+					"blocked_reason": "Это ночное дело."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 150
+			}
+		},
+		{
+			"action_id": "action_underpass_night_watch",
+			"location_id": "underpass",
+			"category_id": "observe",
+			"icon_id": "action_observe",
+			"title": "Не спать до утра",
+			"description": "Сидеть у стены и смотреть, кто проходит. Ночью через переход ходят не те, кто днём.",
+			"repeat_policy": "repeatable",
+			"confirmation": "required",
+			"intent": {
+				"type": "perform_activity",
+				"payload": {
+					"activity_id": "activity_underpass_night_watch"
+				}
+			},
+			"requirements": [
+				{
+					"type": "time_window",
+					"start_minute": 1380,
+					"end_minute": 300,
+					"blocked_reason": "Это ночное дело."
+				}
+			],
+			"duration": {
+				"kind": "fixed",
+				"minutes": 120
+			}
 		}
 	]
 }

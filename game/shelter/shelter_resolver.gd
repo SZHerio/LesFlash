@@ -19,6 +19,9 @@ const EXPOSURE_BY_CATEGORY := {
 	"paid_room": 0,
 }
 const SHIELDED_ENERGY_BONUS := 12
+## What a fully exposed night in the harshest month takes out of a person before
+## anything he is wearing gives it back. Worn warmth still shields it.
+const COLD_BITE := 9
 
 
 static func resolve_for_location(catalog: Dictionary, context: Dictionary) -> Dictionary:
@@ -122,13 +125,20 @@ static func _resolve_definition(
 	var result := definition.duplicate(true)
 	# What the night actually costs him, which is nothing on a bed he rents.
 	result["price_arden"] = price
+	# What the place leaves to the weather, and what the weather does with it. A
+	# paid room is exposed to nothing, so February costs it nothing; the niche
+	# under the avenue is exposed to everything, which is where the difference
+	# between a bed and a corner stops being about comfort.
 	var exposure := int(EXPOSURE_BY_CATEGORY.get(String(definition.get("category_id", "street")), 100))
+	var season := String(context.get("season", Season.SUMMER))
+	var weather := Season.cold_basis_points(season)
 	var shielded := clampi(mini(int(context.get("warmth", 0)), exposure), 0, 100)
 	result["exposure"] = exposure
 	result["warmth"] = clampi(int(context.get("warmth", 0)), 0, 100)
 	result["shielded"] = shielded
+	result["season"] = season
 	result["meter_effects"] = _shielded_meter_effects(
-		Dictionary(definition.get("meter_effects", {})),
+		_weathered_meter_effects(Dictionary(definition.get("meter_effects", {})), exposure, weather),
 		shielded
 	)
 	result["available"] = reasons.is_empty()
@@ -138,6 +148,43 @@ static func _resolve_definition(
 	result["wake_time_text"] = _minute_text(int(definition["wake_minute"]))
 	result["crosses_date"] = _date_changed(current_stamp, wake_at)
 	result["currency_code"] = "ARD"
+	return result
+
+
+## The season reaches only the part of the night the place left uncovered. Under
+## a roof the month does not matter; in the open it is most of what matters.
+static func _weathered_meter_effects(
+	authored: Dictionary,
+	exposure: int,
+	weather_basis_points: int
+) -> Dictionary:
+	var result := authored.duplicate(true)
+	if exposure <= 0 or weather_basis_points == 10_000:
+		return result
+	# How much of the weather actually lands, given how open the place is.
+	var extra := (weather_basis_points - 10_000) * clampi(exposure, 0, 100) / 100
+	var factor := 10_000 + extra
+
+	# Cold does not merely make an unpleasant night worse — it makes a tolerable
+	# one cost something. Scaling alone left the free municipal room untouched all
+	# winter, because nothing harmful was written into it, and a January that can
+	# be walked away from is not a January.
+	var bite := extra * COLD_BITE / 10_000
+	if bite > 0:
+		result["health"] = int(result.get("health", 0)) - bite
+		result["tension"] = int(result.get("tension", 0)) + bite
+
+	for meter_id: String in ["health", "mental_state"]:
+		var value := int(result.get(meter_id, 0))
+		if value < 0:
+			result[meter_id] = -maxi(-value * factor / 10_000, 1)
+	var tension := int(result.get("tension", 0))
+	if tension > 0:
+		result["tension"] = maxi(tension * factor / 10_000, 1)
+	# A cold night gives back less rest than a mild one, even for the same hours.
+	var energy := int(result.get("energy", 0))
+	if energy > 0:
+		result["energy"] = maxi(energy * 10_000 / factor, 1)
 	return result
 
 

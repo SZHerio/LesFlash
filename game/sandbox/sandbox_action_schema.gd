@@ -184,6 +184,10 @@ static func _validate_requirement(value: Variant, path: String, errors: Array[St
 			keys = ["type", "knowledge_id", "value", "blocked_reason"]
 		"time_window":
 			keys = ["type", "start_minute", "end_minute", "blocked_reason"]
+		# Work that exists only in one part of the year. Snow is not cleared in
+		# July, and a warming station open all summer is not a warming station.
+		"season":
+			keys = ["type", "season_ids", "blocked_reason"]
 		_:
 			errors.append("%s.type is unknown" % path)
 			return
@@ -203,6 +207,16 @@ static func _validate_requirement(value: Variant, path: String, errors: Array[St
 		"inventory_item_min":
 			_expect_id(requirement.get("item_id", null), "%s.item_id" % path, errors)
 			_expect_int(requirement.get("quantity", null), 1, 999, "%s.quantity" % path, errors)
+		"season":
+			var raw_seasons: Variant = requirement.get("season_ids", null)
+			if not raw_seasons is Array or Array(raw_seasons).is_empty():
+				errors.append("%s.season_ids must be a non-empty array" % path)
+			else:
+				for raw_season: Variant in Array(raw_seasons):
+					if String(raw_season) not in Season.ORDER:
+						errors.append("%s.season_ids contains an unknown season" % path)
+				if Array(raw_seasons).size() >= Season.ORDER.size():
+					errors.append("%s.season_ids covers the whole year and gates nothing" % path)
 		"knowledge_level_min":
 			_expect_id(requirement.get("knowledge_id", null), "%s.knowledge_id" % path, errors)
 			_expect_int(requirement.get("value", null), 1, 3, "%s.value" % path, errors)

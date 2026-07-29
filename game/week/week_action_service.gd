@@ -56,6 +56,8 @@ static func _requirement_passed(run_state: RunState, requirement: Dictionary) ->
 			return run_state.get_meter(String(requirement.get("meter_id", ""))) <= int(requirement.get("value", 0))
 		"inventory_item_min":
 			return InventoryStateScript.item_count(run_state.inventory, String(requirement.get("item_id", ""))) >= int(requirement.get("quantity", 0))
+		"season":
+			return Season.of_calendar(run_state.calendar) in Array(requirement.get("season_ids", []))
 		"time_window":
 			var minute := run_state.calendar.minute_of_day
 			var start := int(requirement.get("start_minute", 0))

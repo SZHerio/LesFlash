@@ -121,6 +121,7 @@ static func _context(session: Object) -> Dictionary:
 			"location_id": _location_id(session),
 			"money": run_state.money,
 			"rent_paid_shelter_ids": _beds_already_paid(session),
+			"season": Season.of_calendar(run_state.calendar),
 			"calendar": run_state.calendar.to_dict(),
 			"warmth": EquipmentRulesScript.modifier(run_state.inventory, "warmth"),
 		},

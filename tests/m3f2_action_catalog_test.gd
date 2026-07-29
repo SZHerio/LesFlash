@@ -15,16 +15,16 @@ const IconRegistry := preload("res://ui/icons/icon_registry.gd")
 ## otherwise leave rank zero.
 const EXPECTED_LOCATION_COUNTS := {
 	"bus_depot": 2,
-	"night_canteen": 2,
+	"night_canteen": 3,
 	"workshop_row": 2,
 	"cathedral_steps": 2,
 	"almshouse": 2,
 	"pawn_row": 3,
-	"underpass": 6,
+	"underpass": 7,
 	"market": 3,
-	"station_square": 5,
-	"recycling_point": 4,
-	"clinic_yard": 4,
+	"station_square": 6,
+	"recycling_point": 5,
+	"clinic_yard": 5,
 	"embankment": 4,
 }
 
@@ -42,7 +42,7 @@ func _init() -> void:
 		_catalog = Dictionary(loaded.get("catalog", {}))
 	else:
 		_failures.append("catalog setup — %s" % str(loaded.get("errors", [])))
-	_run("versioned catalog loads with twelve locations and 39 actions", _test_header_and_spread)
+	_run("versioned catalog loads with twelve locations and 44 actions", _test_header_and_spread)
 	_run("free-week activity coverage is complete", _test_activity_coverage)
 	_run("only confirmed decisions carry duration", _test_time_contract)
 	_run("all external IDs and semantic icons are canonical", _test_references)
@@ -60,7 +60,7 @@ func _test_header_and_spread() -> void:
 	_expect(_catalog.get("catalog_id") == "riverside_sandbox_actions", "catalog ID")
 	_expect(_catalog.get("catalog_version") == 1, "catalog version must be 1")
 	_expect(_catalog.get("location_ids", []) == Validator.CANONICAL_LOCATION_IDS, "canonical location order")
-	_expect(Array(_catalog.get("actions", [])).size() == 39, "the authored slice must contain 39 actions")
+	_expect(Array(_catalog.get("actions", [])).size() == 44, "the authored slice must contain 44 actions")
 	for location_id: String in EXPECTED_LOCATION_COUNTS:
 		var actions := Catalog.actions_for_location(_catalog, location_id)
 		_expect(actions.size() == int(EXPECTED_LOCATION_COUNTS[location_id]), "%s action count" % location_id)
@@ -100,7 +100,7 @@ func _test_time_contract() -> void:
 		else:
 			immediate += 1
 			_expect(not action.has("duration"), "%s must not advance time" % action.get("action_id", ""))
-	_expect(confirmed == 22, "twenty-two actions are confirmed decisions")
+	_expect(confirmed == 27, "twenty-seven actions are confirmed decisions")
 	_expect(immediate == 17, "seventeen actions only open or inspect content")
 
 
