@@ -96,17 +96,21 @@ func _answer_what_is_waiting(adapter: Object) -> void:
 ## the evening, sleep at night. Not optimal; plausible, and it has to supply
 ## itself, because a plan that assumes food appears is not a plan.
 func _plan_an_ordinary_week(adapter: Object) -> void:
+	# A shift takes the morning and the day both; the afternoon entry is left
+	# empty on working days because the day is already spent.
 	const WEEK := {
-		1: ["routine_shift_yard", "routine_stock_food"],
-		2: ["routine_shift_yard", "routine_recycle"],
+		1: ["routine_shift_yard", ""],
+		2: ["routine_shift_yard", ""],
 		3: ["routine_search_underpass", "routine_stock_food"],
-		4: ["routine_shift_yard", "routine_recycle"],
-		5: ["routine_shift_yard", "routine_stock_food"],
+		4: ["routine_shift_yard", ""],
+		5: ["routine_search_underpass", "routine_recycle"],
 		6: ["routine_search_yard", "routine_recycle"],
 		7: ["routine_rest", "routine_stock_food"],
 	}
 	for day: int in WEEK:
 		adapter.set_routine_block(day, "morning", String(Array(WEEK[day])[0]))
-		adapter.set_routine_block(day, "day", String(Array(WEEK[day])[1]))
+		var afternoon := String(Array(WEEK[day])[1])
+		if not afternoon.is_empty():
+			adapter.set_routine_block(day, "day", afternoon)
 		adapter.set_routine_block(day, "evening", "routine_eat")
 		adapter.set_routine_block(day, "night", "routine_sleep")

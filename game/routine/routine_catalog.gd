@@ -29,6 +29,10 @@ const KNOWN_LOCATION_IDS := CityPlaces.PLACES
 ## stretch of a day, it is the whole day, and the plan stops describing a week.
 const MAX_ACTIVITY_MINUTES := 8 * 60
 
+## The most stretches one activity may take. Three is a working day plus its
+## evening; anything longer is not an activity, it is the day itself.
+const MAX_BLOCKS_USED := 3
+
 
 static func load_default() -> Dictionary:
 	return load_path(DEFAULT_PATH)
@@ -70,6 +74,13 @@ static func validate(catalog: Dictionary) -> Dictionary:
 			entry.get("mastery_repeats", null), 2, 12, "%s.mastery_repeats" % path, errors
 		)
 		_validate_blocks(entry.get("blocks", null), path, errors)
+		# How much of the day it actually takes. A six-hour shift occupying one
+		# stretch let a plan put shopping in the afternoon and then arrive at a
+		# counter that had shut hours ago; the plan has to say what it costs.
+		Rules.validate_int_range(
+			entry.get("blocks_used", null), 1, MAX_BLOCKS_USED, "%s.blocks_used" % path, errors
+		)
+		_validate_span_fits(entry, path, errors)
 	# A week has to be liveable from the catalog alone: something to earn with,
 	# something to eat, and somewhere to sleep.
 	for required_kind: String in ["job_shift", "meal", "shelter"]:
@@ -93,6 +104,55 @@ static func _validate_blocks(value: Variant, path: String, errors: Array[String]
 		if seen.has(block_id):
 			errors.append("%s.blocks повторяет %s" % [path, block_id])
 		seen[block_id] = true
+
+
+## An activity that starts where it cannot finish is a plan nobody can keep: a
+## shift beginning in the evening would run into the night, which is for sleep.
+static func _validate_span_fits(entry: Dictionary, path: String, errors: Array[String]) -> void:
+	var span := int(entry.get("blocks_used", 1))
+	if span <= 1:
+		return
+	for raw_block: Variant in Array(entry.get("blocks", [])):
+		var block_id := String(raw_block)
+		var index := WeekSchedule.BLOCK_IDS.find(block_id)
+		if index < 0:
+			continue
+		if index + span > WeekSchedule.BLOCK_IDS.size():
+			errors.append(
+				"%s начинается в %s, но занимает %d отрезка — день кончится раньше"
+					% [path, block_id, span]
+			)
+
+
+static func blocks_used(entry: Dictionary) -> int:
+	return maxi(int(entry.get("blocks_used", 1)), 1)
+
+
+## Which activity holds this stretch of a planned day — the one written into it,
+## or an earlier one that has not finished yet. Empty means the stretch is free.
+static func holder_of(catalog: Dictionary, day_plan: Dictionary, block_id: String) -> Dictionary:
+	var target := WeekSchedule.BLOCK_IDS.find(block_id)
+	if target < 0:
+		return {}
+	for index: int in range(target, -1, -1):
+		var candidate_block := String(WeekSchedule.BLOCK_IDS[index])
+		var activity_id := String(day_plan.get(candidate_block, ""))
+		if activity_id.is_empty():
+			continue
+		var entry := find(catalog, activity_id)
+		if entry.is_empty():
+			continue
+		if index + blocks_used(entry) > target:
+			return {
+				"activity_id": activity_id,
+				"entry": entry,
+				"starts_block": candidate_block,
+				"spills": index != target,
+			}
+		# The nearest written activity ended before this stretch, and anything
+		# written earlier ended sooner still.
+		return {}
+	return {}
 
 
 static func find(catalog: Dictionary, activity_id: String) -> Dictionary:

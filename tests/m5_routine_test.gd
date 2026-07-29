@@ -31,6 +31,7 @@ func _init() -> void:
 	_test_every_place_can_be_reached()
 	_test_the_routine_is_lived()
 	_test_need_stops_the_routine()
+	_test_a_long_activity_holds_the_stretches_it_takes()
 	_finish()
 
 
@@ -229,6 +230,43 @@ func _test_need_stops_the_routine() -> void:
 	)
 
 
+## A six-hour shift takes the morning and the day. The plan has to say so, or a
+## player writes shopping into an afternoon that is already spent and finds out
+## at a counter that shut hours ago.
+func _test_a_long_activity_holds_the_stretches_it_takes() -> void:
+	var adapter: SandboxSessionAdapter = _adapter()
+	if adapter == null:
+		return
+	_expect(
+		bool(adapter.set_routine_block(1, "morning", "routine_shift_yard").get("ok", false)),
+		"a shift could not be planned for the morning"
+	)
+	var over: Dictionary = adapter.set_routine_block(1, "day", "routine_stock_food")
+	_expect(
+		not bool(over.get("ok", true)),
+		"the afternoon was sold twice: the shift is still running through it"
+	)
+	_expect(
+		String(over.get("error", "")).strip_edges() != "",
+		"the refusal did not say what was holding the afternoon"
+	)
+	# Writing the long thing second must be refused just as plainly.
+	var fresh: SandboxSessionAdapter = _adapter()
+	if fresh == null:
+		return
+	fresh.set_routine_block(2, "day", "routine_recycle")
+	var spill: Dictionary = fresh.set_routine_block(2, "morning", "routine_shift_yard")
+	_expect(
+		not bool(spill.get("ok", true)),
+		"a shift was written over an afternoon that already had something in it"
+	)
+	# An evening stays free: the shift never reaches it.
+	_expect(
+		bool(fresh.set_routine_block(2, "evening", "routine_eat").get("ok", false)),
+		"the evening was refused although nothing runs into it"
+	)
+
+
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		_failures.append(message)
@@ -241,7 +279,7 @@ func _expect_equal(actual: Variant, expected: Variant, message: String) -> void:
 
 func _finish() -> void:
 	if _failures.is_empty():
-		print("M5 ROUTINE TESTS PASSED: 9/9")
+		print("M5 ROUTINE TESTS PASSED: 10/10")
 		quit(0)
 		return
 	for failure: String in _failures:

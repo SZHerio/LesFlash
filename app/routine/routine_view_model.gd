@@ -31,7 +31,12 @@ static func build(session: Object) -> Dictionary:
 		var blocks: Array[Dictionary] = []
 		for block_id: String in WeekSchedule.BLOCK_IDS:
 			var activity_id := routine.activity_for(day_index, block_id)
-			blocks.append(_block_entry(catalog, routine, day_index, block_id, activity_id, today, now_block))
+			var day_plan: Dictionary = Dictionary(Dictionary(routine.plan).get(str(day_index), {}))
+			var holder := CatalogScript.holder_of(catalog, day_plan, block_id)
+			var spilled: Dictionary = holder if bool(holder.get("spills", false)) else {}
+			blocks.append(_block_entry(
+				catalog, routine, day_index, block_id, activity_id, today, now_block, spilled
+			))
 		days.append({
 			"day_of_week": day_index,
 			"title": WeekSchedule.day_title(day_index),
@@ -57,10 +62,25 @@ static func _block_entry(
 	block_id: String,
 	activity_id: String,
 	today: int,
-	now_block: String
+	now_block: String,
+	spilled_from: Dictionary = {}
 ) -> Dictionary:
 	var entry: Dictionary = {} if activity_id.is_empty() else CatalogScript.find(catalog, activity_id)
 	var repeats := int(entry.get("mastery_repeats", 4))
+	if entry.is_empty() and not spilled_from.is_empty():
+		# The stretch the morning's shift is still running through. Showing it as
+		# free would invite a plan the day cannot hold.
+		return {
+			"block_id": block_id,
+			"title": WeekSchedule.block_title(block_id),
+			"activity_id": "",
+			"activity_title": "занято: %s" % String(Dictionary(spilled_from["entry"]).get("title", "")),
+			"empty": false,
+			"missing": false,
+			"occupied": true,
+			"unattended": false,
+			"now": day_index == today and block_id == now_block,
+		}
 	return {
 		"block_id": block_id,
 		"title": WeekSchedule.block_title(block_id),
@@ -70,6 +90,7 @@ static func _block_entry(
 		"activity_title": String(entry.get("title", "")) if not entry.is_empty() else "свободно",
 		"empty": activity_id.is_empty(),
 		"missing": not activity_id.is_empty() and entry.is_empty(),
+		"occupied": false,
 		"unattended": not entry.is_empty() and routine.is_mastered(activity_id, repeats),
 		"now": day_index == today and block_id == now_block,
 	}

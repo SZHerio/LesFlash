@@ -97,6 +97,17 @@ static func _run_one_slot(adapter: Object) -> Dictionary:
 	if slot.is_empty():
 		return {"stop": STOP_UNAVAILABLE, "reason": "Время неизвестно"}
 	var slot_key := String(slot["slot_key"])
+	var loaded_now := CatalogScript.load_default()
+	var catalog_now: Dictionary = Dictionary(loaded_now.get("catalog", {}))
+	var day_plan: Dictionary = Dictionary(Dictionary(routine.plan).get(str(int(slot["day_of_week"])), {}))
+	var holder := CatalogScript.holder_of(catalog_now, day_plan, String(slot["block_id"]))
+	# A stretch the morning's work is still running through is not a new activity
+	# to start. The shift already took it; the day moves on.
+	if not holder.is_empty() and bool(holder.get("spills", false)):
+		if not _let_the_stretch_pass(adapter):
+			return {"stop": STOP_UNAVAILABLE, "reason": "Время не сдвинулось"}
+		routine.mark_slot(slot_key)
+		return {}
 	var activity_id := routine.activity_for(int(slot["day_of_week"]), String(slot["block_id"]))
 	# A stretch already lived — after reloading a save mid-week, say — is moved
 	# past rather than lived twice.

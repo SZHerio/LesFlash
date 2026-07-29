@@ -126,6 +126,9 @@ func _block_row(day_of_week: int, block: Dictionary) -> Control:
 	# row the player cannot explain.
 	if bool(block.get("missing", false)):
 		label = "%s — занятия больше нет" % String(block.get("title", ""))
+	elif bool(block.get("occupied", false)):
+		# Held by something that started earlier. Tapping it would only be refused.
+		row.disabled = true
 	elif bool(block.get("unattended", false)):
 		label = "%s (само собой)" % label
 	if bool(block.get("now", false)):

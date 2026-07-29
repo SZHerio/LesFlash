@@ -56,11 +56,22 @@ static func set_block(
 	if day_of_week < 1 or day_of_week > WeekSchedule.DAYS_PER_WEEK:
 		return _failure("unknown_day", "Такого дня недели нет")
 	var trimmed := activity_id.strip_edges()
+	var loaded := CatalogScript.load_default()
+	if not bool(loaded.get("ok", false)):
+		return _failure("invalid_catalog", "Список занятий недоступен")
+	var catalog: Dictionary = loaded["catalog"]
+	var routine_now: RoutineState = target.get("routine_state")
+	var day_plan: Dictionary = Dictionary(Dictionary(routine_now.plan).get(str(day_of_week), {}))
+	# A stretch already taken by something that started earlier is not free. The
+	# planner says so instead of letting two things be written over one afternoon.
+	var holder := CatalogScript.holder_of(catalog, day_plan, block_id)
+	if not holder.is_empty() and bool(holder.get("spills", false)):
+		return _failure(
+			"block_taken",
+			"Это время занято: «%s» ещё не закончится" % String(Dictionary(holder["entry"]).get("title", ""))
+		)
 	if not trimmed.is_empty():
-		var loaded := CatalogScript.load_default()
-		if not bool(loaded.get("ok", false)):
-			return _failure("invalid_catalog", "Список занятий недоступен")
-		var entry := CatalogScript.find(Dictionary(loaded["catalog"]), trimmed)
+		var entry := CatalogScript.find(catalog, trimmed)
 		if entry.is_empty():
 			return _failure("unknown_activity", "Такого занятия нет")
 		if block_id not in Array(entry.get("blocks", [])):
@@ -68,9 +79,40 @@ static func set_block(
 				"wrong_block",
 				"«%s» в это время суток не делают" % String(entry.get("title", ""))
 			)
+		var conflict := _spans_into_something(catalog, day_plan, block_id, entry)
+		if not conflict.is_empty():
+			return _failure("block_taken", conflict)
 	return _publish(target, command_id, func(routine: RoutineState) -> bool:
 		return routine.set_activity(day_of_week, block_id, trimmed)
 	)
+
+
+## Whether a long activity written here would run over something already
+## planned later in the day. Returns the refusal in words, or empty.
+static func _spans_into_something(
+	catalog: Dictionary,
+	day_plan: Dictionary,
+	block_id: String,
+	entry: Dictionary
+) -> String:
+	var span := CatalogScript.blocks_used(entry)
+	if span <= 1:
+		return ""
+	var start := WeekSchedule.BLOCK_IDS.find(block_id)
+	for offset: int in range(1, span):
+		var index := start + offset
+		if index >= WeekSchedule.BLOCK_IDS.size():
+			return "«%s» не помещается до конца дня" % String(entry.get("title", ""))
+		var later := String(day_plan.get(String(WeekSchedule.BLOCK_IDS[index]), ""))
+		if later.is_empty():
+			continue
+		var later_entry := CatalogScript.find(catalog, later)
+		return "«%s» займёт и %s, где уже намечено «%s»" % [
+			String(entry.get("title", "")),
+			WeekSchedule.block_title(String(WeekSchedule.BLOCK_IDS[index])),
+			String(later_entry.get("title", later)),
+		]
+	return ""
 
 
 ## Starts or stops keeping to the plan. Stopping never erases it.

@@ -14,7 +14,8 @@
 				"day"
 			],
 			"minutes": 360,
-			"mastery_repeats": 4
+			"mastery_repeats": 4,
+			"blocks_used": 2
 		},
 		{
 			"id": "routine_shift_market",
@@ -28,7 +29,8 @@
 				"day"
 			],
 			"minutes": 360,
-			"mastery_repeats": 4
+			"mastery_repeats": 4,
+			"blocks_used": 2
 		},
 		{
 			"id": "routine_search_underpass",
@@ -42,7 +44,8 @@
 				"evening"
 			],
 			"minutes": 90,
-			"mastery_repeats": 5
+			"mastery_repeats": 5,
+			"blocks_used": 1
 		},
 		{
 			"id": "routine_search_yard",
@@ -56,7 +59,8 @@
 				"evening"
 			],
 			"minutes": 90,
-			"mastery_repeats": 5
+			"mastery_repeats": 5,
+			"blocks_used": 1
 		},
 		{
 			"id": "routine_recycle",
@@ -69,7 +73,8 @@
 				"evening"
 			],
 			"minutes": 45,
-			"mastery_repeats": 3
+			"mastery_repeats": 3,
+			"blocks_used": 1
 		},
 		{
 			"id": "routine_eat",
@@ -82,7 +87,8 @@
 				"evening"
 			],
 			"minutes": 30,
-			"mastery_repeats": 2
+			"mastery_repeats": 2,
+			"blocks_used": 1
 		},
 		{
 			"id": "routine_stock_food",
@@ -97,7 +103,8 @@
 				"evening"
 			],
 			"minutes": 45,
-			"mastery_repeats": 3
+			"mastery_repeats": 3,
+			"blocks_used": 1
 		},
 		{
 			"id": "routine_sleep",
@@ -108,7 +115,8 @@
 				"night"
 			],
 			"minutes": 0,
-			"mastery_repeats": 2
+			"mastery_repeats": 2,
+			"blocks_used": 1
 		},
 		{
 			"id": "routine_rest",
@@ -121,7 +129,8 @@
 				"evening"
 			],
 			"minutes": 60,
-			"mastery_repeats": 2
+			"mastery_repeats": 2,
+			"blocks_used": 1
 		}
 	]
 }
