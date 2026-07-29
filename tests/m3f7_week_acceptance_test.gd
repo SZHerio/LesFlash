@@ -1009,11 +1009,17 @@ func _hunger_relief(item_id: String) -> int:
 
 ## Picks the longest thing worth doing here. A day spent in ten-minute slices is
 ## the same day as one spent in twenty-minute ones, only twice as many commands.
+## `prefer_shortest` is what a person does with an idle half-hour as against a
+## free day. Filling a gap and burning a day are different acts, and the driver
+## used to only know the second: it always took the longest thing on offer,
+## which was written when three long things existed. With fifteen it walked into
+## a bathhouse with nothing to eat and starved on the fifth day.
 func _perform_kind(
 	adapter: Object,
 	kind: String,
 	counters: Dictionary,
-	category_id: String = ""
+	category_id: String = "",
+	prefer_shortest: bool = false
 ) -> bool:
 	var best: Dictionary = {}
 	for raw_action: Variant in Array(adapter.get_location_model().get("actions", [])):
@@ -1026,7 +1032,15 @@ func _perform_kind(
 			continue
 		if int(action.get("minutes", 0)) <= 0:
 			continue
-		if best.is_empty() or int(action.get("minutes", 0)) > int(best.get("minutes", 0)):
+		if best.is_empty():
+			best = action
+			continue
+		var better := (
+			int(action.get("minutes", 0)) < int(best.get("minutes", 0))
+			if prefer_shortest
+			else int(action.get("minutes", 0)) > int(best.get("minutes", 0))
+		)
+		if better:
 			best = action
 	if best.is_empty():
 		return false
@@ -1039,7 +1053,9 @@ func _perform_kind(
 ## Nothing worthwhile is offered here: do whatever the place allows, or walk on.
 ## Walking costs the clock exactly what walking costs a person.
 func _pass_time(adapter: Object, counters: Dictionary) -> bool:
-	if _perform_kind(adapter, "local", counters):
+	# Nothing worth doing is on offer, so the shortest thing that costs the clock
+	# something is the right one: this is filling a gap, not choosing a day.
+	if _perform_kind(adapter, "local", counters, "", true):
 		return true
 	for raw_route: Variant in Array(adapter.get_city_map_model().get("routes", [])):
 		if not raw_route is Dictionary:
