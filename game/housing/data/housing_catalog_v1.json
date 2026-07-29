@@ -1,0 +1,28 @@
+{
+	"schema_version": 1,
+	"catalog_id": "housing_catalog_v1",
+	"rooms": [
+		{
+			"id": "room_station_lodging",
+			"title": "Комната у вокзала",
+			"description": "Комната за занавеской над привокзальной лавкой. Тепло, тесно и слышно всё, что делается в доме.",
+			"location_id": "station_square",
+			"shelter_id": "shelter_station_safe_room",
+			"deposit_ard": 180,
+			"rent_ard": 170,
+			"rent_every_days": 5,
+			"landlord_npc_id": "npc_lidia_maren"
+		},
+		{
+			"id": "room_almshouse_cot",
+			"title": "Койка в ночлежке",
+			"description": "Место в общей комнате городского ночлега. Дёшево, но по правилам: приходить до отбоя и не пить.",
+			"location_id": "station_square",
+			"shelter_id": "shelter_municipal_night_room",
+			"deposit_ard": 0,
+			"rent_ard": 45,
+			"rent_every_days": 5,
+			"landlord_npc_id": ""
+		}
+	]
+}

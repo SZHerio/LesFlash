@@ -269,6 +269,39 @@ func resolve_job_shift_step(choice_id: String) -> Dictionary:
 	))
 
 
+## --- what he owes, and by when ---------------------------------------------
+
+
+func get_rooms_here() -> Array[Dictionary]:
+	return [] if _session == null else WeekFacade.rooms_here(_session)
+
+
+func get_obligation_ledger() -> Array[Dictionary]:
+	return [] if _session == null else WeekFacade.obligation_ledger(_session)
+
+
+func take_room(room_id: String) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.take_room(_session, room_id, _session.flow_revision))
+
+
+func pay_obligation(obligation_id: String) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.pay_obligation(
+		_session, obligation_id, _session.flow_revision
+	))
+
+
+## Marks everything whose day has come and gone as missed. Called after time
+## moves so a debt cannot be outrun by never opening the ledger.
+func settle_what_is_due() -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.obligations_fall_due(_session, _session.flow_revision))
+
+
 ## --- a place of his own ---------------------------------------------------
 
 

@@ -10,6 +10,7 @@ const WeekActionCommandScript := preload("res://game/week/week_action_command.gd
 const RoutineCommandScript := preload("res://game/routine/routine_session_command.gd")
 const BusinessCommandScript := preload("res://game/business/business_session_command.gd")
 const BusinessCatalogScript := preload("res://game/business/business_catalog.gd")
+const ObligationCommandScript := preload("res://game/obligations/obligation_session_command.gd")
 const StoreServiceScript := preload("res://game/commerce/store_service.gd")
 const CommerceCommandScript := preload("res://game/commerce/commerce_session_command.gd")
 const ShelterServiceScript := preload("res://game/shelter/shelter_session_service.gd")
@@ -41,6 +42,7 @@ static func location_model(
 	actions.append_array(JobLocationActionsScript.location_actions(session, include_blocked))
 	actions.append_array(_qualification_actions(session, include_blocked))
 	actions.append_array(_business_actions(session, include_blocked))
+	actions.append_array(_room_actions(session, include_blocked))
 	result["actions"] = actions
 	return result
 
@@ -498,6 +500,91 @@ static func _business_actions(session: Object, include_blocked: bool) -> Array[D
 		"confirmation_required": true,
 	})
 	return result
+
+
+## Rooms going here, and rent that can be handed over on the spot. Both are
+## ordinary location actions: taking a room is a decision like any other, and
+## the only thing that makes it different is that it does not end.
+static func _room_actions(session: Object, include_blocked: bool) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for raw_room: Variant in ObligationCommandScript.rooms_at(session):
+		var room: Dictionary = raw_room
+		var reasons: Array = Array(room.get("reasons", []))
+		var available := reasons.is_empty()
+		if not available and not include_blocked:
+			continue
+		result.append({
+			"id": "room_take_%s" % String(room["id"]),
+			"kind": "room",
+			"category_id": "shelter",
+			"category_icon_id": "action_shelter",
+			"title": "Снять: %s" % String(room["title"]),
+			"description": "%s Залог и плата вперёд — %d ард, дальше %d раз в %d дней." % [
+				String(room["description"]),
+				int(room["upfront_ard"]),
+				int(room["rent_ard"]),
+				int(room["rent_every_days"]),
+			],
+			"available": available,
+			"reasons": reasons,
+			"minutes": 0,
+			"intent": {"type": "take_room", "payload": {"room_id": String(room["id"])}},
+			"confirmation_required": true,
+		})
+	for raw_entry: Variant in ObligationCommandScript.ledger(session):
+		var entry: Dictionary = raw_entry
+		if bool(entry.get("broken", false)):
+			continue
+		# Only what is close enough to matter. A debt with a week still on it is
+		# not something a place should be nagging about.
+		if int(entry.get("days_left", 0)) > 2 and not bool(entry.get("overdue", false)):
+			continue
+		result.append({
+			"id": "obligation_pay_%s" % String(entry["id"]),
+			"kind": "room",
+			"category_id": "trade",
+			"category_icon_id": "action_trade",
+			"title": "Заплатить: %s" % String(entry["title"]),
+			"description": (
+				"Просрочено." if bool(entry.get("overdue", false))
+				else "Осталось дней: %d." % int(entry.get("days_left", 0))
+			) + " Сумма — %d ард." % int(entry.get("amount_ard", 0)),
+			"available": true,
+			"reasons": [],
+			"minutes": 0,
+			"intent": {"type": "pay_obligation", "payload": {"obligation_id": String(entry["id"])}},
+			"confirmation_required": true,
+		})
+	return result
+
+
+## --- what he owes, and by when ---------------------------------------------
+
+
+static func rooms_here(session: Object) -> Array[Dictionary]:
+	return ObligationCommandScript.rooms_at(session)
+
+
+static func obligation_ledger(session: Object) -> Array[Dictionary]:
+	return ObligationCommandScript.ledger(session)
+
+
+static func take_room(session: Object, room_id: String, flow_revision: int) -> Dictionary:
+	return ObligationCommandScript.take_room(
+		session, room_id, _command_id(session, "room:%s" % room_id, flow_revision)
+	)
+
+
+static func pay_obligation(session: Object, obligation_id: String, flow_revision: int) -> Dictionary:
+	return ObligationCommandScript.pay(
+		session, obligation_id, _command_id(session, "obligation:pay:%s" % obligation_id, flow_revision)
+	)
+
+
+static func obligations_fall_due(session: Object, flow_revision: int) -> Dictionary:
+	return ObligationCommandScript.fall_due(
+		session, _command_id(session, "obligation:due", flow_revision)
+	)
 
 
 ## --- a place of his own ---------------------------------------------------

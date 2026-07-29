@@ -91,6 +91,9 @@ static func _resolve_definition(
 	var current_stamp := calendar.current_stamp()
 	var current_minute := int(current_stamp["minute_of_day"])
 	var price := int(definition["price_arden"])
+	# A bed he already rents is not bought again tonight.
+	if String(definition.get("shelter_id", "")) in Array(context.get("rent_paid_shelter_ids", [])):
+		price = 0
 	var reasons: Array[Dictionary] = []
 	if String(context["location_id"]) not in Array(definition["location_ids"]):
 		reasons.append({
@@ -117,6 +120,8 @@ static func _resolve_definition(
 	)
 	var wake_at := calendar.future_stamp(duration)
 	var result := definition.duplicate(true)
+	# What the night actually costs him, which is nothing on a bed he rents.
+	result["price_arden"] = price
 	var exposure := int(EXPOSURE_BY_CATEGORY.get(String(definition.get("category_id", "street")), 100))
 	var shielded := clampi(mini(int(context.get("warmth", 0)), exposure), 0, 100)
 	result["exposure"] = exposure

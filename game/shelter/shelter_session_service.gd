@@ -4,11 +4,35 @@ extends RefCounted
 ## Session-level night flow: pure options and one confirmed atomic sleep.
 
 const CatalogScript := preload("res://game/shelter/shelter_catalog.gd")
+const HousingScript := preload("res://game/housing/housing_catalog.gd")
 const ResolverScript := preload("res://game/shelter/shelter_resolver.gd")
 const CommandBuilderScript := preload("res://game/shelter/shelter_command_builder.gd")
 const SessionTransactionScript := preload("res://game/session/session_command_transaction.gd")
 const WorldCatalogScript := preload("res://game/content/catalogs/world_definition_catalog.gd")
 const EquipmentRulesScript := preload("res://game/equipment/equipment_rules.gd")
+
+
+## Beds the hero already pays rent on. Both the list and the confirmed sleep
+## read this out of the context, so the screen and the command can never
+## disagree about whether a night costs anything.
+##
+## The price in the catalog is left alone: a paid room that costs nothing is not
+## a valid paid room, and the catalog is right to say so. What changes is not the
+## price of the bed, it is who has already paid it.
+static func _beds_already_paid(session: Object) -> Array[String]:
+	var result: Array[String] = []
+	var obligations: ObligationState = session.get("obligation_state")
+	if obligations == null or obligations.records.is_empty():
+		return result
+	var housing := HousingScript.load_default()
+	if not bool(housing.get("ok", false)):
+		return result
+	for raw_room: Variant in Array(Dictionary(housing["catalog"]).get("rooms", [])):
+		var room: Dictionary = raw_room
+		var obligation_id := HousingScript.rent_obligation_id(String(room.get("id", "")))
+		if obligations.has(obligation_id) and not obligations.is_broken(obligation_id):
+			result.append(String(room.get("shelter_id", "")))
+	return result
 
 
 static func options(session: Object) -> Dictionary:
@@ -96,6 +120,7 @@ static func _context(session: Object) -> Dictionary:
 		"context": {
 			"location_id": _location_id(session),
 			"money": run_state.money,
+			"rent_paid_shelter_ids": _beds_already_paid(session),
 			"calendar": run_state.calendar.to_dict(),
 			"warmth": EquipmentRulesScript.modifier(run_state.inventory, "warmth"),
 		},

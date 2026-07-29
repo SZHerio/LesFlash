@@ -47,6 +47,8 @@ static func prepare(
 	var conditions: Array = []
 	var effects: Array = []
 	var price := int(option["price_arden"])
+	if String(option.get("shelter_id", "")) in Array(context.get("rent_paid_shelter_ids", [])):
+		price = 0
 	if price > 0:
 		conditions.append(ConditionScript.with_reason(
 			ConditionScript.money(price),

@@ -60,6 +60,19 @@ func _on_action_requested(_action_id: String, action_model: Dictionary) -> void:
 				_session.obtain_qualification.bind(String(payload.get("qualification_id", ""))),
 				true
 			)
+		"room":
+			var room_intent: Dictionary = Dictionary(action_model.get("intent", {}))
+			var room_payload: Dictionary = Dictionary(room_intent.get("payload", {}))
+			if String(room_intent.get("type", "")) == "take_room":
+				_hook("run_command").call(
+					_session.take_room.bind(String(room_payload.get("room_id", ""))),
+					true
+				)
+			else:
+				_hook("run_command").call(
+					_session.pay_obligation.bind(String(room_payload.get("obligation_id", ""))),
+					true
+				)
 		"business":
 			var business_intent: Dictionary = Dictionary(action_model.get("intent", {}))
 			var business_payload: Dictionary = Dictionary(business_intent.get("payload", {}))
