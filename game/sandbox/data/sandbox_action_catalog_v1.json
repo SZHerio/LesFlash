@@ -840,6 +840,23 @@
 				"kind": "fixed",
 				"minutes": 30
 			}
+		},
+		{
+			"action_id": "action_pawn_row_open_counter",
+			"location_id": "pawn_row",
+			"category_id": "trade",
+			"icon_id": "action_trade",
+			"title": "Подойти к прилавку",
+			"description": "Здесь смотрят на вещь, а не на того, кто её принёс. За сделанное руками дают заметно больше, чем за лом.",
+			"repeat_policy": "repeatable",
+			"confirmation": "none",
+			"intent": {
+				"type": "open_store",
+				"payload": {
+					"store_id": "store_pawn_row_counter"
+				}
+			},
+			"requirements": []
 		}
 	]
 }

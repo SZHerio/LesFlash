@@ -96,12 +96,15 @@ func _test_catalogs() -> void:
 		store_ids.append(String(store["store_id"]))
 		archetype_ids[String(store["archetype_id"])] = true
 	store_ids.sort()
+	# The pawn counter joined in M5 stage 4: made goods needed somewhere that
+	# pays for what they are rather than what they weigh.
 	_expect_equal(store_ids, [
 		"store_clinic_pharmacy_window",
 		"store_market_food_row",
+		"store_pawn_row_counter",
 		"store_station_commission",
-	], "M3F.1 must author exactly the three canonical stores")
-	_expect_equal(archetype_ids.size(), 3, "the stores must have distinct profiles")
+	], "the city must author exactly the four counters")
+	_expect_equal(archetype_ids.size(), 4, "the stores must have distinct profiles")
 	var commission := StoreCatalogScript.profile_for_store(_stores, "store_station_commission")
 	_expect(bool(Dictionary(commission.get("archetype", {})).get("buyback_policy", {}).get("enabled", false)), "commission store must buy accepted goods")
 

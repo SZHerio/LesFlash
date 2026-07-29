@@ -50,6 +50,28 @@ func _init() -> void:
 				_clock(int(transport.get("opens_minute", 0))),
 				_clock(int(transport.get("closes_minute", 0))),
 			])
+	# The debt from stage 3: does a trip pay for itself now that there is a
+	# counter across the city that knows what a made thing is worth.
+	print("  --")
+	var store_catalog := StoreCatalog.load_default()
+	if bool(store_catalog.get("ok", false)):
+		var payout: Dictionary = {}
+		for raw_archetype: Variant in Array(Dictionary(store_catalog["catalog"]).get("archetypes", [])):
+			var archetype: Dictionary = raw_archetype
+			var policy: Dictionary = Dictionary(archetype.get("buyback_policy", {}))
+			if bool(policy.get("enabled", false)):
+				payout[String(archetype.get("archetype_id", ""))] = int(policy.get("payout_basis_points", 0))
+		for archetype_id: String in payout:
+			print("  %-30s выкуп %d%%" % [archetype_id, int(payout[archetype_id]) / 100])
+		var home := 0
+		for archetype_id: String in payout:
+			if archetype_id != "archetype_pawn_row":
+				home = maxi(home, int(payout[archetype_id]))
+		var pawn := int(payout.get("archetype_pawn_row", 0))
+		# A repaired radio is the most valuable thing the hero can make.
+		var radio := 145
+		var gain := (radio * pawn / 10000) - (radio * home / 10000)
+		print("  за починенный приёмник ломбард даёт на %d ард больше, проезд туда-обратно 36" % gain)
 	print("DISTRICTS BALANCE PROBE WRITTEN")
 	quit(0)
 

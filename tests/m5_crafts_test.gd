@@ -13,6 +13,7 @@ extends SceneTree
 const SandboxAdapter = preload("res://app/session/sandbox_session_adapter.gd")
 const ItemCatalog = preload("res://core/inventory/item_catalog.gd")
 const SkillCatalog = preload("res://game/skills/skill_catalog.gd")
+const StoreCatalog = preload("res://game/commerce/store_catalog.gd")
 
 ## Eighteen points exactly, or the sandbox refuses to start and every check
 ## below passes by never running.
@@ -27,6 +28,7 @@ func _init() -> void:
 	_test_a_recipe_refuses_without_the_parts()
 	_test_making_it_consumes_and_produces_and_teaches()
 	_test_making_beats_selling_raw()
+	_test_the_pawn_counter_pays_best_for_made_things()
 	_finish()
 
 
@@ -163,6 +165,41 @@ func _test_making_beats_selling_raw() -> void:
 		)
 
 
+## The debt from stage 3: a district you pay a fare to reach has to be worth
+## reaching. The pawn counter is what makes a made thing worth carrying across
+## the city, so it must pay better than the counters at home.
+func _test_the_pawn_counter_pays_best_for_made_things() -> void:
+	var loaded := StoreCatalog.load_default()
+	_expect(bool(loaded.get("ok", false)), "the store catalog does not load")
+	if not bool(loaded.get("ok", false)):
+		return
+	var catalog: Dictionary = loaded["catalog"]
+	var payouts: Dictionary = {}
+	var accepts: Dictionary = {}
+	for raw_archetype: Variant in Array(catalog.get("archetypes", [])):
+		var archetype: Dictionary = raw_archetype
+		var policy: Dictionary = Dictionary(archetype.get("buyback_policy", {}))
+		if not bool(policy.get("enabled", false)):
+			continue
+		payouts[String(archetype.get("archetype_id", ""))] = int(policy.get("payout_basis_points", 0))
+		accepts[String(archetype.get("archetype_id", ""))] = Array(policy.get("accepted_category_ids", []))
+	var pawn := int(payouts.get("archetype_pawn_row", 0))
+	_expect(pawn > 0, "the pawn counter buys nothing")
+	for archetype_id: String in payouts:
+		if archetype_id == "archetype_pawn_row":
+			continue
+		_expect(
+			pawn > int(payouts[archetype_id]),
+			"%s pays as well as the pawn counter, so nobody would make the trip" % archetype_id
+		)
+	# And it has to take what the hero can actually make.
+	for category_id: String in ["crafted"]:
+		_expect(
+			category_id in Array(accepts.get("archetype_pawn_row", [])),
+			"the pawn counter does not take %s, which is everything the hero makes" % category_id
+		)
+
+
 func _value_of(item_id: String, quantity: int) -> int:
 	var definition: Variant = ItemCatalog.definition(item_id)
 	if definition == null:
@@ -203,7 +240,7 @@ func _expect_equal(actual: Variant, expected: Variant, message: String) -> void:
 
 func _finish() -> void:
 	if _failures.is_empty():
-		print("M5 CRAFTS TESTS PASSED: 5/5")
+		print("M5 CRAFTS TESTS PASSED: 6/6")
 		quit(0)
 		return
 	for failure: String in _failures:

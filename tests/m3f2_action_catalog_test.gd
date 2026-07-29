@@ -19,7 +19,7 @@ const EXPECTED_LOCATION_COUNTS := {
 	"workshop_row": 2,
 	"cathedral_steps": 2,
 	"almshouse": 2,
-	"pawn_row": 2,
+	"pawn_row": 3,
 	"underpass": 6,
 	"market": 3,
 	"station_square": 5,
@@ -42,7 +42,7 @@ func _init() -> void:
 		_catalog = Dictionary(loaded.get("catalog", {}))
 	else:
 		_failures.append("catalog setup — %s" % str(loaded.get("errors", [])))
-	_run("versioned catalog loads with twelve locations and 38 actions", _test_header_and_spread)
+	_run("versioned catalog loads with twelve locations and 39 actions", _test_header_and_spread)
 	_run("free-week activity coverage is complete", _test_activity_coverage)
 	_run("only confirmed decisions carry duration", _test_time_contract)
 	_run("all external IDs and semantic icons are canonical", _test_references)
@@ -60,7 +60,7 @@ func _test_header_and_spread() -> void:
 	_expect(_catalog.get("catalog_id") == "riverside_sandbox_actions", "catalog ID")
 	_expect(_catalog.get("catalog_version") == 1, "catalog version must be 1")
 	_expect(_catalog.get("location_ids", []) == Validator.CANONICAL_LOCATION_IDS, "canonical location order")
-	_expect(Array(_catalog.get("actions", [])).size() == 38, "the authored slice must contain 38 actions")
+	_expect(Array(_catalog.get("actions", [])).size() == 39, "the authored slice must contain 39 actions")
 	for location_id: String in EXPECTED_LOCATION_COUNTS:
 		var actions := Catalog.actions_for_location(_catalog, location_id)
 		_expect(actions.size() == int(EXPECTED_LOCATION_COUNTS[location_id]), "%s action count" % location_id)
@@ -79,7 +79,7 @@ func _test_activity_coverage() -> void:
 	_expect(int(intent_counts.get("inspect", 0)) >= 5, "reading and observation actions")
 	_expect(int(intent_counts.get("enter_search", 0)) == 1, "one search mini-game entrance")
 	_expect(int(intent_counts.get("consume_item", 0)) == 1, "food action")
-	_expect(store_ids.size() == 3, "three distinct stores")
+	_expect(store_ids.size() == 4, "four distinct stores")
 	_expect(int(intent_counts.get("open_recycling_sale", 0)) == 1, "recycling sale route")
 	_expect(int(intent_counts.get("open_job", 0)) == 1, "work mini-game route")
 	_expect(int(intent_counts.get("open_shelter", 0)) == 2, "shelter selection in two locations")
@@ -101,7 +101,7 @@ func _test_time_contract() -> void:
 			immediate += 1
 			_expect(not action.has("duration"), "%s must not advance time" % action.get("action_id", ""))
 	_expect(confirmed == 22, "twenty-two actions are confirmed decisions")
-	_expect(immediate == 16, "sixteen actions only open or inspect content")
+	_expect(immediate == 17, "seventeen actions only open or inspect content")
 
 
 func _test_references() -> void:
