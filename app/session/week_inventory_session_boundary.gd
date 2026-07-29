@@ -52,7 +52,10 @@ static func execute(
 				target_container_id,
 				quantity
 			)
-		"use", "disassemble", "sell":
+		# Making something goes down the same path as using or taking apart: the
+		# item action already consumes, checks and produces. A separate crafting
+		# route would only be this one with a different name.
+		"use", "disassemble", "sell", "craft":
 			result = WeekInventoryCommand.execute(
 				session,
 				stack_id,

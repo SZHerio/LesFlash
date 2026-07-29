@@ -13,7 +13,7 @@ const CheckResolverScript := preload("res://core/rules/check_resolver.gd")
 const SessionTransaction := preload("res://game/session/session_command_transaction.gd")
 const RecyclingServiceScript := preload("res://game/recycling/recycling_service.gd")
 
-const TIMED_ACTIONS := ["use", "disassemble"]
+const TIMED_ACTIONS := ["use", "disassemble", "craft"]
 
 
 static func execute(

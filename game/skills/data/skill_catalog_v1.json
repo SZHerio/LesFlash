@@ -34,6 +34,10 @@
 				{
 					"kind": "search_approach",
 					"source_id": "dark_tunnel:feel_along_wall"
+				},
+				{
+					"kind": "craft",
+					"source_id": "craft_sort_by_grade"
 				}
 			]
 		},
@@ -128,6 +132,14 @@
 				{
 					"kind": "event_choice",
 					"source_id": "legacy_scales_check"
+				},
+				{
+					"kind": "craft",
+					"source_id": "craft_repair_radio"
+				},
+				{
+					"kind": "craft",
+					"source_id": "craft_twist_cord"
 				}
 			]
 		},
@@ -249,6 +261,10 @@
 				{
 					"kind": "event_choice",
 					"source_id": "legacy_market_meal"
+				},
+				{
+					"kind": "craft",
+					"source_id": "craft_brew_strong"
 				}
 			]
 		},

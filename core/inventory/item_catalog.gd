@@ -8,6 +8,10 @@ const ACTION_IDS := [
 	"use",
 	"equip",
 	"disassemble",
+	## Making something out of this and whatever else the recipe asks for. One
+	## per item, because the item is what names the recipe: a broken radio is
+	## repaired, wire is twisted, tea is brewed strong.
+	"craft",
 	"drop",
 	"give",
 	"sell",

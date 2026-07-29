@@ -22,7 +22,7 @@ const CATALOG_ID := "skill_catalog_v1"
 const DEFAULT_PATH := "res://game/skills/data/skill_catalog_v1.json"
 
 ## Where an application lives, which decides who has to emit the practice.
-const SOURCE_KINDS := ["job_task", "location_action", "search_approach", "event_choice"]
+const SOURCE_KINDS := ["job_task", "location_action", "search_approach", "event_choice", "craft"]
 
 ## The rule the whole catalog exists to protect: below this a family cannot even
 ## reach its first rank, so declaring it would be a promise the game cannot keep.
