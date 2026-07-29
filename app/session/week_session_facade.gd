@@ -16,6 +16,7 @@ const NpcInteractionServiceScript := preload("res://game/npc/npc_interaction_ser
 const JobLocationActionsScript := preload("res://game/jobs/job_location_actions.gd")
 const QualificationCommandScript := preload("res://game/content/qualification_session_command.gd")
 const JobSessionCommandScript := preload("res://game/jobs/job_session_command.gd")
+const JobLadderScript := preload("res://game/jobs/job_ladder.gd")
 const JobShiftViewModelScript := preload("res://app/jobs/job_shift_view_model.gd")
 const NpcInteractionCommandScript := preload("res://game/npc/npc_interaction_command.gd")
 const NpcGiftCommandScript := preload("res://game/npc/npc_gift_command.gd")
@@ -368,6 +369,13 @@ static func job_shift_model(session: Object, reduced_motion: bool = false) -> Di
 	var raw := work_state.to_dict()
 	raw["dismissed"] = work_state.is_dismissed(work_state.active_job_id())
 	raw["quick_resolve"] = JobSessionCommandScript.quick_resolve_available(session)
+	# How the supervisor speaks to him is where the hero finds out he has moved
+	# up. Rule 3.4: nothing announces a promotion, the greeting simply changes.
+	var job_id := work_state.active_job_id()
+	var grade := JobLadderScript.grade_of(session.get("run_state"), work_state, job_id)
+	raw["grade_id"] = grade
+	raw["grade_title"] = JobLadderScript.title_of(grade)
+	raw["supervisor_greeting"] = JobLadderScript.address_at(grade)
 	return JobShiftViewModelScript.build(raw, reduced_motion)
 
 

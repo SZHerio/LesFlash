@@ -93,7 +93,13 @@ func _apply_model() -> void:
 	_title.text = _visible_text(_model.get("title", "Сортировщик вторсырья"), "Сортировщик вторсырья")
 	_supervisor.text = _visible_text(_model.get("supervisor_text", "Мастер смены"), "Мастер смены")
 	_briefing_title.text = _visible_text(_model.get("briefing_title", "Рабочая смена"), "Рабочая смена")
-	_briefing_text.text = _visible_text(_model.get("briefing_text", "Подготовьтесь к задачам смены."), "Подготовьтесь к задачам смены.")
+	var briefing := _visible_text(_model.get("briefing_text", "Подготовьтесь к задачам смены."), "Подготовьтесь к задачам смены.")
+	# The supervisor speaks first, and how he speaks is the only place a rise in
+	# standing is announced. Rule 3.4: no badge, no number — a different greeting.
+	var greeting := String(_model.get("supervisor_greeting", "")).strip_edges()
+	_briefing_text.text = briefing if greeting.is_empty() else "%s
+
+%s" % [greeting, briefing]
 	# DecisionCostRow takes Array[Dictionary]. Passing a bare Array threw at
 	# runtime and the shift's cost tokens simply never drew.
 	var meta_tokens: Array[Dictionary] = []

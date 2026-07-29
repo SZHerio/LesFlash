@@ -16,6 +16,7 @@ const CatalogScript := preload("res://game/jobs/job_shift_catalog.gd")
 const GeneratorScript := preload("res://game/jobs/job_shift_generator.gd")
 const ServiceScript := preload("res://game/jobs/job_shift_service.gd")
 const MasteryScript := preload("res://game/jobs/job_mastery.gd")
+const LadderScript := preload("res://game/jobs/job_ladder.gd")
 const SessionTransactionScript := preload("res://game/session/session_command_transaction.gd")
 const SocialMutationScript := preload("res://core/social/social_mutation.gd")
 const WorldMutationScript := preload("res://core/world/world_mutation.gd")
@@ -320,10 +321,22 @@ static func _finish(
 			day_index
 		):
 			return _failure("completion_rejected", "Итог смены не принят состоянием работы")
-		var payout := _payout(result)
+		# What the day is worth depends on who is working it. A casual hand gets
+		# what the job pays; the one they ask for by name gets half again. The
+		# grade is read *before* this shift is recorded, so a rung is never
+		# reached and paid for in the same breath.
+		var grade := LadderScript.grade_of(
+			target.get("run_state"),
+			target.get("job_work_state"),
+			candidate_work.active_job_id()
+		)
+		var payout := int(
+			float(_payout(result)) * float(LadderScript.pay_basis_points(grade)) / 10_000.0
+		)
 		effects.append({"type": "change_money", "amount": payout, "reason": "Оплата смены"})
 		payload["result"] = result.duplicate(true)
 		payload["payout_ard"] = payout
+		payload["grade_id"] = grade
 		# A shift is where a trade is actually learned. Each task class the hero
 		# worked counts as one distinct piece of practice for the skill that
 		# task uses, so a rank comes from doing different things rather than

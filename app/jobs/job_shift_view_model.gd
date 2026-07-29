@@ -43,6 +43,11 @@ static func build(raw: Dictionary, reduced_motion: bool = false) -> Dictionary:
 				scores[score_id] = result[score_id]
 	return {
 		"job_id": _text(snapshot.get("job_id", raw.get("job_id", ""))),
+		# What the hero is to this employer, and how the supervisor says it. The
+		# player is never shown a rung or a number — only the greeting changes.
+		"grade_id": _text(raw.get("grade_id", "")),
+		"grade_title": _text(raw.get("grade_title", "")),
+		"supervisor_greeting": _text(raw.get("supervisor_greeting", "")),
 		"shift_id": _text(snapshot.get("shift_id", raw.get("shift_id", ""))),
 		"title": _text(raw.get("title", "Сортировщик вторсырья"), "Сортировщик вторсырья"),
 		"briefing_title": _text(briefing.get("title", "Рабочая смена"), "Рабочая смена"),
