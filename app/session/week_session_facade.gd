@@ -7,6 +7,7 @@ extends RefCounted
 
 const WeekActions := preload("res://game/week/week_action_service.gd")
 const WeekActionCommandScript := preload("res://game/week/week_action_command.gd")
+const RoutineCommandScript := preload("res://game/routine/routine_session_command.gd")
 const StoreServiceScript := preload("res://game/commerce/store_service.gd")
 const CommerceCommandScript := preload("res://game/commerce/commerce_session_command.gd")
 const ShelterServiceScript := preload("res://game/shelter/shelter_session_service.gd")
@@ -429,6 +430,48 @@ static func _qualification_actions(session: Object, include_blocked: bool) -> Ar
 			"confirmation_required": true,
 		})
 	return result
+
+
+## --- the week the hero means to have ---------------------------------------
+
+
+static func routine_options(session: Object, block_id: String) -> Array[Dictionary]:
+	return RoutineCommandScript.options_for(session, block_id)
+
+
+static func set_routine_block(
+	session: Object,
+	day_of_week: int,
+	block_id: String,
+	activity_id: String,
+	flow_revision: int
+) -> Dictionary:
+	return RoutineCommandScript.set_block(
+		session,
+		day_of_week,
+		block_id,
+		activity_id,
+		_command_id(session, "routine:%d:%s" % [day_of_week, block_id], flow_revision)
+	)
+
+
+static func set_routine_following(
+	session: Object,
+	following: bool,
+	flow_revision: int
+) -> Dictionary:
+	return RoutineCommandScript.set_following(
+		session,
+		following,
+		_command_id(session, "routine:following:%s" % str(following), flow_revision)
+	)
+
+
+static func clear_routine(session: Object, flow_revision: int) -> Dictionary:
+	return RoutineCommandScript.clear(
+		session,
+		_command_id(session, "routine:clear", flow_revision)
+	)
 
 
 static func obtain_qualification(

@@ -81,6 +81,7 @@ func _boot() -> void:
 			"location": _show_location,
 			"map": _show_map,
 			"hero": _show_hero,
+			"routine": _show_routine,
 			"inventory": _show_inventory,
 		}
 	)
@@ -261,6 +262,59 @@ func _show_map() -> void:
 		_preferences.to_model(),
 		_flow_hooks({"back": _show_location, "arrived": _on_map_arrived})
 	)
+
+
+func _show_routine() -> void:
+	_route = "routine"
+	var screen := _screens.show_routine(
+		_session.get_routine_model(),
+		_session.get_shell_model(),
+		_preferences.to_model(),
+		{
+			"settings": _open_settings,
+			"block_selected": _on_routine_block_selected,
+			"following_toggled": _on_routine_following_toggled,
+			"clear": _on_routine_clear,
+		}
+	)
+	screen.activity_chosen.connect(_on_routine_activity_chosen)
+
+
+## Day zero means the player backed out of the picker rather than choosing.
+func _on_routine_block_selected(day_of_week: int, block_id: String) -> void:
+	if day_of_week <= 0 or block_id.is_empty():
+		_show_routine()
+		return
+	var screen := _shell.current_screen() as RoutineScreen
+	if screen == null:
+		return
+	screen.present_options(
+		day_of_week,
+		block_id,
+		WeekSchedule.block_title(block_id),
+		_session.get_routine_options(block_id)
+	)
+
+
+func _on_routine_activity_chosen(day_of_week: int, block_id: String, activity_id: String) -> void:
+	var result: Dictionary = _session.set_routine_block(day_of_week, block_id, activity_id)
+	if not bool(result.get("ok", false)):
+		_shell.show_toast(String(result.get("error", "Изменить не вышло")), true)
+	_show_routine()
+
+
+func _on_routine_following_toggled(following: bool) -> void:
+	var result: Dictionary = _session.set_routine_following(following)
+	if not bool(result.get("ok", false)):
+		_shell.show_toast(String(result.get("error", "Не вышло")), true)
+	_show_routine()
+
+
+func _on_routine_clear() -> void:
+	var result: Dictionary = _session.clear_routine()
+	if not bool(result.get("ok", false)):
+		_shell.show_toast(String(result.get("error", "Стереть не вышло")), true)
+	_show_routine()
 
 
 func _show_hero() -> void:

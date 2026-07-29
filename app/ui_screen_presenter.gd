@@ -12,6 +12,7 @@ const InventoryScene := preload("res://ui/screens/inventory/inventory_screen.tsc
 const ShopScene := preload("res://ui/screens/shop/shop_screen.tscn")
 const NpcScene := preload("res://ui/screens/npc/npc_screen.tscn")
 const HeroScene := preload("res://ui/screens/hero/hero_screen.tscn")
+const RoutineScene := preload("res://ui/screens/routine/routine_screen.tscn")
 const JobShiftScene := preload("res://ui/screens/job/job_screen.tscn")
 const HeroModels := preload("res://app/hero/hero_view_model.gd")
 const InventoryModels := preload("res://app/inventory/inventory_view_model.gd")
@@ -119,6 +120,27 @@ func show_hero(
 		bool(preferences.get("reduced_motion", false)),
 		float(preferences.get("font_scale", 1.0))
 	))
+	return screen
+
+
+func show_routine(
+	model: Dictionary,
+	shell_model: Dictionary,
+	preferences: Dictionary,
+	handlers: Dictionary
+) -> RoutineScreen:
+	var location_model: Dictionary = Dictionary(shell_model.get("location", {}))
+	_shell.set_background(String(location_model.get("background_key", DEFAULT_BACKGROUND)))
+	apply_session_ambience(shell_model, preferences)
+	_show_session_navigation("routine")
+	var screen := _shell.show_screen(RoutineScene) as RoutineScreen
+	screen.settings_requested.connect(_handler(handlers, "settings"))
+	screen.block_selected.connect(_handler(handlers, "block_selected"))
+	screen.following_toggled.connect(_handler(handlers, "following_toggled"))
+	screen.clear_requested.connect(_handler(handlers, "clear"))
+	var full := model.duplicate(true)
+	full["shell"] = shell_model
+	screen.present(full, bool(preferences.get("reduced_motion", false)))
 	return screen
 
 
@@ -322,6 +344,7 @@ func _show_session_navigation(active_tab: String) -> void:
 			"place": true,
 			"map": true,
 			"hero": true,
+			"routine": true,
 			"items": true,
 			"tasks": false,
 		},

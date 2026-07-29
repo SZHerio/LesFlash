@@ -15,6 +15,8 @@ const SearchCommands := preload("res://app/session/search_session_commands.gd")
 const SearchModels := preload("res://app/search/search_read_model.gd")
 const EncounterCommand := preload("res://game/events/search_encounter_command.gd")
 const HeroModels := preload("res://app/hero/hero_view_model.gd")
+const RoutineModels := preload("res://app/routine/routine_view_model.gd")
+const RoutineRunnerScript := preload("res://app/routine/routine_runner.gd")
 
 static func create(characteristics: Dictionary, seed: int) -> RefCounted:
 	var session := RunSessionScript.create_location_first(characteristics, seed)
@@ -265,6 +267,60 @@ func resolve_job_shift_step(choice_id: String) -> Dictionary:
 		choice_id,
 		_session.flow_revision
 	))
+
+
+## --- the week the hero means to have ---------------------------------------
+
+
+func get_routine_model() -> Dictionary:
+	if _session == null:
+		return {}
+	return RoutineModels.build(_session)
+
+
+func get_routine_options(block_id: String) -> Array[Dictionary]:
+	if _session == null:
+		return []
+	return WeekFacade.routine_options(_session, block_id)
+
+
+func set_routine_block(day_of_week: int, block_id: String, activity_id: String) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.set_routine_block(
+		_session,
+		day_of_week,
+		block_id,
+		activity_id,
+		_session.flow_revision
+	))
+
+
+func set_routine_following(following: bool) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.set_routine_following(
+		_session,
+		following,
+		_session.flow_revision
+	))
+
+
+func clear_routine() -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	return _finish_week_command(WeekFacade.clear_routine(_session, _session.flow_revision))
+
+
+## Lives the plan forward. Every step inside goes through the same public
+## commands this adapter offers the screens, so a week lived here and a week
+## lived by hand cannot diverge.
+func follow_routine(slots: int = 1) -> Dictionary:
+	if _session == null:
+		return _missing_sandbox_session()
+	var result := RoutineRunnerScript.follow(self, slots)
+	result["flow_revision"] = _session.flow_revision
+	return result
 
 
 func obtain_qualification(qualification_id: String) -> Dictionary:

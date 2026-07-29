@@ -1,0 +1,127 @@
+{
+	"schema_version": 1,
+	"catalog_id": "routine_catalog_v1",
+	"activities": [
+		{
+			"id": "routine_shift_yard",
+			"title": "смена на площадке",
+			"description": "Сортировка на приёмном пункте, пока ставят в смену.",
+			"kind": "job_shift",
+			"location_id": "recycling_point",
+			"job_id": "job_recycling_sorter",
+			"blocks": [
+				"morning",
+				"day"
+			],
+			"minutes": 360,
+			"mastery_repeats": 4
+		},
+		{
+			"id": "routine_shift_market",
+			"title": "смена в ряду",
+			"description": "Разгрузка и подноска в продуктовом ряду.",
+			"kind": "job_shift",
+			"location_id": "market",
+			"job_id": "job_market_porter",
+			"blocks": [
+				"morning",
+				"day"
+			],
+			"minutes": 360,
+			"mastery_repeats": 4
+		},
+		{
+			"id": "routine_search_underpass",
+			"title": "обход перехода",
+			"description": "Проверить служебный двор у перехода.",
+			"kind": "search",
+			"location_id": "underpass",
+			"blocks": [
+				"morning",
+				"day",
+				"evening"
+			],
+			"minutes": 90,
+			"mastery_repeats": 5
+		},
+		{
+			"id": "routine_search_yard",
+			"title": "обход путей",
+			"description": "Пройти по отстойнику товарной станции.",
+			"kind": "search",
+			"location_id": "freight_yard",
+			"blocks": [
+				"morning",
+				"day",
+				"evening"
+			],
+			"minutes": 90,
+			"mastery_repeats": 5
+		},
+		{
+			"id": "routine_recycle",
+			"title": "сдать собранное",
+			"description": "Отнести металл и стекло на приёмку.",
+			"kind": "recycle",
+			"location_id": "recycling_point",
+			"blocks": [
+				"day",
+				"evening"
+			],
+			"minutes": 45,
+			"mastery_repeats": 3
+		},
+		{
+			"id": "routine_eat",
+			"title": "поесть",
+			"description": "Разобрать запас и поесть как следует.",
+			"kind": "meal",
+			"blocks": [
+				"morning",
+				"day",
+				"evening"
+			],
+			"minutes": 30,
+			"mastery_repeats": 2
+		},
+		{
+			"id": "routine_stock_food",
+			"title": "закупиться едой",
+			"description": "Пополнить запас в продуктовом ряду.",
+			"kind": "stock",
+			"location_id": "market",
+			"store_id": "store_market_food_row",
+			"blocks": [
+				"morning",
+				"day",
+				"evening"
+			],
+			"minutes": 45,
+			"mastery_repeats": 3
+		},
+		{
+			"id": "routine_sleep",
+			"title": "ночлег",
+			"description": "Лечь там, где пустят.",
+			"kind": "shelter",
+			"blocks": [
+				"night"
+			],
+			"minutes": 0,
+			"mastery_repeats": 2
+		},
+		{
+			"id": "routine_rest",
+			"title": "передохнуть",
+			"description": "Никуда не идти и ничего не делать.",
+			"kind": "rest",
+			"blocks": [
+				"morning",
+				"day",
+				"evening"
+			],
+			"minutes": 60,
+			"mastery_repeats": 2
+		}
+	]
+}

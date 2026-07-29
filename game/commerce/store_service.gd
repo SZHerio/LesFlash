@@ -182,8 +182,7 @@ static func availability_model(
 			break
 	if schedule.is_empty():
 		return {"open": false, "reason": "Расписание не найдено", "day_of_week": 0}
-	@warning_ignore("integer_division")
-	var day_of_week := posmod(int(stamp.get("elapsed_minutes", 0)) / 1440, 7) + 1
+	var day_of_week := WeekSchedule.day_of_week(int(stamp.get("elapsed_minutes", 0)))
 	var minute := int(stamp.get("minute_of_day", 0))
 	for raw_entry: Variant in Array(schedule.get("entries", [])):
 		if not raw_entry is Dictionary:

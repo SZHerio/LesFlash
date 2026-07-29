@@ -13,6 +13,7 @@ const REQUIRED_HOOKS := [
 	"location",
 	"map",
 	"hero",
+	"routine",
 	"inventory",
 ]
 
@@ -52,6 +53,7 @@ func navigate(tab_id: String, current_route: String) -> void:
 		"place": _hook("location").call()
 		"map": _hook("map").call()
 		"hero": _hook("hero").call()
+		"routine": _hook("routine").call()
 		"items": _hook("inventory").call()
 
 
@@ -75,7 +77,7 @@ func handle_back(current_route: String) -> void:
 		"search":
 			if not _search_flow.handle_back():
 				_hook("location").call()
-		"map", "hero", "npc", "shop", "shelter", "job_shift":
+		"map", "hero", "routine", "npc", "shop", "shelter", "job_shift":
 			_hook("location").call()
 		_:
 			_shell.show_toast("Сначала завершите текущее решение.")
