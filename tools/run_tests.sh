@@ -33,7 +33,7 @@ declare -a failed=()
 
 run_suite() {
 	local suite="$1"
-	local name log display
+	local name log display godot_for_ps wrapper_for_ps code
 	name="$(basename "$suite" .gd)"
 	log="$LOG_DIR/$name.log"
 	# The visual reference suites save screenshots, and there is nothing to
@@ -42,14 +42,37 @@ run_suite() {
 	case "$suite" in
 		*_visual_reference.gd) display="" ;;
 	esac
-	# Redirect to a file rather than piping: Godot block-buffers stdout into a
-	# pipe and the verdict is lost when the process exits.
-	timeout 600 "$GODOT" $display --path "$ROOT" --script "res://$suite" >"$log" 2>&1
-	if grep -qiE "PASSED|tests passed|: PASS$|WRITTEN" "$log"; then
+	# On Windows every invocation goes through the shared mutex/error-mode
+	# wrapper. Several Codex agents used to launch the Steam editor binary at the
+	# same time; four processes then hung in teardown and opened Visual Studio's
+	# native JIT debugger. The wrapper also gives each process its own engine log.
+	if command -v powershell.exe >/dev/null 2>&1 && [ -f "$ROOT/tools/run_godot_test.ps1" ]; then
+		godot_for_ps="$GODOT"
+		wrapper_for_ps="$ROOT/tools/run_godot_test.ps1"
+		if command -v cygpath >/dev/null 2>&1; then
+			godot_for_ps="$(cygpath -w "$GODOT")"
+			wrapper_for_ps="$(cygpath -w "$wrapper_for_ps")"
+		fi
+		if [ -n "$display" ]; then
+			powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$wrapper_for_ps" \
+				-Suite "$suite" -Godot "$godot_for_ps" -TimeoutSeconds 600 >"$log" 2>&1
+		else
+			powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$wrapper_for_ps" \
+				-Suite "$suite" -Godot "$godot_for_ps" -TimeoutSeconds 600 -Windowed >"$log" 2>&1
+		fi
+		code=$?
+	else
+		# Non-Windows fallback. Redirect to a file rather than piping: Godot
+		# block-buffers stdout into a pipe and the verdict can be lost on exit.
+		timeout 600 "$GODOT" $display --path "$ROOT" --log-file "$log.godot" \
+			--script "res://$suite" >"$log" 2>&1
+		code=$?
+	fi
+	if [ "$code" -eq 0 ] && grep -qiE "PASSED|tests passed|: PASS$|WRITTEN" "$log"; then
 		passed=$((passed + 1))
 	else
 		failed+=("$suite")
-		echo "FAIL $suite"
+		echo "FAIL $suite (exit=$code)"
 		grep -E "^  - |Parse Error|SCRIPT ERROR" "$log" | head -5
 	fi
 }
@@ -57,7 +80,9 @@ run_suite() {
 cd "$ROOT" || exit 2
 for suite in tests/*.gd tests/ui/*.gd; do
 	case "$suite" in
-		*fixture*|*preview*|*integrity_suite*) continue ;;
+		# Замеры печатают таблицы, а не вердикт: они инструмент для разбора
+		# поломки, и считать их провалом за отсутствие слова PASSED неправильно.
+		*fixture*|*preview*|*integrity_suite*|*_probe.gd) continue ;;
 		*m3f7_week_acceptance*) [ "$RUN_GATE" -eq 1 ] || continue ;;
 	esac
 	run_suite "$suite"
